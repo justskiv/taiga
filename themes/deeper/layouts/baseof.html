@@ -10,7 +10,7 @@
 {{- else if and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}{{ $body = "article" }}
 {{- end -}}
 <body{{ with $body }} class="{{ . }}"{{ end }}>
-{{ partialCached "header.html" . .Section }}
+{{ partialCached "header.html" . (or .Section .RelPermalink) }}
 {{ block "main" . }}{{ end }}
 {{ partialCached "footer.html" . }}
 {{ partial "scripts.html" . }}

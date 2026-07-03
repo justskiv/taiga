@@ -1,5 +1,6 @@
 {{- /* Site header: brand, rubric nav (active item + optional badge), search
-       button, popover mount. Cached per section (the only thing that varies).
+       button, popover mount. Cached by section, falling back to the page URL for
+       section-less pages (home/404/lab) whose active item differs at section "".
        Note: no flex gap on .brand — the wordmark is a bare text node (brand.name)
        + .tld, a gap would split them; the svg carries the spacing. */ -}}
 <header class="site-head">
