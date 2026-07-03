@@ -1,0 +1,9 @@
+{{- /* Kicker line: "<рубрика> · <серия> · часть N из M" for a series article, or
+       "<рубрика> · разбор" for a standalone one. Rubric label and series label are
+       lowercase mono; the part number is the position in the series order. */ -}}
+{{- $rubric := .CurrentSection.Params.label | default (lower .CurrentSection.Title) -}}
+{{- $s := partial "article/series-ctx.html" . -}}
+<div class="kicker"><span class="dot"></span>{{ $rubric }}
+{{- if $s.isSeries }} · {{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}
+{{- else }} · {{ i18n "kicker_standalone" }}{{ end -}}
+</div>

@@ -55,3 +55,84 @@ other = "{{ .Count }} части"
 
 [part_of]
 other = "часть {{ .N }} из {{ .M }}"
+
+# ── article machinery (phase 02) ─────────────────────────────────────────────
+
+# render-heading hook: hash-anchor aria-labels
+[anchor_sec]
+other = "Якорь на раздел"
+[anchor_sub]
+other = "Якорь на подраздел"
+
+# callout default labels (per-callout override with label=)
+[callout_key]
+other = "Главная мысль"
+[callout_trap]
+other = "Ловушка"
+[callout_internals]
+other = "Под капотом"
+[callout_note]
+other = "Историческая сноска"
+
+# widget figure caption
+[widget_cap]
+other = "Поиграй"
+
+# inline table of contents + rails
+[toc_heading]
+other = "Содержание"
+[rail_l_aria]
+other = "Навигация по серии"
+[rail_r_aria]
+other = "Оглавление страницы"
+[rail_r_head]
+other = "на этой странице"
+[rail_hide_l]
+other = "Скрыть панель — ["
+[rail_hide_r]
+other = "Скрыть панель — ]"
+[rail_related]
+other = "ещё по теме"
+
+# article meta chips
+[meta_tested_on]
+other = "проверено на"
+[meta_interactive]
+other = "интерактив"
+[mins_abbr]
+other = "мин"
+
+# kicker: non-series article ("<рубрика> · разбор")
+[kicker_standalone]
+other = "разбор"
+
+# series header word (kicker/rail/bridge): "серия · <name>"
+[series_word]
+other = "серия"
+[all_series]
+other = "вся серия →"
+
+# series bridge (.sbr) — text mirrors the mock's buildSeriesBridge 1:1
+[sbr_behind]
+other = "позади <b>{{ .done }} из {{ .total }}</b>"
+[sbr_ahead]
+other = "впереди {{ .n }}"
+[parts_word]
+one = "часть"
+few = "части"
+many = "частей"
+other = "части"
+[sbr_left]
+other = "<b>~{{ .mins }} мин</b>"
+[sbr_done]
+other = "серия пройдена · <b>{{ .total }} из {{ .total }}</b>"
+[sbr_next_k]
+other = "дальше · часть {{ .n }}"
+[sbr_final_k]
+other = "финал серии"
+[sbr_final_t]
+other = "Вся серия «{{ .name }}» — выбрать, что перечитать"
+[sbr_prev]
+other = "← часть {{ .n }} · {{ .short }}"
+[sbr_seg_title]
+other = "часть {{ .n }} · {{ .short }}"

@@ -1,0 +1,10 @@
+{{- /* Callout box: {{< callout type="trap" label="Ловушка" >}}…markdown…{{< /callout >}}
+       type ∈ key|trap|internals|note drives the colour; the label defaults to that
+       type's i18n string, override with label=. Inner is markdown (rendered to a
+       <p>…), matching the mock: <div class="callout key"><span class="clabel">…</span><p>…</p></div>. */ -}}
+{{- $type := .Get "type" | default "note" -}}
+{{- $label := .Get "label" | default (i18n (printf "callout_%s" $type)) -}}
+<div class="callout {{ $type }}">
+<span class="clabel">{{ $label }}</span>
+{{ .InnerDeindent | .Page.RenderString }}
+</div>

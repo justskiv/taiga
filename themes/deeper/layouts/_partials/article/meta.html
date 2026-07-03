@@ -1,0 +1,12 @@
+{{- /* Meta chips, mirroring the mock: «проверено на go1.26 · 64-бит», «~14 мин»,
+       «интерактив: …». go_version falls back to the site default; arch and the
+       interactive list are optional per-article; mins is authored (fixed values,
+       so the chips and the series bridge agree) with .ReadingTime as fallback. */ -}}
+{{- $ver := .Params.go_version | default site.Params.goVersionDefault -}}
+<div class="meta">
+<span class="tag">{{ i18n "meta_tested_on" }} <b>go{{ $ver }}</b>{{ with .Params.arch }} · {{ . }}{{ end }}</span>
+<span class="tag">~<b>{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</b></span>
+{{- with .Params.interactive }}
+<span class="tag"><b>{{ $.Params.interactive_label | default (i18n "meta_interactive") }}</b>: {{ . }}</span>
+{{- end }}
+</div>

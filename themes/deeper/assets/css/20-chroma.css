@@ -1,4 +1,68 @@
 /* Chroma syntax highlighting — server-side Go highlighting replaces the mock's
-   runtime regex highlighter. Class-mode (markup.highlight.noClasses = false):
-   Hugo emits .chroma token classes, mapped here to palette colors so code reads
-   identically to the mock's .gtok-* colors. Populated in phase 02. */
+   runtime regex highlighter (SPEC §8.2). Class-mode (markup.highlight.noClasses =
+   false): Hugo emits .chroma token classes; here they map to the SAME palette
+   variables the mock's .gtok-* used, so Go reads identically and re-themes with
+   every palette. Only Go is highlighted; other fences render as plain .nohl
+   (render-codeblock.html). Token→colour map recovered empirically from Chroma's
+   Go output; see notes below. */
+
+/* Wrapper: let the mock's `pre` box (bg/border/radius/padding) show through and
+   the text colour come from `pre code`. Chroma's own bg/colour are dropped. */
+.chroma { background: transparent; color: inherit; }
+.chroma .line { display: flex; }
+.chroma .hl { background: var(--bg-surface); }   /* hl_lines row — flat, no gradient */
+.chroma .err { color: inherit; background: none; }
+
+/* Keywords → amber (gtok-kw): type struct func var const return if for range … */
+.chroma .k,
+.chroma .kd,
+.chroma .kn,
+.chroma .kp,
+.chroma .kr,
+.chroma .kc { color: var(--accent-amber); }
+
+/* Built-in types → blue (gtok-typ): int64 byte bool string … */
+.chroma .kt { color: var(--accent-blue); }
+
+/* Functions & builtins → green (gtok-fn): make len append + declared/called funcs */
+.chroma .nf,
+.chroma .nb,
+.chroma .fm { color: var(--accent-green); }
+
+/* Strings → gtok-str */
+.chroma .s,
+.chroma .sa,
+.chroma .sb,
+.chroma .sc,
+.chroma .dl,
+.chroma .sd,
+.chroma .s2,
+.chroma .se,
+.chroma .sh,
+.chroma .si,
+.chroma .sx,
+.chroma .sr,
+.chroma .s1,
+.chroma .ss { color: var(--gtok-str); }
+
+/* Numbers → copper (gtok-num) */
+.chroma .m,
+.chroma .mb,
+.chroma .mf,
+.chroma .mh,
+.chroma .mi,
+.chroma .il,
+.chroma .mo { color: var(--accent-copper); }
+
+/* Comments → muted italic (gtok-com) */
+.chroma .c,
+.chroma .ch,
+.chroma .cm,
+.chroma .cp,
+.chroma .cpf,
+.chroma .c1,
+.chroma .cs { color: var(--text-muted); font-style: italic; }
+
+/* Left at the base text colour, matching the mock: identifiers/variables and
+   user-type names (.nx — Chroma can't tell `Point` the type from `p` the var),
+   operators (.o .ow), punctuation (.p), labels, attributes, whitespace. */

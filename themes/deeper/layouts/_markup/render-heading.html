@@ -1,0 +1,14 @@
+{{- /* h2/h3 get an id and a leading hash-anchor (## for h3), matching the mock:
+       <h2 id="s1"><a class="hash" href="#s1" aria-label="…">#</a>Text</h2>.
+       Explicit markdown ids ({#s1}) are honoured via .Anchor so the mock anchors
+       survive; other heading attributes pass through. The href fragment is
+       percent-encoded for non-ASCII by html/template — harmless, browsers decode
+       it back to the raw id (see reference/features-recipes.md §1a). */ -}}
+{{- $level := .Level -}}
+{{- $anchor := .Anchor -}}
+{{- $hash := cond (eq $level 3) "##" "#" -}}
+{{- $aria := cond (eq $level 3) (i18n "anchor_sub") (i18n "anchor_sec") -}}
+<h{{ $level }} id="{{ $anchor }}"{{ range $k, $v := .Attributes }}{{ if ne $k "id" }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+{{- if or (eq $level 2) (eq $level 3) }}<a class="hash" href="#{{ $anchor }}" aria-label="{{ $aria }}">{{ $hash }}</a>{{ end -}}
+{{- .Text -}}
+</h{{ $level }}>

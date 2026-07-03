@@ -1,0 +1,30 @@
+{{- /* Links: external (http/https) open in a new tab; mailto:/tel: pass through
+       (safeURL keeps tel: from #ZgotmplZ); pure #anchors pass through; internal
+       /paths are resolved against the content tree with site.GetPage and rewritten
+       to the canonical .RelPermalink (so links survive URL/slug changes and .html→
+       pretty). A dead internal link fails the build (params.linkcheck = "error")
+       or warns (= "warn"). GetPage takes a CONTENT path, not an output URL — write
+       internal links by content path (reference/features-recipes.md §1b). */ -}}
+{{- $d := .Destination -}}
+{{- $u := urls.Parse $d -}}
+{{- $scheme := $u.Scheme -}}
+{{- if $scheme -}}
+  {{- if or (eq $scheme "http") (eq $scheme "https") -}}
+    <a href="{{ $d }}" target="_blank" rel="noopener"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+  {{- else -}}
+    <a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+  {{- end -}}
+{{- else if hasPrefix $d "#" -}}
+  <a href="{{ $d }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+{{- else if hasPrefix $d "/" -}}
+  {{- $target := site.GetPage $u.Path -}}
+  {{- if $target -}}
+    <a href="{{ $target.RelPermalink }}{{ with $u.Fragment }}#{{ . }}{{ end }}"{{ with $.Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+  {{- else -}}
+    {{- $msg := printf "broken internal link %q on page %q" $d .Page.Path -}}
+    {{- if eq (site.Params.linkcheck | default "error") "warn" -}}{{ warnf "%s" $msg }}{{- else -}}{{ errorf "%s" $msg }}{{- end -}}
+    <a href="{{ $d }}" class="broken">{{ .Text | safeHTML }}</a>
+  {{- end -}}
+{{- else -}}
+  <a href="{{ $d }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+{{- end -}}

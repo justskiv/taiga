@@ -1,0 +1,32 @@
+{{- /* Left rail. Series article → all parts in order, li.cur on the current one,
+       rail-k/rail-all pointing at the series anchor on the rubric page. Standalone
+       article → «ещё по теме»: the rubric plus 3–5 близких guides from front-matter
+       `related:` (content paths). The collapsed minimap is built client-side from
+       this markup (rails.js), so the DOM here is just the seed. */ -}}
+{{- $s := partial "article/series-ctx.html" . -}}
+<aside class="rail rail-l" aria-label="{{ i18n "rail_l_aria" }}">
+  <div class="rail-in">
+{{- if $s.isSeries }}
+    <div class="rail-h">
+      <a class="rail-k" href="{{ $s.href }}">{{ i18n "series_word" }} · {{ $s.label }}</a>
+      <button class="rail-x" data-rail="l" type="button" title="{{ i18n "rail_hide_l" }}">×</button>
+    </div>
+    <ol class="snav">
+{{- range $s.pages }}
+      <li{{ if eq .RelPermalink $.RelPermalink }} class="cur"{{ end }}><a href="{{ .RelPermalink }}"{{ if eq .RelPermalink $.RelPermalink }} aria-current="page"{{ end }}>{{ .Params.nav_title | default (index (split .Title ":") 0) }}</a></li>
+{{- end }}
+    </ol>
+    <a class="rail-all" href="{{ $s.href }}">{{ i18n "all_series" }}</a>
+{{- else }}
+    <div class="rail-h">
+      <a class="rail-k" href="{{ .CurrentSection.RelPermalink }}">{{ i18n "rail_related" }}</a>
+      <button class="rail-x" data-rail="l" type="button" title="{{ i18n "rail_hide_l" }}">×</button>
+    </div>
+    <ol class="snav">
+{{- range .Params.related }}{{ with site.GetPage . }}
+      <li><a href="{{ .RelPermalink }}">{{ .Params.nav_title | default (index (split .Title ":") 0) }}</a></li>
+{{- end }}{{ end }}
+    </ol>
+{{- end }}
+  </div>
+</aside>

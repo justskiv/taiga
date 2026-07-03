@@ -1,11 +1,43 @@
-{{- /* Placeholder single-page template. The full article machinery (kicker,
-       meta chips, rails, TOC, series bridge, hooks) arrives in phase 02; the
-       standalone pages (about/roadmap/lab) get their content in phase 03. */ -}}
+{{- /* Single-page template. Guides that live in a rubric section (kind=page in
+       internals/best-practices/practice) get the full article machinery — two rails,
+       kicker, meta, TOC, series bridge — built from front matter + taxonomy. Every
+       other page (about/roadmap/lab, fleshed out in phase 03) gets the plain column.
+
+       The h1 splits its title at the first ": " into a heading and a .sub subtitle
+       (as every mock article does); an explicit `sub:` overrides the auto-split, and
+       a title without a colon stays single-line. */ -}}
 {{ define "main" }}
+{{- $isArticle := and (eq .Kind "page") (in (slice "internals" "best-practices" "practice") .Section) -}}
+{{- $main := .Title -}}
+{{- $auto := "" -}}
+{{- $parts := split .Title ": " -}}
+{{- if gt (len $parts) 1 -}}
+  {{- $main = printf "%s:" (index $parts 0) -}}
+  {{- $auto = strings.TrimPrefix (printf "%s: " (index $parts 0)) .Title -}}
+{{- end -}}
+{{- $sub := .Params.sub | default $auto -}}
+{{- if $isArticle -}}
+<div class="layout">
+  {{ partial "article/rail-left.html" . }}
+  <main class="wrap">
+{{ partial "article/kicker.html" . }}
+<h1>{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
+{{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
+{{ partial "article/meta.html" . }}
+{{ with .Params.intro }}{{ $.RenderString (dict "display" "block") . }}{{ end }}
+{{ partial "article/toc.html" . }}
+{{ .Content }}
+{{ partial "article/series-bridge.html" . }}
+{{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
+  </main>
+  {{ partial "article/rail-right.html" . }}
+</div>
+{{- else -}}
 <main class="wrap">
   <div class="kicker"><span class="dot"></span>{{ .Title }}</div>
-  <h1>{{ .Title }}</h1>
-  {{ with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+  <h1>{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
+  {{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
   {{ .Content }}
 </main>
+{{- end -}}
 {{ end }}

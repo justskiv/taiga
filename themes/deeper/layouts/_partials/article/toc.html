@@ -1,0 +1,19 @@
+{{- /* Inline table of contents from .Fragments, listing h2 only (as the mock does).
+       Content starts at ## (h1 comes from the template), so .Fragments.Headings has
+       a single synthetic node with an empty title whose children are the real h2s
+       (reference/hugo-core.md §9) — descend into it. Wide screens hide this block
+       via CSS; the right rail (JS) replaces it. */ -}}
+{{- $labels := .Params.toc_labels -}}
+{{- $top := .Fragments.Headings -}}
+{{- if and (eq (len $top) 1) (not (index $top 0).Title) }}{{ $top = (index $top 0).Headings }}{{ end -}}
+{{- $h2 := where $top "Level" 2 -}}
+{{- with $h2 }}
+<div class="toc">
+<div class="toc-h">{{ i18n "toc_heading" }}</div>
+<ol>
+{{- range . }}
+<li><a href="#{{ .ID }}">{{ (index $labels .ID) | default (.Title | plainify) }}</a></li>
+{{- end }}
+</ol>
+</div>
+{{- end -}}

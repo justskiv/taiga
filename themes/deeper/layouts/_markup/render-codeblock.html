@@ -1,0 +1,14 @@
+{{- /* Code blocks. An optional fence attribute {label="runtime/malloc.go"} renders
+       a <span class="code-label"> above the block (the mock's file caption). Only
+       Go is highlighted — server-side Chroma with classes recoloured to the mock's
+       .gtok-* palette (chroma.css); every other language, ```text, and bare fences
+       fall through to a plain <code class="nohl">, matching the mock's non-Go code.
+       transform.Highlight (not HighlightCodeBlock) keeps the wrapper clean and still
+       honours hl_lines from .Options (reference/features-recipes.md §1e, §4). */ -}}
+{{- with .Attributes.label }}<span class="code-label">{{ . }}</span>
+{{ end -}}
+{{- if eq .Type "go" -}}
+{{- transform.Highlight (trim .Inner "\n") "go" .Options -}}
+{{- else -}}
+<pre><code class="nohl">{{ trim .Inner "\n" }}</code></pre>
+{{- end -}}

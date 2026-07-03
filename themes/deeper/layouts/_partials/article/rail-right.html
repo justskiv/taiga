@@ -1,0 +1,13 @@
+{{- /* Right rail: an empty #tocRail shell, exactly like the mock's static HTML.
+       toc.js fills it from the page's h2/h3 and builds the dash minimap + scrollspy
+       on load — keeping it empty here means the server render matches the mock byte
+       for byte (nothing invisible added to the prose diff). */ -}}
+<aside class="rail rail-r" aria-label="{{ i18n "rail_r_aria" }}">
+  <div class="rail-in">
+    <div class="rail-h">
+      <span class="rail-k">{{ i18n "rail_r_head" }}</span>
+      <button class="rail-x" data-rail="r" type="button" title="{{ i18n "rail_hide_r" }}">×</button>
+    </div>
+    <ol class="tocr" id="tocRail"></ol>
+  </div>
+</aside>

@@ -1,0 +1,20 @@
+{{- /* Interactive widget figure. Three forms (ARCHITECTURE §4a):
+       1. {{< widget id="w-x" note="…" >}}          → empty mount <div id class="w-root">,
+                                                        the page's widgets.js fills it.
+       2. {{< widget id="w-x" note="…" >}}HTML{{< /widget >}} → HTML sits inside the mount
+                                                        as a static/no-JS fallback.
+       3. {{< widget note="…" >}}HTML{{< /widget >}} → no id: raw HTML lives directly in
+                                                        the figure (self-wiring widgets like
+                                                        the drag builder that target their own ids).
+       cap defaults to «Поиграй»; note is the muted instruction after it. */ -}}
+{{- $id := .Get "id" -}}
+{{- $cap := .Get "cap" | default (i18n "widget_cap") -}}
+{{- $note := .Get "note" -}}
+<figure class="widget">
+<figcaption>{{ $cap }}{{ with $note }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
+{{- if $id }}
+<div id="{{ $id }}" class="w-root">{{ with .Inner }}{{ . | safeHTML }}{{ end }}</div>
+{{- else }}
+{{ .Inner | safeHTML }}
+{{- end }}
+</figure>

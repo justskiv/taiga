@@ -1,0 +1,17 @@
+{{- /* Big CTA card inside an article: {{< bigcard href="/lab/" k="Тренажёр →" t="…" s="…" >}}.
+       k = kicker, t = title, s = subtitle. An internal href (/…) is resolved to its
+       canonical .RelPermalink (pretty URL; survives slug changes); external/unknown
+       hrefs pass through unchanged. */ -}}
+{{- $href := .Get "href" -}}
+{{- $u := urls.Parse $href -}}
+{{- if and (not $u.Scheme) (hasPrefix $href "/") -}}
+  {{- with site.GetPage $u.Path -}}
+    {{- $href = .RelPermalink -}}
+    {{- with $u.Fragment }}{{ $href = printf "%s#%s" $href . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+<a class="bigcard" href="{{ $href }}">
+<span class="bc-k">{{ .Get "k" }}</span>
+<span class="bc-t">{{ .Get "t" }}</span>
+<span class="bc-s">{{ .Get "s" }}</span>
+</a>

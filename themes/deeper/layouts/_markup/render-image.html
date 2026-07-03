@@ -1,0 +1,13 @@
+{{- /* Images: always lazy/async; when the source is a page resource, resolve it
+       and stamp width/height so layout doesn't shift. The mock articles carry no
+       images, but the theme must handle them (reference/features-recipes.md §1d). */ -}}
+{{- $dest := .Destination -}}
+{{- $img := "" -}}
+{{- if not (urls.Parse $dest).IsAbs -}}
+  {{- $img = .PageInner.Resources.GetMatch $dest -}}
+{{- end -}}
+<img
+  {{- if $img }} src="{{ $img.RelPermalink }}" width="{{ $img.Width }}" height="{{ $img.Height }}"
+  {{- else }} src="{{ $dest }}"{{ end }}
+  alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}
+  loading="lazy" decoding="async">

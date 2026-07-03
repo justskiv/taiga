@@ -1,0 +1,5 @@
+{{- /* Ordered pages of a series term. $term.Pages is sorted by series_weight
+       ascending (reference/hugo-core.md §4), so this is just a named, cacheable
+       accessor — call via partialCached keyed by the term so each series is
+       resolved once per build. Context = the series term page. */ -}}
+{{- return .Pages -}}

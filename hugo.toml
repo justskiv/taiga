@@ -73,22 +73,23 @@ timeZone = "Europe/Moscow"
   [menus.main.params]
     badge = "β"
 
-# Series terms carry metadata only — never render their own pages, but keep
-# taxonomy data available to templates (.GetTerms / term.Pages).
+# Taxonomy TERM pages never render (tags link to /tags/#tag, series carry metadata
+# only), but their data stays available to templates (.GetTerms / term.Pages).
+# Targeting kind=term covers both tags and series; the /tags/ and /series/ list
+# nodes are kind=taxonomy/section and unaffected.
 [[cascade]]
   [cascade.build]
     render = "never"
     list = "never"
   [cascade._target]
-    path = "/series/**"
+    kind = "term"
 
-# Rubric sections: raw bundle resources (widgets.js/.css sources) must not leak
-# into public/ — only pipeline outputs are published.
+# Leaf pages: raw bundle resources (widgets.js/.css sources) must not leak into
+# public/ — only pipeline outputs (js.Build/minify/fingerprint) are published.
 [[cascade]]
   [cascade.build]
     publishResources = false
   [cascade._target]
-    path = "/{internals,best-practices,practice}/**"
     kind = "page"
 
 [markup]

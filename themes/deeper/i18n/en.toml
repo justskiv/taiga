@@ -46,3 +46,74 @@ other = "{{ .Count }} parts"
 
 [part_of]
 other = "part {{ .N }} of {{ .M }}"
+
+# ── article machinery (phase 02) ─────────────────────────────────────────────
+
+[anchor_sec]
+other = "Section anchor"
+[anchor_sub]
+other = "Subsection anchor"
+
+[callout_key]
+other = "Key idea"
+[callout_trap]
+other = "Trap"
+[callout_internals]
+other = "Under the hood"
+[callout_note]
+other = "Historical note"
+
+[widget_cap]
+other = "Play"
+
+[toc_heading]
+other = "Contents"
+[rail_l_aria]
+other = "Series navigation"
+[rail_r_aria]
+other = "Page contents"
+[rail_r_head]
+other = "on this page"
+[rail_hide_l]
+other = "Hide panel — ["
+[rail_hide_r]
+other = "Hide panel — ]"
+[rail_related]
+other = "related"
+
+[meta_tested_on]
+other = "tested on"
+[meta_interactive]
+other = "interactive"
+[mins_abbr]
+other = "min"
+
+[kicker_standalone]
+other = "deep dive"
+
+[series_word]
+other = "series"
+[all_series]
+other = "whole series →"
+
+[sbr_behind]
+other = "<b>{{ .done }} of {{ .total }}</b> behind you"
+[sbr_ahead]
+other = "{{ .n }} ahead"
+[parts_word]
+one = "part"
+other = "parts"
+[sbr_left]
+other = "<b>~{{ .mins }} min</b>"
+[sbr_done]
+other = "series complete · <b>{{ .total }} of {{ .total }}</b>"
+[sbr_next_k]
+other = "next · part {{ .n }}"
+[sbr_final_k]
+other = "series finale"
+[sbr_final_t]
+other = "The whole «{{ .name }}» series — pick what to revisit"
+[sbr_prev]
+other = "← part {{ .n }} · {{ .short }}"
+[sbr_seg_title]
+other = "part {{ .n }} · {{ .short }}"

@@ -1,0 +1,5 @@
+{{- /* Verbatim HTML passthrough for custom markup goldmark would mangle — the mock's
+       .mem / .byte-strip diagrams and complex tables. Unlike a raw HTML block in
+       markdown, a shortcode captures its body whole, so blank lines inside don't cut
+       the block short (CONVERSION-COOKBOOK §3). */ -}}
+{{- .Inner | safeHTML -}}
