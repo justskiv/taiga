@@ -1,0 +1,34 @@
+{{- /* The site feed: published guides (guides.html — the three rubric sections,
+       stubs excluded), newest first, capped at [services.rss] limit. Full article
+       HTML rides in content:encoded when params.rss.fullContent is set. A generic
+       layouts/rss.xml override is picked up for the home RSS in the new template
+       system (reference/features-recipes.md §7). */ -}}
+{{- $pages := partial "guides.html" . -}}
+{{- $limit := site.Config.Services.RSS.Limit -}}
+{{- if ge $limit 1 }}{{ $pages = $pages | first $limit }}{{ end -}}
+{{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ site.Title }}</title>
+    <link>{{ site.Home.Permalink }}</link>
+    <description>{{ site.Params.footerTag | default site.Params.heroLine }}</description>
+    <language>{{ site.Language.LanguageCode }}</language>
+    {{- with .OutputFormats.Get "rss" }}
+    <atom:link href="{{ .Permalink }}" rel="self" type="application/rss+xml" />
+    {{- end }}
+    {{- range $pages }}
+    <item>
+      <title>{{ .Title }}</title>
+      <link>{{ .Permalink }}</link>
+      <guid>{{ .Permalink }}</guid>
+      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+      {{- with .Description }}
+      <description>{{ . }}</description>
+      {{- end }}
+      {{- if site.Params.rss.fullContent }}
+      <content:encoded>{{ printf "<![CDATA[%s]]>" .Content | safeHTML }}</content:encoded>
+      {{- end }}
+    </item>
+    {{- end }}
+  </channel>
+</rss>

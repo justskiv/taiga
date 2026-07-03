@@ -6,5 +6,5 @@
 {{- $label := .Get "label" | default (i18n (printf "callout_%s" $type)) -}}
 <div class="callout {{ $type }}">
 <span class="clabel">{{ $label }}</span>
-{{ .InnerDeindent | .Page.RenderString }}
+{{ .Page.RenderString (dict "display" "block") .InnerDeindent }}
 </div>

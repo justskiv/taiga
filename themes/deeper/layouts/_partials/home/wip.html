@@ -1,0 +1,14 @@
+{{- /* "In progress" strip: the roadmap items currently being written (everything
+       in data/roadmap.toml [[items]] that isn't flagged `ready`). Titles read
+       lower-case here (first letter only, to keep «map», «GC» intact) — the same
+       items appear title-case on the roadmap page. Whole strip is skipped when
+       nothing is in flight. Links to /roadmap/. */ -}}
+{{- $items := where (site.Data.roadmap.items | default slice) "ready" "!=" true -}}
+{{- $roadmap := site.GetPage "/roadmap" -}}
+{{- with $items }}
+<div class="wip">
+  <span class="dot-live"></span>
+  <span>{{ i18n "wip_writing" }} → {{ range $i, $it := . }}{{ if $i }} · {{ end }}<b>{{ printf "%s%s" (substr $it.title 0 1 | lower) (substr $it.title 1) }}</b>{{ end }}</span>
+  {{- with $roadmap }}<a href="{{ .RelPermalink }}">{{ i18n "wip_roadmap" }} →</a>{{ end }}
+</div>
+{{- end }}

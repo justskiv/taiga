@@ -10,6 +10,7 @@ nav_title: "GC-классика"
 mins: 13
 version: "go1.26"
 tags: [gc, barrier]
+stub: true          # series part exists for structure; not a finished guide yet
 draft: false
 ---
 

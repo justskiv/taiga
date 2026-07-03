@@ -7,8 +7,12 @@
        honours hl_lines from .Options (reference/features-recipes.md §1e, §4). */ -}}
 {{- with .Attributes.label }}<span class="code-label">{{ . }}</span>
 {{ end -}}
+{{- /* data-pagefind-weight="0.5": code is indexed but de-weighted, so prose about
+       a term outranks code that merely mentions it. The Go branch's wrapper is a
+       styleless block (the mock's box lives on `pre`), so it changes nothing but
+       the search weight. */ -}}
 {{- if eq .Type "go" -}}
-{{- transform.Highlight (trim .Inner "\n") "go" .Options -}}
+<div data-pagefind-weight="0.5">{{ transform.Highlight (trim .Inner "\n") "go" .Options }}</div>
 {{- else -}}
-<pre><code class="nohl">{{ trim .Inner "\n" }}</code></pre>
+<pre data-pagefind-weight="0.5"><code class="nohl">{{ trim .Inner "\n" }}</code></pre>
 {{- end -}}

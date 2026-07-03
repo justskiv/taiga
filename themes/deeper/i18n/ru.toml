@@ -126,3 +126,78 @@ other = "Вся серия «{{ .name }}» — выбрать, что переч
 other = "← часть {{ .n }} · {{ .short }}"
 [sbr_seg_title]
 other = "часть {{ .n }} · {{ .short }}"
+
+# ── chrome: home, rubric, tags (phase 03) ────────────────────────────────────
+
+# home section headings + featured CTAs
+[featured_head]
+other = "гайд недели"
+[read_guide]
+other = "читать гайд"
+[featured_all]
+other = "вся серия"
+[feed_head]
+other = "лента гайдов"
+[wip_writing]
+other = "пишутся"
+[wip_roadmap]
+other = "роадмап"
+
+# count plurals (CLDR ru: one/few/many + other for fractionals)
+[guides_count]
+one = "{{ .Count }} гайд"
+few = "{{ .Count }} гайда"
+many = "{{ .Count }} гайдов"
+other = "{{ .Count }} гайда"
+[series_count]
+one = "{{ .Count }} серия"
+few = "{{ .Count }} серии"
+many = "{{ .Count }} серий"
+other = "{{ .Count }} серии"
+[reviews_count]
+one = "{{ .Count }} разбор"
+few = "{{ .Count }} разбора"
+many = "{{ .Count }} разборов"
+other = "{{ .Count }} разбора"
+[hours_count]
+one = "{{ .Count }} час"
+few = "{{ .Count }} часа"
+many = "{{ .Count }} часов"
+other = "{{ .Count }} часа"
+[tags_count]
+one = "{{ .Count }} тег"
+few = "{{ .Count }} тега"
+many = "{{ .Count }} тегов"
+other = "{{ .Count }} тега"
+
+# rubric page
+[rubric_word]
+other = "рубрика"
+[standalone_head]
+other = "разборы вне серий"
+# series duration: "~1,5 часа" needs a genitive hour word + a locale decimal mark
+# (the integer forms come from hours_count)
+[hours_gen]
+other = "часа"
+[decimal_sep]
+other = ","
+
+# tags page
+[tags_cloud]
+other = "облако"
+[tags_cloud_aria]
+other = "Облако тегов"
+[tags_hint]
+other = "кликни тег — подборка появится здесь · вся лента — <a href=\"/#feed\">на главной</a>"
+[tags_noscript]
+other = "Облако тегов собирается на лету — без JavaScript страница молчит. Вся лента гайдов есть <a href=\"/#feed\">на главной</a>."
+
+# roadmap shortcode section headings
+[roadmap_bar_aria]
+other = "готовность"
+[roadmap_now]
+other = "В работе"
+[roadmap_queue]
+other = "Дальше в очереди"
+[roadmap_how]
+other = "Как решаем, что писать"

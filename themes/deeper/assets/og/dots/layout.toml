@@ -1,0 +1,45 @@
+# OG cover style "dots" (Точечная сетка). Text blocks drawn over base.png in
+# order via images.Text. Placeholders {title} {kicker} {meta} {domain} {part}
+# are filled by og-image.html (i18n-aware). Unknown keys are ignored, so the
+# format is forward-compatible. Fonts resolve in this folder first, then og/fonts/.
+name = "Точечная сетка"
+
+# kicker — mono, amber, upper-cased
+[[block]]
+text = "{kicker}"
+font = "JetBrainsMono-SemiBold.ttf"
+size = 27
+color = "#ea8a2e"
+x = 76
+y = 224
+upper = true
+
+# title — big Inter, wraps at width, tight leading
+[[block]]
+text = "{title}"
+font = "Inter-ExtraBold.ttf"
+size = 66
+color = "#e6dfd2"
+x = 76
+y = 270
+width = 1010
+lineheight = 1.13
+
+# bottom-left: the wordmark
+[[block]]
+text = "{domain}"
+font = "JetBrainsMono-Medium.ttf"
+size = 24
+color = "#7d786e"
+x = 76
+y = 545
+
+# bottom-right: "~N мин · goX.Y" (right edge at x, mono only)
+[[block]]
+text = "{meta}"
+font = "JetBrainsMono-Medium.ttf"
+size = 24
+color = "#7d786e"
+x = 1124
+y = 545
+align = "right"

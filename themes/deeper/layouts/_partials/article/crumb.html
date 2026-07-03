@@ -1,0 +1,13 @@
+{{- /* Kicker text as a plain string: "<рубрика> · <серия> · часть N из M" for a
+       series guide, "<рубрика> · разбор" for a standalone one. Shared by the
+       visible kicker and the Pagefind result breadcrumb so they never drift.
+       Context = a guide page. */ -}}
+{{- $rubric := .CurrentSection.Params.label | default (lower .CurrentSection.Title) -}}
+{{- $s := partial "article/series-ctx.html" . -}}
+{{- $out := $rubric -}}
+{{- if $s.isSeries -}}
+  {{- $out = printf "%s · %s · %s" $rubric $s.label (i18n "part_of" (dict "N" $s.pos "M" $s.total)) -}}
+{{- else -}}
+  {{- $out = printf "%s · %s" $rubric (i18n "kicker_standalone") -}}
+{{- end -}}
+{{- return $out -}}

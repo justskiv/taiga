@@ -1,0 +1,8 @@
+{{- /* The site's published guides: regular pages in the rubric sections, newest
+       first (site.RegularPages is date-desc by default), minus stubs. A stub
+       (`stub: true` in front matter) is a series part that exists for structure
+       — it counts in the series rail/bridge and the rubric's part list — but is
+       not yet a finished guide, so it stays out of the feed, RSS, tags and
+       search. Returns a pages collection. */ -}}
+{{- $g := where site.RegularPages "Section" "in" site.Params.rubricSections -}}
+{{- return (where $g "Params.stub" "!=" true) -}}

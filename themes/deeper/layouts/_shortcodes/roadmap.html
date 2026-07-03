@@ -1,0 +1,38 @@
+{{- /* Roadmap blocks from data/roadmap.toml: "in progress" cards (progress bars +
+       status chips), the numbered queue, and the rules. Section headings carry the
+       same hash-anchor markup the render-heading hook emits, so they behave like
+       any h2. Item/queue/rule text is rendered inline so `code` and [links] work.
+       Anchors #now/#queue/#how are fixed (stable deep links); labels are i18n. */ -}}
+{{- $rm := site.Data.roadmap -}}
+{{- $anchor := i18n "anchor_sec" -}}
+{{- with $rm.items }}
+<h2 id="now"><a class="hash" href="#now" aria-label="{{ $anchor }}">#</a>{{ i18n "roadmap_now" }}</h2>
+<div class="rm-now">
+  {{- range . }}
+  <div class="rm-item">
+    <div class="rm-row">
+      <span class="rm-t">{{ .title }}</span>
+      <span class="rm-chip{{ if .ready }} ready{{ end }}">{{ .status }}</span>
+    </div>
+    {{- with .note }}<p class="rm-d">{{ $.Page.RenderString (dict "display" "inline") . }}</p>{{ end }}
+    <div class="rm-bar" role="progressbar" aria-valuenow="{{ .progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ i18n "roadmap_bar_aria" }}"><i style="width:{{ .progress }}%"></i></div>
+  </div>
+  {{- end }}
+</div>
+{{- end }}
+{{- with $rm.queue }}
+<h2 id="queue"><a class="hash" href="#queue" aria-label="{{ $anchor }}">#</a>{{ i18n "roadmap_queue" }}</h2>
+<ul class="rm-queue">
+  {{- range . }}
+  <li>{{ $.Page.RenderString (dict "display" "inline") .title }}</li>
+  {{- end }}
+</ul>
+{{- end }}
+{{- with $rm.rules }}
+<h2 id="how"><a class="hash" href="#how" aria-label="{{ $anchor }}">#</a>{{ i18n "roadmap_how" }}</h2>
+<ul class="rm-rules">
+  {{- range . }}
+  <li><strong>{{ .title }}</strong> {{ $.Page.RenderString (dict "display" "inline") .note }}</li>
+  {{- end }}
+</ul>
+{{- end }}

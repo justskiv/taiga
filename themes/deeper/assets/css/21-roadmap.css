@@ -1,0 +1,32 @@
+/* Roadmap shortcode: "in progress" cards with progress bars + status chips, a
+   numbered queue and a rules list. A theme component (the {{< roadmap >}}
+   shortcode ships with the theme). Ported from the mock's page-local <style>. */
+.rm-now{margin:18px 0 0}
+.rm-item{padding:2px 2px 16px 18px; border-left:2px solid var(--border);
+  transition:border-color var(--dur) var(--ease)}
+.rm-item + .rm-item{margin-top:16px}
+.rm-item:hover{border-left-color:var(--accent-amber)}
+.rm-row{display:flex; align-items:baseline; gap:12px}
+.rm-t{font-weight:650; color:var(--text-strong); font-size:16.5px; line-height:1.35}
+.rm-d{margin:6px 0 0; font-size:14.5px; color:var(--text-secondary); line-height:1.55}
+/* status chip: mono, quiet. green only when it's already touchable. */
+.rm-chip{margin-left:auto; flex:0 0 auto; font-family:var(--font-mono);
+  font-size:10.5px; letter-spacing:.04em; color:var(--text-muted);
+  border:1px solid var(--border); border-radius:20px; padding:3px 9px; white-space:nowrap}
+.rm-chip.ready{color:var(--accent-green);
+  border-color:color-mix(in srgb, var(--accent-green) 32%, var(--border))}
+/* thin progress track/fill from tokens */
+.rm-bar{height:5px; margin-top:12px; max-width:320px; border-radius:20px;
+  background:var(--border); overflow:hidden}
+.rm-bar > i{display:block; height:100%; border-radius:inherit;
+  background:var(--accent-amber); box-shadow:0 0 10px var(--accent-amber-glow)}
+/* queue: numbered one-liners, echoing the rubric series lists */
+.rm-queue{list-style:none; counter-reset:q; margin:18px 0 0; padding:0}
+.rm-queue li{counter-increment:q; display:flex; gap:14px; align-items:baseline;
+  padding:11px 2px; border-bottom:1px solid var(--border);
+  color:var(--text-secondary); font-size:15px; line-height:1.5}
+.rm-queue li:last-child{border-bottom:0}
+.rm-queue li::before{content:counter(q,decimal-leading-zero);
+  font-family:var(--font-mono); font-size:11px; color:var(--text-ghost); flex:0 0 auto}
+.rm-rules{margin-top:16px}
+.rm-rules li{margin-bottom:12px; color:var(--text-secondary)}

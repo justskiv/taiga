@@ -1,0 +1,24 @@
+{{- /* "Разборы вне серий": the rubric's standalone guides (no series term), as a
+       .alist. The "outside the series" heading only appears when the rubric also
+       has series above to separate from — a series-less rubric goes straight to
+       the list. Context = the section page. */ -}}
+{{- $section := . -}}
+{{- $standalone := slice -}}
+{{- $hasSeries := false -}}
+{{- range $section.RegularPages -}}
+  {{- if .GetTerms "series" -}}{{ $hasSeries = true }}
+  {{- else -}}{{ $standalone = $standalone | append . }}{{ end -}}
+{{- end -}}
+{{- with $standalone }}
+  {{- if $hasSeries }}
+  <div class="sec-h" style="margin-top:40px">{{ i18n "standalone_head" }}</div>
+  {{- end }}
+  <ul class="alist">
+  {{- range . }}
+    <li><a href="{{ .RelPermalink }}">
+      <span class="a-t">{{ .Title }}</span>
+      <span class="a-s">{{ .Description }} ~{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span>
+    </a></li>
+  {{- end }}
+  </ul>
+{{- end -}}

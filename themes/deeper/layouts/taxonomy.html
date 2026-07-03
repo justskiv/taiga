@@ -1,9 +1,42 @@
-{{- /* Placeholder taxonomy list. The real /tags/ (chip cloud + filterable feed)
-       is built in phase 03; series terms never render (suppressed by cascade). */ -}}
+{{- /* /tags/: a mono-chip cloud + a filterable feed. Cloud counts and the feed
+       are rendered server-side from the published guides (a stub's tags don't
+       count — see guides.html); the client only filters by location.hash
+       (modules/tags-filter.js). Term pages (/tags/<tag>/) never render — chips
+       point at /tags/#<tag>, as in the mock. Series terms use this template's
+       kind too but are suppressed by the cascade, so this only fires for tags. */ -}}
 {{ define "main" }}
-<main class="wrap">
-  <div class="kicker"><span class="dot"></span>{{ .Title }}</div>
-  <h1>{{ .Title }}</h1>
-  {{ .Content }}
+{{- $guides := partial "guides.html" . -}}
+{{- /* tag → count, from published guides only */ -}}
+{{- $counts := dict -}}
+{{- range $guides }}{{ range .Params.tags }}{{ $counts = merge $counts (dict (printf "%v" .) (add (int (index $counts (printf "%v" .) | default 0)) 1)) }}{{ end }}{{ end -}}
+{{- $tags := slice -}}
+{{- range $t, $c := $counts }}{{ $tags = $tags | append (dict "tag" $t "count" $c) }}{{ end -}}
+{{- /* frequency desc, ties alphabetical: alpha sort first, then a stable count sort */ -}}
+{{- $tags = sort (sort $tags "tag" "asc") "count" "desc" -}}
+<main class="shell page-pad">
+
+  <div class="kicker"><span class="dot"></span>{{ .Params.kicker | default (lower .Title) }}</div>
+  <h1>{{ .Params.headline | default .Title }}{{ with .Params.sub }} <span class="sub">{{ . }}</span>{{ end }}</h1>
+  {{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
+  <noscript><p class="muted">{{ i18n "tags_noscript" | safeHTML }}</p></noscript>
+
+  <div class="sec-h" id="cloudHead">{{ i18n "tags_cloud" }} · {{ i18n "tags_count" (len $tags) }} · {{ i18n "guides_count" (len $guides) }}</div>
+  <nav class="tcloud" id="cloud" aria-label="{{ i18n "tags_cloud_aria" }}">
+    {{- range $tags }}
+    <a class="tchip" href="/tags/#{{ .tag }}" data-tag="{{ .tag }}"><span class="h">#</span>{{ .tag }}<span class="n">×<b>{{ .count }}</b></span></a>
+    {{- end }}
+  </nav>
+  <p class="t-hint" id="cloudHint">{{ i18n "tags_hint" | safeHTML }}</p>
+
+  <section id="tagSec" hidden aria-live="polite">
+    <div class="sec-h" id="tagHead"></div>
+    <div class="feed" id="tagFeed">
+      {{- range $guides }}
+      {{ partial "post.html" . }}
+      {{- end }}
+    </div>
+    <div class="t-empty" id="tagEmpty" hidden></div>
+  </section>
+
 </main>
 {{ end }}

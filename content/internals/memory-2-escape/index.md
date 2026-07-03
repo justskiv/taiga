@@ -10,6 +10,7 @@ nav_title: "Escape analysis"
 mins: 10
 version: "go1.26"
 tags: [куча, стек]
+stub: true          # series part exists for structure; not a finished guide yet
 draft: false
 ---
 

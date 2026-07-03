@@ -16,6 +16,11 @@
   {{- end -}}
 {{- else if hasPrefix $d "#" -}}
   <a href="{{ $d }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+{{- else if and (hasPrefix $d "/") (path.Ext $u.Path) -}}
+  {{- /* link to a generated/static file (RSS /index.xml, sitemap, an image or a
+         download): pass through as-is — GetPage resolves content pages, not output
+         URLs, so these must not go through the page check. */ -}}
+  <a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
 {{- else if hasPrefix $d "/" -}}
   {{- $target := site.GetPage $u.Path -}}
   {{- if $target -}}

@@ -1,0 +1,31 @@
+{{- /* Rubric showcase on the home page. Cards are generated per site section
+       (site.Params.rubricSections, in listed order) — not a hard-coded three —
+       so a site with more or fewer rubrics just works. The section logo is a
+       partial looked up by name: home/logos/<section>.html on the SITE side
+       (the mock's three SVGs live there, keeping the theme subject-agnostic),
+       falling back to the theme's neutral home/logos/default.html.
+
+       .r-n counts the section's whole library (series parts included) so it
+       matches what the rubric page lists; when the section carries series it
+       reads "N гайдов · M серий", otherwise "N разборов". */ -}}
+<section class="rubs2" aria-label="{{ i18n "nav_rubrics" }}">
+{{- range site.Params.rubricSections }}
+  {{- $sec := site.GetPage (printf "/%s" .) -}}
+  {{- if $sec }}
+    {{- $id := $sec.Section -}}
+    {{- $pages := where site.RegularPages "Section" $id -}}
+    {{- $nGuides := len $pages -}}
+    {{- $seriesSlugs := slice -}}
+    {{- range $pages }}{{ with .GetTerms "series" }}{{ $seriesSlugs = $seriesSlugs | append (index . 0).Title }}{{ end }}{{ end -}}
+    {{- $nSeries := len (uniq $seriesSlugs) -}}
+    {{- $logo := printf "home/logos/%s.html" $id -}}
+    {{- $logoPartial := cond (templates.Exists (printf "_partials/%s" $logo)) $logo "home/logos/default.html" -}}
+  <a class="rub2" href="{{ $sec.RelPermalink }}">
+    <span class="r-logo" data-logo="{{ $id }}">{{ partial $logoPartial $sec }}</span>
+    <span class="r-t">{{ $sec.Title }}</span>
+    {{- with $sec.Params.card_line }}<span class="r-d">{{ . }}</span>{{ end }}
+    <span class="r-n">{{ if gt $nSeries 0 }}{{ i18n "guides_count" $nGuides }} · {{ i18n "series_count" $nSeries }}{{ else }}{{ i18n "reviews_count" $nGuides }}{{ end }}</span>
+  </a>
+  {{- end }}
+{{- end }}
+</section>

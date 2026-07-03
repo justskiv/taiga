@@ -12,6 +12,9 @@ import { bindRails } from './modules/rails.js';
 import { bindTips } from './modules/tooltip.js';
 import { bindKeys } from './modules/keys.js';
 import { mountScrollTop } from './modules/scrolltop.js';
+import { initFeatured } from './modules/featured.js';
+import { initFeedReveal } from './modules/reveal.js';
+import { initTagsFilter } from './modules/tags-filter.js';
 
 function onReady(fn) {
   if (document.readyState !== 'loading') fn();
@@ -47,6 +50,9 @@ onReady(function () {
   bindTips();
   bindKeys();
   mountScrollTop();
+  initFeatured();   /* home only: self-guards on #hd-strip/#hd-data */
+  initFeedReveal(); /* home only: self-guards on .feed-more */
+  initTagsFilter(); /* tags only: self-guards on #cloud/#tagFeed */
 });
 
 if (document.readyState === 'complete') runWidgets();

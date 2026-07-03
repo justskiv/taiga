@@ -10,6 +10,7 @@ nav_title: "Source dive"
 mins: 13
 version: "go1.26"
 tags: [runtime, malloc]
+stub: true          # series part exists for structure; not a finished guide yet
 draft: false
 ---
 

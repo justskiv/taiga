@@ -10,6 +10,7 @@ nav_title: "Аллокатор"
 mins: 11
 version: "go1.26"
 tags: [mcache, spans]
+stub: true          # series part exists for structure; not a finished guide yet
 draft: false
 ---
 

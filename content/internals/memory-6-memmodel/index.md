@@ -10,6 +10,7 @@ nav_title: "Memory Model"
 mins: 11
 version: "go1.26"
 tags: [гонки, atomic]
+stub: true          # series part exists for structure; not a finished guide yet
 draft: false
 ---
 

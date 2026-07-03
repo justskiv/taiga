@@ -22,6 +22,11 @@ const DEFAULTS = {
   searchEmpty: 'Ничего не нашлось. Попробуй «gc», «слайс», «планировщик»…',
   searchUnbuilt: 'Индекс поиска ещё не собран. Соберётся командой pagefind --site public.',
   minutes: 'мин',
+  /* tags page (/tags/) filter */
+  tagFeedHead: 'лента',
+  tagReset: 'сбросить',
+  tagEmptyTail: ' — такого тега нет. Проверь ссылку или выбери тему из облака выше.',
+  guideForms: ['гайд', 'гайда', 'гайдов'],
 };
 
 export const I18N = Object.assign({}, DEFAULTS,

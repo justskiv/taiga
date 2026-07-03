@@ -21,12 +21,21 @@
   {{ partial "article/rail-left.html" . }}
   <main class="wrap">
 {{ partial "article/kicker.html" . }}
-<h1>{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
+<h1 data-pagefind-meta="title">{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
 {{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
 {{ partial "article/meta.html" . }}
 {{ with .Params.intro }}{{ $.RenderString (dict "display" "block") . }}{{ end }}
 {{ partial "article/toc.html" . }}
+{{- /* Pagefind: index the prose only. A stub has nothing to find, so it stays out
+       of the index (keeps search results to real guides). crumb/mins ride along as
+       result-card metadata (empty spans carry inline key:value). */ -}}
+{{ if .Params.stub }}{{ .Content }}{{ else }}
+<div data-pagefind-body>
+<span data-pagefind-meta="crumb:{{ partial "article/crumb.html" . }}"></span>
+<span data-pagefind-meta="mins:{{ .Params.mins | default .ReadingTime }}"></span>
 {{ .Content }}
+</div>
+{{ end }}
 {{ partial "article/series-bridge.html" . }}
 {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
   </main>
@@ -34,10 +43,14 @@
 </div>
 {{- else -}}
 <main class="wrap">
-  <div class="kicker"><span class="dot"></span>{{ .Title }}</div>
-  <h1>{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
+  {{ with .Params.kicker }}<div class="kicker"><span class="dot"></span>{{ . }}</div>{{ end }}
+  <h1 data-pagefind-meta="title">{{ .Params.headline | default $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
   {{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
+  <div data-pagefind-body>
+  {{ with .Params.kicker }}<span data-pagefind-meta="crumb:{{ . }}"></span>{{ end }}
   {{ .Content }}
+  </div>
+  {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
 </main>
 {{- end -}}
 {{ end }}

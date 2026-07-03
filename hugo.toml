@@ -139,3 +139,13 @@ timeZone = "Europe/Moscow"
 [services]
   [services.rss]
     limit = 20
+
+# Only the home page carries an RSS feed (/index.xml) — the guide feed. Section,
+# taxonomy and term list pages would otherwise each emit their own index.xml;
+# the site wants a single feed, so RSS is dropped from their outputs.
+[outputs]
+  home = ["html", "rss"]
+  section = ["html"]
+  taxonomy = ["html"]
+  term = ["html"]
+  page = ["html"]

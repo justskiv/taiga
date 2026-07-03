@@ -11,12 +11,12 @@
 | 01 Фундамент | done |
 | 02 Статья | done |
 | 2.5 Агностичность | done |
-| 03 Хром | todo |
-| 04 Память I | todo |
-| 05 Память II + планировщик | todo |
-| 06 Идиоматичный | todo |
-| 07 Разборы | todo |
-| 08 Релиз | todo |
+| 03 Хром | done |
+| 04 Демо (exampleSite) | todo |
+| 05 Релиз | todo |
+
+(Таблица приведена к текущему PLAN.md: контент-фазы конверсии статей
+мока отложены в `phases/archive/`; после 03 идут 04 Демо и 05 Релиз.)
 
 ---
 
@@ -35,6 +35,162 @@
 
 Осталось (если фаза не закрыта): точный следующий шаг.
 ```
+
+---
+
+## 2026-07-03 — фаза 03 «Хром» (done)
+
+Весь хром сайта: главная, рубрики, теги, поиск, RSS, OG/SEO, доп-
+страницы. Рабочая папка — `impl/claude/`.
+
+Сделано:
+- ГЛАВНАЯ (`home.html` + `_partials/home/*`): hero из params;
+  `rubric-cards` — карточки по `rubricSections` (generic, не «3»),
+  логотип секции через lookup `home/logos/<section>.html` (сайт) с
+  фолбэком `home/logos/default.html` (тема, нейтральный глиф на
+  currentColor); ТРИ SVG-мока — партиалы САЙТА `impl/claude/layouts/
+  _partials/home/logos/`; `.r-n` = «N гайдов · M серий» / «N разборов»
+  (плюралы i18n, счёт по секции). `featured` — карточка «гайд недели»
+  (generic) + байт-виджет: чтобы тема осталась агностична, сам виджет
+  = generic-модуль `featured.js` (читает JSON-остров `#hd-data`), а
+  Go-данные (layouts Message) + скелет — партиал САЙТА `home/featured-
+  demo.html` (см. находку про §6). `feed` — опубликованные гайды по
+  дате, первые `feedInitial` видимы, хвост в `.feed-more` +
+  `reveal.js`. `wip` — незавершённые (ready≠true) `data/roadmap.items`,
+  первая буква title в нижний регистр. Общие партиалы: `post.html`
+  (одна `.post`, серия через `series-ctx`, `data-tags` для фильтра),
+  `date-ru.html` («27 июн», с годом для не-текущего), `guides.html`
+  (опубликованные гайды = регуляры рубрик минус стабы).
+- РУБРИКИ (`section.html` + `_partials/rubric/*`): кикер «рубрика ·
+  slug_mono», h1+`.sub`, lead; `series-block` — по терминам series
+  секции (порядок = weight термина; термины берём через `.GetTerms`
+  на страницах секции, т.к. `site.GetPage /series/..` для render:never
+  термов даёт nil), «N частей · ~X ч» через `duration.html` (≥60 мин →
+  часы с округлением до 0.5 «~1,5 часа»; <60 → «~N мин»); `alist` —
+  стендэлоны с условным заголовком «разборы вне серий». «Дальше» и
+  «Формат живой» коллауты добавлены в тела `_index.md`.
+- ТЕГИ (`taxonomy.html` + `content/tags/_index.md`): облако моно-чипов
+  со счётчиками ИЗ опубликованных гайдов (частота, ничьи — алфавит),
+  «облако · N тегов · M гайдов»; полная лента постов (server-render)
+  + `tags-filter.js` (hash-фильтр, сброс повторным кликом/ссылкой,
+  пустое состояние). Стили чипов → `19-tags.css` (тема-компонент).
+  Термины `/tags/<tag>/` не рендерятся (каскад ф.01, проверено).
+- ПОИСК (Pagefind): `data-pagefind-body` на теле статьи (стабы —
+  без него, вне индекса), meta `title` (h1) + `crumb`/`mins` (пустые
+  инлайн-спаны), код-блоки `data-pagefind-weight="0.5"` (render-
+  codeblock); `search.js` доведён (крошка+минуты+выдержка, `<mark>`→
+  янтарь `.sm-item .d mark`). Pagefind 1.5.2 (пин), сборка = `hugo &&
+  pagefind --site public` (README сайта).
+- RSS (`rss.xml`): опубликованные гайды, полнотекст (`content:encoded`),
+  лимит `[services.rss]`; `[outputs]` — RSS только у home (секции/
+  таксономии/термы без index.xml); автодискавери-`<link>` в head.
+- OG/SEO (`head/og.html` + `og-image.html` + `assets/og/dots/`):
+  полный контракт og/twitter/article + JSON-LD (TechArticle +
+  BreadcrumbList на гайдах, WebSite на главной, `jsonify | safeJS`);
+  генерация обложек стиля «dots» — `layout.toml` (transform.Unmarshal)
+  рисует блоки {kicker}{title}{meta}{domain} через images.Text поверх
+  `base.png`; правый мета-блок right-align вручную (моно: сдвиг x на
+  RuneCount·size·0.6). Оверрайды: `og.png` в бандле, `og_image`,
+  `ogImages.enable`. TTF в `assets/og/fonts/` + OFL.
+- ДОП-СТРАНИЦЫ: `about.md` (проза, таблица хоткеев, коллаут, фраза RSS
+  → «уже работают» /index.xml); `roadmap.md` + шорткод `{{< roadmap >}}`
+  (рендерит now/queue/rules из `roadmap.toml`, h2 с хеш-якорями как
+  render-heading, inline-markdown в note/queue/rules) + полный
+  `roadmap.toml`; `lab/index.md` (widget-скелет + `content/lab/
+  widgets.js` тренажёр). `page.html` standalone-ветка: kicker/headline/
+  sub/foot из front matter + `data-pagefind-body`.
+- МЕЛОЧИ: `robots.txt` (allow all + Sitemap), sitemap дефолтный (15
+  URL, без термов); `stub: true` на memory-2..7.
+
+Проверено (приёмка) — СЫРОЙ вывод:
+- Сборка `hugo --gc --minify --printPathWarnings --printUnusedTemplates
+  --printI18nWarnings`: 0 ошибок, 0 i18n/path-warning; 2 «unused
+  template» — `render-image` (в контенте картинок нет) и `home/logos/
+  default.html` (все 3 рубрики имеют свои лого сайта, фолбэк не
+  вызывается). Обе — осознанные (тема обязана уметь и то и другое).
+- `check-links.py public/` → «OK: 16 pages, all internal links and
+  anchors resolve».
+- `pagefind --site public` → «Indexed 4 pages» (memory-1, about,
+  roadmap, lab; главная и стабы — вне индекса, как задумано).
+- `xmllint --noout public/index.xml` → VALID; 1 item (memory-1),
+  полнотекст.
+- prose-diff (visible-text) против мока — только санкционированное:
+  about — RSS-фраза + `rss soon`→`rss` (§8.5); roadmap — то же + порядок
+  футер-ссылок (§8.15, баг мока не воспроизводим); lab — `rss` (§8.5);
+  internals — отсутствует серия «Планировщик» (нет контента sched —
+  реальность ф.03), memory-серия БАЙТ-в-байт как мок; memory-1 —
+  прежние §8.4 (мост `.sbr`) + §8.5, т.е. правки ф.03 (pagefind-обёртка,
+  meta-спаны, code-weight, `<p>` в коллауте) текст НЕ изменили.
+- Живьём (Chrome, прод-сборка + pagefind на :1319): ⌘K нашёл memory-1
+  по слову ИЗ ТЕКСТА «выравнивании» → совпало «выравниванию» (русский
+  стемминг!), карточка = крошка «под капотом · память · часть 1 из 7»
+  + «14 мин» + выдержка с ЯНТАРНЫМ `<mark>`; теги — клик #layout даёт
+  «лента · #layout · 1 гайд» + сброс, повторный клик/ссылка сброс,
+  неизвестный тег → пустое состояние; тренажёр лаборатории — bool·
+  int64·bool = 24 Б/14 pad, «оптимизировать» → 16 Б/6 pad, «очистить»
+  → 0; featured байт-виджет отрисовал naive-раскладку (24 Б);
+  rubvar rows/loud = block, shelf = grid 2×350px. Консоль — 0 ошибок.
+- `node --check` (stdin, module) на всех JS + `content/lab/widgets.js` —
+  OK; JSON-остров `#hd-data` валиден.
+
+Отклонения/находки (для доков пакета):
+- РЕШЕНИЕ про стабы: `stub: true` на memory-2..7. Стаб = часть серии
+  для СТРУКТУРЫ (входит в рельс/мост/кикер статьи, в `series-block` и
+  счётчик карточки рубрики → «7 гайдов», серия «7 частей · ~1,5 часа»
+  как в моке), но НЕ «готовый гайд»: `guides.html` его исключает, и он
+  выпадает из ленты главной, тегов, RSS и Pagefind. Так «лента живёт с
+  одной статьёй» (приёмка §6: 1 гайд) при верной структуре серии.
+  Стабы ОСТАЮТСЯ в sitemap (валидные URL, достижимы по ссылкам серии)
+  — консистентно: sitemap = всё достижимое, поиск/лента = готовое.
+- АГНОСТИЧНОСТЬ vs phase §1 «featured.js в теме»: скелет+данные
+  featured — Go-специфичны (Message, unsafe.Sizeof), класть их в тему
+  = регресс ф.2.5. Разрешил как lab (§10a): generic-механизм в теме
+  (`featured.js` читает `#hd-data`), Go-контент — партиал САЙТА
+  `home/featured-demo.html`. Тема осталась предметно-чистой. Отступление
+  от буквы phase §1, но по духу §1+§10a. (То же для тренажёра лабы.)
+- НАЙДЕНЫ И ПОЧИНЕНЫ (правки тем-файлов ф.02, обе текст-нейтральны для
+  memory-1): (1) render-link на `/index.xml` падал (GetPage не находит
+  output-URL) — добавил ветку «ссылка с расширением (.xml/.png/…) →
+  passthrough без GetPage»; нужно для about-ссылки на RSS (SPEC §8.5).
+  (2) коллаут-шорткод рендерил `.Inner` инлайн (без `<p>`), мок — с
+  `<p>`; переключил на `RenderString display:block`. Оба — реальные
+  баги, всплывшие на хроме ф.03.
+- КАРТОЧКИ РУБРИК главной: `.r-n` считает ВСЕ регуляры секции (со
+  стабами) — зеркалит `series-block` страницы рубрики, куда ведёт
+  карточка (7=7). Пустые рубрики (bp/practice без контента) → «0
+  разборов» (ветка без серий); косметика пустого состояния, уйдёт с
+  контентом. Лента главной при этом = 1 (метрика «свежих постов» ≠
+  «библиотека», как в моке card 11 vs feed 17).
+- WIP-полоса: мок болдит только «планировщик:» во втором пункте, я
+  болжу пункт целиком (данные единообразно). ВИДИМЫЙ текст совпал
+  (prose-diff чист), отличие только в объёме `<b>`.
+- OG-ШРИФТЫ: JBM SemiBold/Medium — полные TTF с GitHub (кириллица
+  есть); Inter-ExtraBold собрал из woff2 темы (merge latin+cyrillic
+  700 через fontTools — вес 700 вместо 800, для заголовка обложки
+  достаточно). fonttools/pagefind ставил в venv (PEP 668 на brew-
+  python; venv в scratchpad, не в проекте). Проверил обложки глазами:
+  memory-1 и home — кириллица целая, перенос заголовка чистый, бренд/
+  мета на месте.
+- OG-СТИЛЬ: сделан ОБЯЗАТЕЛЬНЫЙ «dots». Остальные стили (rail/bytestrip/
+  terminal/spread) и `home.png` — НЕ делал (остаточный бюджет, phase
+  помечает желательными): механика от одного стиля не зависит, добавить
+  папкой без правок кода. Home/рубрики берут общий пайплайн из base.png
+  (кикер=site.Title, title=page.Title — для home чуть тавтологично
+  «DEEPER.GO»/«deeper.go», уйдёт если завести `home.png`).
+- SPEC §6 «featured .f-s» ≠ мок дословно: беру `.Description` (единый
+  источник §9), у мока там рукописный вариант лида. Не воспроизводимо
+  без спец-поля; расхождение на главной (и так разъехавшейся по контенту).
+- Инфра: `pagefind`/`fonttools` в venv scratchpad — dev-инструменты,
+  сайт от них не зависит (README пинует 1.5.2). Живой сервер поднимал
+  на :1319 (:1313/:1314 были заняты — на :1314 крутился чужой блог
+  Тузова, тоже на pagefind; чуть не сверил не тот сайт).
+
+Осталось соседним фазам:
+- Реальные статьи рубрик (memory-2..7 полная проза, sched, idiomatic,
+  practice) — пользователь пишет позже; тогда лента/теги/поиск/счётчики
+  наполнятся сами, пустые карточки рубрик оживут.
+- exampleSite (ф.04) из `demo-content/`; доки темы, CHANGELOG, CI (ф.05).
+- OG: доп-стили обложек + `home.png` (некритично).
 
 ---
 

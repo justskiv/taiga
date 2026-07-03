@@ -108,3 +108,61 @@ other = "The whole «{{ .name }}» series — pick what to revisit"
 other = "← part {{ .n }} · {{ .short }}"
 [sbr_seg_title]
 other = "part {{ .n }} · {{ .short }}"
+
+# ── chrome: home, rubric, tags (phase 03) ────────────────────────────────────
+
+[featured_head]
+other = "guide of the week"
+[read_guide]
+other = "read guide"
+[featured_all]
+other = "whole series"
+[feed_head]
+other = "the feed"
+[wip_writing]
+other = "writing"
+[wip_roadmap]
+other = "roadmap"
+
+[guides_count]
+one = "{{ .Count }} guide"
+other = "{{ .Count }} guides"
+[series_count]
+one = "{{ .Count }} series"
+other = "{{ .Count }} series"
+[reviews_count]
+one = "{{ .Count }} deep dive"
+other = "{{ .Count }} deep dives"
+[hours_count]
+one = "{{ .Count }} hour"
+other = "{{ .Count }} hours"
+[tags_count]
+one = "{{ .Count }} tag"
+other = "{{ .Count }} tags"
+
+[rubric_word]
+other = "rubric"
+[standalone_head]
+other = "outside the series"
+[hours_gen]
+other = "hours"
+[decimal_sep]
+other = "."
+
+[tags_cloud]
+other = "cloud"
+[tags_cloud_aria]
+other = "Tag cloud"
+[tags_hint]
+other = "click a tag — the picks show up here · full feed is <a href=\"/#feed\">on the home page</a>"
+[tags_noscript]
+other = "The tag cloud is built on the fly — without JavaScript the page stays quiet. The full feed lives <a href=\"/#feed\">on the home page</a>."
+
+[roadmap_bar_aria]
+other = "readiness"
+[roadmap_now]
+other = "In progress"
+[roadmap_queue]
+other = "Next in the queue"
+[roadmap_how]
+other = "How we pick what to write"

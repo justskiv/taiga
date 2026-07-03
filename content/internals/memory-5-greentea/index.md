@@ -10,6 +10,7 @@ nav_title: "Green Tea GC"
 mins: 10
 version: "go1.26"
 tags: [gc]
+stub: true          # series part exists for structure; not a finished guide yet
 draft: false
 ---
 

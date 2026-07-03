@@ -1,11 +1,21 @@
-{{- /* Temporary minimum: just the hero intro line. The full home (rubric cards,
-       featured guide, feed, wip strip) is built in phase 03. */ -}}
+{{- /* Home: intro line, rubric showcase, guide of the week, feed, and the
+       "in progress" strip. Each block is its own partial under home/. */ -}}
 {{ define "main" }}
 <main class="shell page-pad" style="padding-top:0">
+
   <div class="hero-line">
     <span class="dot"></span>
     {{ site.Params.heroLine }}
     <span class="sat">{{ site.Params.heroSat }}</span>
   </div>
+
+  {{ partial "home/rubric-cards.html" . }}
+
+  {{ partial "home/featured.html" . }}
+
+  {{ partial "home/feed.html" . }}
+
+  {{ partial "home/wip.html" . }}
+
 </main>
 {{ end }}
