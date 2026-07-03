@@ -1,0 +1,48 @@
+# English equivalents. Content stays Russian until a translation is added; these
+# keep the theme chrome language-agnostic.
+
+[to_home]
+other = "home"
+[nav_rubrics]
+other = "Rubrics"
+[search]
+other = "Search"
+[search_label]
+other = "search"
+
+[foot_internals]
+other = "internals"
+[foot_bestpractices]
+other = "best practices"
+[foot_practice]
+other = "practice"
+[foot_roadmap]
+other = "roadmap"
+[foot_about]
+other = "about"
+[foot_rss]
+other = "rss"
+
+[nf_kicker]
+other = "404 · page not found"
+[nf_title]
+other = "No such page."
+[nf_line]
+other = "But there are three rubrics — start anywhere."
+[nf_home]
+other = "← home"
+
+[minutes]
+one = "{{ .Count }} min"
+other = "{{ .Count }} min"
+
+[guides_left]
+one = "{{ .Count }} more guide"
+other = "{{ .Count }} more guides"
+
+[parts_count]
+one = "{{ .Count }} part"
+other = "{{ .Count }} parts"
+
+[part_of]
+other = "part {{ .N }} of {{ .M }}"

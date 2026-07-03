@@ -1,0 +1,30 @@
+name = "Obsidian"
+weight = 30
+
+# surface / text ramp (swapped per theme)
+"bg-deep" = "#161616"
+"bg-base" = "#1e1e1e"
+"bg-surface" = "#262626"
+"bg-raised" = "#333333"
+"bg-hover" = "#2d2d2d"
+"border" = "#363636"
+"text-primary" = "#e0e0e0"
+"text-secondary" = "#bcbcbc"
+"text-muted" = "#909090"
+"text-ghost" = "#8a8a8a"
+"text-strong" = "#f1f3f6"
+"gtok-str" = "#cbb279"
+
+# brand accents (constant across built-in palettes; overridable)
+"accent-amber" = "#ea8a2e"
+"accent-amber-dim" = "rgba(234,138,46,.18)"
+"accent-amber-glow" = "rgba(234,138,46,.28)"
+"accent-green" = "#a8c954"
+"accent-green-dim" = "rgba(168,201,84,.16)"
+"accent-green-glow" = "rgba(168,201,84,.22)"
+"accent-copper" = "#c87a42"
+"accent-copper-dim" = "rgba(200,122,66,.18)"
+"accent-blue" = "#6ba4c9"
+"accent-blue-dim" = "rgba(107,164,201,.16)"
+"accent-gold" = "#d4a24e"
+"accent-gold-dim" = "rgba(212,162,78,.18)"

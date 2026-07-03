@@ -1,0 +1,9 @@
+{{- /* Placeholder taxonomy list. The real /tags/ (chip cloud + filterable feed)
+       is built in phase 03; series terms never render (suppressed by cascade). */ -}}
+{{ define "main" }}
+<main class="wrap">
+  <div class="kicker"><span class="dot"></span>{{ .Title }}</div>
+  <h1>{{ .Title }}</h1>
+  {{ .Content }}
+</main>
+{{ end }}

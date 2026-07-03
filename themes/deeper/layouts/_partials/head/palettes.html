@@ -1,0 +1,24 @@
+{{- /* Generate palette CSS from data/themes/<id>.toml (theme + site merged):
+       :root = the default palette (params.defaultTheme), plus one [data-theme]
+       block per palette. Returned as a string; css.html prepends it to the
+       bundle so the vars are defined before any rule consumes them. Palettes
+       with `disabled = true` are skipped (a site can disable a theme's palette
+       by overriding its file). Meta keys are not emitted as CSS vars. */ -}}
+{{- $skip := slice "name" "weight" "light" "disabled" -}}
+{{- $default := site.Params.defaultTheme | default "amber" -}}
+{{- $themes := site.Data.themes -}}
+{{- $css := "" -}}
+{{- $root := index $themes $default -}}
+{{- with $root -}}
+  {{- $vars := "" -}}
+  {{- range $k, $v := . -}}{{- if not (in $skip $k) -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
+  {{- $css = printf ":root{%s}" $vars -}}
+{{- end -}}
+{{- range $id, $t := $themes -}}
+  {{- if not $t.disabled -}}
+    {{- $vars := "" -}}
+    {{- range $k, $v := $t -}}{{- if not (in $skip $k) -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
+    {{- $css = printf "%s\n[data-theme=%q]{%s}" $css $id $vars -}}
+  {{- end -}}
+{{- end -}}
+{{- return $css -}}

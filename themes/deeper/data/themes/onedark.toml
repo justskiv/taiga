@@ -1,0 +1,30 @@
+name = "One Dark"
+weight = 50
+
+# surface / text ramp (swapped per theme)
+"bg-deep" = "#1a1e23"
+"bg-base" = "#21252b"
+"bg-surface" = "#282c34"
+"bg-raised" = "#353b45"
+"bg-hover" = "#2f343d"
+"border" = "#3e4451"
+"text-primary" = "#dde2ec"
+"text-secondary" = "#c0c7d5"
+"text-muted" = "#99a1b0"
+"text-ghost" = "#6c7382"
+"text-strong" = "#f1f3f6"
+"gtok-str" = "#cbb279"
+
+# brand accents (constant across built-in palettes; overridable)
+"accent-amber" = "#ea8a2e"
+"accent-amber-dim" = "rgba(234,138,46,.18)"
+"accent-amber-glow" = "rgba(234,138,46,.28)"
+"accent-green" = "#a8c954"
+"accent-green-dim" = "rgba(168,201,84,.16)"
+"accent-green-glow" = "rgba(168,201,84,.22)"
+"accent-copper" = "#c87a42"
+"accent-copper-dim" = "rgba(200,122,66,.18)"
+"accent-blue" = "#6ba4c9"
+"accent-blue-dim" = "rgba(107,164,201,.16)"
+"accent-gold" = "#d4a24e"
+"accent-gold-dim" = "rgba(212,162,78,.18)"

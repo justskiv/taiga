@@ -1,0 +1,6 @@
+{{- /* Brand mark: four rounded blocks, one amber. Colors are the brand's own
+       constants (they also form the favicon, which as a data-URI can't read CSS
+       vars), so they stay literal here. Pass a pixel size to set width/height;
+       omit to let CSS size it. */ -}}
+{{- $size := . -}}
+<svg viewBox="0 0 32 32" aria-hidden="true"{{ with $size }} width="{{ . }}" height="{{ . }}"{{ end }}><rect width="32" height="32" rx="7" fill="#1d1d1c"/><rect x="6" y="6" width="9" height="9" rx="2" fill="#3c3b38"/><rect x="17" y="6" width="9" height="9" rx="2" fill="#ea8a2e"/><rect x="6" y="17" width="9" height="9" rx="2" fill="#3c3b38"/><rect x="17" y="17" width="9" height="9" rx="2" fill="#3c3b38"/></svg>

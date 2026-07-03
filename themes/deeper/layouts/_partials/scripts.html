@@ -1,0 +1,28 @@
+{{- /* Main bundle (esbuild resolves the module imports into one iife), deferred
+       at the end of body. prod: minify + fingerprint + integrity. A page bundle
+       may ship its own widgets.js; it is built and attached after main. */ -}}
+{{- $opts := dict "minify" hugo.IsProduction "target" "es2018" "format" "iife" "sourceMap" "" -}}
+{{- with resources.Get "js/main.js" -}}
+  {{- with . | js.Build $opts -}}
+    {{- if hugo.IsProduction -}}
+      {{- with . | fingerprint "sha256" }}
+  <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous" defer></script>
+      {{- end -}}
+    {{- else }}
+  <script src="{{ .RelPermalink }}" defer></script>
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- with .Resources.Get "widgets.js" -}}
+  {{- with . | js.Build (dict "minify" hugo.IsProduction "target" "es2018" "sourceMap" "") -}}
+    {{- if hugo.IsProduction -}}
+      {{- with . | fingerprint "sha256" }}
+  <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous" defer></script>
+      {{- end -}}
+    {{- else }}
+  <script src="{{ .RelPermalink }}" defer></script>
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- /* site override point: end-of-body scripts */ -}}
+{{- partial "hooks/foot-extra.html" . -}}

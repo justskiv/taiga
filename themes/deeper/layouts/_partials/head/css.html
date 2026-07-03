@@ -1,0 +1,28 @@
+{{- /* CSS bundle: generated palette vars (first) + the numbered theme sheets in
+       name order (the cascade) + the site's optional css/custom.css (last, so
+       site overrides win without a fork). dev serves it raw; prod minifies and
+       fingerprints. */ -}}
+{{- $palettes := partial "head/palettes.html" . | resources.FromString "css/00-palettes.css" -}}
+{{- $bundle := slice $palettes -}}
+{{- range sort (resources.Match "css/[0-9]*.css") "Name" -}}
+  {{- $bundle = $bundle | append . -}}
+{{- end -}}
+{{- with resources.Get "css/custom.css" -}}{{ $bundle = $bundle | append . }}{{- end -}}
+{{- $css := $bundle | resources.Concat "css/bundle.css" -}}
+{{- if hugo.IsProduction -}}
+  {{- with $css | minify | fingerprint "sha256" }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+  {{- end -}}
+{{- else -}}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+{{- end -}}
+{{- /* page-bundle widget styles: minified, fingerprinted, linked only here */ -}}
+{{- with .Resources.Get "widgets.css" -}}
+  {{- if hugo.IsProduction -}}
+    {{- with . | minify | fingerprint "sha256" }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+    {{- end -}}
+  {{- else -}}
+  <link rel="stylesheet" href="{{ .RelPermalink }}">
+  {{- end -}}
+{{- end -}}

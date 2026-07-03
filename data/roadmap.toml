@@ -1,0 +1,15 @@
+# Roadmap data — drives both the /roadmap/ page and the home "in progress"
+# strip. One example block here; the full set is filled in phase 03.
+
+[[items]]
+title = "Серия «map изнутри»"
+status = "исследование"       # free-form chip label
+ready = false                 # true → green "ready" chip
+progress = 15                 # progress bar, 0–100
+note = "Swiss Table, рост, эвакуация. Разбираем, как именно эвакуация амортизируется по вставкам."
+
+[[queue]]
+title = "pprof в проде: как читать профили, не пугаясь"
+
+[[rules]]
+title = "Серию не бросаем: начатый трек доводим до конца."

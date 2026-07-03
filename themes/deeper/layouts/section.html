@@ -1,0 +1,10 @@
+{{- /* Placeholder rubric template. The full rubric (series blocks from the
+       series taxonomy, standalone list, layout variants) is built in phase 03. */ -}}
+{{ define "main" }}
+<main class="wrap">
+  <div class="kicker"><span class="dot"></span>{{ with .Params.slug_mono }}рубрика · {{ . }}{{ else }}{{ .Title }}{{ end }}</div>
+  <h1>{{ .Title }}</h1>
+  {{ with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+  {{ .Content }}
+</main>
+{{ end }}

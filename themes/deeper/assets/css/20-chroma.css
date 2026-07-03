@@ -1,0 +1,4 @@
+/* Chroma syntax highlighting — server-side Go highlighting replaces the mock's
+   runtime regex highlighter. Class-mode (markup.highlight.noClasses = false):
+   Hugo emits .chroma token classes, mapped here to palette colors so code reads
+   identically to the mock's .gtok-* colors. Populated in phase 02. */

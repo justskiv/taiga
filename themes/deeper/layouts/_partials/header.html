@@ -1,0 +1,24 @@
+{{- /* Site header: brand, rubric nav (active item + optional badge), search
+       button, popover mount. Cached per section (the only thing that varies).
+       Note: no flex gap on .brand — the wordmark is a bare text node + .tld, a
+       gap would split "deeper" from ".go"; the svg carries the spacing. */ -}}
+<header class="site-head">
+  <div class="head-in">
+    <a class="brand" href="{{ "" | relLangURL }}" aria-label="{{ site.Params.brand.name }}{{ site.Params.brand.tld }} — {{ i18n "to_home" }}">
+      {{ partial "logo.html" }}
+      {{ site.Params.brand.name }}<span class="tld">{{ site.Params.brand.tld }}</span>
+    </a>
+    <nav class="nav" aria-label="{{ i18n "nav_rubrics" }}">
+      {{- range site.Menus.main }}
+      <a href="{{ .URL }}"{{ if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} class="on"{{ end }}>{{ .Name }}{{ with .Params.badge }}<sup class="beta">{{ . }}</sup>{{ end }}</a>
+      {{- end }}
+    </nav>
+    <span class="head-sp"></span>
+    <button class="search-btn" id="searchBtn" type="button" aria-label="{{ i18n "search" }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.2-4.2"/></svg>
+      <span class="s-lab">{{ i18n "search_label" }}</span>
+      <kbd class="kb">⌘K</kbd>
+    </button>
+    <span id="tp-mount"></span>
+  </div>
+</header>

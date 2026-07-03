@@ -1,0 +1,12 @@
+name = "deeper"
+license = "MIT"
+licenselink = "https://github.com/deeper-go/deeper/blob/main/LICENSE"
+description = "Тёмная минималистичная тема учебной платформы про Go: серии-курсы, интерактивные виджеты в тексте, self-hosted шрифты, полнотекстовый поиск. Без Node и внешних зависимостей."
+homepage = "https://github.com/deeper-go/deeper"
+demosite = "https://deeper.go/"
+tags = ["blog", "docs", "minimal", "dark", "multilingual", "education"]
+features = ["blog", "syntax-highlighting", "multilingual", "search"]
+min_version = "0.146.0"
+
+[author]
+  name = "skiv"

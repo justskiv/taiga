@@ -1,0 +1,7 @@
+/* tables */
+.tbl-wrap{overflow-x:auto; margin:0 0 22px}
+table{border-collapse:collapse; width:100%; font-size:14.5px}
+th,td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top}
+th{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); font-weight:600; background:var(--bg-surface)}
+tr:last-child td{border-bottom:0}
+td code{white-space:normal}

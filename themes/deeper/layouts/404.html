@@ -1,0 +1,17 @@
+{{- /* In the spirit of the site: mono kicker, one line, links to the rubrics
+       and home. Flat surfaces, no gradients. */ -}}
+{{ define "main" }}
+<main class="wrap">
+  <div class="kicker"><span class="dot"></span>{{ i18n "nf_kicker" }}</div>
+  <h1>{{ i18n "nf_title" }}</h1>
+  <p class="lead">{{ i18n "nf_line" }}</p>
+  <ul>
+    {{- range slice "/internals" "/best-practices" "/practice" }}
+    {{- with site.GetPage . }}
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+    {{- end }}
+    {{- end }}
+  </ul>
+  <p><a href="{{ "" | relLangURL }}">{{ i18n "nf_home" }}</a></p>
+</main>
+{{ end }}

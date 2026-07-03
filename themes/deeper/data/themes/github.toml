@@ -1,0 +1,30 @@
+name = "GitHub Dark"
+weight = 40
+
+# surface / text ramp (swapped per theme)
+"bg-deep" = "#010409"
+"bg-base" = "#0d1117"
+"bg-surface" = "#161b22"
+"bg-raised" = "#21262d"
+"bg-hover" = "#1c2128"
+"border" = "#30363d"
+"text-primary" = "#e6edf3"
+"text-secondary" = "#c9d1d9"
+"text-muted" = "#9aa3ad"
+"text-ghost" = "#6e7681"
+"text-strong" = "#f1f3f6"
+"gtok-str" = "#cbb279"
+
+# brand accents (constant across built-in palettes; overridable)
+"accent-amber" = "#ea8a2e"
+"accent-amber-dim" = "rgba(234,138,46,.18)"
+"accent-amber-glow" = "rgba(234,138,46,.28)"
+"accent-green" = "#a8c954"
+"accent-green-dim" = "rgba(168,201,84,.16)"
+"accent-green-glow" = "rgba(168,201,84,.22)"
+"accent-copper" = "#c87a42"
+"accent-copper-dim" = "rgba(200,122,66,.18)"
+"accent-blue" = "#6ba4c9"
+"accent-blue-dim" = "rgba(107,164,201,.16)"
+"accent-gold" = "#d4a24e"
+"accent-gold-dim" = "rgba(212,162,78,.18)"

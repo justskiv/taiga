@@ -1,0 +1,16 @@
+{{- /* Theme list for the popover picker, built from the same data. popover.js
+       reads this instead of a hardcoded table; it never sees palette values
+       beyond the four swatch colors. Ordered by weight. */ -}}
+{{- $skip := slice "name" "weight" "light" "disabled" -}}
+{{- $list := slice -}}
+{{- range $id, $t := site.Data.themes -}}
+  {{- if not $t.disabled -}}
+    {{- $list = $list | append (dict
+        "id" $id
+        "name" $t.name
+        "weight" (or $t.weight 100)
+        "sw" (slice (index $t "bg-base") (index $t "bg-surface") (index $t "bg-raised") (index $t "text-primary"))) -}}
+  {{- end -}}
+{{- end -}}
+{{- $list = sort $list "weight" -}}
+<script type="application/json" id="dg-themes">{{ $list | jsonify | safeJS }}</script>

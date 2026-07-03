@@ -1,0 +1,73 @@
+/* Search (⌘K / "/"): our modal over a Pagefind full-text index. pagefind.js and
+   the index load lazily on first open. If the index is missing (a bare
+   `hugo server` without the second build step) the modal shows a quiet hint.
+   Result rendering (excerpt, breadcrumb, minutes) is refined in phase 03. */
+import { I18N } from './i18n.js';
+
+let smBack = null, smInput = null, smList = null, smItems = [], smSel = 0;
+let pagefind = null, pfState = 'idle'; /* idle | loading | ready | missing */
+
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function build() {
+  if (smBack) return;
+  smBack = document.createElement('div'); smBack.className = 'sm-back'; smBack.hidden = true;
+  smBack.innerHTML = '<div class="sm" role="dialog" aria-label="' + esc(I18N.searchAria) + '">' +
+    '<div class="sm-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.2-4.2"/></svg>' +
+    '<input type="text" placeholder="' + esc(I18N.searchPlaceholder) + '" spellcheck="false"></div>' +
+    '<div class="sm-list"></div></div>';
+  document.body.appendChild(smBack);
+  smInput = smBack.querySelector('input'); smList = smBack.querySelector('.sm-list');
+  smBack.addEventListener('mousedown', function (e) { if (e.target === smBack) closeSearch(); });
+  smInput.addEventListener('input', function () { runSearch(smInput.value); });
+  smInput.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveSel(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveSel(-1); }
+    else if (e.key === 'Enter') { e.preventDefault(); const it = smItems[smSel]; if (it) location.href = it.url; }
+  });
+}
+
+async function ensurePagefind() {
+  if (pfState === 'ready' || pfState === 'missing') return;
+  pfState = 'loading';
+  try {
+    pagefind = await import(/* @vite-ignore */ '/pagefind/pagefind.js');
+    await pagefind.init();
+    pfState = 'ready';
+  } catch (e) {
+    pfState = 'missing';
+  }
+}
+
+function empty(msg) { smList.innerHTML = '<div class="sm-empty">' + esc(msg) + '</div>'; smItems = []; }
+
+async function runSearch(q) {
+  q = (q || '').trim();
+  await ensurePagefind();
+  if (pfState === 'missing') { empty(I18N.searchUnbuilt); return; }
+  if (pfState !== 'ready') return;
+  if (!q) { empty(I18N.searchPlaceholder); return; }
+  const search = await pagefind.search(q);
+  const results = await Promise.all(search.results.slice(0, 12).map(function (r) { return r.data(); }));
+  smItems = results.map(function (d) { return { url: d.url, title: (d.meta && d.meta.title) || d.url, excerpt: d.excerpt, meta: d.meta || {} }; });
+  smSel = 0;
+  if (!smItems.length) { empty(I18N.searchEmpty); return; }
+  smList.innerHTML = '';
+  smItems.forEach(function (it, i) {
+    const a = document.createElement('a'); a.className = 'sm-item' + (i === smSel ? ' sel' : ''); a.href = it.url;
+    a.innerHTML = '<div class="t">' + esc(it.title) + '</div>' +
+      (it.excerpt ? '<span class="d">' + it.excerpt + '</span>' : '') +
+      (it.meta.crumb ? '<span class="k"><b>' + esc(it.meta.crumb) + '</b>' + (it.meta.mins ? ' · ' + esc(it.meta.mins) + ' ' + I18N.minutes : '') + '</span>' : '');
+    a.addEventListener('mousemove', function () { if (smSel !== i) { smSel = i; paintSel(); } });
+    smList.appendChild(a);
+  });
+}
+
+function paintSel() {
+  Array.prototype.forEach.call(smList.children, function (el, i) { el.classList.toggle('sel', i === smSel); });
+  const el = smList.children[smSel]; if (el) el.scrollIntoView({ block: 'nearest' });
+}
+function moveSel(d) { if (!smItems.length) return; smSel = (smSel + d + smItems.length) % smItems.length; paintSel(); }
+
+export function openSearch() { build(); smBack.hidden = false; smInput.value = ''; runSearch(''); smInput.focus(); }
+export function closeSearch() { if (smBack) smBack.hidden = true; }

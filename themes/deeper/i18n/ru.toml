@@ -1,0 +1,57 @@
+# UI strings for templates. Content is authored in content/ and data/; this file
+# is only chrome. A site overrides any key by shipping its own i18n/ru.toml.
+
+[to_home]
+other = "на главную"
+[nav_rubrics]
+other = "Рубрики"
+[search]
+other = "Поиск"
+[search_label]
+other = "поиск"
+
+# footer link labels (lowercase, as in the mock)
+[foot_internals]
+other = "под капотом"
+[foot_bestpractices]
+other = "best practices"
+[foot_practice]
+other = "практика"
+[foot_roadmap]
+other = "роадмап"
+[foot_about]
+other = "о проекте"
+[foot_rss]
+other = "rss"
+
+# 404
+[nf_kicker]
+other = "404 · страница не найдена"
+[nf_title]
+other = "Такой страницы нет."
+[nf_line]
+other = "Но есть три рубрики — начни с любой."
+[nf_home]
+other = "← на главную"
+
+# reading-time and feed plurals (CLDR ru: one/few/many), used from phase 03 on
+[minutes]
+one = "{{ .Count }} минута"
+few = "{{ .Count }} минуты"
+many = "{{ .Count }} минут"
+other = "{{ .Count }} минуты"
+
+[guides_left]
+one = "ещё {{ .Count }} гайд"
+few = "ещё {{ .Count }} гайда"
+many = "ещё {{ .Count }} гайдов"
+other = "ещё {{ .Count }} гайда"
+
+[parts_count]
+one = "{{ .Count }} часть"
+few = "{{ .Count }} части"
+many = "{{ .Count }} частей"
+other = "{{ .Count }} части"
+
+[part_of]
+other = "часть {{ .N }} из {{ .M }}"

@@ -1,0 +1,11 @@
+{{- /* Temporary minimum: just the hero intro line. The full home (rubric cards,
+       featured guide, feed, wip strip) is built in phase 03. */ -}}
+{{ define "main" }}
+<main class="shell page-pad" style="padding-top:0">
+  <div class="hero-line">
+    <span class="dot"></span>
+    {{ site.Params.heroLine }}
+    <span class="sat">{{ site.Params.heroSat }}</span>
+  </div>
+</main>
+{{ end }}

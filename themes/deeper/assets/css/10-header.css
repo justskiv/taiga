@@ -1,0 +1,31 @@
+/* while a theme swap applies, kill transitions for one frame */
+:root.theme-switching *{transition:none !important}
+
+/* ---- header (static by default: scrolls away with the page) ---- */
+.site-head{border-bottom:1px solid var(--border)}
+.head-in{max-width:var(--shell); margin:0 auto; padding:12px 24px; display:flex; align-items:center; gap:18px}
+/* NB: no flex gap here — the wordmark is a bare text node + .tld span, a gap
+   would split "deeper" and ".go" apart; the svg carries the spacing instead */
+.brand{display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:14.5px; font-weight:600; letter-spacing:.02em; color:var(--text-primary); border:0}
+.brand:hover{border:0; color:var(--accent-amber)}
+.brand svg{width:22px; height:22px; display:block; border-radius:6px; margin-right:10px}
+.brand .tld{color:var(--accent-amber)}
+/* variant key: quiet badge so mock variants are distinguishable at a glance */
+.nav{display:flex; align-items:center; gap:2px; overflow-x:auto; scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:13.5px; color:var(--text-secondary); padding:6px 11px; border:0; border-radius:8px; white-space:nowrap; transition:color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.nav a:hover{color:var(--text-primary); background:var(--bg-surface)}
+.nav a.on{color:var(--accent-amber)}
+sup.beta{font-family:var(--font-mono); font-size:9px; color:var(--accent-amber); margin-left:3px; letter-spacing:.04em; opacity:.85}
+.head-sp{flex:1}
+kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 5px; background:var(--bg-base)}
+.search-btn{display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); background:var(--bg-surface); border:1px solid var(--border); border-radius:9px; padding:6px 10px; cursor:pointer; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
+.search-btn:hover{color:var(--text-secondary); border-color:var(--text-muted)}
+.search-btn svg{width:13px; height:13px}
+@media(max-width:720px){.search-btn .s-lab, .search-btn kbd{display:none}}
+/* header sticks, hides on scroll-down, slides back on scroll-up */
+.site-head{position:sticky; top:0; z-index:110;
+  background:color-mix(in srgb, var(--bg-deep) 88%, transparent);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  transition:transform .24s var(--ease)}
+html.head-hidden .site-head{transform:translateY(-100%)}

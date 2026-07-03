@@ -1,0 +1,18 @@
+/* callouts */
+.callout{position:relative; margin:0 0 22px; padding:14px 16px 14px 18px; border:1px solid var(--border); border-left-width:3px; border-radius:var(--radius-sm); background:var(--bg-surface); font-size:15.5px; line-height:1.6}
+.callout .clabel{display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; font-weight:600}
+.callout p{margin:0}
+.callout p + p{margin-top:10px}
+.callout.note{border-left-color:var(--accent-blue)} .callout.note .clabel{color:var(--accent-blue)}
+.callout.key{border-left-color:var(--accent-amber)} .callout.key .clabel{color:var(--accent-amber)}
+.callout.trap{border-left-color:var(--accent-copper)} .callout.trap .clabel{color:var(--accent-copper)}
+.callout.internals{border-left-color:var(--accent-green)} .callout.internals .clabel{color:var(--accent-green)}
+
+/* in-article table of contents (narrow screens; the right rail replaces it on wide) */
+.toc{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px; margin:30px 0}
+.toc .toc-h{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px}
+.toc ol{margin:0; padding-left:0; list-style:none; columns:2; column-gap:32px}
+.toc li{margin:0 0 8px; break-inside:avoid}
+.toc li a{color:var(--text-secondary); border:0}
+.toc li a:hover{color:var(--accent-amber)}
+.toc li::before{content:"#"; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); margin-right:9px}

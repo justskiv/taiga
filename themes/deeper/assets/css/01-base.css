@@ -1,0 +1,15 @@
+/* base */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg-deep);
+  /* Single faint warm glow lifts the hero region on dark themes. The light
+     palette suppresses it (a warm rgba wash over near-white reads as a dingy
+     tint) by setting --body-glow:none in its data-theme block. */
+  background-image:var(--body-glow, radial-gradient(1200px 600px at 80% -10%, rgba(224,164,88,.04), transparent 60%));
+  color:var(--text-primary); font-family:var(--font-sans);
+  font-size:17px; line-height:1.72; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--content); margin:0 auto; padding:48px 24px 96px}
+a{color:var(--accent-amber); text-decoration:none; border-bottom:1px solid transparent; transition:border-color var(--dur) var(--ease)}
+a:hover{border-bottom-color:var(--accent-amber)}

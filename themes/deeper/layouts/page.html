@@ -1,0 +1,11 @@
+{{- /* Placeholder single-page template. The full article machinery (kicker,
+       meta chips, rails, TOC, series bridge, hooks) arrives in phase 02; the
+       standalone pages (about/roadmap/lab) get their content in phase 03. */ -}}
+{{ define "main" }}
+<main class="wrap">
+  <div class="kicker"><span class="dot"></span>{{ .Title }}</div>
+  <h1>{{ .Title }}</h1>
+  {{ with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+  {{ .Content }}
+</main>
+{{ end }}

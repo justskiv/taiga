@@ -1,0 +1,7 @@
+{{- /* Pre-paint preferences: theme / rails / rubric-list variant from
+       localStorage, inlined before the stylesheet so nothing flashes. Minified
+       in prod, readable in dev; no sourcemap noise. */ -}}
+{{- with resources.Get "js/prefs.js" -}}
+  {{- $p := . | js.Build (dict "minify" hugo.IsProduction "target" "es2015" "format" "iife" "sourceMap" "") -}}
+  <script>{{ $p.Content | safeJS }}</script>
+{{- end -}}

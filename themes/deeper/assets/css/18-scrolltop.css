@@ -1,0 +1,92 @@
+/* deeper.go — scroll-to-top button for article pages.
+   Ported from tuzov.dev (site owner's blog): a single button that IS the
+   entire hit zone — a full-viewport-height column pinned to the left edge,
+   not just the small circle glyph centered inside it. Hovering anywhere in
+   the column lights up the whole strip, not only the arrow; that's the
+   point of a wide column in the first place (a Fitts's-law "infinite
+   width" target — you slam the cursor into the screen edge and can't miss
+   it). Colors remapped onto our design tokens (see assets/site.css :root)
+   so the button follows every theme switch, including the light one; the
+   source's separate dark-mode override block is dropped because our
+   tokens already swap live and the amber accents never change between
+   themes.
+
+   One geometry adaptation vs. the source: on tuzov.dev the column is a
+   flat 60px because that site has nothing else pinned to the left edge.
+   Here the series rail (.rail-l, ≥1366px) lives in that same corner, so
+   the column width is tuned to the free gutter left of it — see the
+   ≥1366px media query below for the exact numbers. */
+
+.scrolltop-btn{
+  position:fixed; left:0; top:0; z-index:100; width:48px; height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  padding:0; margin:0; border:none; background:transparent;
+  cursor:pointer;
+  opacity:0; visibility:hidden;
+  transition:opacity .3s, visibility .3s;
+}
+.scrolltop-btn.is-visible{opacity:1; visibility:visible}
+
+/* whole-column hover wash — neutral grey, exactly like the source
+   (rgba(secondary-text, .07)): the strip lights up quietly; amber is
+   reserved for the arrow stroke only. Kept at
+   the same restrained ~18% strength the token already carries everywhere
+   else on the site (tag chips, popover items, etc). Matches the source's
+   own timing too: the wash snaps instantly on hover (no listed transition
+   on background there) while the icon underneath fades. */
+.scrolltop-btn:hover{background:color-mix(in srgb, var(--text-secondary) 7%, transparent)}
+
+.scrolltop-circle{
+  width:2rem; height:2rem;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--border); border-radius:50%; background:transparent;
+  color:var(--text-muted);
+  transition:color .2s, border-color .2s, background-color .2s;
+}
+.scrolltop-btn:hover .scrolltop-circle{
+  color:var(--accent-amber); border-color:var(--text-muted); background:transparent;
+}
+/* the 60x100vh hit zone is invisible, so its own focus ring would be a
+   giant, disorienting outline; suppress it and ring the visible glyph
+   instead — same trade the source makes */
+.scrolltop-btn:focus-visible{outline:none}
+.scrolltop-btn:focus-visible .scrolltop-circle{outline:2px solid var(--accent-amber); outline-offset:2px}
+
+.scrolltop-circle svg{width:14px; height:14px; display:block; transition:transform .3s ease}
+/* armed state: a second click returns to where you scrolled from, so the
+   chevron flips to point back down */
+.scrolltop-btn.is-back .scrolltop-circle svg{transform:rotate(180deg)}
+
+/* ---- stay clear of the series rail (.rail-l) on wide screens ----
+   assets/site.css: .layout is a 1fr / minmax(0,760px) / 1fr grid, 44px
+   column gaps, 24px side padding, capped at max-width:1600px; .rail-in
+   (the panel itself) is 236px wide and right-aligned in the left 1fr
+   track. For a viewport width VW ≤ 1600 (.layout then fills it, 0 margin):
+
+     leftTrack = (VW - 2*24 - 2*44 - 760) / 2 = (VW - 896) / 2
+     railLeft  = 24 + leftTrack - 236 = (VW - 1320) / 2   <- free gutter
+
+     railLeft(1366) =  23px  (rail's own ≥1366px breakpoint — tightest)
+     railLeft(1440) =  60px
+     railLeft(1512) =  96px  (this component's verified target viewport)
+
+   A flat 48px column only clears the rail from 1416px up (railLeft≥48).
+   Below that — 1366px to 1440px — the gutter is narrower than 48px, so
+   the column (and the glyph inside it) steps down to 20px for that
+   stretch, comfortably under the 23px worst case with room for rounding.
+   From 1440px the gutter is 60px+, so the full 48px column is safe again
+   and stays that way as the viewport grows (the gutter only widens). */
+@media (min-width:1366px) and (max-width:1439.9px){
+  .scrolltop-btn{width:20px}
+  .scrolltop-circle{width:18px; height:18px}
+  .scrolltop-circle svg{width:10px; height:10px}
+}
+
+/* same cutoff as the source: on narrow viewports the left edge has no
+   room to spare and the column would sit over the article text */
+@media (max-width:680px){
+  .scrolltop-btn{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .scrolltop-btn, .scrolltop-circle, .scrolltop-circle svg{transition:none}
+}

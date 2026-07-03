@@ -1,0 +1,112 @@
+# deeper.go — site configuration.
+# This is the primary interface for the site owner: every key is commented.
+# Palettes are NOT configured here — they live as data files in data/themes/
+# (see themes/deeper/docs/customizing.md). `defaultTheme` below picks one.
+
+baseURL = "https://example.org/"        # placeholder — set to the real domain
+title = "deeper.go"
+theme = "deeper"
+
+# Single language today, but the config is already in multilingual shape so
+# adding en/ja is additive (content + a [languages.xx] block), not a migration.
+defaultContentLanguage = "ru"
+enableRobotsTXT = true
+
+# Git-derived dates. OFF until the site lives in a git repo — with it on and no
+# repo, the build fails (exit 1). Flip to true once `git init` + first commit.
+enableGitInfo = false
+
+timeZone = "Europe/Moscow"
+
+[languages]
+  [languages.ru]
+    languageCode = "ru"
+    languageName = "Русский"
+    weight = 1
+
+[taxonomies]
+  tag = "tags"
+  series = "series"
+
+[params]
+  # NB: in TOML all scalar keys must precede any [params.subtable] — otherwise
+  # they get absorbed into the preceding subtable. Scalars first, tables last.
+  heroLine = "гайды по внутренностям и практике go"   # home intro line
+  heroSat = "· новый гайд — каждую субботу"            # its trailing clause
+  featured = "internals/memory-1-layout"              # "guide of the week" (content path)
+  feedInitial = 8                        # posts shown before the "ещё N" button
+  defaultTheme = "amber"                 # id of a data/themes/<id>.toml palette
+  goVersionDefault = "1.26"              # meta chip when a guide omits go_version
+  footerTag = "гайды по внутренностям и практике Go"
+  linkcheck = "error"                    # broken internal links: "error" | "warn"
+  # Wordmark in header and footer.
+  [params.brand]
+    name = "deeper"
+    tld = ".go"
+  [params.search]
+    enable = true                        # ⌘K modal + Pagefind index
+  [params.ogImages]
+    enable = true                        # generate share images at build time
+    style = "dots"                       # style = folder name in assets/og/
+  [params.rss]
+    fullContent = true                   # full article body in the feed
+  [params.social]
+    twitter = ""                         # @handle for twitter:site (empty = omit)
+
+# Main navigation. `params.badge` renders a generic <sup> badge on any item.
+[[menus.main]]
+  name = "Под капотом"
+  pageRef = "/internals"
+  weight = 10
+[[menus.main]]
+  name = "Best Practices"
+  pageRef = "/best-practices"
+  weight = 20
+[[menus.main]]
+  name = "Практика"
+  pageRef = "/practice"
+  weight = 30
+[[menus.main]]
+  name = "Лаборатория"
+  pageRef = "/lab"
+  weight = 40
+  [menus.main.params]
+    badge = "β"
+
+# Series terms carry metadata only — never render their own pages, but keep
+# taxonomy data available to templates (.GetTerms / term.Pages).
+[[cascade]]
+  [cascade.build]
+    render = "never"
+    list = "never"
+  [cascade._target]
+    path = "/series/**"
+
+# Rubric sections: raw bundle resources (widgets.js/.css sources) must not leak
+# into public/ — only pipeline outputs are published.
+[[cascade]]
+  [cascade.build]
+    publishResources = false
+  [cascade._target]
+    path = "/{internals,best-practices,practice}/**"
+    kind = "page"
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true                        # articles carry deliberate inline HTML
+  [markup.goldmark.parser.attribute]
+    title = true
+    block = true                         # {.class} on block elements
+  [markup.goldmark.extensions.typographer]
+    disable = true                       # « » quotes are typed by hand
+  [markup.highlight]
+    noClasses = false                    # emit Chroma classes; colors via chroma.css
+    codeFences = true
+    guessSyntax = false
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 3
+
+[services]
+  [services.rss]
+    limit = 20

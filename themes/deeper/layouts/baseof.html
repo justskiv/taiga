@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="{{ .Language.LanguageCode }}" data-theme="{{ site.Params.defaultTheme | default "amber" }}">
+<head>
+{{- partial "head.html" . -}}
+</head>
+{{- /* body class drives rail composition and the popover's "view" section:
+       `article` = a guide (leaf page in a rubric), `rubric` = a rubric index. */ -}}
+{{- $body := "" -}}
+{{- if eq .Kind "section" -}}{{ $body = "rubric" }}
+{{- else if and (eq .Kind "page") (in (slice "internals" "best-practices" "practice") .Section) -}}{{ $body = "article" }}
+{{- end -}}
+<body{{ with $body }} class="{{ . }}"{{ end }}>
+{{ partialCached "header.html" . .Section }}
+{{ block "main" . }}{{ end }}
+{{ partialCached "footer.html" . }}
+{{ partial "scripts.html" . }}
+</body>
+</html>

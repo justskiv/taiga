@@ -1,0 +1,30 @@
+name = "Nord"
+weight = 60
+
+# surface / text ramp (swapped per theme)
+"bg-deep" = "#292f3a"
+"bg-base" = "#2e3440"
+"bg-surface" = "#373e4c"
+"bg-raised" = "#454e60"
+"bg-hover" = "#3f4757"
+"border" = "#404857"
+"text-primary" = "#f5f7fb"
+"text-secondary" = "#e3e8f1"
+"text-muted" = "#bac3d2"
+"text-ghost" = "#8b94a6"
+"text-strong" = "#f1f3f6"
+"gtok-str" = "#cbb279"
+
+# brand accents (constant across built-in palettes; overridable)
+"accent-amber" = "#ea8a2e"
+"accent-amber-dim" = "rgba(234,138,46,.18)"
+"accent-amber-glow" = "rgba(234,138,46,.28)"
+"accent-green" = "#a8c954"
+"accent-green-dim" = "rgba(168,201,84,.16)"
+"accent-green-glow" = "rgba(168,201,84,.22)"
+"accent-copper" = "#c87a42"
+"accent-copper-dim" = "rgba(200,122,66,.18)"
+"accent-blue" = "#6ba4c9"
+"accent-blue-dim" = "rgba(107,164,201,.16)"
+"accent-gold" = "#d4a24e"
+"accent-gold-dim" = "rgba(212,162,78,.18)"
