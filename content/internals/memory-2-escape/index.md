@@ -8,7 +8,7 @@ series: ["memory"]
 series_weight: 2
 nav_title: "Escape analysis"
 mins: 10
-go_version: "1.26"
+version: "go1.26"
 tags: [куча, стек]
 draft: false
 ---

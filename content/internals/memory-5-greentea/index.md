@@ -8,7 +8,7 @@ series: ["memory"]
 series_weight: 5
 nav_title: "Green Tea GC"
 mins: 10
-go_version: "1.26"
+version: "go1.26"
 tags: [gc]
 draft: false
 ---

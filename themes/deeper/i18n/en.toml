@@ -10,16 +10,7 @@ other = "Search"
 [search_label]
 other = "search"
 
-[foot_internals]
-other = "internals"
-[foot_bestpractices]
-other = "best practices"
-[foot_practice]
-other = "practice"
-[foot_roadmap]
-other = "roadmap"
-[foot_about]
-other = "about"
+# footer feed link (the other footer labels are the site's menus.footer entries)
 [foot_rss]
 other = "rss"
 

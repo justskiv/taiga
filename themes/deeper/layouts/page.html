@@ -1,13 +1,13 @@
-{{- /* Single-page template. Guides that live in a rubric section (kind=page in
-       internals/best-practices/practice) get the full article machinery — two rails,
-       kicker, meta, TOC, series bridge — built from front matter + taxonomy. Every
-       other page (about/roadmap/lab, fleshed out in phase 03) gets the plain column.
+{{- /* Single-page template. Guides that live in a rubric section (kind=page whose
+       section is listed in site.Params.rubricSections) get the full article
+       machinery — two rails, kicker, meta, TOC, series bridge — built from front
+       matter + taxonomy. Every other page (about/roadmap/lab) gets the plain column.
 
        The h1 splits its title at the first ": " into a heading and a .sub subtitle
        (as every mock article does); an explicit `sub:` overrides the auto-split, and
        a title without a colon stays single-line. */ -}}
 {{ define "main" }}
-{{- $isArticle := and (eq .Kind "page") (in (slice "internals" "best-practices" "practice") .Section) -}}
+{{- $isArticle := and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}
 {{- $main := .Title -}}
 {{- $auto := "" -}}
 {{- $parts := split .Title ": " -}}

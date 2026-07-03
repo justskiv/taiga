@@ -8,7 +8,7 @@ series: ["memory"]
 series_weight: 6
 nav_title: "Memory Model"
 mins: 11
-go_version: "1.26"
+version: "go1.26"
 tags: [гонки, atomic]
 draft: false
 ---

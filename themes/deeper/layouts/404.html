@@ -6,8 +6,8 @@
   <h1>{{ i18n "nf_title" }}</h1>
   <p class="lead">{{ i18n "nf_line" }}</p>
   <ul>
-    {{- range slice "/internals" "/best-practices" "/practice" }}
-    {{- with site.GetPage . }}
+    {{- range site.Params.rubricSections }}
+    {{- with site.GetPage (printf "/%s" .) }}
     <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
     {{- end }}
     {{- end }}

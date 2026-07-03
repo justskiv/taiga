@@ -5,7 +5,7 @@
 .site-head{border-bottom:1px solid var(--border)}
 .head-in{max-width:var(--shell); margin:0 auto; padding:12px 24px; display:flex; align-items:center; gap:18px}
 /* NB: no flex gap here — the wordmark is a bare text node + .tld span, a gap
-   would split "deeper" and ".go" apart; the svg carries the spacing instead */
+   would split the brand name and its .tld apart; the svg carries the spacing */
 .brand{display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:14.5px; font-weight:600; letter-spacing:.02em; color:var(--text-primary); border:0}
 .brand:hover{border:0; color:var(--accent-amber)}
 .brand svg{width:22px; height:22px; display:block; border-radius:6px; margin-right:10px}

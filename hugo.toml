@@ -36,9 +36,13 @@ timeZone = "Europe/Moscow"
   featured = "internals/memory-1-layout"              # "guide of the week" (content path)
   feedInitial = 8                        # posts shown before the "ещё N" button
   defaultTheme = "amber"                 # id of a data/themes/<id>.toml palette
-  goVersionDefault = "1.26"              # meta chip when a guide omits go_version
+  versionDefault = "go1.26"              # meta chip fallback when a guide omits `version`
   footerTag = "гайды по внутренностям и практике Go"
   linkcheck = "error"                    # broken internal links: "error" | "warn"
+  # Content sections whose leaf pages are full guides (two rails, kicker, meta,
+  # TOC, series bridge); every other page gets the plain column. Drives the
+  # article layout, the 404 rubric list, and (phase 03) the home rubric cards.
+  rubricSections = ["internals", "best-practices", "practice"]
   # Wordmark in header and footer.
   [params.brand]
     name = "deeper"
@@ -72,6 +76,30 @@ timeZone = "Europe/Moscow"
   weight = 40
   [menus.main.params]
     badge = "β"
+
+# Footer link row (ordered by weight). The theme renders whatever is listed here;
+# which links and what labels are the site's concern, not the theme's. The mock's
+# roadmap page shuffled this order — that was a mock bug, not reproduced.
+[[menus.footer]]
+  name = "под капотом"
+  pageRef = "/internals"
+  weight = 10
+[[menus.footer]]
+  name = "best practices"
+  pageRef = "/best-practices"
+  weight = 20
+[[menus.footer]]
+  name = "практика"
+  pageRef = "/practice"
+  weight = 30
+[[menus.footer]]
+  name = "роадмап"
+  pageRef = "/roadmap"
+  weight = 40
+[[menus.footer]]
+  name = "о проекте"
+  pageRef = "/about"
+  weight = 50
 
 # Taxonomy TERM pages never render (tags link to /tags/#tag, series carry metadata
 # only), but their data stays available to templates (.GetTerms / term.Pages).

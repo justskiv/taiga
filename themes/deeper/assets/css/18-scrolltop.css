@@ -1,4 +1,4 @@
-/* deeper.go — scroll-to-top button for article pages.
+/* deeper — scroll-to-top button for article pages.
    Ported from tuzov.dev (site owner's blog): a single button that IS the
    entire hit zone — a full-viewport-height column pinned to the left edge,
    not just the small circle glyph centered inside it. Hovering anywhere in

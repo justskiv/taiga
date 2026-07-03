@@ -1,4 +1,4 @@
-/* deeper.go — entrypoint. Bundled with js.Build (iife), loaded `defer` at the
+/* deeper — entrypoint. Bundled with js.Build (iife), loaded `defer` at the
    end of <body>. Each module self-guards on the DOM it needs, so it stays quiet
    on pages that don't have it. The Go highlighter, the series-bridge builder and
    the metadata search index of the mock are gone: highlighting is server-side

@@ -7,7 +7,7 @@
        `article` = a guide (leaf page in a rubric), `rubric` = a rubric index. */ -}}
 {{- $body := "" -}}
 {{- if eq .Kind "section" -}}{{ $body = "rubric" }}
-{{- else if and (eq .Kind "page") (in (slice "internals" "best-practices" "practice") .Section) -}}{{ $body = "article" }}
+{{- else if and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}{{ $body = "article" }}
 {{- end -}}
 <body{{ with $body }} class="{{ . }}"{{ end }}>
 {{ partialCached "header.html" . .Section }}

@@ -1,20 +1,13 @@
-{{- /* Site footer: brand, tagline, one canonical link row (the mock's roadmap
-       page shuffled this order — that's a mock bug, not reproduced). The mock's
-       "rss soon" is now a live feed link. */ -}}
+{{- /* Site footer: brand, tagline, the site's link row (menus.footer) and a live
+       feed link. Which links and what labels are the site's config, not the
+       theme's. The mock's "rss soon" is now a live feed link. */ -}}
 <footer class="site-foot">
   <div class="foot-in">
     <a class="brand" href="{{ "" | relLangURL }}">{{ site.Params.brand.name }}<span class="tld">{{ site.Params.brand.tld }}</span></a>
     <span class="foot-tag">{{ site.Params.footerTag }}</span>
     <span class="foot-links">
-      {{- range $it := slice
-          (dict "ref" "/internals" "key" "foot_internals")
-          (dict "ref" "/best-practices" "key" "foot_bestpractices")
-          (dict "ref" "/practice" "key" "foot_practice")
-          (dict "ref" "/roadmap" "key" "foot_roadmap")
-          (dict "ref" "/about" "key" "foot_about") }}
-      {{- with site.GetPage $it.ref }}
-      <a href="{{ .RelPermalink }}">{{ i18n $it.key }}</a>
-      {{- end }}
+      {{- range site.Menus.footer }}
+      <a href="{{ .URL }}">{{ .Name }}</a>
       {{- end }}
       <a href="{{ "index.xml" | relLangURL }}">{{ i18n "foot_rss" }}</a>
     </span>

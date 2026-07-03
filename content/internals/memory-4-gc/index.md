@@ -8,7 +8,7 @@ series: ["memory"]
 series_weight: 4
 nav_title: "GC-классика"
 mins: 13
-go_version: "1.26"
+version: "go1.26"
 tags: [gc, barrier]
 draft: false
 ---

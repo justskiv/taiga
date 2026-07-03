@@ -10,7 +10,7 @@ series_weight: 1
 related: []               # for non-series guides: 3–5 content paths for "ещё по теме"
 tags: []
 mins: 10                  # "~N мин" chip; hand-tuned, not .ReadingTime
-go_version: "1.26"
+version: "go1.26"         # free-form "tested on" chip, e.g. "go1.26", "PostgreSQL 17"
 ---
 
 Лид и текст гайда. Код-блоки — обычные fenced ```go … ``` (подсветка Chroma).

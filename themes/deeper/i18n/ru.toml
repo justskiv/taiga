@@ -10,17 +10,7 @@ other = "Поиск"
 [search_label]
 other = "поиск"
 
-# footer link labels (lowercase, as in the mock)
-[foot_internals]
-other = "под капотом"
-[foot_bestpractices]
-other = "best practices"
-[foot_practice]
-other = "практика"
-[foot_roadmap]
-other = "роадмап"
-[foot_about]
-other = "о проекте"
+# footer feed link (the other footer labels are the site's menus.footer entries)
 [foot_rss]
 other = "rss"
 

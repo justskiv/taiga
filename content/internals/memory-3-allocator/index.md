@@ -8,7 +8,7 @@ series: ["memory"]
 series_weight: 3
 nav_title: "Аллокатор"
 mins: 11
-go_version: "1.26"
+version: "go1.26"
 tags: [mcache, spans]
 draft: false
 ---

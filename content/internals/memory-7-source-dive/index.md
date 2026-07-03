@@ -8,7 +8,7 @@ series: ["memory"]
 series_weight: 7
 nav_title: "Source dive"
 mins: 13
-go_version: "1.26"
+version: "go1.26"
 tags: [runtime, malloc]
 draft: false
 ---

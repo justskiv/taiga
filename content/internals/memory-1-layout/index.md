@@ -10,7 +10,7 @@ series: ["memory"]
 series_weight: 1
 nav_title: "Значения и layout"
 mins: 14
-go_version: "1.26"
+version: "go1.26"
 arch: "64-бит"
 interactive: "padding · slice · retention · interface · GC"
 tags: [layout, padding]

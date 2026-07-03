@@ -1,4 +1,4 @@
-/* deeper.go — pre-paint preferences.
+/* deeper — pre-paint preferences.
    Inlined in <head> before the stylesheet, so the saved theme, rails and
    rubric-list variant apply before first paint (no FOUC). Themes now live as
    CSS [data-theme] blocks, so this only sets attributes/classes — it never
