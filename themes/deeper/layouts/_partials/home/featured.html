@@ -12,14 +12,14 @@
   <div class="f-body">
     <div class="f-k">
       <a href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
-      {{- if $s.isSeries }}<a href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>{{ end }}
+      {{ if $s.isSeries }}<a href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>{{ end }}
       <span>{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span>
     </div>
     <h2 class="f-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
     <p class="f-s">{{ .Description }}</p>
     <div class="hero-cta" style="display:flex; gap:12px; flex-wrap:wrap">
       <a class="btn-cta" href="{{ .RelPermalink }}">{{ i18n "read_guide" }} →</a>
-      {{- if $s.isSeries }}<a class="btn-ghost" href="{{ $s.href }}">{{ i18n "featured_all" }} «{{ $s.term.Title }}»</a>{{ end }}
+      {{ if $s.isSeries }}<a class="btn-ghost" href="{{ $s.href }}">{{ i18n "featured_all" }} «{{ $s.term.Title }}»</a>{{ end }}
     </div>
   </div>
   {{- if templates.Exists "_partials/home/featured-demo.html" }}{{ partial "home/featured-demo.html" . }}{{ end }}

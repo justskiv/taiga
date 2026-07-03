@@ -30,17 +30,27 @@
     {{- $layoutRes := resources.Get (printf "%s/layout.toml" $dir) -}}
     {{- if and (not $out) $base $layoutRes -}}
       {{- $layout := $layoutRes | transform.Unmarshal -}}
-      {{- $part := "" -}}{{ $kicker := "" -}}{{ $meta := "" -}}
+      {{- $part := "" -}}{{ $kicker := "" -}}{{ $meta := "" -}}{{ $titleText := .Title -}}
       {{- if $isGuide -}}
         {{- $kicker = partial "article/crumb.html" . -}}
         {{- $meta = printf "~%v %s · %s" (.Params.mins | default .ReadingTime) (i18n "mins_abbr") (.Params.version | default site.Params.versionDefault) -}}
         {{- $s := partial "article/series-ctx.html" . -}}
         {{- if $s.isSeries }}{{ $part = printf "%d/%d" $s.pos $s.total }}{{ end -}}
+      {{- else if .IsHome -}}
+        {{- /* the slogan IS the poster's headline; no kicker/meta so nothing
+               duplicates the wordmark drawn as {domain}. */ -}}
+        {{- $titleText = site.Params.heroLine -}}
+      {{- else if eq .Kind "section" -}}
+        {{- /* rubric index: "рубрика" kicks off the section title */ -}}
+        {{- $kicker = i18n "rubric_word" -}}
       {{- else -}}
-        {{- $kicker = site.Title -}}
-        {{- $meta = site.Params.heroLine -}}
+        {{- /* service / taxonomy page (about, roadmap, lab, /tags/): its own
+               kicker + editorial headline, so it's never mislabelled "рубрика"
+               and the kicker doesn't echo the short .Title. */ -}}
+        {{- $kicker = .Params.kicker -}}
+        {{- $titleText = .Params.headline | default .Title -}}
       {{- end -}}
-      {{- $vars := dict "{title}" .Title "{kicker}" $kicker "{meta}" $meta "{domain}" (printf "%s%s" site.Params.brand.name site.Params.brand.tld) "{part}" $part -}}
+      {{- $vars := dict "{title}" $titleText "{kicker}" $kicker "{meta}" $meta "{domain}" (printf "%s%s" site.Params.brand.name site.Params.brand.tld) "{part}" $part -}}
       {{- $filters := slice -}}
       {{- range $layout.block -}}
         {{- $b := . -}}

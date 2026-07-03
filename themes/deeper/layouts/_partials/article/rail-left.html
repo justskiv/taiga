@@ -13,7 +13,7 @@
     </div>
     <ol class="snav">
 {{- range $s.pages }}
-      <li{{ if eq .RelPermalink $.RelPermalink }} class="cur"{{ end }}><a href="{{ .RelPermalink }}"{{ if eq .RelPermalink $.RelPermalink }} aria-current="page"{{ end }}>{{ .Params.nav_title | default (index (split .Title ":") 0) }}</a></li>
+      <li{{ if eq .RelPermalink $.RelPermalink }} class="cur"{{ end }}><a href="{{ .RelPermalink }}"{{ if eq .RelPermalink $.RelPermalink }} aria-current="page"{{ end }}>{{ .Params.rail_title | default (index (split .Title ":") 0) }}</a></li>
 {{- end }}
     </ol>
     <a class="rail-all" href="{{ $s.href }}">{{ i18n "all_series" }}</a>
@@ -24,7 +24,7 @@
     </div>
     <ol class="snav">
 {{- range .Params.related }}{{ with site.GetPage . }}
-      <li><a href="{{ .RelPermalink }}">{{ .Params.nav_title | default (index (split .Title ":") 0) }}</a></li>
+      <li><a href="{{ .RelPermalink }}">{{ .Params.rail_title | default (index (split .Title ":") 0) }}</a></li>
 {{- end }}{{ end }}
     </ol>
 {{- end }}

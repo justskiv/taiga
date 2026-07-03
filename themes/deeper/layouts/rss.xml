@@ -1,9 +1,9 @@
-{{- /* The site feed: published guides (guides.html — the three rubric sections,
-       stubs excluded), newest first, capped at [services.rss] limit. Full article
-       HTML rides in content:encoded when params.rss.fullContent is set. A generic
-       layouts/rss.xml override is picked up for the home RSS in the new template
-       system (reference/features-recipes.md §7). */ -}}
-{{- $pages := partial "guides.html" . -}}
+{{- /* The site feed: finished guides only (guides-published.html — the rubric
+       guides minus placeholders), newest first, capped at [services.rss] limit.
+       Full article HTML rides in content:encoded when params.rss.fullContent is
+       set. A generic layouts/rss.xml override is picked up for the home RSS in
+       the new template system (reference/features-recipes.md §7). */ -}}
+{{- $pages := partial "guides-published.html" . -}}
 {{- $limit := site.Config.Services.RSS.Limit -}}
 {{- if ge $limit 1 }}{{ $pages = $pages | first $limit }}{{ end -}}
 {{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}

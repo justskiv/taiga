@@ -159,6 +159,9 @@ one = "{{ .Count }} разбор"
 few = "{{ .Count }} разбора"
 many = "{{ .Count }} разборов"
 other = "{{ .Count }} разбора"
+# rubric card with no guides yet — a muted label instead of "0 разборов"
+[rubric_empty]
+other = "готовится"
 [hours_count]
 one = "{{ .Count }} час"
 few = "{{ .Count }} часа"

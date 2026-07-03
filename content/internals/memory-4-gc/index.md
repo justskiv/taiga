@@ -3,19 +3,13 @@ title: "GC-классика: трёхцветная маркировка на х
 slug: memory-4-gc
 date: 2026-05-23
 description: "Собираем классический GC с нуля: трёхцветный инвариант, конкурентная маркировка, write barrier и pacer — и где эта классика упирается в кеш."
-lead: "Собираем классический GC с нуля: трёхцветный инвариант, конкурентная маркировка, write barrier и pacer — и где эта классика упирается в кеш."
 series: ["memory"]
 series_weight: 4
-nav_title: "GC-классика"
+tags: [gc, barrier]
 mins: 13
 version: "go1.26"
-tags: [gc, barrier]
-stub: true          # series part exists for structure; not a finished guide yet
-draft: false
+rail_title: "GC-классика"
+placeholder: true    # metadata-only stub; in chrome, not in RSS/search
 ---
 
-<!-- STUB (phase 02): only front matter is final — full prose ships in the
-     memory-series content phases. Present now so memory-1's series rail, kicker
-     («часть 1 из 7») and bridge resolve against all seven parts. -->
-
-Полный разбор этой части серии появится в контентных фазах.
+Страница временно содержит только метаданные.

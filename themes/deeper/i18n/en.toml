@@ -133,6 +133,8 @@ other = "{{ .Count }} series"
 [reviews_count]
 one = "{{ .Count }} deep dive"
 other = "{{ .Count }} deep dives"
+[rubric_empty]
+other = "in the works"
 [hours_count]
 one = "{{ .Count }} hour"
 other = "{{ .Count }} hours"

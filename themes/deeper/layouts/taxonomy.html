@@ -1,12 +1,13 @@
 {{- /* /tags/: a mono-chip cloud + a filterable feed. Cloud counts and the feed
-       are rendered server-side from the published guides (a stub's tags don't
-       count — see guides.html); the client only filters by location.hash
-       (modules/tags-filter.js). Term pages (/tags/<tag>/) never render — chips
-       point at /tags/#<tag>, as in the mock. Series terms use this template's
-       kind too but are suppressed by the cascade, so this only fires for tags. */ -}}
+       are rendered server-side from every listable guide (guides.html — includes
+       placeholders, so the cloud matches the mock's 29 tags · 17 guides); the
+       client only filters by location.hash (modules/tags-filter.js). Term pages
+       (/tags/<tag>/) never render — chips point at /tags/#<tag>, as in the mock.
+       Series terms share this template's kind but the cascade suppresses them,
+       so this only fires for tags. */ -}}
 {{ define "main" }}
 {{- $guides := partial "guides.html" . -}}
-{{- /* tag → count, from published guides only */ -}}
+{{- /* tag → count, over every listable guide (placeholders included) */ -}}
 {{- $counts := dict -}}
 {{- range $guides }}{{ range .Params.tags }}{{ $counts = merge $counts (dict (printf "%v" .) (add (int (index $counts (printf "%v" .) | default 0)) 1)) }}{{ end }}{{ end -}}
 {{- $tags := slice -}}

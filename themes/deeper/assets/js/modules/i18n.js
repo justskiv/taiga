@@ -1,5 +1,5 @@
 /* UI strings that live in JS (popover, tooltips, search). Overridable from the
-   site with window.DEEPER_I18N — documented in docs/customizing.md. */
+   site with window.THEME_I18N — documented in docs/customizing.md. */
 const DEFAULTS = {
   themeHead: 'Тема',
   viewHead: 'Вид',
@@ -30,4 +30,4 @@ const DEFAULTS = {
 };
 
 export const I18N = Object.assign({}, DEFAULTS,
-  (typeof window !== 'undefined' && window.DEEPER_I18N) || {});
+  (typeof window !== 'undefined' && window.THEME_I18N) || {});

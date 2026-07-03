@@ -18,7 +18,7 @@
 <div class="sbr-scale">
 {{- range $i, $p := $pages -}}
 {{- $cls := cond (lt $i $idx) "done" (cond (eq $i $idx) "cur" "") -}}
-<a class="sbr-seg{{ with $cls }} {{ . }}{{ end }}" style="flex-grow:{{ $p.Params.mins | default $p.ReadingTime }}" href="{{ $p.RelPermalink }}" title="{{ i18n "sbr_seg_title" (dict "n" (add $i 1) "short" ($p.Params.nav_title | default (index (split $p.Title ":") 0))) }}"></a>
+<a class="sbr-seg{{ with $cls }} {{ . }}{{ end }}" style="flex-grow:{{ $p.Params.mins | default $p.ReadingTime }}" href="{{ $p.RelPermalink }}" title="{{ i18n "sbr_seg_title" (dict "n" (add $i 1) "short" ($p.Params.rail_title | default (index (split $p.Title ":") 0))) }}"></a>
 {{- end -}}
 </div>
 <div class="sbr-legend">{{ if lt $pos $total }}{{ i18n "sbr_behind" (dict "done" $pos "total" $total) | safeHTML }} · {{ i18n "sbr_ahead" (dict "n" $ahead) }} {{ i18n "parts_word" $ahead }} · {{ i18n "sbr_left" (dict "mins" $minsLeft) | safeHTML }}{{ else }}{{ i18n "sbr_done" (dict "total" $total) | safeHTML }}{{ end }}</div>
@@ -31,7 +31,7 @@
 {{- end -}}
 {{- if gt $pos 1 -}}
 {{- $prev := index $pages (sub $idx 1) -}}
-<a class="sbr-prev" href="{{ $prev.RelPermalink }}">{{ i18n "sbr_prev" (dict "n" $idx "short" ($prev.Params.nav_title | default (index (split $prev.Title ":") 0))) }}</a>
+<a class="sbr-prev" href="{{ $prev.RelPermalink }}">{{ i18n "sbr_prev" (dict "n" $idx "short" ($prev.Params.rail_title | default (index (split $prev.Title ":") 0))) }}</a>
 {{- end -}}
 </nav>
 {{- end -}}

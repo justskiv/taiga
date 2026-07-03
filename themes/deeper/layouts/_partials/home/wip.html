@@ -9,6 +9,6 @@
 <div class="wip">
   <span class="dot-live"></span>
   <span>{{ i18n "wip_writing" }} → {{ range $i, $it := . }}{{ if $i }} · {{ end }}<b>{{ printf "%s%s" (substr $it.title 0 1 | lower) (substr $it.title 1) }}</b>{{ end }}</span>
-  {{- with $roadmap }}<a href="{{ .RelPermalink }}">{{ i18n "wip_roadmap" }} →</a>{{ end }}
+  {{ with $roadmap }}<a href="{{ .RelPermalink }}">{{ i18n "wip_roadmap" }} →</a>{{ end }}
 </div>
 {{- end }}

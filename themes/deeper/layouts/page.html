@@ -26,10 +26,10 @@
 {{ partial "article/meta.html" . }}
 {{ with .Params.intro }}{{ $.RenderString (dict "display" "block") . }}{{ end }}
 {{ partial "article/toc.html" . }}
-{{- /* Pagefind: index the prose only. A stub has nothing to find, so it stays out
-       of the index (keeps search results to real guides). crumb/mins ride along as
-       result-card metadata (empty spans carry inline key:value). */ -}}
-{{ if .Params.stub }}{{ .Content }}{{ else }}
+{{- /* Pagefind: index the prose only. A placeholder has nothing to find, so it
+       stays out of the index (keeps search results to real guides). crumb/mins
+       ride along as result-card metadata (empty spans carry inline key:value). */ -}}
+{{ if .Params.placeholder }}{{ .Content }}{{ else }}
 <div data-pagefind-body>
 <span data-pagefind-meta="crumb:{{ partial "article/crumb.html" . }}"></span>
 <span data-pagefind-meta="mins:{{ .Params.mins | default .ReadingTime }}"></span>

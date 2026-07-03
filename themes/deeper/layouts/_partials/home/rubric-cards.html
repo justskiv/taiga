@@ -23,8 +23,11 @@
   <a class="rub2" href="{{ $sec.RelPermalink }}">
     <span class="r-logo" data-logo="{{ $id }}">{{ partial $logoPartial $sec }}</span>
     <span class="r-t">{{ $sec.Title }}</span>
-    {{- with $sec.Params.card_line }}<span class="r-d">{{ . }}</span>{{ end }}
-    <span class="r-n">{{ if gt $nSeries 0 }}{{ i18n "guides_count" $nGuides }} · {{ i18n "series_count" $nSeries }}{{ else }}{{ i18n "reviews_count" $nGuides }}{{ end }}</span>
+    {{ with $sec.Params.card_line }}<span class="r-d">{{ . }}</span>{{ end }}
+    {{/* Count line only when the rubric has guides (with series → "N гайдов · M
+         серий", else "N разборов"); an empty rubric shows a muted "готовится"
+         rather than a meaningless "0 разборов". */}}
+    {{ if gt $nGuides 0 }}<span class="r-n">{{ if gt $nSeries 0 }}{{ i18n "guides_count" $nGuides }} · {{ i18n "series_count" $nSeries }}{{ else }}{{ i18n "reviews_count" $nGuides }}{{ end }}</span>{{ else }}<span class="r-n r-n-empty">{{ i18n "rubric_empty" }}</span>{{ end }}
   </a>
   {{- end }}
 {{- end }}

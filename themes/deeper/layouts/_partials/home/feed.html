@@ -1,8 +1,8 @@
-{{- /* The guide feed: every published guide, newest first. The first
-       `feedInitial` are visible; the rest sit in a hidden .feed-more block that
-       modules/reveal.js unhides on demand. The count and plural in the button
-       are computed server-side. With fewer posts than feedInitial there is no
-       hidden tail and no button. */ -}}
+{{- /* The guide feed: every listable guide (guides.html — placeholders included),
+       newest first. The first `feedInitial` are visible; the rest sit in a hidden
+       .feed-more block that modules/reveal.js unhides on demand. The count and
+       plural in the button are computed server-side. With fewer posts than
+       feedInitial there is no hidden tail and no button. */ -}}
 {{- $guides := partial "guides.html" . -}}
 {{- $initial := site.Params.feedInitial | default 8 -}}
 <div class="sec-h" id="feed">{{ i18n "feed_head" }}</div>

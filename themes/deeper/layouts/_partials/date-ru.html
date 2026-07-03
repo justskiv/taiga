@@ -2,7 +2,8 @@
        current one. Context = a time value (e.g. .Date). Month names are a data
        slice, not i18n keys — the abbreviations are locale copy the site owner
        tunes by overriding this partial (a non-ru site ships its own). */ -}}
-{{- $months := slice "янв" "фев" "мар" "апр" "май" "июн" "июл" "авг" "сен" "окт" "ноя" "дек" -}}
+{{- /* Genitive short months as the mock's feed writes them ("30 мая", not "май"). */ -}}
+{{- $months := slice "янв" "фев" "мар" "апр" "мая" "июн" "июл" "авг" "сен" "окт" "ноя" "дек" -}}
 {{- $mon := index $months (sub (int .Month) 1) -}}
 {{- $out := printf "%d %s" .Day $mon -}}
 {{- if ne .Year now.Year -}}{{ $out = printf "%s %d" $out .Year }}{{- end -}}

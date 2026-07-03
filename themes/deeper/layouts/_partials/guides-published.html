@@ -1,0 +1,5 @@
+{{- /* Finished, published guides: listable guides minus placeholders. Used by
+       the RSS feed (a metadata-only stub isn't something to syndicate). The
+       search index applies the same rule per-page in page.html (no
+       data-pagefind-body on placeholders). */ -}}
+{{- return (where (partial "guides.html" .) "Params.placeholder" "!=" true) -}}
