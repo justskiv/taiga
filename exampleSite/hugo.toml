@@ -66,6 +66,14 @@ timeZone = "Europe/Moscow"
   # "Палитра — это один файл" guide explains how this maps to CSS.
   defaultTheme = "amber"
 
+  # Cross-cutting accent (optional). One hex repaints the accent across EVERY
+  # palette at once — links, buttons, active states, the picker's swatch dot, the
+  # favicon square and the logo mark. --accent-dim/-glow derive from it as
+  # rgba(…,.18)/(…,.28); accentDim/accentGlow (also scalars) override them. Left
+  # unset, each palette keeps its native amber — which is what this demo ships.
+  # See docs/customizing.md#recolour.
+  # accent = "#7aa2f7"
+
   # Meta chip fallback when a guide omits `version`. Here it is the THEME's own
   # version: the demo documents the theme, and this doubles as a live proof that the
   # chip is an arbitrary string (see "Обложки, поиск и другая магия сборки").

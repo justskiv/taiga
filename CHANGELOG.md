@@ -7,6 +7,22 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ## [Unreleased]
 
+### Added
+
+- **`params.accent`** — a single param repaints the accent across **every**
+  palette at once (built-in and site), a brand axis orthogonal to the palettes.
+  `accentDim` / `accentGlow` override the derived `rgba(…, .18)` / `rgba(…, .28)`.
+  The favicon square and the logo mark follow it too. Unset ⇒ each palette keeps
+  its native accent and the output is byte-for-byte unchanged. A non-`#rrggbb`
+  value fails the build. See [customizing.md](docs/customizing.md#recolour).
+
+### Changed
+
+- **Renamed the primary accent token** `--accent-amber` → `--accent` (with its
+  `-dim` / `-glow`; palette key `accent-amber` → `accent`). A site that references
+  the old name in `custom.css` or a palette file must rename it. The secondary
+  accents (`--accent-green` / `-copper` / `-blue` / `-gold`) are unchanged.
+
 ## [0.1.0] — 2026-07-04
 
 Initial release: a topic-agnostic learning-platform theme (rubrics → series →

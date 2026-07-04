@@ -7,17 +7,36 @@
 {{- $skip := slice "name" "weight" "light" "disabled" -}}
 {{- $default := site.Params.defaultTheme | default "amber" -}}
 {{- $themes := site.Data.themes -}}
+{{- /* Optional cross-cutting accent override (params.accent). When set, it
+       replaces --accent/-dim/-glow in :root AND in every [data-theme] block,
+       so the whole palette set adopts the site's brand colour while palettes
+       stay data (ARCH §5a). Unset → empty dict → no substitution → output is
+       byte-identical to the palette files. See docs/customizing.md. */ -}}
+{{- $ov := dict -}}
+{{- with site.Params.accent -}}
+  {{- if findRE `^#[0-9a-fA-F]{6}$` . -}}
+    {{- $r := int (printf "0x%s" (substr . 1 2)) -}}
+    {{- $g := int (printf "0x%s" (substr . 3 2)) -}}
+    {{- $b := int (printf "0x%s" (substr . 5 2)) -}}
+    {{- $ov = dict
+        "accent" .
+        "accent-dim"  (site.Params.accentDim  | default (printf "rgba(%d,%d,%d,.18)" $r $g $b))
+        "accent-glow" (site.Params.accentGlow | default (printf "rgba(%d,%d,%d,.28)" $r $g $b)) -}}
+  {{- else -}}
+    {{- errorf "params.accent must be #rrggbb (6 hex digits), got %q" . -}}
+  {{- end -}}
+{{- end -}}
 {{- $css := "" -}}
 {{- $root := index $themes $default -}}
 {{- with $root -}}
   {{- $vars := "" -}}
-  {{- range $k, $v := . -}}{{- if not (in $skip $k) -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
+  {{- range $k, $v := . -}}{{- if not (in $skip $k) -}}{{- with index $ov $k }}{{ $v = . }}{{ end -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
   {{- $css = printf ":root{%s}" $vars -}}
 {{- end -}}
 {{- range $id, $t := $themes -}}
   {{- if not $t.disabled -}}
     {{- $vars := "" -}}
-    {{- range $k, $v := $t -}}{{- if not (in $skip $k) -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
+    {{- range $k, $v := $t -}}{{- if not (in $skip $k) -}}{{- with index $ov $k }}{{ $v = . }}{{ end -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
     {{- $css = printf "%s\n[data-theme=%q]{%s}" $css $id $vars -}}
   {{- end -}}
 {{- end -}}

@@ -37,9 +37,12 @@ Structure (`assets/css/00-tokens.css`):
 Colours come from the **palette** (see below), so they change per theme:
 `--bg-deep`, `--bg-base`, `--bg-surface`, `--bg-raised`, `--bg-hover`,
 `--border`, `--text-primary`, `--text-secondary`, `--text-muted`, `--text-ghost`,
-`--text-strong`, `--gtok-str`, and the accents `--accent-amber` (+ `-dim`,
+`--text-strong`, `--gtok-str`, and the accents `--accent` (+ `-dim`,
 `-glow`), `--accent-green` (+ `-dim`, `-glow`), `--accent-copper` (+ `-dim`),
 `--accent-blue` (+ `-dim`), `--accent-gold` (+ `-dim`).
+
+The primary `--accent` is special: a site can repaint it across every palette
+with a single param — see [Recolour the accent](#recolour).
 
 ## 3. Palettes are data {#palettes-are-data}
 
@@ -49,8 +52,8 @@ colour variables (keys = CSS variable names without the `--`):
 ```toml
 name = "Мой цвет"
 weight = 25
-"bg-base"      = "#101418"
-"accent-amber" = "#7aa2f7"
+"bg-base" = "#101418"
+"accent"  = "#7aa2f7"
 # … the rest of the keys as in data/themes/amber.toml
 ```
 
@@ -59,15 +62,45 @@ picker automatically — no theme edit. Because Hugo merges the theme's data wit
 yours (yours wins on a name clash), you can also **override** a shipped palette
 (same filename, new values) or **disable** one (`disabled = true`).
 
-### Recolour the accent
+### Recolour the accent {#recolour}
 
-The accent is a palette variable. To change it, edit `accent-amber`
-(and its `-dim` / `-glow`) in the palette file(s) — or ship your own palette as
-above. All seven built-in palettes currently share the same accent, so recolour
-each file, or override just the one(s) you use.
+**One line, every palette.** The accent is a brand axis that cuts *across* the
+palettes, so one param repaints it everywhere at once:
 
-For OG covers the accent is baked into the backdrop image — see
-[cover styles](#og-cover-styles) to reskin those.
+```toml
+# hugo.toml
+[params]
+accent = "#7aa2f7"
+```
+
+Now all seven built-in palettes — and any you added — use that colour instead of
+their native amber: links, buttons, active states, the picker's swatch dot, the
+favicon square and the logo mark all follow it. `--accent-dim` and `--accent-glow`
+are derived from it (`rgba(…, .18)` and `rgba(…, .28)`). Override either
+explicitly if the derived alpha isn't what you want:
+
+```toml
+accent     = "#7aa2f7"
+accentGlow = "rgba(122, 162, 247, .45)"   # a stronger halo
+```
+
+`accent` must be a 6-digit `#rrggbb`; any other value stops the build.
+
+**What the handle does *not* reach:**
+
+- **OG cover images** — the accent is baked into `base.png`. For a full rebrand,
+  ship your own [cover style](#og-cover-styles) folder rather than expecting the
+  param to repaint the artwork.
+- **Secondary accents** (`--accent-green`, `--accent-copper`, `--accent-blue`,
+  `--accent-gold`) and the code-string colour `--gtok-str` are palette variables,
+  not part of the one accent axis. Change them in the palette files (below).
+
+**Different accents per palette.** If you'd rather each palette keep (or set) its
+*own* accent than share one colour, don't set `accent` — edit the palette files
+instead. The accent is the `accent` key (plus `-dim` / `-glow`) in
+`data/themes/<id>.toml`; ship your own palette or override a shipped one (above).
+All seven built-ins currently share the same accent, so recolour each file, or
+override just the one(s) you use.
 
 ## 4. Hook partials — inject head/foot content
 
