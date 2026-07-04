@@ -45,9 +45,10 @@ woff2 fonts, a static search index. That constraint is the whole design.
 
 ## Installation
 
-Pick one. In every case set `theme = "taiga"` (or your chosen folder name).
+Pick one.
 
-**1. Hugo Module** (recommended). In your site config:
+**1. Hugo Module** (recommended). Add the import to your site config — with a
+module import you do **not** also set `theme`:
 
 ```toml
 [module]
@@ -57,13 +58,14 @@ Pick one. In every case set `theme = "taiga"` (or your chosen folder name).
 
 Then `hugo mod get -u`.
 
-**2. Git submodule.**
+**2. Git submodule.** Add it under `themes/`, then set `theme = "taiga"` in your
+config:
 
 ```sh
 git submodule add https://github.com/skiv/taiga.git themes/taiga
 ```
 
-**3. Copy.** Clone or download into `themes/taiga`.
+**3. Copy.** Clone or download into `themes/taiga`, then set `theme = "taiga"`.
 
 ## Quick start
 

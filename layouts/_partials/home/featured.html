@@ -3,8 +3,10 @@
        it is subject-specific, so the theme only *slots in* a site partial
        home/featured-demo.html if the site ships one — the theme itself stays free
        of any Go/content (see modules/featured.js, which reads its data island). */ -}}
-{{- $f := site.GetPage site.Params.featured -}}
-{{- with $f -}}
+{{- /* No featured param, or an empty/missing path → the card is skipped (guard
+       on the input, not just the resolved page: site.GetPage needs a string). */ -}}
+{{- with site.Params.featured -}}
+{{- with site.GetPage . -}}
 {{- $s := partial "article/series-ctx.html" . -}}
 {{- $rubric := .CurrentSection -}}
 <div class="sec-h">{{ i18n "featured_head" }}</div>
@@ -24,4 +26,5 @@
   </div>
   {{- if templates.Exists "_partials/home/featured-demo.html" }}{{ partial "home/featured-demo.html" . }}{{ end }}
 </section>
+{{- end -}}
 {{- end -}}
