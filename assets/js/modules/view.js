@@ -5,7 +5,7 @@
 import { store, read } from './store.js';
 
 const root = document.documentElement;
-const THEME_KEY = 'dg.theme';
+const THEME_KEY = 'taiga.theme';
 
 export function curTheme() { return root.getAttribute('data-theme') || read(THEME_KEY) || 'amber'; }
 
@@ -18,10 +18,10 @@ export function setTheme(id) {
 }
 
 /* rubric page layout variant: rows (default) / loud / shelf */
-let rubvar = (function () { const v = read('dg.rubvar'); return (v === 'loud' || v === 'shelf') ? v : 'rows'; })();
+let rubvar = (function () { const v = read('taiga.rubvar'); return (v === 'loud' || v === 'shelf') ? v : 'rows'; })();
 export function getRubvar() { return rubvar; }
 export function setRubvar(v) {
-  rubvar = v; store('dg.rubvar', v);
+  rubvar = v; store('taiga.rubvar', v);
   if (v === 'rows') root.removeAttribute('data-rubvar');
   else root.setAttribute('data-rubvar', v);
   syncSegs();
@@ -30,7 +30,7 @@ export function setRubvar(v) {
 export function railOn(side) { return !root.classList.contains('rail-' + side + '-off'); }
 export function setRail(side, on) {
   root.classList.toggle('rail-' + side + '-off', !on);
-  store(side === 'l' ? 'dg.railL' : 'dg.railR', on ? 'on' : 'off');
+  store(side === 'l' ? 'taiga.railL' : 'taiga.railR', on ? 'on' : 'off');
   syncSegs();
 }
 

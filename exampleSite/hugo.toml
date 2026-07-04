@@ -87,7 +87,7 @@ timeZone = "Europe/Moscow"
   # Wordmark in header and footer. Brand-neutral on purpose — the demo is about the
   # theme, not a subject.
   [params.brand]
-    name = "deeper"
+    name = "taiga"
     tld = ""
 
   [params.search]

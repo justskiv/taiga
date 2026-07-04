@@ -1,5 +1,5 @@
 /* w-mins: прикидка честного mins — сам сделан «за два касания» из этой же статьи */
-DG.widget("w-mins", function (root) {
+Taiga.widget("w-mins", function (root) {
   root.innerHTML = ""; // статик-фолбэк больше не нужен
 
   var sections = 0;

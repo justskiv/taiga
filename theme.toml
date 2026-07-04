@@ -1,9 +1,9 @@
-name = "deeper"
+name = "taiga"
 license = "MIT"
-licenselink = "https://github.com/deeper-go/deeper/blob/main/LICENSE"
-description = "Тёмная минималистичная тема учебной платформы про Go: серии-курсы, интерактивные виджеты в тексте, self-hosted шрифты, полнотекстовый поиск. Без Node и внешних зависимостей."
-homepage = "https://github.com/deeper-go/deeper"
-demosite = "https://deeper.go/"
+licenselink = "https://github.com/skiv/taiga/blob/main/LICENSE"
+description = "Тёмная минималистичная тема учебной платформы: рубрики, серии-курсы, интерактивные виджеты в тексте, self-hosted шрифты, полнотекстовый поиск. Без Node и внешних зависимостей."
+homepage = "https://github.com/skiv/taiga"
+demosite = "https://skiv.github.io/taiga/"
 tags = ["blog", "docs", "minimal", "dark", "multilingual", "education"]
 features = ["blog", "syntax-highlighting", "multilingual", "search"]
 min_version = "0.146.0"

@@ -1,5 +1,5 @@
 /* w-hello: живое доказательство, что widgets.js из папки статьи подключился */
-DG.widget("w-hello", function (root) {
+Taiga.widget("w-hello", function (root) {
   root.innerHTML = ""; // статик-фолбэк больше не нужен
 
   var clicks = 0;
@@ -25,7 +25,7 @@ DG.widget("w-hello", function (root) {
   var badge = document.createElement("span");
   badge.className = "w-badge ok";
   badge.textContent = "смонтирован";
-  badge.setAttribute("data-tip", "DG.widget нашёл mount по id и вызвал колбэк");
+  badge.setAttribute("data-tip", "Taiga.widget нашёл mount по id и вызвал колбэк");
 
   var cap = document.createElement("div");
   cap.className = "w-cap";

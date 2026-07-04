@@ -3,6 +3,6 @@
    inside its figure.widget, and hands it to the callback. A widget that throws
    logs and doesn't break its neighbours; a missing mount is skipped silently.
    Delete this file if the guide has no widgets. */
-DG.widget('w-example', function (root) {
+Taiga.widget('w-example', function (root) {
   // root is the .w-root mount — build the interactive here (vanilla JS).
 });

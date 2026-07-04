@@ -1,5 +1,5 @@
 /* w-reflex: игрушка песочницы — виджет обычного бандла, в теме от него ни следа */
-DG.widget("w-reflex", function (root) {
+Taiga.widget("w-reflex", function (root) {
   root.innerHTML = ""; // статик-фолбэк больше не нужен
 
   var state = "idle", t0 = 0, timer = null, best = 0;

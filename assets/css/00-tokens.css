@@ -1,4 +1,4 @@
-/* deeper — design system.
+/* taiga — design system.
    Non-color tokens only. Color tokens (the swappable surface/text ramp and the
    brand accents) live as data in data/themes/<id>.toml and are emitted, first
    in the bundle, by the head/palettes.html partial (:root + [data-theme] blocks).

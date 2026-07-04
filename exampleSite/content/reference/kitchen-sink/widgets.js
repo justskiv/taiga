@@ -1,7 +1,7 @@
-/* Kitchen-sink widget: exercises the DG.widget runtime (main.js) end to end —
+/* Kitchen-sink widget: exercises the Taiga.widget runtime (main.js) end to end —
    registered at top level, run on DOMContentLoaded, mounted by id, isolated in a
    try/catch. Uses the theme's widget building blocks (.w-row/.w-btn/.w-num). */
-DG.widget('w-ks-counter', function (root) {
+Taiga.widget('w-ks-counter', function (root) {
   var n = 0;
   root.innerHTML =
     '<div class="w-row">' +

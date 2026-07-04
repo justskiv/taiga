@@ -1,6 +1,6 @@
 /* w-palette: свотчи из того же JSON #dg-themes, которым пользуется пикер в шапке.
    Клик ставит data-theme на <html> — настоящий механизм переключения темы. */
-DG.widget("w-palette", function (root) {
+Taiga.widget("w-palette", function (root) {
   root.innerHTML = "";
 
   var cap = document.createElement("div");

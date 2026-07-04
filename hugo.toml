@@ -4,3 +4,12 @@
 [module]
   [module.hugoVersion]
     min = "0.146.0"
+
+# Neutral defaults the theme falls back on when a site omits them; a site
+# overrides these in its own hugo.toml (full registry: docs/params.md). Kept to
+# the bare minimum — only the wordmark, so a fresh install shows a name rather
+# than an empty header. Everything topic-specific lives in the site config.
+[params]
+  [params.brand]
+    name = "taiga"   # wordmark in header/footer — override per site
+    tld = ""         # optional suffix (e.g. ".dev"); empty = just the name

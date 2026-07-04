@@ -39,7 +39,7 @@ func mallocgc(size uintptr) unsafe.Pointer {
 
 ```text
 $ go build ./...
-ok  deeper/internals  0.312s
+ok  taiga/internals  0.312s
 ```
 
 ## Таблица {#table}
@@ -86,7 +86,7 @@ Markdown-таблица, обёртку `.tbl-wrap` вешает render-table:
 
 ## Виджеты {#widgets}
 
-Форма 1 — пустой mount, оживляет `DG.widget` из `widgets.js`:
+Форма 1 — пустой mount, оживляет `Taiga.widget` из `widgets.js`:
 
 {{< widget id="w-ks-counter" note="— жми, число тикает" />}}
 

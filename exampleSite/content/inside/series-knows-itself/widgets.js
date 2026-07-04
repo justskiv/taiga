@@ -1,5 +1,5 @@
 /* w-series-math: арифметика моста серии — те же числа, что у серии «Анатомия темы» */
-DG.widget("w-series-math", function (root) {
+Taiga.widget("w-series-math", function (root) {
   root.innerHTML = "";
 
   var parts = [

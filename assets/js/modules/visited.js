@@ -1,7 +1,7 @@
 /* Visited marks: series lists get a quiet ✓ once a guide has been read. */
 import { store, read } from './store.js';
 
-const VIS_KEY = 'dg.visited';
+const VIS_KEY = 'taiga.visited';
 function visited() { try { return JSON.parse(read(VIS_KEY) || '[]'); } catch (e) { return []; } }
 
 export function markVisited() {
