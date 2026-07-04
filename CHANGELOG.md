@@ -63,8 +63,6 @@ guides), packaged as the repository root with a self-documenting `exampleSite`.
 
 ### Known limitations
 
-- **Module path is a placeholder** (`github.com/skiv/taiga`); set it to the real
-  repository on first push (`go.mod`, `theme.toml`, README install snippets).
 - **One OG cover style** ships (`dots`); additional styles are added as folders.
 - The `render-image` hook ships for completeness but is unused until content
   carries an image.

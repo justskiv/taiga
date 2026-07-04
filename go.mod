@@ -1,3 +1,3 @@
-module github.com/skiv/taiga
+module github.com/justskiv/taiga
 
 go 1.23

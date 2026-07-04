@@ -4,7 +4,7 @@ A dark, minimalist Hugo theme for a **learning platform**: rubrics → series �
 guides with interactive widgets in the text. Topic-agnostic — the demo teaches
 the theme itself, but nothing in the templates is tied to any subject.
 
-![Screenshot](https://raw.githubusercontent.com/skiv/taiga/main/images/screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/justskiv/taiga/main/images/screenshot.png)
 
 **Two binaries and you're done: `hugo` and `pagefind`.** No Node, no npm, no CDN,
 no trackers. Vanilla JS bundled by Hugo's built-in esbuild, plain CSS, self-hosted
@@ -53,7 +53,7 @@ module import you do **not** also set `theme`:
 ```toml
 [module]
   [[module.imports]]
-    path = "github.com/skiv/taiga"
+    path = "github.com/justskiv/taiga"
 ```
 
 Then `hugo mod get -u`.
@@ -62,7 +62,7 @@ Then `hugo mod get -u`.
 config:
 
 ```sh
-git submodule add https://github.com/skiv/taiga.git themes/taiga
+git submodule add https://github.com/justskiv/taiga.git themes/taiga
 ```
 
 **3. Copy.** Clone or download into `themes/taiga`, then set `theme = "taiga"`.
