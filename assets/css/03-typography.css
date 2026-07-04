@@ -18,16 +18,16 @@ h2 .hash::after, h3 .hash::after, h4 .hash::after{
 h2:hover .hash::after, h3:hover .hash::after, h4:hover .hash::after,
 h2 .hash:focus-visible::after, h3 .hash:focus-visible::after, h4 .hash:focus-visible::after{opacity:1}
 h2 .hash:hover, h3 .hash:hover, h4 .hash:hover,
-h2 .hash:focus-visible, h3 .hash:focus-visible, h4 .hash:focus-visible{color:var(--accent-amber)}
-.hash:focus-visible{outline:2px solid var(--accent-amber); outline-offset:3px; border-radius:3px}
+h2 .hash:focus-visible, h3 .hash:focus-visible, h4 .hash:focus-visible{color:var(--accent)}
+.hash:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:3px}
 p{margin:0 0 16px}
 ul,ol{margin:0 0 16px; padding-left:22px}
 li{margin:0 0 9px}
-li::marker{color:var(--accent-amber)}
+li::marker{color:var(--accent)}
 strong{color:var(--text-strong); font-weight:650}
 em{color:var(--text-primary); font-style:italic}
 .muted{color:var(--text-muted)}
-blockquote{margin:0 0 22px; padding:2px 0 2px 18px; border-left:3px solid var(--accent-amber); color:var(--text-secondary); font-style:italic}
+blockquote{margin:0 0 22px; padding:2px 0 2px 18px; border-left:3px solid var(--accent); color:var(--text-secondary); font-style:italic}
 blockquote p{margin:0}
 
 /* inline + block code */
@@ -35,7 +35,7 @@ code{font-family:var(--font-mono); font-size:.86em}
 p code, li code, td code, h3 code, blockquote code{background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; padding:1px 6px; color:var(--text-strong); white-space:nowrap}
 pre{margin:0 0 20px; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; overflow-x:auto; position:relative}
 pre code{font-size:13.5px; line-height:1.7; color:var(--text-primary); white-space:pre; background:none; border:0; padding:0}
-.gtok-kw{color:var(--accent-amber)}
+.gtok-kw{color:var(--accent)}
 .gtok-typ{color:var(--accent-blue)}
 .gtok-fn{color:var(--accent-green)}
 .gtok-str{color:var(--gtok-str)}

@@ -5,7 +5,7 @@
 .rm-item{padding:2px 2px 16px 18px; border-left:2px solid var(--border);
   transition:border-color var(--dur) var(--ease)}
 .rm-item + .rm-item{margin-top:16px}
-.rm-item:hover{border-left-color:var(--accent-amber)}
+.rm-item:hover{border-left-color:var(--accent)}
 .rm-row{display:flex; align-items:baseline; gap:12px}
 .rm-t{font-weight:650; color:var(--text-strong); font-size:16.5px; line-height:1.35}
 .rm-d{margin:6px 0 0; font-size:14.5px; color:var(--text-secondary); line-height:1.55}
@@ -19,7 +19,7 @@
 .rm-bar{height:5px; margin-top:12px; max-width:320px; border-radius:20px;
   background:var(--border); overflow:hidden}
 .rm-bar > i{display:block; height:100%; border-radius:inherit;
-  background:var(--accent-amber); box-shadow:0 0 10px var(--accent-amber-glow)}
+  background:var(--accent); box-shadow:0 0 10px var(--accent-glow)}
 /* queue: numbered one-liners, echoing the rubric series lists */
 .rm-queue{list-style:none; counter-reset:q; margin:18px 0 0; padding:0}
 .rm-queue li{counter-increment:q; display:flex; gap:14px; align-items:baseline;

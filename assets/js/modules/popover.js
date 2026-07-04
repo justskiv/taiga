@@ -35,7 +35,7 @@ export function buildPopover(mount) {
         '<i style="background:' + sw[1] + '"></i>' +
         '<i style="background:' + sw[2] + '"></i>' +
         '<i style="background:' + sw[3] + '"></i>' +
-        '<i class="tp-amber"></i></span>' +
+        '<i class="tp-acc"></i></span>' +
       '<span class="tp-name">' + t.name + '</span>' +
       '<span class="tp-check" aria-hidden="true">✓</span>';
     it.addEventListener('click', function () { setTheme(t.id); mark(); });

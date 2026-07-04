@@ -16,7 +16,7 @@ html[data-rubvar="loud"] .rubric .ser-d{font-size:13px; line-height:1.6; color:v
 html[data-rubvar="loud"] .rubric .slist{margin-top:8px}
 html[data-rubvar="loud"] .rubric .slist a{font-size:20px; font-weight:700; letter-spacing:-.012em; line-height:1.32; color:var(--text-strong); padding:15px 8px; gap:16px}
 html[data-rubvar="loud"] .rubric .slist a::before{font-weight:500}
-html[data-rubvar="loud"] .rubric .slist a:hover{color:var(--accent-amber)}
+html[data-rubvar="loud"] .rubric .slist a:hover{color:var(--accent)}
 html[data-rubvar="loud"] .rubric .slist a .mins{font-weight:400; color:var(--text-muted); letter-spacing:0}
 html[data-rubvar="loud"] .rubric .slist a .vmark{font-size:12px}
 html[data-rubvar="loud"] .rubric .alist a{padding:16px 2px}
@@ -36,17 +36,17 @@ html[data-rubvar="shelf"] .rubric .slist a{position:relative; flex-direction:col
   font-size:15.5px; font-weight:600; color:var(--text-primary); line-height:1.35;
   transition:border-color var(--dur) var(--ease), transform .16s var(--ease), box-shadow .16s var(--ease)}
 html[data-rubvar="shelf"] .rubric .slist a:hover{background:var(--bg-surface); color:var(--text-strong); padding-left:16px; border-radius:12px;
-  border-color:color-mix(in srgb, var(--accent-amber) 40%, var(--border)); transform:translateY(-2px);
+  border-color:color-mix(in srgb, var(--accent) 40%, var(--border)); transform:translateY(-2px);
   box-shadow:0 14px 30px -18px rgba(0,0,0,.6)}
 html[data-rubvar="shelf"] .rubric .slist a::before{position:absolute; top:11px; left:16px; font-size:19px; font-weight:600; color:var(--text-ghost); transition:color var(--dur) var(--ease)}
-html[data-rubvar="shelf"] .rubric .slist a:hover::before{color:var(--accent-amber)}
+html[data-rubvar="shelf"] .rubric .slist a:hover::before{color:var(--accent)}
 html[data-rubvar="shelf"] .rubric .slist a .mins{margin:auto 0 0; padding-left:0}
 html[data-rubvar="shelf"] .rubric .slist a .vmark{position:absolute; top:14px; right:14px; font-size:11px}
 html[data-rubvar="shelf"] .rubric .alist{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:14px}
 html[data-rubvar="shelf"] .rubric .alist li a, html[data-rubvar="shelf"] .rubric .alist li:last-child a{height:100%;
   padding:15px 16px; border:1px solid var(--border); border-radius:12px; background:var(--bg-surface);
   transition:border-color var(--dur) var(--ease), transform .16s var(--ease), box-shadow .16s var(--ease)}
-html[data-rubvar="shelf"] .rubric .alist li a:hover{border-color:color-mix(in srgb, var(--accent-amber) 40%, var(--border)); transform:translateY(-2px); box-shadow:0 14px 30px -18px rgba(0,0,0,.6)}
+html[data-rubvar="shelf"] .rubric .alist li a:hover{border-color:color-mix(in srgb, var(--accent) 40%, var(--border)); transform:translateY(-2px); box-shadow:0 14px 30px -18px rgba(0,0,0,.6)}
 html[data-rubvar="shelf"] .rubric .alist .a-t{font-size:15.5px}
 html[data-rubvar="shelf"] .rubric .alist .a-s{font-size:13px}
 @media(max-width:640px){

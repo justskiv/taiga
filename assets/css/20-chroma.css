@@ -19,7 +19,7 @@
 .chroma .kn,
 .chroma .kp,
 .chroma .kr,
-.chroma .kc { color: var(--accent-amber); }
+.chroma .kc { color: var(--accent); }
 
 /* Built-in types → blue (gtok-typ): int64 byte bool string … */
 .chroma .kt { color: var(--accent-blue); }

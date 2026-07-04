@@ -1,8 +1,8 @@
 /* hero / article head */
-.kicker{display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-amber); margin-bottom:18px}
-.kicker .dot{width:7px; height:7px; border-radius:50%; background:var(--accent-amber); box-shadow:0 0 10px var(--accent-amber-glow)}
+.kicker{display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin-bottom:18px}
+.kicker .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent-glow)}
 h1{font-size:38px; line-height:1.15; font-weight:750; letter-spacing:-.02em; margin:0 0 18px}
-h1 .sub{color:var(--accent-amber)}
+h1 .sub{color:var(--accent)}
 .lead{font-size:19px; line-height:1.6; color:var(--text-secondary); margin:0 0 18px}
 .meta{display:flex; flex-wrap:wrap; gap:10px; margin:22px 0 8px; font-family:var(--font-mono); font-size:12px}
 .tag{display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--border); border-radius:20px; color:var(--text-secondary); background:var(--bg-surface)}

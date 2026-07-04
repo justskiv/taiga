@@ -5,7 +5,7 @@
   -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
   display:flex; align-items:flex-start; justify-content:center; padding:11vh 20px 20px}
 .sm{width:min(620px,100%); background:var(--bg-base); border:1px solid var(--border); border-radius:14px;
-  box-shadow:0 30px 80px -20px rgba(0,0,0,.7), 0 0 0 1px var(--accent-amber-dim); overflow:hidden;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.7), 0 0 0 1px var(--accent-dim); overflow:hidden;
   animation:tp-in .15s var(--ease) both}
 .sm-in{display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); padding:0 16px}
 .sm-in svg{width:15px; height:15px; color:var(--text-muted); flex:0 0 auto}
@@ -14,11 +14,11 @@
 .sm-list{max-height:46vh; overflow:auto; padding:8px}
 .sm-item{display:block; padding:10px 12px; border:0; border-radius:9px; color:var(--text-secondary); cursor:pointer}
 .sm-item .t{color:var(--text-primary); font-weight:600; font-size:14.5px; line-height:1.35}
-.sm-item .t mark{background:none; color:var(--accent-amber)}
+.sm-item .t mark{background:none; color:var(--accent)}
 .sm-item .d{display:block; font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-top:2px}
-.sm-item .d mark{background:none; color:var(--accent-amber); font-weight:600}  /* Pagefind excerpt hit — amber, no plaque */
+.sm-item .d mark{background:none; color:var(--accent); font-weight:600}  /* Pagefind excerpt hit — amber, no plaque */
 .sm-item .k{display:block; font-family:var(--font-mono); font-size:10.5px; color:var(--text-muted); margin-top:4px}
-.sm-item .k b{color:var(--accent-amber); font-weight:600}
+.sm-item .k b{color:var(--accent); font-weight:600}
 .sm-item.sel{background:var(--bg-surface)}
 .sm-item.sel .t{color:var(--text-strong)}
 .sm-empty{padding:26px 20px; color:var(--text-muted); font-size:14px; text-align:center}
