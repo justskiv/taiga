@@ -156,9 +156,9 @@ other = "cloud"
 [tags_cloud_aria]
 other = "Tag cloud"
 [tags_hint]
-other = "click a tag — the picks show up here · full feed is <a href=\"/#feed\">on the home page</a>"
+other = "click a tag — the picks show up here · full feed is <a href=\"{{ .home }}#feed\">on the home page</a>"
 [tags_noscript]
-other = "The tag cloud is built on the fly — without JavaScript the page stays quiet. The full feed lives <a href=\"/#feed\">on the home page</a>."
+other = "The tag cloud is built on the fly — without JavaScript the page stays quiet. The full feed lives <a href=\"{{ .home }}#feed\">on the home page</a>."
 
 [roadmap_bar_aria]
 other = "readiness"

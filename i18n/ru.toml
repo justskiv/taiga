@@ -191,9 +191,9 @@ other = "облако"
 [tags_cloud_aria]
 other = "Облако тегов"
 [tags_hint]
-other = "кликни тег — подборка появится здесь · вся лента — <a href=\"/#feed\">на главной</a>"
+other = "кликни тег — подборка появится здесь · вся лента — <a href=\"{{ .home }}#feed\">на главной</a>"
 [tags_noscript]
-other = "Облако тегов собирается на лету — без JavaScript страница молчит. Вся лента гайдов есть <a href=\"/#feed\">на главной</a>."
+other = "Облако тегов собирается на лету — без JavaScript страница молчит. Вся лента гайдов есть <a href=\"{{ .home }}#feed\">на главной</a>."
 
 # roadmap shortcode section headings
 [roadmap_bar_aria]

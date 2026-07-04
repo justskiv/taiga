@@ -57,7 +57,7 @@
   {{- $pos := 3 -}}
   {{- $s := partial "article/series-ctx.html" . -}}
   {{- if $s.isSeries -}}
-    {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" $pos "name" $s.term.Title "item" (printf "%s%s" (strings.TrimSuffix "/" site.BaseURL) $s.href)) -}}
+    {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" $pos "name" $s.term.Title "item" (printf "%s#%s" .CurrentSection.Permalink $s.slug)) -}}
     {{- $pos = add $pos 1 -}}
   {{- end -}}
   {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" $pos "name" .Title "item" .Permalink) -}}

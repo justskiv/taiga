@@ -12,7 +12,7 @@
 {{- if $s.isSeries }}<a class="ps" href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>
 {{- else }}<span>{{ i18n "kicker_standalone" }}</span>{{ end }}
 {{- "" -}}<span>{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span>
-{{- with $tags }}<span class="p-tags">{{ range $i, $t := . }}{{ if $i }} {{ end }}<a href="/tags/#{{ $t }}">#{{ $t }}</a>{{ end }}</span>{{ end -}}
+{{- with $tags }}<span class="p-tags">{{ $tagsURL := "tags/" | relLangURL }}{{ range $i, $t := . }}{{ if $i }} {{ end }}<a href="{{ $tagsURL }}#{{ $t }}">#{{ $t }}</a>{{ end }}</span>{{ end -}}
 </div>
 <h3 class="p-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
 <p class="p-s">{{ .Description }}</p>

@@ -19,15 +19,16 @@
   <div class="kicker"><span class="dot"></span>{{ .Params.kicker | default (lower .Title) }}</div>
   <h1>{{ .Params.headline | default .Title }}{{ with .Params.sub }} <span class="sub">{{ . }}</span>{{ end }}</h1>
   {{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
-  <noscript><p class="muted">{{ i18n "tags_noscript" | safeHTML }}</p></noscript>
+  <noscript><p class="muted">{{ i18n "tags_noscript" (dict "home" site.Home.RelPermalink) | safeHTML }}</p></noscript>
 
   <div class="sec-h" id="cloudHead">{{ i18n "tags_cloud" }} · {{ i18n "tags_count" (len $tags) }} · {{ i18n "guides_count" (len $guides) }}</div>
+  {{- $tagsURL := "tags/" | relLangURL -}}
   <nav class="tcloud" id="cloud" aria-label="{{ i18n "tags_cloud_aria" }}">
     {{- range $tags }}
-    <a class="tchip" href="/tags/#{{ .tag }}" data-tag="{{ .tag }}"><span class="h">#</span>{{ .tag }}<span class="n">×<b>{{ .count }}</b></span></a>
+    <a class="tchip" href="{{ $tagsURL }}#{{ .tag }}" data-tag="{{ .tag }}"><span class="h">#</span>{{ .tag }}<span class="n">×<b>{{ .count }}</b></span></a>
     {{- end }}
   </nav>
-  <p class="t-hint" id="cloudHint">{{ i18n "tags_hint" | safeHTML }}</p>
+  <p class="t-hint" id="cloudHint">{{ i18n "tags_hint" (dict "home" site.Home.RelPermalink) | safeHTML }}</p>
 
   <section id="tagSec" hidden aria-live="polite">
     <div class="sec-h" id="tagHead"></div>
