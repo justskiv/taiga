@@ -12,7 +12,7 @@
 | 02 Статья | done |
 | 2.5 Агностичность | done |
 | 03 Хром | done |
-| 04 Демо (exampleSite) | todo |
+| 04 Демо (exampleSite) | done |
 | 05 Релиз | todo |
 
 (Таблица приведена к текущему PLAN.md: контент-фазы конверсии статей
@@ -35,6 +35,152 @@
 
 Осталось (если фаза не закрыта): точный следующий шаг.
 ```
+
+---
+
+## 2026-07-04 — фаза 04 «Демо (exampleSite)» (done)
+
+exampleSite темы наполнен готовым комплектом `demo-content/`: мета-серия
+«под капотом» + мануал «Руководство» + standalone + kitchen-sink.
+Живёт в `themes/deeper/exampleSite/`, собирается против темы на месте
+через `--themesDir ../..`. Тексты и виджеты комплекта разложены
+дословно (правки — только санкционированные, ниже).
+
+Сделано:
+- КОНФИГ `exampleSite/hugo.toml` — второй эталонный пример, каждый
+  параметр закомментирован. `rubricSections=[howto,inside,reference]`
+  (три рубрики → грид карточек главной); меню 4 пункта в порядке
+  Приёмы/Устройство/Справочник/Песочница (у последнего `params.badge
+  = "β"` — демо генерик-бейджа); `featured=howto/get-started`,
+  `feedInitial=3`, `versionDefault="v0.1.0"`, `defaultTheme="amber"`,
+  brand `deeper` (tld пустой — бренд-нейтрально). heroLine/heroSat
+  разбиты по «·» из строки README; footerTag из README. Таксономии
+  tag/series, `[languages.ru]`, cascade term→render:never + page→
+  publishResources:false, markup/outputs — как у основного сайта.
+- РАСКЛАДКА комплекта по карте `demo-content/README.md`: howto
+  (_index + get-started/first-guide/make-it-yours/build-magic),
+  inside (_index + 3 бандла анатомии с widgets.js), reference
+  (_index + hotkeys), термины series/handbook + series/anatomy,
+  playground (бандл + w-reflex), about.md, roadmap.md, data/roadmap.toml.
+  СКАФФОЛДИНГ (не из комплекта, это сайт-хром): `content/_index.md`
+  (home, hero в params), `content/series/_index.md` (render:never),
+  `content/tags/_index.md` (chrome таксономии, копия схемы сайта с
+  бренд-нейтральным лидом).
+- KITCHEN-SINK перенесён из dev-драфта сайта (`content/dev/kitchen-sink/`)
+  в `content/reference/kitchen-sink/`; снят `draft`, дата `2026-05-30`.
+  Санкционированные правки при переносе (kitchen-sink — контент фазы 02,
+  НЕ комплект; README разрешает его правку):
+  · lead переписан — прежний описывал страницу как `draft: true`,
+    «в прод не попадает», что на опубликованном полигоне лживо; новый
+    lead описывает роль полигона («смотреть и копировать»).
+  · две внутренние ссылки на `/internals/memory-1-layout/` (страница
+    основного сайта, в exampleSite её нет → `linkcheck=error` убил бы
+    сборку) перенаправлены на `/inside/guide-is-a-bundle/`: инлайн-
+    ссылка «эталонный гайд» и bigcard (t → «Гайд — это папка»).
+- САНКЦИОНИРОВАННАЯ ПРАВКА комплекта (единственная, оговорена в README):
+  bigcard в конце «Палитра — это один файл» `/howto/kitchen-sink/` →
+  `/reference/kitchen-sink/`.
+- `.gitignore`: добавлены `exampleSite/public/` и `exampleSite/resources/`
+  (артефакты сборки не коммитятся).
+
+Проверено (приёмка) — СЫРОЙ вывод:
+- Сборка `hugo -s exampleSite --themesDir ../.. --gc --printPathWarnings
+  --printUnusedTemplates --printI18nWarnings`: 0 ошибок, 0 i18n/path-
+  warning; 1 «unused» — `render-image.html` (в контенте картинок нет;
+  тема обязана уметь — прежнее санкц. исключение). 21 страница, 18
+  обложек.
+- `pagefind --site exampleSite/public` (1.5.2, из venv): Indexed 1 lang
+  (ru), 12 страниц, 1554 слова — полнотекст (9 гайдов + about/roadmap/
+  playground; tags/термы вне индекса). Поиск находит тело статей, не
+  только заголовки.
+- `check-links.py exampleSite/public`: «OK: 18 pages, all internal links
+  and anchors resolve».
+- Обложки OG: 18 png в `public/og/dots/`, у каждой страницы свой
+  `og:image`. Глазами 2 шт: home (слоган heroLine, домен «deeper», без
+  кикера) и `guide-is-a-bundle` (кикер «ПОД КАПОТОМ У ТЕМЫ · АНАТОМИЯ
+  ТЕМЫ · ЧАСТЬ 1 ИЗ 3», title, мета «~5 мин · v0.1.0» right-align,
+  домен) — кириллица Inter 800, чисто.
+- Лента главной: 9 постов + кнопка «ещё 6 гайдов» (feedInitial 3).
+  Карточки рубрик: «4 гайда · 1 серия | 3 гайда · 1 серия | 2 разбора».
+- Серии (сервер-рендер выверен по HTML): handbook мост 5/5/5 →
+  часть1 «впереди 2 части · ~10 мин», часть2 «~5 мин», часть3 «серия
+  пройдена 3 из 3»; anatomy 5/4/5 → часть1 «~9 мин», часть2 «~5 мин»,
+  часть3 финал; шкала `flex-grow` ∝ mins; кикеры «часть N из 3»;
+  панель серии (snav, 3 части, aria-current), панель «ещё по теме»
+  у hotkeys (related → «Установка»).
+- Живьём (hugo server :1314, все виджеты кликаются, консоль
+  ЧИСТАЯ на всех): w-hello 0→3+«смонтирован»; w-mins 2 разд→mins 6;
+  w-series-math часть2 «~5 мин»/часть3 «дочитана» (числа = реальному
+  мосту — мета сошлась); w-reflex «старт»→«жди…»; kitchen-sink
+  w-ks-counter/fallback; бейдж меню «β»; чип versionDefault
+  «проверено на v0.1.0» на kitchen-sink (без version во fm). Минимапы
+  — сервер-сид панелей на месте, visited-метки ✓ ставятся.
+
+Факт-чек текстов против кода (задача 5) — СВЕРЕНО, всё сходится, КРОМЕ
+одной находки ниже. Проверенные контракты:
+- `DG.widget` (main.js): try/catch, missing mount → тихий скип, DOM-
+  ready — как в текстах.
+- Бандл: widgets.js/.css/og.png подхват; строит.-классы `.w-row/.w-btn/
+  .w-num/.w-cap/.w-badge` в `09-widgets.css`; работает для любого
+  бандла (playground доказывает).
+- Серии: series+series_weight, сортировка, N/M; кикер из 3 источников
+  (crumb.html); `series/pages.html` через `partialCached` по терму;
+  мост prev/next + шкала `flex-grow:mins` + остаток = сумма mins после
+  текущей; «вся серия» = якорь серии в рубрике (не отдельный URL);
+  related → левая панель у standalone.
+- Палитры: `data/themes/<id>.toml`, ключи = имена CSS-переменных;
+  `head/palettes.html` → `:root{}` + `[data-theme=id]{}`, prepend
+  первым в бандл; `defaultTheme`; `disabled=true` скипается; 7 палитр
+  (amber/github/lamp/light/nord/obsidian/onedark) = «все семь»; ключи
+  из текста (`bg-deep/bg-surface/border/text-primary/text-muted`) все
+  реальны.
+- OG: стиль = папка `assets/og/<style>/` (base.png+layout.toml,
+  опц. home.png); плейсхолдеры `{title}{kicker}{meta}{domain}{part}`;
+  `og_style`/`ogImages.style`/дефолт; `og.png`/`og_image`-оверрайд;
+  right-align только для моно (движок картинок Hugo).
+- Pagefind: ленивый `import('/pagefind/pagefind.js')`, тихий хинт при
+  отсутствии индекса, тело в `data-pagefind-body`, крошка/минуты —
+  метаданными, код `data-pagefind-weight="0.5"`.
+- Хоткеи (keys.js): ⌘K/`/` поиск, `[`/⌘1 левая, `]`/⌘2 правая, `F`
+  фокус (только на `.article`), `Esc` — поиск (keys.js) + поповер
+  (popover.js onKey); по `e.code` (любая раскладка); не в полях.
+  localStorage: `dg.theme` (view.js), `dg.railL/railR`, `dg.rubvar`,
+  `dg.visited` (visited.js) — все совпали.
+- Прочее: `custom.css` последним в бандле, existence-gated (css.html);
+  hooks `head-extra`/`foot-extra` — пустые точки переопределения
+  (head.html/scripts.html); `window.THEME_I18N` (i18n.js); архетип
+  `guides` (index.md+widgets.js, `--kind guides`, ловушка «без
+  /index.md»); чип версии — произвольная строка; дата — только в
+  head-метаданных (og/JSON-LD), в теле статьи нет; токены —
+  «public API, docs/customizing.md». i18n-мерж и второй язык —
+  структурно консистентны (не гонял добавление языка).
+
+Отклонения/находки:
+- [НАХОДКА #1 · w-palette не рисует свотчи] Виджет `w-palette`
+  (комплект, `inside/palette-is-a-file/widgets.js`) читает JSON-остров
+  `#dg-themes` и функцией `hexes(t)` ищет hex-цвета среди TOP-LEVEL
+  значений объекта палитры. Но канонический контракт острова (его
+  кладёт `head/palettes-json.html`, и ИМЕННО его читает НАСТОЯЩИЙ пикер
+  `popover.js` через `t.sw[0..3]`) — это `{id, name, weight, sw:[4
+  hex]}`: свотчи лежат в МАССИВЕ `sw`, а не россыпью строк. `hexes(t)`
+  массив пропускает → находит 0 hex → виджет рисует 7 кнопок палитр
+  БЕЗ цветных квадратиков (подтверждено и кодом, и живьём:
+  `swatchSquares:0`, и на скрине). Переключение темы при этом РАБОТАЕТ
+  (клик ставит `data-theme`, консоль чистая) — деградация визуальная,
+  не краш.
+  Кто прав: ТЕМА и ТЕКСТ статьи корректны и согласованы («свотчи
+  собираются из четырёх фиксированных ключей палитры» = `sw`); мимо
+  контракта — сам виджет комплекта.
+  РАЗРЕШЕНО ВЛАДЕЛЬЦЕМ (в чате) как санкционированная правка комплекта:
+  в `hexes()` первой строкой `if (Array.isArray(t.sw) && t.sw.length)
+  return t.sw.slice(0, 4);` (старый скан значений оставлен фолбэком).
+  Владелец внёс фикс в источник истины (`local/.../demo-content/`), я
+  подтянул его в exampleSite (файлы виджетов = источник дословно).
+  Проверено живьём: 7 кнопок × 4 свотча = 28 квадратиков, «Янтарь» =
+  bg-base/bg-surface/bg-raised/text-primary, консоль чистая.
+- Багов реализации ТЕМЫ не найдено — правок темы в этой фазе НЕТ.
+
+Осталось: фаза закрыта.
 
 ---
 
