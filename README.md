@@ -1,33 +1,19 @@
-# deeper.go
+# deeper
 
-The deeper.go site, built on the bundled `deeper` theme (`themes/deeper/`).
+A dark, minimalist Hugo theme for a Go learning platform: course-like series,
+interactive in-text widgets, self-hosted fonts, full-text search. No Node, no
+CDN, no external dependencies — Hugo + vanilla JS + plain CSS.
 
-## Build
-
-Search is a **two-step** build — Hugo renders the site, then Pagefind indexes
-the rendered HTML:
-
-```sh
-hugo --gc --minify
-pagefind --site public
-```
-
-The index lands in `public/pagefind/`. `hugo server` alone does **not** serve it;
-until the second step runs, the ⌘K search modal shows a quiet "index not built
-yet" hint instead of erroring.
-
-### Pagefind
-
-No Node required. Pin the version:
-
-```sh
-pip install 'pagefind[bin]==1.5.2'   # then: python3 -m pagefind --site public
-```
-
-or drop the standalone `pagefind` binary (same release tag) on the `PATH`. The
-standard release covers Russian stemming; `extended` is only needed for CJK.
+> Placeholder README. The full theme showcase (features, screenshots, install,
+> configuration, customization) lands in the release phase.
 
 ## Requirements
 
-- Hugo ≥ 0.146 (developed against v0.154.x), extended not required.
-- Pagefind 1.5.2 (search index).
+- Hugo ≥ 0.146 (developed against v0.154.x). The `extended` build is **not**
+  required — this is a plain-CSS theme.
+- [Pagefind](https://pagefind.app/) for search (second build step).
+
+## License
+
+MIT — see [LICENSE](LICENSE). Bundled fonts are under the SIL Open Font License;
+see the `.txt` files next to them in `assets/fonts/`.

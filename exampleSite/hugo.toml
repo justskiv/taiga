@@ -6,15 +6,16 @@
 # theme in place — so every key is commented for someone reading the theme to
 # learn how to configure their own site.
 #
-# Build it from the theme root (themes/deeper/) with:
+# Build it from the repo root (the theme IS this repository):
 #   hugo -s exampleSite --themesDir ../..
 #   pagefind --site exampleSite/public
-# `--themesDir ../..` resolves to themes/ (exampleSite/../.. ), where `deeper`
-# lives — so the demo builds against the very theme it documents, no install.
+# `theme = "taiga"` is resolved under `--themesDir` (the repo's PARENT dir) to a
+# folder named `taiga` — i.e. this repo. Check the repo out as `taiga` for this
+# to work with no install; the demo then builds against the very theme it documents.
 
 baseURL = "https://example.org/"        # placeholder — the demo has no real domain
-title = "deeper"                         # brand-neutral: this demo is theme-about-theme
-theme = "deeper"                         # resolved via --themesDir (see header)
+title = "taiga"                          # brand-neutral: this demo is theme-about-theme
+theme = "taiga"                          # resolved via --themesDir (see header)
 
 # Single language, but already in multilingual shape: adding a second language is
 # additive (content + one [languages.xx] block), not a config migration. The

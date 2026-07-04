@@ -1,6 +1,0 @@
-# Theme module descriptor. `extended` is intentionally NOT declared: the flag
-# is deprecated since v0.153, and a plain-CSS theme needs no extended build
-# (esbuild for css.Build/js.Build ships in the ordinary binary).
-[module]
-  [module.hugoVersion]
-    min = "0.146.0"
