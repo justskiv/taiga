@@ -42,3 +42,18 @@ pre code{font-size:13.5px; line-height:1.7; color:var(--text-primary); white-spa
 .gtok-num{color:var(--accent-copper)}
 .gtok-com{color:var(--text-muted); font-style:italic}
 .code-label{display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); margin:0 0 8px}
+
+/* content images */
+/* On dark palettes, dim images at rest and reveal full brightness on hover,
+   so a bright screenshot never punches a hole in a dark page. Gated on
+   (hover: hover) so it runs only on pointer devices — a touch screen has no
+   hover to undo the dimming, which would leave images dark for good.
+   `light` (data/themes/light.toml, `light = true`) is the sole non-dark
+   palette, so it's the one theme excluded here. */
+@media (hover:hover){
+  :root:not([data-theme="light"]) .wrap img{filter:brightness(.5); transition:filter .6s ease-out}
+  :root:not([data-theme="light"]) .wrap img:hover{filter:none}
+}
+@media (prefers-reduced-motion:reduce){
+  :root:not([data-theme="light"]) .wrap img{transition:none}
+}
