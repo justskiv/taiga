@@ -10,8 +10,13 @@ h1 .sub{color:var(--accent)}
    same solid --border as the meta ticks and h2 rules) so the head ends on a clean
    line and the article starts fresh below it. .layout scopes this to real
    articles; rubric/taxonomy/404 leads keep the plain deck. No lead → no element →
-   no rule, and the meta line's own margin carries the gap to the body. */
+   no rule, and the meta line's own margin carries the gap to the body.
+   The deck is now the prose before <!--more--> (.Summary), so it can run to
+   several paragraphs; type sits on the wrapper and cascades into the child <p>s,
+   which means it still applies to the legacy single <p class="lead"> too. */
 .layout .lead{font-size:20px; line-height:1.5; color:var(--text-primary); margin:0 0 28px; padding-bottom:20px; border-bottom:1px solid var(--border)}
+.layout .lead p{font-size:inherit; line-height:inherit; color:inherit; margin:0 0 14px}
+.layout .lead p:last-child{margin-bottom:0}
 /* meta line: quiet metadata between the title and the lead — muted label +
    emphasized value, borderless (editorial, not a tag cloud), items split by a
    hairline. -2 top collapses with h1's 18px to a snug 16px (binds it to the

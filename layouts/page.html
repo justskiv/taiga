@@ -23,7 +23,15 @@
 {{ partial "article/kicker.html" . }}
 <h1 data-pagefind-meta="title">{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
 {{ partial "article/meta.html" . }}
-{{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
+{{- /* Standfirst: prose before the <!--more--> divider is the lead (.Summary),
+       everything after is the body (.ContentWithoutSummary). Gated on the divider
+       being present in the raw markdown, NOT on .Truncated — .Truncated is also
+       true for Hugo's auto-summary, which would wrongly split an intro off any
+       long article that never had a lead. Falls back to the legacy `lead:` param
+       when there's no divider, so articles migrate one file at a time. */ -}}
+{{- $cut := strings.Contains .RawContent "<!--more-->" -}}
+{{ if $cut }}<div class="lead">{{ .Summary }}</div>
+{{ else }}{{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}{{ end }}
 {{ with .Params.intro }}{{ $.RenderString (dict "display" "block") . }}{{ end }}
 {{ partial "article/toc.html" . }}
 {{- /* Pagefind: index the prose only. A placeholder has nothing to find, so it
@@ -33,7 +41,7 @@
 <div data-pagefind-body>
 <span data-pagefind-meta="crumb:{{ partial "article/crumb.html" . }}"></span>
 <span data-pagefind-meta="mins:{{ .Params.mins | default (partial "article/reading-time.html" .) }}"></span>
-{{ .Content }}
+{{ if $cut }}{{ .ContentWithoutSummary }}{{ else }}{{ .Content }}{{ end }}
 </div>
 {{ end }}
 {{ partial "article/series-bridge.html" . }}
