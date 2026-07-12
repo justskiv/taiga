@@ -19,10 +19,21 @@
 sup.beta{font-family:var(--font-mono); font-size:9px; color:var(--accent); margin-left:3px; letter-spacing:.04em; opacity:.85}
 .head-sp{flex:1}
 kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 5px; background:var(--bg-base)}
-.search-btn{display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); background:var(--bg-surface); border:1px solid var(--border); border-radius:9px; padding:6px 10px; cursor:pointer; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
-.search-btn:hover{color:var(--text-secondary); border-color:var(--text-muted)}
-.search-btn svg{width:13px; height:13px}
-@media(max-width:720px){.search-btn .s-lab, .search-btn kbd{display:none}}
+/* command-trigger button: magnifier · label · ⌘K keycap, on a fixed 32px row so
+   the three optically center; asymmetric padding (11 left / 8 right) balances the
+   bare icon against the boxed keycap */
+.search-btn{display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 8px 0 11px; font-family:var(--font-mono); font-size:12.5px; line-height:1; color:var(--text-muted); background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-sm); cursor:pointer; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.search-btn svg{flex:0 0 auto; width:14px; height:14px; transition:color var(--dur) var(--ease)}
+.search-btn:hover{color:var(--text-secondary); border-color:var(--accent-dim); background:var(--bg-raised)}
+.search-btn:hover svg{color:var(--accent)}
+.search-btn:hover .kb{color:var(--text-secondary); border-color:var(--text-muted)}
+.search-btn:active{transform:translateY(1px)}
+.search-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+/* refined in-button keycap: flex-centered content + a 1px bottom shadow-lip (not a
+   heavier bottom border) so the ⌘K sits dead-centre against the label */
+.search-btn .kb{display:inline-flex; align-items:center; justify-content:center; margin-left:3px; height:16px; padding:0 5px; font-size:10.5px; border-bottom-width:1px; box-shadow:0 1px 0 var(--border); transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
+@media(max-width:720px){.search-btn{width:36px; padding:0; gap:0; justify-content:center} .search-btn .s-lab, .search-btn .kb{display:none} .search-btn svg{width:16px; height:16px}}
+@media(prefers-reduced-motion:reduce){.search-btn{transition:none} .search-btn:active{transform:none}}
 /* header sticks, hides on scroll-down, slides back on scroll-up */
 .site-head{position:sticky; top:0; z-index:110;
   background:color-mix(in srgb, var(--bg-deep) 88%, transparent);

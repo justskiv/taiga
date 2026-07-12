@@ -15,7 +15,7 @@
     <div class="f-k">
       <a href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
       {{ if $s.isSeries }}<a href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>{{ end }}
-      <span>{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span>
+      <span>{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</span>
     </div>
     <h2 class="f-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
     <p class="f-s">{{ .Description }}</p>

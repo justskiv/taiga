@@ -22,8 +22,8 @@
   <main class="wrap">
 {{ partial "article/kicker.html" . }}
 <h1 data-pagefind-meta="title">{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
-{{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
 {{ partial "article/meta.html" . }}
+{{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
 {{ with .Params.intro }}{{ $.RenderString (dict "display" "block") . }}{{ end }}
 {{ partial "article/toc.html" . }}
 {{- /* Pagefind: index the prose only. A placeholder has nothing to find, so it
@@ -32,7 +32,7 @@
 {{ if .Params.placeholder }}{{ .Content }}{{ else }}
 <div data-pagefind-body>
 <span data-pagefind-meta="crumb:{{ partial "article/crumb.html" . }}"></span>
-<span data-pagefind-meta="mins:{{ .Params.mins | default .ReadingTime }}"></span>
+<span data-pagefind-meta="mins:{{ .Params.mins | default (partial "article/reading-time.html" .) }}"></span>
 {{ .Content }}
 </div>
 {{ end }}

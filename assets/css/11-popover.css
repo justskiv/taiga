@@ -1,4 +1,4 @@
-/* ---- theme / view popover (lives in the header now, not floating) ---- */
+/* ---- theme popover (lives in the header now, not floating) ---- */
 .tp-wrap{position:relative}
 .tp-btn{
   width:34px; height:34px; display:flex; align-items:center; justify-content:center; padding:0;
@@ -39,14 +39,4 @@
 .tp-name{flex:1; font-size:13px; font-weight:600}
 .tp-check{color:var(--accent); font-family:var(--font-mono); font-weight:700; flex-shrink:0; opacity:0}
 .tp-item.current .tp-check{opacity:1}
-/* view settings section inside the popover */
-.tp-sec{border-top:1px solid var(--border); margin-top:7px; padding-top:7px}
-.tp-row{display:flex; align-items:center; gap:10px; padding:6px 8px; font-size:12.5px; color:var(--text-secondary)}
-.tp-row .tr-l{flex:1; min-width:0}
-.tp-seg{display:flex; border:1px solid var(--border); border-radius:7px; overflow:hidden; flex-shrink:0}
-.tp-seg button{font-family:var(--font-mono); font-size:10.5px; padding:4px 8px; background:none; border:0; color:var(--text-muted); cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease)}
-.tp-seg button + button{border-left:1px solid var(--border)}
-.tp-seg button.on{background:var(--accent-dim); color:var(--accent)}
-.tp-hint{padding:7px 8px 3px; font-size:10.5px; line-height:1.7; color:var(--text-muted); font-family:var(--font-mono)}
-.tp-hint kbd.kb{margin-right:2px}
 @media (prefers-reduced-motion:reduce){ .tp-pop{animation:none} }

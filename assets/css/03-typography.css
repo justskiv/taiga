@@ -30,6 +30,11 @@ em{color:var(--text-primary); font-style:italic}
 blockquote{margin:0 0 22px; padding:2px 0 2px 18px; border-left:3px solid var(--accent); color:var(--text-secondary); font-style:italic}
 blockquote p{margin:0}
 
+/* thematic break (markdown ----): the same --border hairline as the lead deck
+   and the h2 rules, with generous air so it reads as a deliberate section
+   break rather than an underline */
+hr{border:0; height:1px; background:var(--border); margin:40px 0}
+
 /* inline + block code */
 code{font-family:var(--font-mono); font-size:.86em}
 p code, li code, td code, h3 code, blockquote code{background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; padding:1px 6px; color:var(--text-strong); white-space:nowrap}

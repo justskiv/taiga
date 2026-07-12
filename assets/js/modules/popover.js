@@ -2,7 +2,7 @@
    comes from the JSON the palettes partial emits (#dg-themes) — JS knows only
    names and swatch colors, never palette values. */
 import { I18N } from './i18n.js';
-import { curTheme, setTheme, railOn, setRail, getRubvar, setRubvar, registerSeg, syncSegs } from './view.js';
+import { curTheme, setTheme } from './view.js';
 
 function themes() {
   const el = document.getElementById('dg-themes');
@@ -50,51 +50,12 @@ export function buildPopover(mount) {
     });
   }
 
-  /* view settings: rails, rubric layout */
-  function segRow(label, opts, activeIdx, choose) {
-    const row = document.createElement('div'); row.className = 'tp-row';
-    row.innerHTML = '<span class="tr-l">' + label + '</span>';
-    const seg = document.createElement('span'); seg.className = 'tp-seg';
-    const btns = opts.map(function (o, i) {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = o;
-      b.addEventListener('click', function () { choose(i); });
-      seg.appendChild(b); return b;
-    });
-    row.appendChild(seg);
-    registerSeg(btns, activeIdx);
-    return row;
-  }
-  const sec = document.createElement('div'); sec.className = 'tp-sec';
-  const vh = document.createElement('div'); vh.className = 'tp-head'; vh.textContent = I18N.viewHead;
-  sec.appendChild(vh);
-  let hasRows = false;
-  if (document.body.classList.contains('article')) {
-    hasRows = true;
-    sec.appendChild(segRow(I18N.railLeft, [I18N.on, I18N.off],
-      function () { return railOn('l') ? 0 : 1; }, function (i) { setRail('l', i === 0); }));
-    sec.appendChild(segRow(I18N.railRight, [I18N.on, I18N.off],
-      function () { return railOn('r') ? 0 : 1; }, function (i) { setRail('r', i === 0); }));
-  }
-  if (document.body.classList.contains('rubric')) {
-    hasRows = true;
-    const RUBVARS = ['rows', 'loud', 'shelf'];
-    sec.appendChild(segRow(I18N.lists, [I18N.listRows, I18N.listLoud, I18N.listShelf],
-      function () { return Math.max(0, RUBVARS.indexOf(getRubvar())); },
-      function (i) { setRubvar(RUBVARS[i]); }));
-  }
-  if (document.body.classList.contains('article')) {
-    const hint = document.createElement('div'); hint.className = 'tp-hint';
-    hint.innerHTML = I18N.hint;
-    sec.appendChild(hint);
-  }
-  if (hasRows) pop.appendChild(sec);
-
   function onDoc(e) { if (!pop.contains(e.target) && !btn.contains(e.target)) close(); }
   function onKey(e) { if (e.key === 'Escape') { close(); btn.focus(); } }
   function show() {
     pop.hidden = false; btn.setAttribute('aria-expanded', 'true');
     document.addEventListener('mousedown', onDoc); document.addEventListener('keydown', onKey);
-    mark(); syncSegs();
+    mark();
   }
   function close() {
     pop.hidden = true; btn.setAttribute('aria-expanded', 'false');

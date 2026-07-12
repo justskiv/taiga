@@ -30,6 +30,9 @@ export function buildToc() {
   function spy() {
     ticking = false;
     const line = window.scrollY + Math.min(180, window.innerHeight * 0.25);
+    /* default to the first heading so the toc is never blank in the pre-heading
+       lead — it reads as "you're at the start", and lights the real section
+       once one crosses the line */
     let cur = items[0];
     for (let i = 0; i < items.length; i++) {
       const top = items[i].h.getBoundingClientRect().top + window.scrollY;

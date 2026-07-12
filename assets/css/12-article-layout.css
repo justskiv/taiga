@@ -1,10 +1,14 @@
 /* ---- article layout: rail | content | rail ---- */
 .layout{display:grid; grid-template-columns:1fr minmax(0,var(--content)) 1fr; column-gap:44px; max-width:1600px; margin:0 auto; padding:0 24px}
 .layout > .wrap{grid-column:2; grid-row:1; max-width:none; margin:0; padding:48px 0 96px; min-width:0}
+.wrap p > img{display:block; box-sizing:border-box; max-width:100%; height:auto; margin-left:auto; margin-right:auto}
 .rail{display:none; grid-row:1; font-size:13px}
 .rail-l{grid-column:1; justify-self:end}
 .rail-r{grid-column:3; justify-self:start}
 .rail-in{position:sticky; top:36px; width:var(--rail); max-height:calc(100vh - 72px); overflow:auto; padding:14px 4px 24px; scrollbar-width:thin}
+/* transparent while the rail is open (rail-in stays sticky, as above); turns
+   into a viewport-tall frame when collapsed so marks + peek centre in the margin */
+.rail-dock{display:contents}
 @media(min-width:1366px){
   .rail{display:block}
   body.article .toc{display:none} /* the live right rail replaces the inline toc */
@@ -13,20 +17,29 @@
    in the margin, no box, no chrome. Left: one dot per series part
    (filled=read, amber=current), each dot navigates. Right: miniature outline
    (h2 long dash, h3 short) synced with the scroll-spy. Hovering or focusing
-   the map peeks the full panel as a soft overlay anchored to the same top
-   line (--mini-top), so nothing jumps; «закрепить панель» at the overlay's
-   bottom pins it back (as do [ ] / ⌘1 ⌘2). Hover states stay gray — amber is
-   reserved for the current marks. */
+   the map peeks the full panel, blooming from the same centred spot; «закрепить
+   панель» at the overlay's bottom pins it back (as do [ ] / ⌘1 ⌘2). Hover
+   states stay gray — amber is reserved for the current marks. */
 html.rail-l-off .rail-l .rail-in{display:none}
 html.rail-r-off .rail-r .rail-in{display:none}
-/* one shared top line for the map and its peek: lower than the pinned panel
-   (36px) so the marks don't glue to the header, still top-anchored so the
-   overlay can grow downward from the very same edge */
+/* the "just under the header" line the marks and peek hang from */
 .rail{--mini-top:104px}
-.rail-mini{display:none; position:sticky; top:var(--mini-top);
-  flex-direction:column; width:32px; padding:10px 6px; cursor:pointer}
-.rail-l .rail-mini{align-items:flex-end}
-.rail-r .rail-mini{align-items:flex-start}
+/* collapsed: the dock spans the viewport (sticky, 100vh) and rides scroll, so
+   its top-anchored children stay pinned just under the header at every scroll
+   position and unpin only with the footer. Click-through frame; only the marks
+   and the peek take the pointer. */
+html.rail-l-off .rail-l .rail-dock,
+html.rail-r-off .rail-r .rail-dock{
+  display:block; position:sticky; top:0; height:100vh; width:var(--rail); pointer-events:none}
+/* the marks: pinned just under the header, tucked into the outer corner of the
+   rail track — well clear of the prose */
+.rail-mini{display:none; position:absolute; top:var(--mini-top);
+  flex-direction:column; padding:10px 12px; cursor:pointer; pointer-events:auto}
+/* left/right pulled in by the same amount the h-padding grew, so the marks stay
+   put in the corner while the (invisible) hit zone widens around them — hovering
+   only opens the peek, nothing else changes under the cursor */
+.rail-l .rail-mini{align-items:flex-start; left:8px}
+.rail-r .rail-mini{align-items:flex-end; right:8px}
 html.rail-l-off .rail-l .rail-mini{display:flex}
 html.rail-r-off .rail-r .rail-mini{display:flex}
 /* while the peek is up the map yields to the panel shown over it */
@@ -45,45 +58,55 @@ html.rail-r-off .rail-r .rail-mini{display:flex}
 .rail-mini:hover .mini-ln{background:var(--text-muted)}
 .rail-mini .mini-ln:hover{background:var(--text-secondary)}
 .rail-mini .mini-ln.on{background:var(--accent); width:19px}
-/* peek overlay: the real .rail-in shown on the map's top line. It is sticky
-   like the map itself, so both ride the same line at every scroll position —
-   the panel opens exactly where the marks were. */
+/* peek overlay: the real .rail-in, absolutely hung from the same top line as the
+   marks, blooming downward over the rail track. Height is capped and it scrolls
+   if it ever needs to; the panel is short, so it just hangs from the top. */
 html.rail-l-off .rail-l.peek .rail-in,
 html.rail-r-off .rail-r.peek .rail-in{
-  display:block; top:var(--mini-top); z-index:120;
-  max-height:calc(100vh - var(--mini-top) - 24px);
+  display:block; position:absolute; top:var(--mini-top); z-index:120; pointer-events:auto;
+  max-height:calc(100vh - var(--mini-top) - 24px); overflow:auto;
   padding:12px 12px 0;
   background:color-mix(in srgb, var(--bg-base) 94%, transparent);
   -webkit-backdrop-filter:blur(14px) saturate(1.2); backdrop-filter:blur(14px) saturate(1.2);
   border:1px solid var(--border); border-radius:14px;
   box-shadow:0 18px 44px -16px rgba(0,0,0,.55);
 }
-html.rail-l-off .rail-l.peek .rail-in{animation:rail-peek-l .16s var(--ease) both}
-html.rail-r-off .rail-r.peek .rail-in{animation:rail-peek-r .16s var(--ease) both}
+html.rail-l-off .rail-l.peek .rail-in{right:0; animation:rail-peek-l .16s var(--ease) both}
+html.rail-r-off .rail-r.peek .rail-in{left:0; animation:rail-peek-r .16s var(--ease) both}
 @keyframes rail-peek-l{from{opacity:0; transform:translateX(6px)} to{opacity:1; transform:none}}
 @keyframes rail-peek-r{from{opacity:0; transform:translateX(-6px)} to{opacity:1; transform:none}}
-/* inside the peek the ✕ makes no sense — the panel is already hidden */
+/* inside the peek the collapse chevron makes no sense — the panel is folded */
 html.rail-l-off .rail-l .rail-in .rail-x,
 html.rail-r-off .rail-r .rail-in .rail-x{display:none}
-/* pin row: a quiet line stuck to the overlay bottom */
+/* pin row: an unmistakable button stuck to the overlay bottom — a raised
+   surface with a pin glyph and hotkey keycap, accent on hover/press, so it
+   reads as "click here (or press [ ) to keep this panel open". */
 .rail-pin{display:none}
 html.rail-l-off .rail-l .rail-pin,
 html.rail-r-off .rail-r .rail-pin{
-  position:sticky; bottom:0; display:flex; align-items:center; gap:8px;
-  width:calc(100% + 24px); margin:10px -12px 0; padding:9px 14px;
-  background:var(--bg-base); border:0; border-top:1px solid var(--border);
+  position:sticky; bottom:0; z-index:1; display:flex; align-items:center; gap:8px;
+  width:calc(100% + 24px); margin:12px -12px 0; padding:11px 14px;
+  background:var(--bg-surface); border:0; border-top:1px solid var(--border);
   border-radius:0 0 13px 13px; text-align:left; cursor:pointer;
-  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.05em;
-  color:var(--text-muted);
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.04em;
+  color:var(--text-secondary);
   transition:color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
-.rail-pin:hover{color:var(--text-primary); background:var(--bg-surface)}
+.rail-pin svg{width:14px; height:14px; flex:0 0 auto; color:var(--text-muted);
+  transition:color var(--dur) var(--ease)}
 .rail-pin .kb{margin-left:auto}
+.rail-pin:hover{color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, var(--bg-surface))}
+.rail-pin:hover svg{color:var(--accent)}
+.rail-pin:active{background:color-mix(in srgb, var(--accent) 18%, var(--bg-surface))}
 .rail-pin:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
 @media (prefers-reduced-motion:reduce){
   .rail-mini .mini-dot:hover{transform:none}
   html.rail-l-off .rail-l.peek .rail-in,
   html.rail-r-off .rail-r.peek .rail-in{animation:none}
+  .focus-exit, .focus-exit.gone, .focus-exit-tip{transition:none}
+  .focus-exit-tip, .focus-exit:hover .focus-exit-tip,
+  .focus-exit:focus-visible .focus-exit-tip{transform:translateY(-50%)}
+  .rail-tip, .rail-x:hover .rail-tip, .rail-x:focus-visible .rail-tip{transition:none; transform:none}
 }
 /* focus mode: nothing but the text (F to toggle) */
 html.focus .site-head, html.focus .rail{display:none !important}
@@ -95,17 +118,34 @@ html.focus .site-head, html.focus .rail{display:none !important}
 .focus-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .focus-btn svg{width:16px; height:16px}
 .focus-exit[hidden]{display:none}
-/* enters bright so you know the way back, then melts to a whisper */
-.focus-exit{position:fixed; right:20px; bottom:20px; z-index:130;
-  display:inline-flex; align-items:center; gap:8px;
-  font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);
+/* icon-only "shrink back": mirrors .focus-btn at top-right (the header, hidden
+   in focus mode, is where enter lived). Enters visible, melts to a whisper,
+   tucks away on scroll-down and drifts back on scroll-up. Cascade order sets
+   the winner: gone (0) beats dim (.5), hover/focus (1) beats both. */
+.focus-exit{position:fixed; top:20px; right:20px; z-index:130;
+  width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; padding:0;
+  color:var(--text-secondary); cursor:pointer;
   background:color-mix(in srgb, var(--bg-surface) 85%, transparent);
   -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
-  border:1px solid var(--border); border-radius:999px; padding:8px 14px; cursor:pointer;
-  opacity:1; transition:opacity .5s var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
-.focus-exit .kb{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--border))}
-.focus-exit.dim{opacity:.22}
-.focus-exit:hover, .focus-exit:focus-visible{opacity:1; color:var(--text-primary); border-color:var(--text-muted)}
+  border:1px solid var(--border); border-radius:9px;
+  opacity:1; transition:opacity .6s var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
+.focus-exit svg{width:16px; height:16px}
+.focus-exit.dim{opacity:.5}
+.focus-exit.gone{opacity:0; pointer-events:none; transition:opacity .28s var(--ease)}
+.focus-exit:hover, .focus-exit:focus-visible{opacity:1; pointer-events:auto; color:var(--accent); border-color:var(--accent-dim)}
+.focus-exit:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+/* label + keycap, tucked left of the icon until hover/focus */
+.focus-exit-tip{position:absolute; right:calc(100% + 9px); top:50%;
+  transform:translateY(-50%) translateX(5px);
+  display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+  padding:5px 9px; border-radius:8px;
+  background:var(--bg-raised); border:1px solid var(--border);
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.55);
+  font-family:var(--font-mono); font-size:11.5px; color:var(--text-secondary);
+  opacity:0; pointer-events:none;
+  transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease)}
+.focus-exit-tip .kb{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--border))}
+.focus-exit:hover .focus-exit-tip, .focus-exit:focus-visible .focus-exit-tip{opacity:1; transform:translateY(-50%) translateX(0)}
 @media(max-width:1365.9px){
   .layout{display:block; max-width:none; padding:0}
   .layout > .wrap{max-width:var(--content); margin:0 auto; padding:48px 24px 96px}
@@ -114,11 +154,27 @@ html.focus .site-head, html.focus .rail{display:none !important}
 .rail-h{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; min-height:22px}
 .rail-k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted); border:0}
 a.rail-k:hover{color:var(--accent); border:0}
-.rail-x{width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
-  background:none; border:0; border-radius:6px; color:var(--text-ghost); cursor:pointer; font-size:15px; line-height:1;
-  opacity:0; transition:opacity var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease)}
-.rail:hover .rail-x, .rail-x:focus-visible{opacity:1}
-.rail-x:hover{color:var(--text-secondary); background:var(--bg-surface)}
+/* collapse control: a quiet, always-present chevron that tucks the panel to its
+   outer edge (reversible — not a close ✕). Ghost at rest so it never nags the
+   reader; wakes on panel hover, goes accent on its own hover. */
+.rail-x{position:relative; width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  background:none; border:0; border-radius:6px; color:var(--text-muted); cursor:pointer;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.rail-x svg{width:15px; height:15px}
+.rail:hover .rail-x{color:var(--text-secondary)}
+.rail-x:hover{color:var(--accent); background:var(--bg-surface)}
+.rail-x:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+/* hotkey tooltip — same keycap pattern as .focus-exit-tip, dropping down */
+.rail-tip{position:absolute; top:calc(100% + 7px); right:0; z-index:5;
+  display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+  padding:5px 9px; border-radius:8px;
+  background:var(--bg-raised); border:1px solid var(--border);
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.55);
+  font-family:var(--font-mono); font-size:11.5px; color:var(--text-secondary);
+  opacity:0; pointer-events:none; transform:translateY(-4px);
+  transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease)}
+.rail-tip .kb{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--border))}
+.rail-x:hover .rail-tip, .rail-x:focus-visible .rail-tip{opacity:1; transform:translateY(0)}
 /* series list (left rail) */
 .snav{list-style:none; margin:0; padding:0; counter-reset:sn}
 .snav li{margin:0; counter-increment:sn}

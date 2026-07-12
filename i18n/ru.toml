@@ -43,6 +43,12 @@ few = "{{ .Count }} части"
 many = "{{ .Count }} частей"
 other = "{{ .Count }} части"
 
+[words]
+one = "{{ .Count }} слово"
+few = "{{ .Count }} слова"
+many = "{{ .Count }} слов"
+other = "{{ .Count }} слова"
+
 [part_of]
 other = "часть {{ .N }} из {{ .M }}"
 
@@ -76,11 +82,11 @@ other = "Навигация по серии"
 [rail_r_aria]
 other = "Оглавление страницы"
 [rail_r_head]
-other = "на этой странице"
+other = "Содержание"
 [rail_hide_l]
-other = "Скрыть панель — ["
+other = "Свернуть"
 [rail_hide_r]
-other = "Скрыть панель — ]"
+other = "Свернуть"
 [rail_related]
 other = "ещё по теме"
 

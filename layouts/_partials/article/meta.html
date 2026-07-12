@@ -1,13 +1,18 @@
-{{- /* Meta chips, mirroring the mock: «проверено на go1.26 · 64-бит», «~14 мин»,
-       «интерактив: …». `version` is a free-form string rendered verbatim (e.g.
-       "go1.26", "PostgreSQL 17"), falling back to the site default; arch and the
-       interactive list are optional per-article; mins is authored (fixed values,
-       so the chips and the series bridge agree) with .ReadingTime as fallback. */ -}}
+{{- /* Meta line: quiet editorial metadata, sits between the title and the lead.
+       «проверено на go1.26 · 64-бит», «~14 мин», «4 183 слова», optional
+       «интерактив: …». Each item is a muted label + emphasized value, split by a
+       hairline; the word count is the quietest (all-muted). `version` renders
+       verbatim (e.g. "go1.26", "PostgreSQL 17"), falling back to the site default;
+       arch and the interactive list are optional per-article; mins is authored
+       (fixed, so the line and the series bridge agree) and both fall back to the
+       shared reading-time.html estimate — so the chip and the bridge stay in sync.
+       Class stays .tag (the site's meta override emits it too). */ -}}
 {{- $ver := .Params.version | default site.Params.versionDefault -}}
 <div class="meta">
 <span class="tag">{{ i18n "meta_tested_on" }} <b>{{ $ver }}</b>{{ with .Params.arch }} · {{ . }}{{ end }}</span>
-<span class="tag">~<b>{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</b></span>
+<span class="tag">~<b>{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</b></span>
+<span class="tag tag-quiet">{{ i18n "words" .WordCount }}</span>
 {{- with .Params.interactive }}
-<span class="tag"><b>{{ $.Params.interactive_label | default (i18n "meta_interactive") }}</b>: {{ . }}</span>
+<span class="tag"><b>{{ $.Params.interactive_label | default (i18n "meta_interactive") }}:</b> {{ . }}</span>
 {{- end }}
 </div>

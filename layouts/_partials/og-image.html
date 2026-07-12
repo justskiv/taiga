@@ -33,7 +33,7 @@
       {{- $part := "" -}}{{ $kicker := "" -}}{{ $meta := "" -}}{{ $titleText := .Title -}}
       {{- if $isGuide -}}
         {{- $kicker = partial "article/crumb.html" . -}}
-        {{- $meta = printf "~%v %s · %s" (.Params.mins | default .ReadingTime) (i18n "mins_abbr") (.Params.version | default site.Params.versionDefault) -}}
+        {{- $meta = printf "~%v %s · %s" (.Params.mins | default (partial "article/reading-time.html" .)) (i18n "mins_abbr") (.Params.version | default site.Params.versionDefault) -}}
         {{- $s := partial "article/series-ctx.html" . -}}
         {{- if $s.isSeries }}{{ $part = printf "%d/%d" $s.pos $s.total }}{{ end -}}
       {{- else if .IsHome -}}

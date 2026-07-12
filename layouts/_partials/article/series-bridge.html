@@ -12,19 +12,19 @@
 {{- $idx := sub $pos 1 -}}
 {{- $ahead := sub $total $pos -}}
 {{- $minsLeft := 0 -}}
-{{- range $i, $p := $pages }}{{ if gt $i $idx }}{{ $minsLeft = add $minsLeft (int ($p.Params.mins | default $p.ReadingTime)) }}{{ end }}{{ end -}}
+{{- range $i, $p := $pages }}{{ if gt $i $idx }}{{ $minsLeft = add $minsLeft (int ($p.Params.mins | default (partial "article/reading-time.html" $p))) }}{{ end }}{{ end -}}
 <nav class="sbr" aria-label="{{ i18n "rail_l_aria" }}">
 <div class="sbr-head"><span>{{ i18n "series_word" }} · {{ $s.label }}</span><a href="{{ $s.href }}">{{ i18n "all_series" }}</a></div>
 <div class="sbr-scale">
 {{- range $i, $p := $pages -}}
 {{- $cls := cond (lt $i $idx) "done" (cond (eq $i $idx) "cur" "") -}}
-<a class="sbr-seg{{ with $cls }} {{ . }}{{ end }}" style="flex-grow:{{ $p.Params.mins | default $p.ReadingTime }}" href="{{ $p.RelPermalink }}" title="{{ i18n "sbr_seg_title" (dict "n" (add $i 1) "short" ($p.Params.rail_title | default (index (split $p.Title ":") 0))) }}"></a>
+<a class="sbr-seg{{ with $cls }} {{ . }}{{ end }}" style="flex-grow:{{ $p.Params.mins | default (partial "article/reading-time.html" $p) }}" href="{{ $p.RelPermalink }}" title="{{ i18n "sbr_seg_title" (dict "n" (add $i 1) "short" ($p.Params.rail_title | default (index (split $p.Title ":") 0))) }}"></a>
 {{- end -}}
 </div>
 <div class="sbr-legend">{{ if lt $pos $total }}{{ i18n "sbr_behind" (dict "done" $pos "total" $total) | safeHTML }} · {{ i18n "sbr_ahead" (dict "n" $ahead) }} {{ i18n "parts_word" $ahead }} · {{ i18n "sbr_left" (dict "mins" $minsLeft) | safeHTML }}{{ else }}{{ i18n "sbr_done" (dict "total" $total) | safeHTML }}{{ end }}</div>
 {{- if lt $pos $total -}}
 {{- $next := index $pages $pos -}}
-{{- $nextMins := $next.Params.mins | default $next.ReadingTime -}}
+{{- $nextMins := $next.Params.mins | default (partial "article/reading-time.html" $next) -}}
 <a class="sbr-next" href="{{ $next.RelPermalink }}"><span class="sbr-body"><span class="k">{{ i18n "sbr_next_k" (dict "n" (add $pos 1)) }}{{ with $nextMins }} · {{ . }} {{ i18n "mins_abbr" }}{{ end }}</span><span class="t">{{ $next.Title }}</span></span><span class="arr" aria-hidden="true">→</span></a>
 {{- else -}}
 <a class="sbr-next" href="{{ $s.href }}"><span class="sbr-body"><span class="k">{{ i18n "sbr_final_k" }}</span><span class="t">{{ i18n "sbr_final_t" (dict "name" $s.label) }}</span></span><span class="arr" aria-hidden="true">→</span></a>

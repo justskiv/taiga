@@ -12,10 +12,11 @@ export function buildMini(rail, side, keys) {
   function sched(fn, ms) { clearTimeout(t); t = setTimeout(fn, ms); }
   function peek() { clearTimeout(t); rail.classList.add('peek'); }
   function unpeek() { clearTimeout(t); rail.classList.remove('peek'); }
-  /* small delays: entry so a passing cursor doesn't flash the panel,
-     exit so the map→overlay hand-off doesn't flicker */
-  box.addEventListener('mouseenter', function () { if (!railOn(side)) sched(peek, 120); });
-  box.addEventListener('mouseleave', function () { sched(unpeek, 200); });
+  /* tiny entry delay so the panel feels responsive to intent (just enough to
+     swallow a passing cursor), a longer exit one so the map→overlay hand-off
+     doesn't flicker */
+  box.addEventListener('mouseenter', function () { if (!railOn(side)) sched(peek, 50); });
+  box.addEventListener('mouseleave', function () { sched(unpeek, 50); });
   box.addEventListener('focusin', function () { if (!railOn(side)) peek(); });
   rail.addEventListener('focusout', function (e) {
     if (!(e.relatedTarget && rail.contains(e.relatedTarget))) unpeek();
@@ -25,16 +26,18 @@ export function buildMini(rail, side, keys) {
   });
   if (inEl) {
     inEl.addEventListener('mouseenter', function () { if (rail.classList.contains('peek')) clearTimeout(t); });
-    inEl.addEventListener('mouseleave', function () { if (rail.classList.contains('peek')) sched(unpeek, 200); });
+    inEl.addEventListener('mouseleave', function () { if (rail.classList.contains('peek')) sched(unpeek, 50); });
     if (!inEl.querySelector('.rail-pin')) {
       const pin = document.createElement('button');
       pin.type = 'button'; pin.className = 'rail-pin';
-      pin.title = I18N.pinPanel + ' — ' + keys;
-      pin.innerHTML = I18N.pinPanel + ' <kbd class="kb">' + keys.charAt(0) + '</kbd>';
+      pin.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6"/><path d="M10 4v6l-2 3h8l-2-3V4"/><path d="M12 13v7"/></svg>' +
+        '<span class="rail-pin-lab">' + I18N.pinPanel + '</span>' +
+        '<kbd class="kb">' + keys.charAt(0) + '</kbd>';
       pin.addEventListener('click', function () { unpeek(); setRail(side, true); });
       inEl.appendChild(pin);
     }
   }
-  rail.appendChild(box);
+  (rail.querySelector('.rail-dock') || rail).appendChild(box);
   return box;
 }

@@ -4,8 +4,23 @@
 h1{font-size:38px; line-height:1.15; font-weight:750; letter-spacing:-.02em; margin:0 0 18px}
 h1 .sub{color:var(--accent)}
 .lead{font-size:19px; line-height:1.6; color:var(--text-secondary); margin:0 0 18px}
-.meta{display:flex; flex-wrap:wrap; gap:10px; margin:22px 0 8px; font-family:var(--font-mono); font-size:12px}
-.tag{display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--border); border-radius:20px; color:var(--text-secondary); background:var(--bg-surface)}
-.tag b{color:var(--text-primary); font-weight:600}
+/* article standfirst: a deliberate deck, not just bigger body text — brighter
+   (primary, so it's emphasized rather than faded), a step up in size, tighter
+   leading for a denser display texture, and closed by a full-width hairline (the
+   same solid --border as the meta ticks and h2 rules) so the head ends on a clean
+   line and the article starts fresh below it. .layout scopes this to real
+   articles; rubric/taxonomy/404 leads keep the plain deck. No lead → no element →
+   no rule, and the meta line's own margin carries the gap to the body. */
+.layout .lead{font-size:20px; line-height:1.5; color:var(--text-primary); margin:0 0 28px; padding-bottom:20px; border-bottom:1px solid var(--border)}
+/* meta line: quiet metadata between the title and the lead — muted label +
+   emphasized value, borderless (editorial, not a tag cloud), items split by a
+   hairline. -2 top collapses with h1's 18px to a snug 16px (binds it to the
+   title); 18px below lets the lead (or intro) breathe. keeps the .tag class so it
+   also covers the site's meta override, which emits the same markup. the divider
+   is a trailing pseudo (wrap-safe: it stays with the item that ends a line). */
+.meta{display:flex; flex-wrap:wrap; align-items:center; row-gap:8px; column-gap:14px; margin:-2px 0 18px; font-family:var(--font-mono); font-size:12.5px; color:var(--text-muted)}
+.meta .tag{display:inline-flex; align-items:center; gap:5px; line-height:1}
+.meta .tag b{color:var(--text-secondary); font-weight:600; letter-spacing:.01em}
+.meta .tag:not(:last-child)::after{content:""; flex:0 0 auto; width:1px; height:11px; margin-left:9px; background:var(--border)}
 
 hr.sep{border:0; height:1px; background:linear-gradient(90deg, var(--border), transparent); margin:40px 0}

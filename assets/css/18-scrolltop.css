@@ -11,19 +11,19 @@
    tokens already swap live and the amber accents never change between
    themes.
 
-   One geometry adaptation vs. the source: on tuzov.dev the column is a
-   flat 60px because that site has nothing else pinned to the left edge.
-   Here the series rail (.rail-l, ≥1366px) lives in that same corner, so
-   the column width is tuned to the free gutter left of it — see the
-   ≥1366px media query below for the exact numbers. */
+   One geometry adaptation vs. the source: tuzov.dev keeps a flat 60px
+   column because nothing else is pinned to its left edge. Here the series
+   rail (.rail-l, ≥1366px) lives in that same corner, so the 60px column is
+   kept only where the gutter allows it and steps down over the narrow
+   1366–1440px band — see the media query below for the exact numbers. */
 
 .scrolltop-btn{
-  position:fixed; left:0; top:0; z-index:100; width:48px; height:100vh;
+  position:fixed; left:0; top:0; z-index:100; width:60px; height:100vh;
   display:flex; align-items:center; justify-content:center;
   padding:0; margin:0; border:none; background:transparent;
   cursor:pointer;
   opacity:0; visibility:hidden;
-  transition:opacity .3s, visibility .3s;
+  transition:opacity .3s, visibility .3s, background-color .2s;
 }
 .scrolltop-btn.is-visible{opacity:1; visibility:visible}
 
@@ -31,20 +31,24 @@
    (rgba(secondary-text, .07)): the strip lights up quietly; amber is
    reserved for the arrow stroke only. Kept at
    the same restrained ~18% strength the token already carries everywhere
-   else on the site (tag chips, popover items, etc). Matches the source's
-   own timing too: the wash snaps instantly on hover (no listed transition
-   on background there) while the icon underneath fades. */
+   else on the site (tag chips, popover items, etc). The wash fades in over
+   the same .2s as the circle's accent (see the .scrolltop-btn transition)
+   so the column and the ring light up together — not the strip first, the
+   ring a beat later. */
 .scrolltop-btn:hover{background:color-mix(in srgb, var(--text-secondary) 7%, transparent)}
 
 .scrolltop-circle{
   width:2rem; height:2rem;
   display:flex; align-items:center; justify-content:center;
   border:1px solid var(--border); border-radius:50%; background:transparent;
-  color:var(--text-muted);
-  transition:color .2s, border-color .2s, background-color .2s;
+  color:var(--text-muted); opacity:.5;
+  transition:opacity .2s, color .2s, border-color .2s, background-color .2s;
 }
 .scrolltop-btn:hover .scrolltop-circle{
-  color:var(--accent); border-color:var(--text-muted); background:transparent;
+  opacity:1;
+  color:var(--accent);
+  border-color:color-mix(in srgb, var(--accent) 45%, transparent);
+  background:transparent;
 }
 /* the 60x100vh hit zone is invisible, so its own focus ring would be a
    giant, disorienting outline; suppress it and ring the visible glyph
@@ -68,14 +72,18 @@
 
      railLeft(1366) =  23px  (rail's own ≥1366px breakpoint — tightest)
      railLeft(1440) =  60px
-     railLeft(1512) =  96px  (this component's verified target viewport)
+     railLeft(1512) =  96px
 
-   A flat 48px column only clears the rail from 1416px up (railLeft≥48).
-   Below that — 1366px to 1440px — the gutter is narrower than 48px, so
-   the column (and the glyph inside it) steps down to 20px for that
-   stretch, comfortably under the 23px worst case with room for rounding.
-   From 1440px the gutter is 60px+, so the full 48px column is safe again
-   and stays that way as the viewport grows (the gutter only widens). */
+   The 60px column (the source's own width) clears the expanded rail from
+   1440px up (railLeft≥60), edge-to-edge at 1440. Below that — 1366px to
+   1440px — the gutter is narrower than 60px, so the column and its glyph
+   step down to 20px, comfortably under the 23px worst case. From 1440px
+   the 60px column is safe and stays so as the viewport grows (the gutter
+   only widens). Collapsed, the left rail's marks live at railLeft+14px, so
+   they always sit right of the column's right edge (≤ railLeft) — no
+   overlap with the hit strip or its hover wash at any width. The circle is
+   centred in the column, so the hover wash lights up symmetrically around
+   it. */
 @media (min-width:1366px) and (max-width:1439.9px){
   .scrolltop-btn{width:20px}
   .scrolltop-circle{width:18px; height:18px}

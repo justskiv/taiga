@@ -35,6 +35,10 @@ other = "{{ .Count }} more guides"
 one = "{{ .Count }} part"
 other = "{{ .Count }} parts"
 
+[words]
+one = "{{ .Count }} word"
+other = "{{ .Count }} words"
+
 [part_of]
 other = "part {{ .N }} of {{ .M }}"
 
@@ -66,9 +70,9 @@ other = "Page contents"
 [rail_r_head]
 other = "on this page"
 [rail_hide_l]
-other = "Hide panel — ["
+other = "Collapse"
 [rail_hide_r]
-other = "Hide panel — ]"
+other = "Collapse"
 [rail_related]
 other = "related"
 

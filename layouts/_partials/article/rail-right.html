@@ -3,11 +3,13 @@
        on load — keeping it empty here means the server render matches the mock byte
        for byte (nothing invisible added to the prose diff). */ -}}
 <aside class="rail rail-r" aria-label="{{ i18n "rail_r_aria" }}">
+  <div class="rail-dock">
   <div class="rail-in">
     <div class="rail-h">
       <span class="rail-k">{{ i18n "rail_r_head" }}</span>
-      <button class="rail-x" data-rail="r" type="button" title="{{ i18n "rail_hide_r" }}">×</button>
+      <button class="rail-x" data-rail="r" type="button" aria-label="{{ i18n "rail_hide_r" }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 7l5 5-5 5"/></svg><span class="rail-tip" aria-hidden="true">{{ i18n "rail_hide_r" }} <kbd class="kb">]</kbd></span></button>
     </div>
     <ol class="tocr" id="tocRail"></ol>
+  </div>
   </div>
 </aside>
