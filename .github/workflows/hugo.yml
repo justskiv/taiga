@@ -1,8 +1,13 @@
 name: CI
 
 # Smoke-builds the bundled exampleSite against the theme in place, builds the
-# search index, and checks links. The theme itself is the repo root; the demo is
-# built with `--themesDir`, exactly as documented in the README.
+# search index, checks links — and, on main, publishes that same build as the
+# theme's demo site. The theme itself is the repo root; the demo is built with
+# `--themesDir`, exactly as documented in the README.
+#
+# The demo IS the `demosite` declared in theme.toml, so this workflow is what
+# makes that URL real: themes.gohugo.io no longer hosts theme demos, it just
+# links out to one.
 
 on:
   push:
@@ -43,6 +48,10 @@ jobs:
       - name: Install Pagefind
         run: pip install "pagefind[bin]==1.5.2"
 
+      # No --baseURL here on purpose: exampleSite/hugo.toml already points at the
+      # Pages subpath, so the build that CI checks is byte-for-byte the build that
+      # ships. A theme that only works at a domain root is a theme with a bug, and
+      # this is where that bug would surface.
       - name: Smoke-build exampleSite (warnings are fatal)
         working-directory: taiga
         run: |
@@ -53,26 +62,41 @@ jobs:
         working-directory: taiga
         run: python3 -m pagefind --site exampleSite/public
 
+      # --base-path must match the subpath in exampleSite/hugo.toml's baseURL.
+      # Without it every asset URL looks broken (public/ IS the subpath root), and
+      # worse, a link that genuinely escapes the subpath would hide in the noise.
       - name: Check internal links
         working-directory: taiga
-        run: python3 scripts/check-links.py exampleSite/public
+        run: python3 scripts/check-links.py exampleSite/public --base-path /taiga
 
-  # ---------------------------------------------------------------------------
-  # Optional: deploy the demo (exampleSite) to GitHub Pages.
+      # The README and docs/ are never seen by `hugo` — nothing else checks them,
+      # and a dead link in the README is the first thing a visitor meets.
+      - name: Check README and docs links
+        working-directory: taiga
+        run: python3 scripts/check-docs.py .
+
+      # Only needed for the deploy job below, and only from main.
+      - name: Upload the demo as a Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: taiga/exampleSite/public
+
+  # Publishes the demo to https://justskiv.github.io/taiga/.
   #
-  # To enable: in the repo settings set Pages → Source → "GitHub Actions", then
-  # uncomment the block below and add `pages: write` and `id-token: write` to the
-  # top-level `permissions:`. Set the demo's baseURL to the Pages URL at build
-  # time (`--baseURL "${{ steps.pages.outputs.base_url }}/"`). The artifact is
-  # `taiga/exampleSite/public` (built by the `build` job above; add an
-  # upload-pages-artifact step there, or rebuild here).
-  #
-  # deploy:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   steps:
-  #     - id: deployment
-  #       uses: actions/deploy-pages@v4
+  # REQUIRES a one-time repo setting: Settings → Pages → Source → "GitHub Actions".
+  # Until that is switched on, this job fails (it cannot create the Pages site for
+  # you). The build job above is unaffected either way.
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
