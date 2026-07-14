@@ -1,15 +1,15 @@
 ---
-title: "Песочница"
-description: "Авторский раздел демо-сайта: собран из штатных механизмов темы — страница-бандл, виджет рядом с текстом и пункт меню с бейджем."
-lead: "Этот раздел — не часть темы. Он существует, чтобы показать, как выглядит собственный раздел сайта: страница, виджет и пункт меню — и ни одной правки в теме."
+title: "Playground"
+description: "A custom section of the demo site: assembled from the theme's stock mechanisms — a page bundle, a widget next to the text, and a menu item with a badge."
+lead: "This section isn't part of the theme. It exists to show what a site's own section looks like: a page, a widget, a menu item — and not a single edit to the theme."
 ---
 
-В теме нет ни шорткода «песочница», ни её стилей, ни упоминаний. Весь раздел — три вещи на стороне сайта: эта страница-бандл, `widgets.js` рядом с ней (механизм виджетов работает для любого бандла, не только для гайдов) и пункт меню в конфиге с `params.badge = "β"` — бейдж у пункта рисует навигация темы, это её генерик-фича.
+The theme has no "playground" shortcode, no styles for it, no mentions of it at all. The whole section is three things on the site's side: this page bundle, `widgets.js` next to it (the widget mechanism works for any bundle, not just guides), and a menu entry in the config with `params.badge = "β"` — the theme's navigation draws the badge on the entry; that's a generic feature of it.
 
-Чтобы песочнице было что показать — игрушка на строительных классах темы:
+So the playground has something to show — a toy built on the theme's building blocks:
 
-{{< widget id="w-reflex" note="— нажми «старт», дождись слова «жми!» и кликни как можно быстрее" >}}
-<div class="w-cap">Замер времени реакции. Сейчас это статичный фолбэк: включи JS — и проверим твои миллисекунды.</div>
+{{< widget id="w-reflex" note="— press 'start', wait for the word 'go!' and click as fast as you can" >}}
+<div class="w-cap">Reaction time test. Right now this is a static fallback: turn on JS, and we'll check your milliseconds.</div>
 {{< /widget >}}
 
-Так же добавляется любой свой раздел — глоссарий, каталог, тренажёр: страница, при необходимости виджеты, пункт меню. Пошагово это разобрано в «[Сделать своей](/howto/make-it-yours/)».
+Any section of your own gets added the same way — a glossary, a catalog, a trainer: a page, widgets if you need them, a menu item. It's covered step by step in "[Make it yours](/howto/make-it-yours/)".

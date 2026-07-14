@@ -1,45 +1,45 @@
 ---
-title: "Горячие клавиши и панели"
+title: "Hotkeys and panels"
 slug: hotkeys
 date: 2026-06-27
-description: "Справка по управлению читалкой: клавиши поиска и панелей, фокус-режим, поповер «Вид» и что запоминается локально."
-lead: "Всё управление читалкой на одной странице: клавиши, панели, поповер «Вид». Ничего из этого знать не обязательно — мышью доступно то же самое, — но с клавиатуры быстрее."
+description: "Reference for reader controls: search and panel keys, focus mode, the View popover, and what's remembered locally."
+lead: "All reader controls on one page: keys, panels, the View popover. None of this is required knowledge — the mouse does the same — but the keyboard is faster."
 tags: [hotkeys, panels]
 mins: 3
-version: "v0.1.0"
+version: "v0.0.1"
 related:
   - "howto/get-started"
 ---
 
-## Клавиши {#keys}
+## Keys {#keys}
 
-| клавиши | действие |
+| keys | action |
 |---|---|
-| <kbd class="kb">⌘K</kbd> или <kbd class="kb">/</kbd> | поиск по гайдам |
-| <kbd class="kb">[</kbd> или <kbd class="kb">⌘1</kbd> | показать/скрыть панель серии (слева) |
-| <kbd class="kb">]</kbd> или <kbd class="kb">⌘2</kbd> | показать/скрыть оглавление (справа) |
-| <kbd class="kb">F</kbd> | фокус-режим: спрятать всё, кроме текста статьи |
-| <kbd class="kb">Esc</kbd> | закрыть поиск или поповер |
+| <kbd class="kb">⌘K</kbd> or <kbd class="kb">/</kbd> | search guides |
+| <kbd class="kb">[</kbd> or <kbd class="kb">⌘1</kbd> | show/hide the series panel (left) |
+| <kbd class="kb">]</kbd> or <kbd class="kb">⌘2</kbd> | show/hide the table of contents (right) |
+| <kbd class="kb">F</kbd> | focus mode: hide everything except the article text |
+| <kbd class="kb">Esc</kbd> | close search or the popover |
 
-Клавиши привязаны к физическим кодам, а не к символам — работают в любой раскладке, включая русскую. В полях ввода не срабатывают; фокус-режим действует только на страницах статей.
+Keys are bound to physical key codes, not characters — they work in any layout, including Russian. They don't fire inside input fields; focus mode only applies on article pages.
 
-## Панели и минимапы {#panels}
+## Panels and minimaps {#panels}
 
-Скрытая панель не исчезает совсем, а сворачивается в минимапу у края экрана: точки и чёрточки повторяют её содержимое. Наведение раскрывает панель поверх текста, там же её можно закрепить обратно. Прочитанные части серии получают метки — видно, где ты уже был.
+A hidden panel doesn't disappear completely — it collapses into a minimap at the edge of the screen: dots and dashes mirror its content. Hovering expands the panel over the text, and you can pin it back from there. Read parts of a series get marks — so you can see where you've already been.
 
-## Поповер «Вид» {#view-popover}
+## The "View" popover {#view-popover}
 
-Иконка в правом верхнем углу открывает настройки чтения: палитры со свотчами, включение и выключение боковых панелей, вариант вёрстки списков на страницах рубрик. Шапка отдельной настройки не имеет: она всегда уезжает при скролле вниз и возвращается при скролле вверх.
+The icon in the top-right corner opens the reading settings: palettes with swatches, toggling the side panels on and off, the list layout variant on rubric pages. The header has no separate setting: it always slides away on scroll down and comes back on scroll up.
 
-## Что запоминается {#storage}
+## What gets remembered {#storage}
 
-Все настройки живут локально в браузере — без аккаунтов и без сети:
+All settings live locally in the browser — no accounts, no network:
 
-| настройка | ключ localStorage |
+| setting | localStorage key |
 |---|---|
-| палитра | `taiga.theme` |
-| панели слева/справа | `taiga.railL`, `taiga.railR` |
-| вариант списков рубрики | `taiga.rubvar` |
-| прочитанные гайды | `taiga.visited` |
+| palette | `taiga.theme` |
+| left/right panels | `taiga.railL`, `taiga.railR` |
+| rubric list variant | `taiga.rubvar` |
+| read guides | `taiga.visited` |
 
-Очистка site data браузера возвращает всё к дефолтам — это штатный способ «сбросить настройки».
+Clearing the browser's site data resets everything to defaults — that's the standard way to "reset settings."

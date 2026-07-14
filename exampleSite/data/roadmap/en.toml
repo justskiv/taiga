@@ -1,0 +1,29 @@
+# Roadmap data: read by the /roadmap/ page (roadmap shortcode)
+# and by the "in progress" wip strip on the home page.
+
+[[items]]
+title = "Light palette out of the box"
+status = "draft"
+progress = 40
+note = "The palette file is already taking shape; a contrast audit of components on a light background is underway."
+
+[[items]]
+title = "OG style gallery"
+status = "research"
+progress = 15
+note = "Several ready-made cover styles bundled with the theme, plus a short walkthrough on drawing your own."
+
+[[items]]
+title = "Translate the theme docs"
+status = "draft"
+progress = 30
+note = "authoring.md and customizing.md in English; the i18n checklist is already in the bundle."
+
+[[queue]]
+title = "CI example: build and deploy to GitHub Pages"
+
+[[queue]]
+title = "Series archetype: term and first part in one command"
+
+[[queue]]
+title = "Auto palette pick from prefers-color-scheme"

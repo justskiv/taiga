@@ -1,58 +1,60 @@
 ---
-title: "Сделать своей"
+title: "Make it yours"
 slug: make-it-yours
 date: 2026-06-20
-description: "Кастомизация без форка: палитра одним toml-файлом, custom.css, hooks-партиалы, собственный раздел и второй язык."
-lead: "Всё в этой части — файлы твоего сайта: палитра, стили, партиалы, строки интерфейса, второй язык. В тему при этом не попадает ни одна правка, и её обновление остаётся обычным git pull."
+description: "Customization without a fork: a palette in one toml file, custom.css, hook partials, a section of your own and a second language."
+lead: "Everything in this part is a file in your site: the palette, the styles, the partials, the interface strings, the second language. Not one edit lands in the theme, and updating it stays an ordinary git pull."
 series: ["handbook"]
 series_weight: 30
 tags: [customize, palettes, i18n]
 mins: 5
-version: "v0.1.0"
-rail_title: "Своя тема"
+version: "v0.0.1"
+rail_title: "Your theme"
 ---
 
-## Палитра — один файл {#own-palette}
+## A palette is one file {#own-palette}
 
-Фирменный цвет сайта — это toml-файл в `data/themes/` **на стороне сайта**:
+The signature color of a site is a toml file in `data/themes/` **on the site side**:
 
-```toml {label="data/themes/mine.toml (фрагмент)"}
-name = "Моя"      # имя в пикере
-weight = 80       # позиция в списке пикера
+```toml {label="data/themes/mine.toml (fragment)"}
+name = "Mine"     # the name in the picker
+weight = 80       # position in the picker's list
 
 "bg-deep" = "#101418"
 "bg-surface" = "#1a2027"
 "text-primary" = "#d8dee6"
 ```
 
-Hugo мержит данные темы и сайта (при совпадении имён побеждает сайт), поэтому файл сам попадает и в CSS, и в пикер палитр в шапке. Не нужна палитра из комплекта темы — переопредели её файл с `disabled = true`, и она исчезнет отовсюду. Как из toml получаются CSS-блоки и свотчи — разобрано в «[Палитра — это один файл](/inside/palette-is-a-file/)».
+Hugo merges the data of the theme and of the site (on a name clash the site wins), so the file finds its own way both into the CSS and into the palette picker in the header. Don't need one of the palettes the theme ships with — override its file with `disabled = true`, and it disappears everywhere. How CSS blocks and swatches come out of the toml is taken apart in "[A palette is one file](/inside/palette-is-a-file/)".
 
-## custom.css и хуки {#css-hooks}
+## custom.css and hooks {#css-hooks}
 
-Точечные правки поверх палитры — `assets/css/custom.css` сайта: если файл существует, тема подключает его последним в CSS-бандл, так что твои правила побеждают без `!important`. Дизайн-токены — публичный API: имена CSS-переменных стабильны и перечислены в `docs/customizing.md` темы.
+Pointed edits on top of the palette go into the site's `assets/css/custom.css`: if the file exists, the theme appends it last to the CSS bundle, so your rules win without `!important`. The design tokens are a public API: the names of the CSS variables are stable and are listed in the theme's `docs/customizing.md`.
 
-Для аналитики, своих meta-тегов и сторонних скриптов есть hooks-партиалы: `hooks/head-extra.html` и `hooks/foot-extra.html` в теме пустые, сайт кладёт одноимённые файлы в свой `layouts/_partials/` — и их содержимое попадает в head и в конец body. А если нужно поменять сам рендер — любой партиал темы переопределяется одноимённым файлом сайта: lookup order Hugo всегда предпочитает файлы сайта. Мелкие именованные партиалы — логотип, футер, карточка ленты — существуют ровно для такого точечного переопределения.
+For analytics, meta tags of your own and third-party scripts there are hook partials: `hooks/head-extra.html` and `hooks/foot-extra.html` are empty in the theme, the site puts files of the same names into its `layouts/_partials/` — and their contents land in the head and at the end of the body. And if the render itself needs changing — any partial of the theme is overridden by a site file of the same name: Hugo's lookup order always prefers the site's files. The small named partials — the logo, the footer, the feed card — exist for exactly this kind of pointed override.
 
-## Свой раздел {#own-section}
+## A section of your own {#own-section}
 
-Понадобился раздел, которого в теме нет, — глоссарий, каталог, песочница с тренажёром. Для него не нужны ни новый layout, ни правки темы: это обычная страница или бандл, а интерактив — те же `widgets.js` рядом с текстом, механизм работает для любого бандла, не только для гайдов. Пункт меню добавляется в `[[menus.main]]` конфига; параметр `params.badge = "β"` у пункта рисует бейдж — это генерик-фича навигации, а не признак особого раздела.
+You need a section the theme does not have — a glossary, a catalog, a playground with a drill. It needs neither a new layout nor edits to the theme: it is an ordinary page or bundle, and the interactivity is the same `widgets.js` next to the text — the mechanism works for any bundle, not only for guides. A menu item is added to `[[menus.main]]` in the config; the item's `params.badge = "β"` draws a badge — that is a generic feature of the navigation, not the mark of a special section.
 
-На этом демо так собрана «[Песочница](/playground/)»: в теме от неё нет ни следа, весь раздел — три файла на стороне сайта.
+The "[Playground](/playground/)" on this demo is built exactly that way: in the theme there is not a trace of it, the whole section is three files on the site side.
 
-## Свои строки {#own-strings}
+## Strings of your own {#own-strings}
 
-Тексты интерфейса не захардкожены в шаблонах. Серверные строки живут в `i18n/*.toml`: сайт кладёт свой файл с частичным набором ключей, и он мержится с файлом темы — переопределяешь только нужное. Строки, живущие в JS — поповер «Вид», подсказки минимап, — переопределяются объектом `window.THEME_I18N`; список ключей — в `docs/customizing.md`.
+The texts of the interface are not hardcoded in the templates. The server-side strings live in `i18n/*.toml`: the site puts down its own file with a partial set of keys, and it merges with the theme's file — you override only what you need. Strings that live in JS — the "View" popover, the hints of the minimap — are overridden with the `window.THEME_I18N` object; the list of keys is in `docs/customizing.md`.
 
-## Второй язык {#second-language}
+## A second language {#second-language}
 
-Добавление языка — аддитивный шаг, а не миграция. В конфиг дописывается блок `[languages.en]` (плюс `[languages.en.params]` для hero-строки и `[languages.en.menus]` для меню). Переводы — суффиксами файлов: `index.en.md` рядом с `index.md`, включая `_index` рубрик и термины серий; Hugo связывает версии сам. Переключатель языков появляется в шапке автоматически, когда языков больше одного, а Pagefind строит отдельный индекс на каждый язык по `lang` страницы. Правок шаблонов — ноль; пошаговый чеклист — в `docs/i18n.md` темы.
+Adding a language is an additive step, not a migration. A `[languages.ru]` block is written into the config (plus `[languages.ru.params]` for the hero line and `[languages.ru.menus]` for the menu). The translations come as file suffixes: `index.ru.md` next to `index.md`, including the `_index` of the rubrics and the terms of the series; Hugo pairs the versions itself. A language switcher appears in the header when the site has more than one language, and Pagefind builds a separate index per language, by the page's `lang`. Template edits: zero. The step-by-step checklist is in the theme's `docs/i18n.md`.
 
-{{< callout type="key" label="Главная мысль" >}}
-Инвариант всей этой части: кастомизация — это файлы твоего сайта. В каталог темы не попадает ни одна правка, поэтому обновление темы — `git pull` или бамп версии модуля, без ручного мержа своих изменений.
+This page is the proof: you are reading the English version, and the Russian one lies next to it as `index.ru.md`.
+
+{{< callout type="key" label="Key idea" >}}
+The invariant of this whole part: customization is the files of your site. Not one edit lands in the theme's directory, so updating the theme is a `git pull` or a bump of the module version, with no hand-merging of your own changes.
 {{< /callout >}}
 
-*Теперь ты можешь увезти сайт сколь угодно далеко от этого демо — не форкая тему.*
+*You can now take your site as far from this demo as you like — without forking the theme.*
 
-## Что дальше {#what-next}
+## What's next {#what-next}
 
-Руководство на этом закончено: тема стоит, гайды пишутся, сайт выглядит по-своему. Если интересно, почему это устроено именно так, — в «Устройстве» есть серия «Анатомия темы»: папка-бандл, арифметика серий, палитры-как-данные. А все компоненты разом собраны на полигоне в «Справочнике».
+The handbook ends here: the theme is installed, guides are being written, the site looks like its own. If you are curious why it is built this way, "Inside" has the "Anatomy of the theme" series: the leaf bundle, the arithmetic of series, palettes-as-data. And every component at once is laid out on the kitchen-sink page in "Reference".

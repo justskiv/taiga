@@ -1,8 +1,8 @@
 ---
-title: "Устройство"
+title: "Inside"
 params:
-  label: "под капотом у темы"
+  label: "under the theme's hood"
   slug_mono: "theme_internals"
-  lead: "Для любопытных — как тема устроена изнутри. Пользоваться ею можно и не заглядывая сюда, но каждый механизм из этих гайдов работает прямо на странице, где ты о нём читаешь: не веришь тексту — проверь разметку."
-  foot: "Тема меняется — эти гайды переписываются вместе с ней. Расхождение текста с поведением страницы считается багом."
+  lead: "For the curious — how the theme is built on the inside. You can use it without ever coming here, but every mechanism in these guides runs on the very page you read about it: don't trust the text — check the markup."
+  foot: "The theme changes — these guides get rewritten with it. A gap between the text and what the page does counts as a bug."
 ---

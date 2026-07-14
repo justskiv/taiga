@@ -1,23 +1,23 @@
 ---
-title: "Kitchen sink: все компоненты темы"
+title: "Kitchen sink: every component"
 slug: kitchen-sink
 date: 2026-05-30
-description: "Регресс-полигон: все шорткоды, коллауты, код, диаграммы и виджеты на одной странице."
-lead: "Полигон всех компонентов темы: по одному экземпляру каждого шорткода, коллаута, блока кода, диаграммы и виджета на одной странице — чтобы правки дизайна было на чём проверять, а автору гайдов было что подсмотреть и скопировать."
+description: "A regression testbed: every shortcode, callout, code block, diagram and widget on one page."
+lead: "A testbed for every component in the theme: one instance of each shortcode, callout, code block, diagram and widget on a single page — so design changes have something to test against, and guide authors have something to peek at and copy."
 ---
 
-## Заголовки и якоря {#headings}
+## Headings and anchors {#headings}
 
-Второго уровня — с решёткой `#`, третьего — с `##`. Инлайн: *курсив*, **жирный**,
-`код`, внутренняя ссылка на [эталонный гайд](/inside/guide-is-a-bundle/).
+Level two — with the `#` character, level three — with `##`. Inline: *italic*, **bold**,
+`code`, an internal link to the [reference guide](/inside/guide-is-a-bundle/).
 
-### Подзаголовок третьего уровня {#sub}
+### Third-level subheading {#sub}
 
-Проверяем, что render-heading вешает `##` и якорь на h3.
+Checks that render-heading attaches `##` and an anchor to h3.
 
-## Код {#code}
+## Code {#code}
 
-Go подсвечивается сервером (Chroma в цветах палитры):
+Go is highlighted server-side (Chroma in the palette's colors):
 
 ```go
 type Point struct {
@@ -26,78 +26,78 @@ type Point struct {
 func dist(a, b Point) int64 { return (a.X-b.X)*(a.X-b.X) }
 ```
 
-С подписью файла и подсветкой строки (`{label=… hl_lines=[2]}`):
+With a file caption and line highlighting (`{label=… hl_lines=[2]}`):
 
-```go {label="runtime/malloc.go (упрощено)" hl_lines=[2]}
+```go {label="runtime/malloc.go (simplified)" hl_lines=[2]}
 func mallocgc(size uintptr) unsafe.Pointer {
-	c := getMCache()          // горячий путь — без блокировок
+	c := getMCache()          // hot path — no locks
 	return c.alloc(size)
 }
 ```
 
-Не-Go — плоский `.nohl` (fence `text` или без языка):
+Non-Go — flat `.nohl` (fence `text` or no language):
 
 ```text
 $ go build ./...
 ok  taiga/internals  0.312s
 ```
 
-## Таблица {#table}
+## Table {#table}
 
-Markdown-таблица, обёртку `.tbl-wrap` вешает render-table:
+A Markdown table; render-table attaches the `.tbl-wrap` wrapper:
 
-| Тип      | Размер | Выравнивание |
+| Type     | Size   | Alignment    |
 |----------|-------:|:------------:|
 | `bool`   |      1 |      1       |
 | `int64`  |      8 |      8       |
 | `[]T`    |     24 |      8       |
 
-## Коллауты {#callouts}
+## Callouts {#callouts}
 
 {{< callout type="key" >}}
-Главная мысль с дефолтным лейблом. Внутри — **markdown** и `код`.
+The main idea with the default label. Inside — **markdown** and `code`.
 {{< /callout >}}
 
 {{< callout type="trap" >}}
-Ловушка с дефолтным лейблом.
+A trap with the default label.
 {{< /callout >}}
 
-{{< callout type="internals" label="Под капотом: свой лейбл" >}}
-Коллаут «под капотом» с переопределённым лейблом.
+{{< callout type="internals" label="Under the hood: a custom label" >}}
+An "under the hood" callout with an overridden label.
 {{< /callout >}}
 
 {{< callout type="note" >}}
-Историческая сноска — самый тихий тип.
+A historical footnote — the quietest type.
 {{< /callout >}}
 
-## Диаграммы {#diagrams}
+## Diagrams {#diagrams}
 
-Диаграмма памяти и байтовая лента — сырой HTML через `{{</* raw */>}}`:
+A memory diagram and a byte strip — raw HTML via `{{</* raw */>}}`:
 
 {{< raw >}}
 <div class="mem">
-  <div class="mem-lab"><code>Point{X, Y int64}</code> <span class="tot">→ 16 байт, ноль воздуха</span></div>
+  <div class="mem-lab"><code>Point{X, Y int64}</code> <span class="tot">→ 16 bytes, zero padding</span></div>
   <div class="byte-strip" aria-hidden="true">
-    <div class="byte-seg"><div class="cells"><div class="byte-box f1" data-tip="X · int64 · 8 Б">0</div><div class="byte-box f1" data-tip="X · int64 · 8 Б">1</div></div><div class="seg-tag">X (int64)</div></div>
-    <div class="byte-seg"><div class="cells"><div class="byte-box f2" data-tip="Y · int64 · 8 Б">8</div><div class="byte-box f2" data-tip="Y · int64 · 8 Б">9</div></div><div class="seg-tag">Y (int64)</div></div>
+    <div class="byte-seg"><div class="cells"><div class="byte-box f1" data-tip="X · int64 · 8 B">0</div><div class="byte-box f1" data-tip="X · int64 · 8 B">1</div></div><div class="seg-tag">X (int64)</div></div>
+    <div class="byte-seg"><div class="cells"><div class="byte-box f2" data-tip="Y · int64 · 8 B">8</div><div class="byte-box f2" data-tip="Y · int64 · 8 B">9</div></div><div class="seg-tag">Y (int64)</div></div>
   </div>
 </div>
 {{< /raw >}}
 
-## Виджеты {#widgets}
+## Widgets {#widgets}
 
-Форма 1 — пустой mount, оживляет `Taiga.widget` из `widgets.js`:
+Form 1 — an empty mount, brought to life by `Taiga.widget` from `widgets.js`:
 
-{{< widget id="w-ks-counter" note="— жми, число тикает" />}}
+{{< widget id="w-ks-counter" note="— click it, the number ticks" />}}
 
-Форма 2 — mount со статик-фолбэком внутри (виден без JS):
+Form 2 — a mount with a static fallback inside (visible without JS):
 
-{{< widget id="w-ks-fallback" note="— под ним статичная диаграмма" >}}<div class="mem"><div class="mem-lab">статик-фолбэк</div><div class="mem-row"><div class="word live" data-tip="виден без JS">e0</div></div></div>{{< /widget >}}
+{{< widget id="w-ks-fallback" note="— a static diagram sits below it" >}}<div class="mem"><div class="mem-lab">static fallback</div><div class="mem-row"><div class="word live" data-tip="visible without JS">e0</div></div></div>{{< /widget >}}
 
-Форма 3 — без id, произвольный HTML прямо в figure:
+Form 3 — no id, arbitrary HTML directly in the figure:
 
-{{< widget note="— свой HTML, без mount" >}}<div class="w-row"><span class="w-cap">произвольная разметка виджета</span></div>{{< /widget >}}
+{{< widget note="— custom HTML, no mount" >}}<div class="w-row"><span class="w-cap">arbitrary widget markup</span></div>{{< /widget >}}
 
-## Карточка {#card}
+## Card {#card}
 
-{{< bigcard href="/inside/guide-is-a-bundle/" k="К эталону →" t="Гайд — это папка" s="Большая CTA-карточка: kicker, заголовок, подпись." >}}
+{{< bigcard href="/inside/guide-is-a-bundle/" k="To the reference →" t="A guide is a folder" s="A big CTA card: kicker, title, caption." >}}

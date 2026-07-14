@@ -1,8 +1,8 @@
 ---
-title: "Справочник"
+title: "Reference"
 params:
-  label: "справочник"
+  label: "reference"
   slug_mono: "reference"
-  lead: "Страницы, которые не читают подряд, а открывают по нужде: полигон со всеми компонентами темы и справка по клавишам и панелям."
-  foot: "Справочник пополняется вместе с темой: новый компонент — новая строка на полигоне."
+  lead: "Pages you don't read start to finish — you open them when you need to: a testbed with every component in the theme, and a reference for hotkeys and panels."
+  foot: "Reference grows with the theme: a new component is a new row on the testbed."
 ---

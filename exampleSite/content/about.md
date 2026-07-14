@@ -1,27 +1,27 @@
 ---
-title: "О демо-сайте"
-description: "Что это за сайт, из чего он собран и где искать саму тему."
-lead: "Это exampleSite темы: демонстрация и одновременно её документация. Всё содержимое — гайды о самой теме, и каждый описанный механизм работает на странице, где о нём написано."
+title: "About this demo"
+description: "What this site is, what it's built from, and where to find the theme itself."
+lead: "This is the theme's exampleSite: a demo and its own documentation at once. Every piece of content is a guide about the theme itself, and every mechanism it describes works right on the page that describes it."
 ---
 
-## Что это {#what}
+## What this is {#what}
 
-Демо-сайт живой темы для учебных гайдов. Здесь нет выдуманных статей: рубрика «Приёмы» — руководство пользователя темы, «Устройство» — разбор её внутренностей, «Справочник» — полигон компонентов и справка по управлению. Расхождение текста с поведением страницы считается багом.
+The demo site of a live theme, built for learning guides. Nothing here is invented: the How-to rubric is the theme's user manual, Inside is a teardown of its internals, Reference is a component testbed and a controls reference. Any gap between the text and the page's actual behavior counts as a bug.
 
-## Из чего собран {#stack}
+## What it's built from {#stack}
 
-Hugo (обычный бинарь, не extended) плюс Pagefind для полнотекстового поиска — два standalone-инструмента, без Node. Полная сборка:
+Hugo (the regular binary, not extended) plus Pagefind for full-text search — two standalone tools, no Node. The full build:
 
-```bash {label="сборка демо"}
+```bash {label="demo build"}
 hugo && pagefind --site public
 ```
 
-Раздел «Песочница» — авторский раздел этого сайта, в теме от него нет ни следа: живой пример того, как темой пользуются, не форкая её.
+The Playground section is an author's section of this site — the theme itself carries no trace of it: a live example of using the theme without forking it.
 
-## Где тема {#links}
+## Where the theme is {#links}
 
-Пути ниже — плейсхолдеры exampleSite; в своём сайте подставь реальные адреса:
+The paths below are exampleSite placeholders; on your own site, put in the real addresses:
 
-- репозиторий темы — `github.com/user/theme`;
-- документация — каталог `docs/` темы: `authoring.md` (как писать гайды), `customizing.md` (кастомизация без форка), `i18n.md` (как добавить язык), `params.md` (реестр параметров);
-- лента этого демо — [/index.xml](/index.xml), управление читалкой — в «[Горячих клавишах](/reference/hotkeys/)».
+- theme repository — `github.com/user/theme`;
+- documentation — the theme's `docs/` directory: `authoring.md` (how to write guides), `customizing.md` (customizing without a fork), `i18n.md` (how to add a language), `params.md` (parameter registry);
+- this demo's feed — [/index.xml](/index.xml), reader controls are covered in "[Hotkeys](/reference/hotkeys/)".

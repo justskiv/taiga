@@ -1,76 +1,76 @@
 ---
-title: "Серия знает о себе всё"
+title: "A series knows itself"
 slug: series-knows-itself
 date: 2026-05-09
-description: "Механика серий: два поля во front matter — и кикер «часть N из M», панель и мост считаются на сборке сами."
-lead: "«Часть 2 из 3» в кикере, оглавление серии слева, мост со шкалой внизу и «осталось ~5 мин» — ничего из этого не набрано руками. Разберём арифметику серий: она проще, чем выглядит, и вся происходит на сборке."
+description: "How series work: two fields in the front matter — and the “part N of M” kicker, the panel and the bridge count themselves at build time."
+lead: "“Part 2 of 3” in the kicker, the series contents on the left, the bridge with its scale at the bottom and “~5 min left” — none of it was typed by hand. Let's take apart the arithmetic of series: it is simpler than it looks, and all of it happens at build time."
 series: ["anatomy"]
 series_weight: 20
 tags: [series, front-matter, widgets]
 mins: 4
-version: "v0.1.0"
+version: "v0.0.1"
 ---
 
-## Оглавление руками {#links-by-hand}
+## Contents by hand {#links-by-hand}
 
-Наивная модель: серия — это когда в конце каждой статьи стоит список ссылок на остальные. Работает ровно до второго изменения. Добавил четвёртую часть — иди обнови три старых статьи. Переставил части местами — «часть 3 из 7» в заголовках теперь врёт, и хорошо, если ты вспомнил про все семь. Оглавление, размазанное по статьям, устаревает в момент любой правки — потому что источников правды столько же, сколько частей.
+The naive model: a series is when every article ends with a list of links to the rest. It works right up to the second change. Add a fourth part — go update three old articles. Reorder the parts — "part 3 of 7" in the headings now lies, and lucky you if you remembered all seven. Contents smeared across the articles go stale the moment you edit anything — because there are as many sources of truth as there are parts.
 
-Хуже того: половина серийной механики вообще не выражается ссылками руками. «Осталось ~9 минут до конца серии» — это арифметика по всем частям сразу; ни одна статья в одиночку такого про себя не знает.
+Worse: half of the series machinery cannot be expressed by hand-written links at all. "~9 minutes left to the end of the series" is arithmetic over every part at once; no article knows that about itself alone.
 
-## Два поля во front matter {#two-fields}
+## Two fields in the front matter {#two-fields}
 
-Здесь у серии один источник правды. Каждая часть объявляет о себе две вещи:
+Here a series has one source of truth. Each part declares two things about itself:
 
 ```yaml {label="inside/series-knows-itself/index.md (front matter)"}
 series: ["anatomy"]
 series_weight: 20
 ```
 
-Это front matter статьи, которую ты сейчас читаешь, — можешь сверить с кикером над заголовком. Всё остальное вычисляется на сборке: части сортируются по `series_weight`, номер «N» — позиция в отсортированном списке, «M» — его длина. Заметь: порядок задаёт вес, а не даты публикации — переставить части местами можно, не переписывая историю ленты.
+This is the front matter of the article you are reading — check it against the kicker above the title. Everything else is computed at build time: the parts are sorted by `series_weight`, the "N" is the position in the sorted list, the "M" is its length. Notice: the order is set by weight, not by publication dates — you can reorder the parts without rewriting the feed's history.
 
-Из того же отсортированного списка собирается всё серийное на странице. Кикер склеивается из трёх независимых источников: метка рубрики (front matter секции), заголовок серии (front matter термина) и вычисленное «часть N из M». Панель слева — оглавление с отметкой текущей части. Мост внизу — соседи prev/next плюс шкала прогресса. Один список — четыре потребителя.
+From that same sorted list everything series-shaped on the page is assembled. The kicker is glued from three independent sources: the rubric label (the section's front matter), the series title (the term's front matter) and the computed "part N of M". The panel on the left is the contents with the current part marked. The bridge at the bottom is the prev/next neighbors plus a progress scale. One list, four consumers.
 
-Вот как выглядит наша серия глазами сборки:
+Here is our series through the eyes of the build:
 
 {{< raw >}}
 <div class="mem">
-  <div class="mem-lab">series/anatomy <span class="tot">→ 3 части · ~14 мин суммарно</span></div>
+  <div class="mem-lab">series/anatomy <span class="tot">→ 3 parts · ~14 min in total</span></div>
   <div class="header">
-    <div class="header-word ptr" data-tip="term · ключ серии, латиницей: anatomy"><span class="wk">term</span><span class="wv">→</span></div>
-    <div class="header-word" data-tip="частей в серии: 3"><span class="wk">parts</span><span class="wv">3</span></div>
-    <div class="header-word" data-tip="сумма mins всех частей: 14"><span class="wk">mins</span><span class="wv">14</span></div>
+    <div class="header-word ptr" data-tip="term · the series key, in latin: anatomy"><span class="wk">term</span><span class="wv">→</span></div>
+    <div class="header-word" data-tip="parts in the series: 3"><span class="wk">parts</span><span class="wv">3</span></div>
+    <div class="header-word" data-tip="the mins of all parts summed: 14"><span class="wk">mins</span><span class="wv">14</span></div>
   </div>
   <div class="mem-arrow">│ term ▼</div>
   <div class="mem-row">
-    <div class="word ro" data-tip="часть 1 · «Гайд — это папка» · weight 10 · ~5 мин">w10</div>
-    <div class="word live" data-tip="часть 2 · эта самая статья · weight 20 · ~4 мин">w20</div>
-    <div class="word spare" data-tip="часть 3 · «Палитра — это один файл» · weight 30 · ~5 мин">w30</div>
+    <div class="word ro" data-tip="part 1 · «A guide is a folder» · weight 10 · ~5 min">w10</div>
+    <div class="word live" data-tip="part 2 · this very article · weight 20 · ~4 min">w20</div>
+    <div class="word spare" data-tip="part 3 · «A palette is one file» · weight 30 · ~5 min">w30</div>
   </div>
 </div>
 {{< /raw >}}
 
-Подсвеченная ячейка — статья, внутри которой ты находишься. Наведи на соседние: у каждой в тултипе её вес и минуты.
+The highlighted cell is the article you are standing inside. Hover the neighbors: each tooltip carries its weight and its minutes.
 
-Заголовок серии, описание и порядок на странице рубрики — тоже не магия: это front matter *термина*, файла `content/series/anatomy/_index.md`. Серия — обычная страница таксономии, просто тема не рендерит её отдельным URL, а разбирает на метаданные. Ссылка «вся серия» ведёт не на отдельную страницу, а на якорь серии внутри рубрики — читателю не нужен лишний уровень навигации ради трёх заголовков.
+The series title, its description and its order on the rubric page are no magic either: that is the front matter of the *term*, the file `content/series/anatomy/_index.md`. A series is an ordinary taxonomy page — the theme just does not render it at a URL of its own, it takes it apart into metadata. The "whole series" link leads not to a separate page but to the series anchor inside the rubric — the reader needs no extra level of navigation for the sake of three titles.
 
-{{< callout type="internals" label="Под капотом" >}}
-Список частей собирает хелпер-партиал `series/pages.html` — с `partialCached` по термину, так что сортировка выполняется один раз на серию, сколько бы страниц её ни запрашивало. Мост берёт оттуда позицию: prev/next — соседи по списку, шкала — `flex-grow: mins` каждой части, «осталось ~N мин» — сумма `mins` частей после текущей.
+{{< callout type="internals" label="Under the hood" >}}
+The list of parts is assembled by the helper partial `series/pages.html` — with `partialCached` keyed on the term, so the sort runs once per series, however many pages ask for it. The bridge takes its position from there: prev/next are the neighbors in the list, the scale is `flex-grow: mins` of each part, and "~N min left" is the sum of `mins` over the parts after the current one.
 {{< /callout >}}
 
-## Проверь арифметику {#check-math}
+## Check the arithmetic {#check-math}
 
-Формула моста настолько короткая, что её можно пересчитать прямо здесь. Виджет ниже гоняет ту же логику по числам этой самой серии:
+The bridge's formula is short enough to recompute right here. The widget below runs the same logic over the numbers of this very series:
 
-{{< widget id="w-series-math" note="— поставь себя на часть 3 и посмотри, что мост скажет про остаток" >}}
-<div class="w-cap">Слайдер «ты на части k» пересчитывает «осталось ~N мин» и шкалу моста. Включи JS — и посчитаем вместе.</div>
+{{< widget id="w-series-math" note="— put yourself on part 3 and see what the bridge says about the remainder" >}}
+<div class="w-cap">The “you are on part k” slider recomputes “~N min left” and the bridge's scale. Turn JS on and we'll count together.</div>
 {{< /widget >}}
 
-Заметь: числа в виджете совпадают с диаграммой выше и с настоящим мостом внизу страницы. Так и задумано — источник у всех трёх один.
+Notice: the numbers in the widget match the diagram above and the real bridge at the bottom of the page. That is the point — all three have one source.
 
-А что со статьями вне серий? У них тот же кикер, только вместо «часть N из M» — «разбор», а панель слева наполняется из поля `related` во front matter: три-пять ссылок на близкие гайды. Серия — не обязанность, а опция.
+And what about articles outside series? They get the same kicker, only instead of "part N of M" it says "deep dive", and the panel on the left is filled from the `related` field in the front matter: three to five links to nearby guides. A series is an option, not an obligation.
 
-*Теперь ты можешь собрать серию из любых статей двумя полями front matter — и переставлять части, меняя один `series_weight`, а не N статей.*
+*Now you can assemble a series out of any articles with two front-matter fields — and reorder the parts by changing one `series_weight`, not N articles.*
 
-## Что дальше {#what-next}
+## What's next {#what-next}
 
-Мост внизу уже посчитал, что осталась одна часть. В ней — про цвет: почему все семь палитр этой страницы живут в data-файлах и как добавить свою, не тронув ни строчки темы.
+The bridge below has already worked out that one part is left. It is about color: why all seven palettes of this page live in data files, and how to add your own without touching a line of the theme.

@@ -1,6 +1,29 @@
-/* w-mins: прикидка честного mins — сам сделан «за два касания» из этой же статьи */
+/* w-mins: an honest-mins estimate — itself made "in two touches", from this very article */
 Taiga.widget("w-mins", function (root) {
-  root.innerHTML = ""; // статик-фолбэк больше не нужен
+  root.innerHTML = ""; // the static fallback is no longer needed
+
+  // one bundle resource serves both translations — pick the strings by <html lang>
+  var RU = document.documentElement.lang.indexOf("ru") === 0;
+  var L = RU
+    ? {
+        add: "+ раздел",
+        reset: "reset",
+        none: "Гайд без разделов — лид и чекпоинт: ~2 мин.",
+        some: function (n, mins) {
+          return n + " разд. × ~2 мин + лид: пиши mins: " + mins +
+            " — и чипы с мостом серии будут говорить правду.";
+        }
+      }
+    : {
+        add: "+ section",
+        reset: "reset",
+        none: "A guide with no sections — the lead and the checkpoint: ~2 min.",
+        some: function (n, mins) {
+          return n + (n === 1 ? " section" : " sections") +
+            " × ~2 min + the lead: write mins: " + mins +
+            " — and the chips and the series bridge will tell the truth.";
+        }
+      };
 
   var sections = 0;
 
@@ -10,12 +33,12 @@ Taiga.widget("w-mins", function (root) {
   var add = document.createElement("button");
   add.type = "button";
   add.className = "w-btn primary";
-  add.textContent = "+ раздел";
+  add.textContent = L.add;
 
   var reset = document.createElement("button");
   reset.type = "button";
   reset.className = "w-btn ghost";
-  reset.textContent = "reset";
+  reset.textContent = L.reset;
 
   var num = document.createElement("div");
   num.className = "w-num";
@@ -26,15 +49,12 @@ Taiga.widget("w-mins", function (root) {
   cap.className = "w-cap";
 
   function paint() {
-    var mins = 2 + sections * 2; // лид и чекпоинт ~2 мин + ~2 мин на раздел
+    var mins = 2 + sections * 2; // lead and checkpoint ~2 min + ~2 min per section
     digit.textContent = mins;
     digit.classList.remove("tick");
-    void digit.offsetWidth; // перезапуск анимации
+    void digit.offsetWidth; // restart the animation
     digit.classList.add("tick");
-    cap.textContent = sections === 0
-      ? "Гайд без разделов — лид и чекпоинт: ~2 мин."
-      : sections + " разд. × ~2 мин + лид: пиши mins: " + mins +
-        " — и чипы с мостом серии будут говорить правду.";
+    cap.textContent = sections === 0 ? L.none : L.some(sections, mins);
     reset.disabled = sections === 0;
   }
 

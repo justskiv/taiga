@@ -1,74 +1,74 @@
 ---
-title: "Гайд — это папка"
+title: "A guide is a folder"
 slug: guide-is-a-bundle
 date: 2026-05-02
-description: "Контент-модель темы: статья — это leaf bundle, где рядом с текстом лежат её виджеты, стили и обложка."
-lead: "У этой статьи есть живой виджет, собственный скрипт и место под собственную обложку — и всё это лежит в одной папке рядом с текстом. Разберём контент-модель «статья = бандл» и посмотрим, почему она избавляет от правки шаблонов."
+description: "The theme's content model: an article is a leaf bundle, where its widgets, styles and cover sit next to the text."
+lead: "This article has a live widget, a script of its own and a slot for its own cover — and all of it lies in one folder next to the text. Let's take apart the “article = bundle” content model and see why it spares you from editing templates."
 series: ["anatomy"]
 series_weight: 10
 tags: [bundle, widgets, shortcodes]
 mins: 5
-version: "v0.1.0"
+version: "v0.0.1"
 ---
 
-## Хочу живую картинку {#naive-picture}
+## I want a live picture {#naive-picture}
 
-Наивная модель такая: я пишу текст, и в одном месте мне нужна интерактивная иллюстрация. Кнопка, счётчик, что угодно. Кажется, дел на десять строк JS.
+The naive model goes like this: I'm writing a text, and at one spot I need an interactive illustration. A button, a counter, anything. Feels like ten lines of JS.
 
-Теперь боль. В обычной теме эти десять строк некуда положить. Скрипт надо подключить в `<head>` — значит, править шаблон. Шаблон общий — значит, скрипт поедет на все страницы сразу. Чтобы не поехал, нужен реестр «какой скрипт какой странице» — значит, конфиг. Через месяц у тебя три статьи с виджетами и одна страница шаблона, которую страшно трогать. Текст живёт в одном месте, его код — в трёх других, и перенести статью целиком уже нельзя: она вросла в тему корнями.
+Now the pain. In an ordinary theme there is nowhere to put those ten lines. The script has to be wired into `<head>` — so you edit a template. The template is shared — so the script ships to every page at once. To stop it, you need a registry of which script belongs to which page — so you add config. A month later you have three articles with widgets and one template file nobody dares to touch. The text lives in one place, its code in three others, and you can no longer move the article as a whole: it has grown roots into the theme.
 
-## Статья — это папка {#bundle}
+## An article is a folder {#bundle}
 
-Здесь статья — это **leaf bundle**: папка, в которой лежит всё её хозяйство. Вот лента файлов бандла — той самой папки, из которой собрана эта страница:
+Here an article is a **leaf bundle**: a folder that holds everything it owns. Here is the file strip of the bundle — the very folder this page was built from:
 
 {{< raw >}}
 <div class="byte-strip" aria-hidden="true">
-  <div class="byte-seg"><div class="cells"><div class="byte-box f0" data-tip="index.md · текст и front matter · обязателен">md</div></div><div class="seg-tag">index.md</div></div>
-  <div class="byte-seg"><div class="cells"><div class="byte-box f1" data-tip="widgets.js · виджеты страницы · тема подключит сама">js</div></div><div class="seg-tag">widgets.js</div></div>
-  <div class="byte-seg"><div class="cells"><div class="byte-box f2" data-tip="widgets.css · свои стили · если строительных классов не хватило">css</div></div><div class="seg-tag">widgets.css</div></div>
-  <div class="byte-seg"><div class="cells"><div class="byte-box pad" data-tip="og.png · авторская обложка · перекрывает сгенерированную">og</div></div><div class="seg-tag padtag">↳ опц.</div></div>
+  <div class="byte-seg"><div class="cells"><div class="byte-box f0" data-tip="index.md · text and front matter · required">md</div></div><div class="seg-tag">index.md</div></div>
+  <div class="byte-seg"><div class="cells"><div class="byte-box f1" data-tip="widgets.js · the page's widgets · the theme wires it in itself">js</div></div><div class="seg-tag">widgets.js</div></div>
+  <div class="byte-seg"><div class="cells"><div class="byte-box f2" data-tip="widgets.css · styles of your own · when the building-block classes run out">css</div></div><div class="seg-tag">widgets.css</div></div>
+  <div class="byte-seg"><div class="cells"><div class="byte-box pad" data-tip="og.png · your own cover · overrides the generated one">og</div></div><div class="seg-tag padtag">↳ opt.</div></div>
 </div>
 {{< /raw >}}
 
-Обязателен только `index.md`. Всё остальное — опциональные соседи: положил `widgets.js` рядом — тема сама его найдёт, минифицирует, отфингерпринтит и подключит **только на этой странице**. Положил `widgets.css` — то же самое со стилями. Положил `og.png` — обложка для соцсетей берётся авторская вместо сгенерированной.
+Only `index.md` is required. Everything else is an optional neighbor: drop `widgets.js` beside it and the theme finds it, minifies it, fingerprints it and wires it in **on this page only**. Drop `widgets.css` — the same for styles. Drop `og.png` — the social cover is taken from you instead of being generated.
 
-{{< callout type="key" label="Главная мысль" >}}
-Всё, что нужно статье, лежит рядом со статьёй. Перенести гайд на другой сайт — значит перенести одну папку. Удалить — удалить одну папку. Никаких хвостов в шаблонах и конфигах.
+{{< callout type="key" label="Key idea" >}}
+Everything an article needs lies next to the article. Moving a guide to another site means moving one folder. Deleting it means deleting one folder. No loose ends in templates and configs.
 {{< /callout >}}
 
-## Два касания {#two-touches}
+## Two touches {#two-touches}
 
-Полный цикл «добавить живую иллюстрацию» — два касания. Первое: в тексте ставишь шорткод с идентификатором и заданием. Второе: в `widgets.js` регистрируешь инициализатор с тем же идентификатором:
+The full cycle of "add a live illustration" is two touches. First: in the text you place a shortcode with an id and a prompt. Second: in `widgets.js` you register an initializer with the same id:
 
-```js {label="inside/guide-is-a-bundle/widgets.js (фрагмент)"}
+```js {label="inside/guide-is-a-bundle/widgets.js (excerpt)"}
 Taiga.widget("w-hello", function (root) {
-  root.innerHTML = ""; // убираем статик-фолбэк
-  // …кнопка, счётчик, бейдж — весь код в файле рядом
+  root.innerHTML = ""; // drop the static fallback
+  // …button, counter, badge — all the code in the file next door
 });
 ```
 
-Ни шаблонов, ни `<head>`, ни реестров. У шорткода есть парная форма: внутрь кладётся статичный фолбэк, который живёт в точке монтирования, пока JS его не заменит, — а если JS выключен, остаётся насовсем. Страница без скриптов деградирует в осмысленный текст, а не в дыру.
+No templates, no `<head>`, no registries. The shortcode has a paired form: inside it goes a static fallback that lives in the mount point until JS replaces it — and if JS is off, it stays for good. A page without scripts degrades into meaningful text, not into a hole.
 
-Заметь, чего в примере выше нет: собственных стилей. Строительные классы — `.w-row` для строки контролов, `.w-btn` для кнопок, `.w-num` для крупной цифры, `.w-cap` для строки-вывода — лежат в CSS темы, и виджет выглядит родным, не привезя ни одного своего правила. `widgets.css` нужен только когда этого набора не хватает — и тогда он, как и всё остальное, просто кладётся в папку.
+Notice what the example above does not have: styles of its own. The building-block classes — `.w-row` for a row of controls, `.w-btn` for buttons, `.w-num` for a big number, `.w-cap` for the output line — live in the theme's CSS, and the widget looks native without hauling in a single rule of its own. `widgets.css` is needed only when that set runs out — and then it, like everything else, simply goes into the folder.
 
-## Рантайм не даст упасть {#runtime}
+## The runtime catches the fall {#runtime}
 
-`Taiga.widget` — это маленький рантайм в теме. Он ждёт DOM, находит точку монтирования по идентификатору и вызывает твой колбэк, обернув его в `try/catch`: упавший виджет напишет в консоль и не уронит соседей. А если точки монтирования нет — шорткод убрали из текста — инициализатор молча пропускается.
+`Taiga.widget` is a small runtime in the theme. It waits for the DOM, finds the mount point by id and calls your callback wrapped in a `try/catch`: a widget that throws writes to the console and does not take its neighbors down. And if there is no mount point — the shortcode was taken out of the text — the initializer is skipped in silence.
 
-{{< callout type="trap" label="Ловушка" >}}
-«Молча» — обоюдоострое слово. Идентификатор в шорткоде и в `Taiga.widget(…)` должны совпадать буква в букву: при опечатке рантайм решит, что шорткод убрали, и ты не получишь ни виджета, ни ошибки. Пустой квадрат на месте иллюстрации — первым делом сверь id.
+{{< callout type="trap" label="Trap" >}}
+"In silence" cuts both ways. The id in the shortcode and in `Taiga.widget(…)` must match letter for letter: on a typo the runtime decides the shortcode is gone, and you get neither a widget nor an error. An empty square where the illustration should be — check the id first.
 {{< /callout >}}
 
-А теперь проверь всё это на живом экземпляре. Виджет ниже смонтирован тем самым рантаймом из того самого `widgets.js`, что лежит в папке этой статьи:
+Now check all of it on a live specimen. The widget below was mounted by that very runtime, out of that very `widgets.js` that lies in this article's folder:
 
-{{< widget id="w-hello" note="— нажми кнопку несколько раз, потом перезагрузи страницу: счётчик живёт в замыкании, а не в теме" >}}
-<div class="w-cap">Здесь живёт счётчик кликов. Сейчас ты видишь статичный фолбэк: включи JS — и он оживёт.</div>
+{{< widget id="w-hello" note="— click the button a few times, then reload the page: the counter lives in a closure, not in the theme" >}}
+<div class="w-cap">A click counter lives here. Right now you see the static fallback: turn JS on and it comes alive.</div>
 {{< /widget >}}
 
-И последнее: механизм не привязан к гайдам. `widgets.js` подхватывается у **любого** бандла — страница с интерактивом здесь не отдельный тип со своим шаблоном, а обычная markdown-страница, рядом с которой лежит скрипт.
+One last thing: the mechanism is not tied to guides. `widgets.js` is picked up from **any** bundle — an interactive page here is not a separate type with a template of its own, but an ordinary markdown page with a script lying next to it.
 
-*Теперь ты можешь добавить живую иллюстрацию в любой гайд, не открыв ни одного файла темы.*
+*Now you can add a live illustration to any guide without opening a single file of the theme.*
 
-## Что дальше {#what-next}
+## What's next {#what-next}
 
-Эта статья — часть серии, и слева от текста уже стоит панель с её оглавлением, а в кикере написано «часть 1 из 3». Руками это никто не набирал. Откуда тема всё знает — во второй части.
+This article is part of a series, and the panel to the left of the text already carries its contents, while the kicker says "part 1 of 3". Nobody typed that by hand. Where the theme knows it all from — in part two.

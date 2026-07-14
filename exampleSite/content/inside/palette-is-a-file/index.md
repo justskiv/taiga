@@ -1,27 +1,27 @@
 ---
-title: "Палитра — это один файл"
+title: "A palette is one file"
 slug: palette-is-a-file
 date: 2026-05-16
-description: "Палитры как данные: toml-файл в data/themes/, из которого сборка делает CSS-блоки и свотчи пикера."
-lead: "Пикер в шапке этой страницы умеет несколько палитр — и ни одна из них не захардкожена ни в CSS, ни в JS. Каждая палитра — это toml-файл, из которого сборка генерирует всё остальное. Разберём, как это устроено, и перекрасим страницу прямо из статьи."
+description: "Palettes as data: a toml file in data/themes/, out of which the build makes CSS blocks and the picker's swatches."
+lead: "The picker in this page's header knows several palettes — and not one of them is hardcoded, neither in CSS nor in JS. Every palette is a toml file, and the build generates all the rest out of it. Let's take apart how that works, and repaint the page from inside the article."
 series: ["anatomy"]
 series_weight: 30
 tags: [palettes, data]
 mins: 5
-version: "v0.1.0"
+version: "v0.0.1"
 ---
 
-## Своя тема без форка {#no-fork}
+## Your own theme without a fork {#no-fork}
 
-Наивная модель: хочу перекрасить сайт под себя — открою CSS темы и поменяю цвета. Боль наступает при первом же обновлении темы: твои правки лежат в её файлах, и каждый апдейт — это merge-конфликт. Классический выбор «форкни и отстань от апстрима — или терпи чужие цвета». Оба варианта плохие, и оба растут из одной ошибки: цвет считается *оформлением*, хотя на самом деле это *данные* — таблица «имя переменной → значение», которой просто негде лежать, кроме чужого CSS.
+The naive model: I want to repaint the site my way — I'll open the theme's CSS and change the colors. The pain arrives with the very first theme update: your edits lie in its files, and every update is a merge conflict. The classic choice of "fork it and drop off upstream — or put up with somebody else's colors". Both options are bad, and both grow from one mistake: color is treated as *styling*, when in fact it is *data* — a table of "variable name → value" that has nowhere to live except somebody else's CSS.
 
-## Один toml {#one-toml}
+## One toml {#one-toml}
 
-Здесь палитра — это данные, а не стили. Каждая — файл `data/themes/<id>.toml`: пара служебных полей плюс цветовые переменные, у которых ключи — буквально имена CSS-переменных без `--`:
+Here a palette is data, not styles. Each one is a file `data/themes/<id>.toml`: a couple of housekeeping fields plus color variables whose keys are literally the names of the CSS variables without the `--`:
 
 ```toml {label="data/themes/mine.toml", hl_lines=[1,2]}
-name = "Моя"      # имя в пикере
-weight = 80       # позиция в списке пикера
+name = "Mine"     # name in the picker
+weight = 80       # position in the picker's list
 
 "bg-deep" = "#101418"
 "bg-surface" = "#1a2027"
@@ -29,40 +29,40 @@ weight = 80       # позиция в списке пикера
 "text-primary" = "#d8dee6"
 ```
 
-Подсвечены единственные две строки, которые не являются CSS-переменными. Всё остальное — прямая таблица «имя → цвет». Ключевые из них:
+Highlighted are the only two lines that are not CSS variables. All the rest is a straight "name → color" table. The key ones:
 
-| Ключ | Что красит |
+| Key | What it paints |
 |---|---|
-| `bg-deep` | самый глубокий фон страницы |
-| `bg-surface` | поверхности: карточки, коллауты, виджеты |
-| `border` | рамки и хайрлайны |
-| `text-primary` | основной текст |
-| `text-muted` | подписи, меты, второстепенное |
+| `bg-deep` | the deepest background of the page |
+| `bg-surface` | surfaces: cards, callouts, widgets |
+| `border` | frames and hairlines |
+| `text-primary` | the main text |
+| `text-muted` | captions, metas, the secondary |
 
-На сборке партиал `head/palettes.html` превращает эти файлы в CSS: блок `:root { … }` для палитры по умолчанию плюс по блоку `[data-theme="<id>"] { … }` на каждую — и вливает результат первым в общий CSS-бандл. Какая палитра дефолтная — решает параметр сайта `defaultTheme`: это просто id одного из файлов. Переключение темы — смена одного атрибута `data-theme` на `<html>`; каскад делает остальное. Поэтому же смена мгновенная: браузеру не нужно ничего дозагружать, все палитры уже в CSS, который он получил с первым байтом страницы.
+At build time the partial `head/palettes.html` turns these files into CSS: a `:root { … }` block for the default palette plus one `[data-theme="<id>"] { … }` block per palette — and pours the result into the common CSS bundle first. Which palette is the default is decided by the site parameter `defaultTheme`: it is just the id of one of the files. Switching the theme is switching one `data-theme` attribute on `<html>`; the cascade does the rest. That is also why the switch is instant: the browser has nothing left to fetch, every palette is already in the CSS it got with the page's first byte.
 
-{{< callout type="note" label="Историческая сноска" >}}
-В прототипе темы палитры жили JS-таблицей: поповер «Вид» держал массив цветов и подменял переменные через `style.setProperty` прямо на `<html>`. При переезде таблицу разобрали на toml-файлы, а генерацию CSS увезли на сборку. Теперь JS значений палитр не знает вовсе — он только читает их список.
+{{< callout type="note" label="Historical note" >}}
+In the theme's prototype the palettes lived as a JS table: the "View" popover held an array of colors and swapped the variables through `style.setProperty` right on `<html>`. During the move the table was taken apart into toml files, and CSS generation was carried off to the build. Now JS does not know the palette values at all — it only reads their list.
 {{< /callout >}}
 
-## Пикер и его JSON {#picker-json}
+## The picker and its JSON {#picker-json}
 
-Откуда пикер знает, какие палитры есть? Из тех же данных: партиал кладёт на страницу `<script type="application/json" id="dg-themes">` со списком `{id, name, weight, свотч-цвета}` — свотчи собираются из четырёх фиксированных ключей палитры, так что миниатюра в пикере честно показывает будущие поверхности и текст. Поповер в шапке читает этот список и рисует кнопки. Виджет ниже читает **тот же самый** список — и по клику ставит тот же самый атрибут:
+Where does the picker learn which palettes exist? From the same data: the partial puts a `<script type="application/json" id="dg-themes">` on the page with a list of `{id, name, weight, swatch colors}` — the swatches are taken from four fixed keys of the palette, so the thumbnail in the picker honestly shows the surfaces and the text to come. The popover in the header reads that list and draws the buttons. The widget below reads **the very same** list — and on a click sets the very same attribute:
 
-{{< widget id="w-palette" note="— перекрась страницу; пикер в шапке делает ровно то же, только ещё запоминает выбор" >}}
-<div class="w-cap">Здесь будут свотчи всех палитр темы — кликабельные, с настоящим переключением. Включи JS, чтобы перекрасить страницу.</div>
+{{< widget id="w-palette" note="— repaint the page; the picker in the header does exactly the same, only it also remembers the choice" >}}
+<div class="w-cap">The swatches of every palette in the theme go here — clickable, with real switching. Turn JS on to repaint the page.</div>
 {{< /widget >}}
 
-Заметь честную разницу: виджет меняет только атрибут, а пикер ещё и записывает выбор в хранилище — поэтому после перезагрузки победит его версия. И применяется сохранённый выбор до первой отрисовки, крошечным инлайн-скриптом в `<head>`: страница ни на кадр не вспыхивает дефолтной палитрой.
+Notice the honest difference: the widget changes only the attribute, while the picker also writes the choice into storage — which is why after a reload its version wins. And the saved choice is applied before the first paint, by a tiny inline script in `<head>`: the page does not flash the default palette, not for a single frame.
 
-Теперь главное — расширяемость. Сайту нужна фирменная палитра? Положи `data/themes/mine.toml` **на стороне сайта**: Hugo мержит данные темы и сайта (сайт побеждает при совпадении имён), и файл сам попадёт и в CSS, и в пикер. Не нравится палитра из комплекта темы — переопредели её файл с `disabled = true`, и она исчезнет отовсюду. Ни строчки в теме, ни форка.
+Now the main thing — extensibility. Your site needs a house palette? Put `data/themes/mine.toml` **on the site side**: Hugo merges the theme's data with the site's (the site wins on a name clash), and the file finds its own way into both the CSS and the picker. Don't like a palette that ships with the theme — override its file with `disabled = true`, and it disappears everywhere. Not a line in the theme, no fork.
 
-*Теперь ты можешь добавить сайту собственную палитру одним файлом — не трогая ни CSS, ни JS, ни шаблоны темы.*
+*Now you can give a site a palette of its own with one file — without touching the theme's CSS, JS or templates.*
 
-## Что дальше {#what-next}
+## What's next {#what-next}
 
-Серия «Анатомия темы» на этом закончена: гайд — папка, серия — таксономия, палитра — файл. Всё показанное — и десяток компонентов, до которых мы не дошли, — собрано на одной странице-полигоне:
+The "Anatomy of the theme" series ends here: a guide is a folder, a series is a taxonomy, a palette is a file. Everything shown — and a dozen components we never got to — is gathered on one proving-ground page:
 
-{{< bigcard href="/reference/kitchen-sink/" k="Полигон →" t="Kitchen-sink" s="Все компоненты темы на одной странице — смотреть и копировать" >}}
+{{< bigcard href="/reference/kitchen-sink/" k="Proving ground →" t="Kitchen-sink" s="Every component of the theme on one page — to look at and to copy" >}}
 
-А про то, что происходит на сборке — обложки, поиск, чип версии, — есть отдельный разбор в «Приёмах».
+And as for what happens at build time — covers, search, the version chip — there is a deep dive of its own in "How-to".

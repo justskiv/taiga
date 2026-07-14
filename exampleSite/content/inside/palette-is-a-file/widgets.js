@@ -1,7 +1,26 @@
-/* w-palette: свотчи из того же JSON #dg-themes, которым пользуется пикер в шапке.
-   Клик ставит data-theme на <html> — настоящий механизм переключения темы. */
+/* w-palette: swatches out of the same #dg-themes JSON the header picker uses.
+   A click sets data-theme on <html> — the real theme-switching mechanism. */
 Taiga.widget("w-palette", function (root) {
   root.innerHTML = "";
+
+  var RU = document.documentElement.lang.indexOf("ru") === 0;
+  var L = RU
+    ? {
+        missing: "Список палитр не найден: на странице нет #dg-themes. " +
+          "Обычно его выкладывает партиал пикера тем — без него виджету нечего показывать.",
+        now: function (name, id) {
+          return "Сейчас: «" + name + "» — атрибут data-theme=\"" + id +
+            "\" стоит на <html>, дальше работает чистый CSS-каскад.";
+        }
+      }
+    : {
+        missing: "The palette list is missing: there is no #dg-themes on the page. " +
+          "It is normally laid out by the theme picker's partial — without it the widget has nothing to show.",
+        now: function (name, id) {
+          return "Now: “" + name + "” — the data-theme=\"" + id +
+            "\" attribute sits on <html>, and from there it is a pure CSS cascade.";
+        }
+      };
 
   var cap = document.createElement("div");
   cap.className = "w-cap";
@@ -12,8 +31,7 @@ Taiga.widget("w-palette", function (root) {
     try { themes = JSON.parse(src.textContent) || []; } catch (e) { themes = []; }
   }
   if (!themes.length) {
-    cap.textContent = "Список палитр не найден: на странице нет #dg-themes. " +
-      "Обычно его выкладывает партиал пикера тем — без него виджету нечего показывать.";
+    cap.textContent = L.missing;
     root.appendChild(cap);
     return;
   }
@@ -23,7 +41,7 @@ Taiga.widget("w-palette", function (root) {
   row.className = "w-row";
   var btns = [];
 
-  // до четырёх свотч-цветов: берём любые hex-значения из объекта палитры
+  // up to four swatch colors: take any hex values out of the palette object
   function hexes(t) {
     if (Array.isArray(t.sw) && t.sw.length) return t.sw.slice(0, 4);
     var out = [];
@@ -43,8 +61,7 @@ Taiga.widget("w-palette", function (root) {
       b.classList.toggle("primary", b._id === curId);
       if (b._id === curId) curName = b._name;
     });
-    cap.textContent = "Сейчас: «" + curName + "» — атрибут data-theme=\"" + curId +
-      "\" стоит на <html>, дальше работает чистый CSS-каскад.";
+    cap.textContent = L.now(curName, curId);
   }
 
   themes.forEach(function (t) {

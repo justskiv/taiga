@@ -1,11 +1,11 @@
 ---
-title: "Роадмап"
-description: "Что делается в теме сейчас и что стоит в очереди — без дат и обещаний."
-lead: "Живая карта, а не список обещаний: статусы честные, прогресс — на глаз, сроков нет. Данные лежат в data/roadmap.toml — правишь файл, и эта страница вместе с полосой «в работе» на главной обновляется сама."
+title: "Roadmap"
+description: "What's being done in the theme right now and what's queued up — no dates, no promises."
+lead: "A live map, not a list of promises: statuses are honest, progress is eyeballed, there are no deadlines. The data lives in data/roadmap/<lang>.toml — edit the file, and this page, along with the \"in progress\" strip on the home page, updates itself."
 ---
 
 {{< roadmap >}}
 
-## Как это устроено {#how}
+## How it works {#how}
 
-Роадмап — данные, а не разметка: и блоки «в работе», и очередь читаются из `data/roadmap.toml` на стороне сайта. Правила простые: без дат — статус и прогресс честнее дедлайнов, которые всё равно поедут; начатое доводится до конца раньше, чем берётся новое; очередь — намерения, а не обязательства, и порядок в ней может меняться.
+The roadmap is data, not markup: both the "in progress" blocks and the queue are read from the site's `data/roadmap/<lang>.toml`. The rules are simple: no dates — status and progress are more honest than deadlines that slip anyway; what's started gets finished before anything new gets picked up; the queue is intentions, not commitments, and its order can change.

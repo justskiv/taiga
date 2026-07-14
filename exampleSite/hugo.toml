@@ -13,14 +13,21 @@
 # folder named `taiga` — i.e. this repo. Check the repo out as `taiga` for this
 # to work with no install; the demo then builds against the very theme it documents.
 
-baseURL = "https://example.org/"        # placeholder — the demo has no real domain
+# The demo's real home (GitHub Pages, a SUBPATH — not a domain root). It is set
+# here rather than passed with --baseURL so that the subpath is exercised on every
+# build: every URL the theme emits must survive living under /taiga/, and a theme
+# that only works at a domain root is a theme with a bug. `hugo server` overrides
+# this locally, so development is unaffected.
+baseURL = "https://justskiv.github.io/taiga/"
 title = "taiga"                          # brand-neutral: this demo is theme-about-theme
 theme = "taiga"                          # resolved via --themesDir (see header)
 
-# Single language, but already in multilingual shape: adding a second language is
-# additive (content + one [languages.xx] block), not a config migration. The
-# "Сделать своей" guide walks this exact path.
-defaultContentLanguage = "ru"
+# Two languages, and they are the point: the demo is the theme's own proof that
+# multilingual works. English is the default and lives at the root; Russian lives
+# under /ru/. Adding a THIRD language is additive — a [languages.xx] block, an
+# i18n/xx.toml, and content with an .xx.md suffix. No template edits.
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false   # en at /, not /en/
 enableRobotsTXT = true
 
 # Git-derived dates. OFF: the demo builds standalone (and inside the theme repo the
@@ -30,11 +37,123 @@ enableGitInfo = false
 
 timeZone = "Europe/Moscow"
 
+# ── Languages ────────────────────────────────────────────────────────────────
+# Per-language `params` and `menus` override the site-wide ones for that language.
+# Everything NOT repeated here (defaultTheme, featured, rubricSections, …) is
+# shared — a language only restates what actually differs.
+#
+# NB: content pairs by FILE SUFFIX — index.md (en) ↔ index.ru.md (ru). Slugs and
+# tags are deliberately identical across languages, so a page and its translation
+# share a URL path and the switcher can hop between them in place.
+
 [languages]
+
+  [languages.en]
+    languageCode = "en"
+    languageName = "English"
+    weight = 1
+
+    [languages.en.params]
+      # Home intro line, split into a lead clause and a trailing "· …" satellite so
+      # the theme can style them apart. Together they read as one sentence.
+      heroLine = "a theme for learning guides: series, widgets in the text, search — with no node"
+      heroSat = "· this demo is written in it, about it"
+      footerTag = "the theme's demo site — every mechanism proven on itself"
+
+    # Main navigation, in order. `params.badge` renders a generic <sup> badge on any
+    # item — here it flags the author-built "Playground" section (β), demonstrating
+    # that the badge is a nav feature, not a marker of a special page type.
+    [[languages.en.menus.main]]
+      name = "How-to"
+      pageRef = "/howto"
+      weight = 10
+    [[languages.en.menus.main]]
+      name = "Inside"
+      pageRef = "/inside"
+      weight = 20
+    [[languages.en.menus.main]]
+      name = "Reference"
+      pageRef = "/reference"
+      weight = 30
+    [[languages.en.menus.main]]
+      name = "Playground"
+      pageRef = "/playground"
+      weight = 40
+      [languages.en.menus.main.params]
+        badge = "β"
+
+    # Footer link row (ordered by weight). The theme renders whatever is listed;
+    # which links and labels are the site's concern, not the theme's.
+    [[languages.en.menus.footer]]
+      name = "how-to"
+      pageRef = "/howto"
+      weight = 10
+    [[languages.en.menus.footer]]
+      name = "inside"
+      pageRef = "/inside"
+      weight = 20
+    [[languages.en.menus.footer]]
+      name = "reference"
+      pageRef = "/reference"
+      weight = 30
+    [[languages.en.menus.footer]]
+      name = "roadmap"
+      pageRef = "/roadmap"
+      weight = 40
+    [[languages.en.menus.footer]]
+      name = "about"
+      pageRef = "/about"
+      weight = 50
+
   [languages.ru]
     languageCode = "ru"
     languageName = "Русский"
-    weight = 1
+    weight = 2
+
+    [languages.ru.params]
+      heroLine = "тема для учебных гайдов: серии, виджеты в тексте, поиск — без node"
+      heroSat = "· это демо написано ею о ней самой"
+      footerTag = "демо-сайт темы — каждый механизм проверен на себе"
+
+    [[languages.ru.menus.main]]
+      name = "Приёмы"
+      pageRef = "/howto"
+      weight = 10
+    [[languages.ru.menus.main]]
+      name = "Устройство"
+      pageRef = "/inside"
+      weight = 20
+    [[languages.ru.menus.main]]
+      name = "Справочник"
+      pageRef = "/reference"
+      weight = 30
+    [[languages.ru.menus.main]]
+      name = "Песочница"
+      pageRef = "/playground"
+      weight = 40
+      [languages.ru.menus.main.params]
+        badge = "β"
+
+    [[languages.ru.menus.footer]]
+      name = "приёмы"
+      pageRef = "/howto"
+      weight = 10
+    [[languages.ru.menus.footer]]
+      name = "устройство"
+      pageRef = "/inside"
+      weight = 20
+    [[languages.ru.menus.footer]]
+      name = "справочник"
+      pageRef = "/reference"
+      weight = 30
+    [[languages.ru.menus.footer]]
+      name = "роадмап"
+      pageRef = "/roadmap"
+      weight = 40
+    [[languages.ru.menus.footer]]
+      name = "о сайте"
+      pageRef = "/about"
+      weight = 50
 
 # Two taxonomies drive the whole content model: `tags` for cross-cutting topics,
 # `series` for ordered multi-part tracks. Names match the site config — the theme
@@ -46,24 +165,22 @@ timeZone = "Europe/Moscow"
 [params]
   # NB: in TOML every scalar key must precede any [params.subtable] — otherwise it
   # is absorbed into the preceding subtable. Scalars first, tables last.
+  #
+  # These are the LANGUAGE-INDEPENDENT params. The ones that differ per language
+  # (heroLine, heroSat, footerTag) live in [languages.xx.params] above.
 
-  # Home intro line, split into a lead clause and a trailing "· …" satellite so the
-  # theme can style them apart. Together they read as one sentence.
-  heroLine = "тема для учебных гайдов: серии, виджеты в тексте, поиск — без node"
-  heroSat = "· это демо написано ею о ней самой"
-
-  # "Guide of the week" — entry into the handbook series (a content path). Being a
-  # series member, the featured card also shows "часть 1 из 3" and an "вся серия"
-  # link, exercising that branch of the featured partial.
+  # "Guide of the week" — entry into the handbook series (a content path, not a
+  # URL: it resolves per language). Being a series member, the featured card also
+  # shows "part 1 of 3" and an "all parts" link, exercising that branch.
   featured = "howto/get-started"
 
-  # Posts shown before the "ещё N гайдов" button. 3 of 9 feed guides visible, so the
-  # reveal control is live in the demo (about/roadmap/playground carry no date and
-  # stay out of the feed).
+  # Posts shown before the "N more guides" button. 3 of 9 feed guides visible, so
+  # the reveal control is live in the demo (about/roadmap/playground carry no date
+  # and stay out of the feed).
   feedInitial = 3
 
   # Default palette id — one of data/themes/<id>.toml (the theme ships seven). The
-  # "Палитра — это один файл" guide explains how this maps to CSS.
+  # "A palette is one file" guide explains how this maps to CSS.
   defaultTheme = "amber"
 
   # Cross-cutting accent (optional). One hex repaints the accent across EVERY
@@ -76,11 +193,8 @@ timeZone = "Europe/Moscow"
 
   # Meta chip fallback when a guide omits `version`. Here it is the THEME's own
   # version: the demo documents the theme, and this doubles as a live proof that the
-  # chip is an arbitrary string (see "Обложки, поиск и другая магия сборки").
-  versionDefault = "v0.1.0"
-
-  # Footer tagline.
-  footerTag = "демо-сайт темы — каждый механизм проверен на себе"
+  # chip is an arbitrary string (see "Covers, search and other build-time magic").
+  versionDefault = "v0.0.1"
 
   # Broken internal links during build: "error" fails the build, "warn" logs. The
   # demo keeps it strict so a dead cross-link between guides never ships.
@@ -98,8 +212,10 @@ timeZone = "Europe/Moscow"
     name = "taiga"
     tld = ""
 
-  [params.search]
-    enable = true                        # ⌘K modal + Pagefind index
+  # NB: there is deliberately NO search toggle. The ⌘K modal is always on and
+  # degrades quietly to an "index not built yet" hint when the Pagefind index is
+  # missing (e.g. a bare `hugo server` with no second build step). A
+  # `[params.search] enable` key used to sit here and was read by nothing.
 
   [params.ogImages]
     enable = true                        # generate share images at build time
@@ -110,51 +226,6 @@ timeZone = "Europe/Moscow"
 
   [params.social]
     twitter = ""                         # @handle for twitter:site (empty = omit)
-
-# Main navigation, in order. `params.badge` renders a generic <sup> badge on any
-# item — here it flags the author-built "Песочница" section (β), demonstrating that
-# the badge is a nav feature, not a marker of a special page type.
-[[menus.main]]
-  name = "Приёмы"
-  pageRef = "/howto"
-  weight = 10
-[[menus.main]]
-  name = "Устройство"
-  pageRef = "/inside"
-  weight = 20
-[[menus.main]]
-  name = "Справочник"
-  pageRef = "/reference"
-  weight = 30
-[[menus.main]]
-  name = "Песочница"
-  pageRef = "/playground"
-  weight = 40
-  [menus.main.params]
-    badge = "β"
-
-# Footer link row (ordered by weight). The theme renders whatever is listed; which
-# links and labels are the site's concern, not the theme's.
-[[menus.footer]]
-  name = "приёмы"
-  pageRef = "/howto"
-  weight = 10
-[[menus.footer]]
-  name = "устройство"
-  pageRef = "/inside"
-  weight = 20
-[[menus.footer]]
-  name = "справочник"
-  pageRef = "/reference"
-  weight = 30
-[[menus.footer]]
-  name = "роадмап"
-  pageRef = "/roadmap"
-  weight = 40
-[[menus.footer]]
-  name = "о сайте"
-  pageRef = "/about"
-  weight = 50
 
 # Taxonomy TERM pages never render (tags link to /tags/#tag; series carry metadata
 # only), but their data stays available to templates (.GetTerms / term.Pages).
@@ -197,7 +268,8 @@ timeZone = "Europe/Moscow"
 
 # Only the home page carries an RSS feed (/index.xml) — the guide feed. Section,
 # taxonomy and term list pages would otherwise each emit their own index.xml; a
-# single feed is wanted, so RSS is dropped from their outputs.
+# single feed is wanted, so RSS is dropped from their outputs. With two languages
+# Hugo emits one feed per language (/index.xml and /ru/index.xml).
 [outputs]
   home = ["html", "rss"]
   section = ["html"]
