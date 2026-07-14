@@ -1,16 +1,12 @@
 /* /tags/ filtering: the cloud and feed are server-rendered; this only reacts to
    location.hash. Selecting a tag reveals the feed and hides posts whose data-tags
-   don't contain it; a repeat click (or "сбросить") clears. Reads its posts and
+   don't contain it; a repeat click (or the reset link) clears. Reads its posts and
    chips from the DOM, so it stays in sync with whatever the template rendered.
-   Inert off the tags page (guards on #cloud/#tagFeed). Strings via I18N. */
-import { I18N } from './i18n.js';
+   Inert off the tags page (guards on #cloud/#tagFeed). Strings via I18N — the
+   "N guides" count included: the number is only known here, so the plural form
+   comes from i18n.js's CLDR pluraliser rather than a Russian rule baked in. */
+import { I18N, plural } from './i18n.js';
 
-function plural(n, forms) {
-  const m10 = n % 10, m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return forms[0];
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return forms[1];
-  return forms[2];
-}
 function decode(s) { try { return decodeURIComponent(s); } catch (e) { return s; } }
 
 export function initTagsFilter() {

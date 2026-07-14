@@ -1,0 +1,10 @@
+{{- /* Short feed date: "27 Jun", or with the year when it isn't the current one.
+       Context = a time value (e.g. .Date). Month names are i18n keys
+       (month_1…month_12), not a locale formatter: a locale may need a month form
+       no formatter hands over — Russian, for one, wants the genitive short month
+       the feed reads out loud, which differs from the month's bare name. A new
+       language is then one more i18n file, no template. */ -}}
+{{- $mon := i18n (printf "month_%d" (int .Month)) -}}
+{{- $out := printf "%d %s" .Day $mon -}}
+{{- if ne .Year now.Year -}}{{ $out = printf "%s %d" $out .Year }}{{- end -}}
+{{- return $out -}}

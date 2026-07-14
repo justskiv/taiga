@@ -1,9 +1,15 @@
-{{- /* Roadmap blocks from data/roadmap.toml: "in progress" cards (progress bars +
+{{- /* Roadmap blocks from the roadmap data: "in progress" cards (progress bars +
        status chips), the numbered queue, and the rules. Section headings carry the
        same hash-anchor markup the render-heading hook emits, so they behave like
        any h2. Item/queue/rule text is rendered inline so `code` and [links] work.
-       Anchors #now/#queue/#how are fixed (stable deep links); labels are i18n. */ -}}
-{{- $rm := site.Data.roadmap -}}
+       Anchors #now/#queue/#how are fixed (stable deep links); labels are i18n.
+
+       Hugo's data/ is not language-aware, so the roadmap resolves in two shapes:
+       a flat data/roadmap.toml (one language, what it always was) or a folder
+       data/roadmap/<lang>.toml, which Hugo hands over as a map keyed by language.
+       Same two lines in home/wip.html — keep them in step. */ -}}
+{{- $rm := site.Data.roadmap | default dict -}}
+{{- with index $rm site.Language.Lang }}{{ $rm = . }}{{ end -}}
 {{- $anchor := i18n "anchor_sec" -}}
 {{- with $rm.items }}
 <h2 id="now"><a class="hash" href="#now" aria-label="{{ $anchor }}">#</a>{{ i18n "roadmap_now" }}</h2>

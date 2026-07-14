@@ -2,12 +2,12 @@
        feed. Context = a guide page. `data-tags` carries the page's tags so the
        tags filter (modules/tags-filter.js) can show/hide it client-side; it is
        inert on the home feed. The series line reuses the article series context
-       (kicker helper), so "часть N из M" stays consistent with the article. */ -}}
+       (kicker helper), so "part N of M" stays consistent with the article. */ -}}
 {{- $rubric := .CurrentSection -}}
 {{- $s := partial "article/series-ctx.html" . -}}
 {{- $tags := .Params.tags | default slice -}}
 <article class="post" data-tags="{{ delimit $tags " " }}">
-<div class="p-m"><span>{{ partial "date-ru.html" .Date }}</span>
+<div class="p-m"><span>{{ partial "date.html" .Date }}</span>
 {{- "" -}}<a class="pr" href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
 {{- if $s.isSeries }}<a class="ps" href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>
 {{- else }}<span>{{ i18n "kicker_standalone" }}</span>{{ end }}

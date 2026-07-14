@@ -1,0 +1,20 @@
+{{- /* Language switcher for the header row ("EN · RU"). Renders nothing at all on
+       a single-language site, so it costs an unused theme exactly one empty
+       partial call. Each link prefers THIS page's translation and falls back to
+       that language's home: a language that hasn't translated the page yet must
+       not hand the reader a 404. Visible text is the bare code (the row is dense);
+       languageName rides in title/aria-label so the accessible name is a word. */ -}}
+{{- $langs := site.Languages -}}
+{{- if gt (len $langs) 1 -}}
+{{- /* lang → URL, homes first so a page-level translation overwrites its own. */ -}}
+{{- $urls := dict -}}
+{{- range site.Home.AllTranslations -}}{{ $urls = merge $urls (dict .Language.Lang .RelPermalink) }}{{- end -}}
+{{- range .AllTranslations -}}{{ $urls = merge $urls (dict .Language.Lang .RelPermalink) }}{{- end -}}
+<nav class="lang-sw" aria-label="{{ i18n "lang_switch" }}">
+  {{- range $i, $l := $langs }}
+  {{- if $i }}<span class="lang-sep" aria-hidden="true">·</span>{{ end }}
+  {{- $on := eq $l.Lang $.Language.Lang }}
+  <a{{ if $on }} class="on" aria-current="true"{{ end }} href="{{ index $urls $l.Lang }}" hreflang="{{ $l.LanguageCode }}" lang="{{ $l.LanguageCode }}" title="{{ $l.LanguageName }}" aria-label="{{ $l.LanguageName }}">{{ upper $l.Lang }}</a>
+  {{- end }}
+</nav>
+{{- end -}}

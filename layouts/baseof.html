@@ -20,9 +20,16 @@
 {{- else if and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}{{ $body = "article" }}
 {{- end -}}
 <body{{ with $body }} class="{{ . }}"{{ end }}>
-{{ partialCached "header.html" . (or .Section .RelPermalink) }}
+{{- /* Both chrome partials are per-language: menus, i18n strings and the footer's
+       feed link all differ, so without .Lang in the variant /howto/ and /ru/howto/
+       would share one cache entry and the loser would render in the wrong language.
+       The header takes a third variant on a multilingual site only: its language
+       switcher points at THIS page's translation, which is not constant within a
+       section — a single-language site keeps caching one header per section. */ -}}
+{{- $multi := gt (len site.Languages) 1 -}}
+{{ partialCached "header.html" . .Language.Lang (or .Section .RelPermalink) (cond $multi .RelPermalink "") }}
 {{ block "main" . }}{{ end }}
-{{ partialCached "footer.html" . }}
+{{ partialCached "footer.html" . .Language.Lang }}
 {{ partial "scripts.html" . }}
 </body>
 </html>

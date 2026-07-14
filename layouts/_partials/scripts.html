@@ -26,3 +26,7 @@
 {{- end -}}
 {{- /* site override point: end-of-body scripts */ -}}
 {{- partial "hooks/foot-extra.html" . -}}
+{{- /* Hugo → JS values (i18n catalogue, Pagefind URL). After the hook on purpose:
+       it merges over whatever THEME_I18N a site set there, and the bundles above
+       are deferred, so an inline script still runs first whatever its position. */ -}}
+{{- partial "js-bridge.html" . -}}

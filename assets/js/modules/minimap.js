@@ -1,7 +1,8 @@
 /* Collapsed-rail minimap + peek overlay, shared by both rails. When a rail is
    off, its panel folds into bare marks in the margin; hovering or focusing the
-   map peeks the full .rail-in as an overlay on the same top line, and the
-   «закрепить панель» row inside pins it back. */
+   map peeks the full .rail-in as an overlay on the same top line, and the pin row
+   inside it pins the rail back. `keys` is the shortcut hint ("[ or ⌘1"): its first
+   character is the rail's own key, which is what the pin row shows in its <kbd>. */
 import { I18N } from './i18n.js';
 import { railOn, setRail } from './view.js';
 

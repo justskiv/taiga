@@ -18,6 +18,14 @@
 .nav a.on{color:var(--accent)}
 sup.beta{font-family:var(--font-mono); font-size:9px; color:var(--accent); margin-left:3px; letter-spacing:.04em; opacity:.85}
 .head-sp{flex:1}
+/* language switcher: mono text, sized like the search button's label so the two
+   controls read as one cluster. flex:none — the nav (overflow-x:auto) is what
+   gives way on a narrow screen, never the two-or-three characters here */
+.lang-sw{display:inline-flex; align-items:center; gap:6px; flex:none; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; white-space:nowrap}
+.lang-sw a{color:var(--text-muted); border:0; padding:2px 1px; transition:color var(--dur) var(--ease)}
+.lang-sw a:hover{color:var(--text-secondary); border:0}
+.lang-sw a.on{color:var(--accent)}
+.lang-sep{color:var(--text-muted); opacity:.45}
 kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 5px; background:var(--bg-base)}
 /* command-trigger button: magnifier · label · ⌘K keycap, on a fixed 32px row so
    the three optically center; asymmetric padding (11 left / 8 right) balances the
@@ -32,7 +40,9 @@ kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); bo
 /* refined in-button keycap: flex-centered content + a 1px bottom shadow-lip (not a
    heavier bottom border) so the ⌘K sits dead-centre against the label */
 .search-btn .kb{display:inline-flex; align-items:center; justify-content:center; margin-left:3px; height:16px; padding:0 5px; font-size:10.5px; border-bottom-width:1px; box-shadow:0 1px 0 var(--border); transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
-@media(max-width:720px){.search-btn{width:36px; padding:0; gap:0; justify-content:center} .search-btn .s-lab, .search-btn .kb{display:none} .search-btn svg{width:16px; height:16px}}
+/* narrow: the search button drops to its icon, and the row tightens to buy back
+   the width the language switcher takes (the nav still scrolls under the rest) */
+@media(max-width:720px){.search-btn{width:36px; padding:0; gap:0; justify-content:center} .search-btn .s-lab, .search-btn .kb{display:none} .search-btn svg{width:16px; height:16px} .head-in{gap:12px}}
 @media(prefers-reduced-motion:reduce){.search-btn{transition:none} .search-btn:active{transform:none}}
 /* header sticks, hides on scroll-down, slides back on scroll-up */
 .site-head{position:sticky; top:0; z-index:110;

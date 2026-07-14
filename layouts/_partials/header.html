@@ -1,6 +1,9 @@
-{{- /* Site header: brand, rubric nav (active item + optional badge), search
-       button, popover mount. Cached by section, falling back to the page URL for
-       section-less pages (home/404/lab) whose active item differs at section "".
+{{- /* Site header: brand, rubric nav (active item + optional badge), language
+       switcher, search button, popover mount. Cached by language + section,
+       falling back to the page URL for section-less pages (home/404/lab) whose
+       active item differs at section "" — and, on a multilingual site, by page
+       too: the switcher links to THIS page's translation, which varies inside a
+       section (see baseof.html).
        Note: no flex gap on .brand — the wordmark is a bare text node (brand.name)
        + .tld, a gap would split them; the svg carries the spacing. */ -}}
 <header class="site-head">
@@ -15,6 +18,7 @@
       {{- end }}
     </nav>
     <span class="head-sp"></span>
+    {{ partial "lang-switch.html" . }}
     <button class="search-btn" id="searchBtn" type="button" aria-label="{{ i18n "search" }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.2-4.2"/></svg>
       <span class="s-lab">{{ i18n "search_label" }}</span>

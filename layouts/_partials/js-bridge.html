@@ -1,0 +1,45 @@
+{{- /* Hugo → JS bridge: the two things the bundle cannot work out for itself.
+
+       1. The i18n catalogue. modules/i18n.js merges window.THEME_I18N over its
+          own (English) defaults, so without this every JS string — search modal,
+          popover, focus button, minimaps, tags filter — would be frozen in one
+          language. jsonify does the escaping: the strings carry <kbd> markup and
+          quotes, and a hand-rolled object literal would be one apostrophe away
+          from a syntax error.
+
+       2. The Pagefind bundle URL, resolved through baseURL. The hardcoded
+          /pagefind/pagefind.js 404s the moment the site lives on a subpath
+          (project pages), and search dies without a sound.
+
+       Rendered LAST in scripts.html — after the foot-extra hook, still before the
+       deferred bundle runs — and merged rather than assigned, so a site that sets
+       window.THEME_I18N from either hook keeps winning key by key.
+
+       Plurals: the tags filter counts posts in the browser, so Hugo can't render
+       the phrase. It renders one word per probe count from its own CLDR catalogue
+       instead, and modules/i18n.js asks Intl.PluralRules — the same CLDR data —
+       which probe shares a category with the real count. Neither side has to know
+       that 5 is "many" in Russian and plain "other" in English. */ -}}
+{{- $i18n := dict
+      "themeHead"         (i18n "js_theme_head")
+      "popoverAria"       (i18n "js_popover_aria")
+      "pinPanel"          (i18n "js_pin_panel")
+      "keyOr"             (i18n "js_key_or")
+      "focusExitTip"      (i18n "js_focus_exit_tip")
+      "focusTitle"        (i18n "js_focus_title")
+      "focusAria"         (i18n "js_focus_aria")
+      "searchAria"        (i18n "js_search_aria")
+      "searchPlaceholder" (i18n "js_search_placeholder")
+      "searchEmpty"       (i18n "js_search_empty")
+      "searchUnbuilt"     (i18n "js_search_unbuilt")
+      "scrollTop"         (i18n "js_scrolltop")
+      "minutes"           (i18n "mins_abbr")
+      "tagFeedHead"       (i18n "js_tag_feed_head")
+      "tagReset"          (i18n "js_tag_reset")
+      "tagEmptyTail"      (i18n "js_tag_empty_tail")
+      "guideForms"        (dict
+        "1" (i18n "js_guides_word" 1)
+        "2" (i18n "js_guides_word" 2)
+        "5" (i18n "js_guides_word" 5))
+-}}
+<script>window.THEME_I18N=Object.assign({{ $i18n | jsonify | safeJS }},window.THEME_I18N||{});window.TAIGA_PAGEFIND={{ "pagefind/pagefind.js" | relURL | jsonify | safeJS }};</script>

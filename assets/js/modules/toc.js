@@ -1,6 +1,7 @@
 /* Right rail: table of contents built from h2/h3 with ids, plus a miniature
    outline synced with the scroll-spy. */
 import { buildMini } from './minimap.js';
+import { I18N } from './i18n.js';
 
 export function buildToc() {
   const host = document.getElementById('tocRail'); if (!host) return;
@@ -17,7 +18,7 @@ export function buildToc() {
   });
   const railR = document.querySelector('.rail-r');
   if (railR && !railR.querySelector('.rail-mini')) {
-    const mini = buildMini(railR, 'r', '] или ⌘2');
+    const mini = buildMini(railR, 'r', '] ' + I18N.keyOr + ' ⌘2');
     items.forEach(function (it) {
       const ln = document.createElement('a');
       ln.className = 'mini-ln' + (it.li.className === 'lv3' ? ' lv3' : '');

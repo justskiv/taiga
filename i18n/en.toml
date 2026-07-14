@@ -9,6 +9,8 @@ other = "Rubrics"
 other = "Search"
 [search_label]
 other = "search"
+[lang_switch]
+other = "Language"
 
 # footer feed link (the other footer labels are the site's menus.footer entries)
 [foot_rss]
@@ -172,3 +174,75 @@ other = "In progress"
 other = "Next in the queue"
 [roadmap_how]
 other = "How we pick what to write"
+
+# ── feed dates (date.html) ───────────────────────────────────────────────────
+[month_1]
+other = "Jan"
+[month_2]
+other = "Feb"
+[month_3]
+other = "Mar"
+[month_4]
+other = "Apr"
+[month_5]
+other = "May"
+[month_6]
+other = "Jun"
+[month_7]
+other = "Jul"
+[month_8]
+other = "Aug"
+[month_9]
+other = "Sep"
+[month_10]
+other = "Oct"
+[month_11]
+other = "Nov"
+[month_12]
+other = "Dec"
+
+# ── strings that live in JS ──────────────────────────────────────────────────
+# Everything below is shipped to the browser by the js-bridge partial as
+# window.THEME_I18N; modules/i18n.js merges it over its English defaults. The
+# `js_` prefix marks exactly which keys leave the server.
+
+[js_theme_head]
+other = "Theme"
+[js_popover_aria]
+other = "Theme and view"
+[js_pin_panel]
+other = "pin panel"
+[js_key_or]
+other = "or"
+
+[js_focus_exit_tip]
+other = "Leave focus"
+[js_focus_title]
+other = "Focus: text only (F)"
+[js_focus_aria]
+other = "Focus: hide the rails and the header (F)"
+
+[js_search_aria]
+other = "Search the guides"
+[js_search_placeholder]
+other = "search a guide, a series, a topic…"
+[js_search_empty]
+other = "Nothing found. Try «gc», «slice», «scheduler»…"
+[js_search_unbuilt]
+other = "The search index isn't built yet. Build it with pagefind --site public."
+
+[js_scrolltop]
+other = "Back to top"
+
+[js_tag_feed_head]
+other = "feed"
+[js_tag_reset]
+other = "reset"
+[js_tag_empty_tail]
+other = " — no such tag. Check the link, or pick a topic from the cloud above."
+# bare plural word for the filter's "N guides" line: the count is only known in
+# the browser, so Hugo renders one word per probe count and Intl.PluralRules
+# picks the matching one (see modules/i18n.js plural()).
+[js_guides_word]
+one = "guide"
+other = "guides"

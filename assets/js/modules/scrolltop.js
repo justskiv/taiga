@@ -10,6 +10,8 @@
    those, so our own smooth scroll can never be mistaken for the reader taking
    control back, however long or choppy it is — which matters because these
    articles run much longer than a typical post. */
+import { I18N } from './i18n.js';
+
 const THRESHOLD = 300;
 const SCROLL_KEYS = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
 
@@ -20,7 +22,7 @@ export function mountScrollTop() {
 
   const btn = document.createElement('button');
   btn.type = 'button'; btn.className = 'scrolltop-btn';
-  btn.setAttribute('aria-label', 'Наверх');
+  btn.setAttribute('aria-label', I18N.scrollTop);
   btn.innerHTML = '<span class="scrolltop-circle" aria-hidden="true">' +
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>' +
     '</span>';

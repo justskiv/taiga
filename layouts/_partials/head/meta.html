@@ -17,6 +17,20 @@
 {{- $acc := site.Params.accent | default (index (index site.Data.themes (site.Params.defaultTheme | default "amber")) "accent") | default "#ea8a2e" -}}
 <meta name="description" content="{{ $desc }}">
 <link rel="canonical" href="{{ .Permalink }}">
+{{- /* hreflang alternates. .AllTranslations includes this page, so the set is
+       complete and self-referential the way search engines want it. x-default is
+       the default language's version of this page — omitted, rather than faked
+       with some other language, when that translation doesn't exist. Nothing is
+       emitted on a single-language site: one page, no alternates. */ -}}
+{{- if gt (len site.Languages) 1 -}}
+  {{- $default := site.Sites.Default.Language.Lang -}}
+  {{- range .AllTranslations }}
+<link rel="alternate" hreflang="{{ .Language.LanguageCode }}" href="{{ .Permalink }}">
+    {{- if eq .Language.Lang $default }}
+<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+    {{- end }}
+  {{- end }}
+{{- end }}
 {{- with site.Home.OutputFormats.Get "rss" }}
 <link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">
 {{- end }}

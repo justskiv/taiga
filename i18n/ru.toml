@@ -9,6 +9,8 @@ other = "Рубрики"
 other = "Поиск"
 [search_label]
 other = "поиск"
+[lang_switch]
+other = "Язык"
 
 # footer feed link (the other footer labels are the site's menus.footer entries)
 [foot_rss]
@@ -210,3 +212,84 @@ other = "В работе"
 other = "Дальше в очереди"
 [roadmap_how]
 other = "Как решаем, что писать"
+
+# ── feed dates (date.html) ───────────────────────────────────────────────────
+# Genitive short months, as the feed reads them out loud ("30 мая", not "май") —
+# no locale formatter gives that form, so the abbreviations are copy, not code.
+[month_1]
+other = "янв"
+[month_2]
+other = "фев"
+[month_3]
+other = "мар"
+[month_4]
+other = "апр"
+[month_5]
+other = "мая"
+[month_6]
+other = "июн"
+[month_7]
+other = "июл"
+[month_8]
+other = "авг"
+[month_9]
+other = "сен"
+[month_10]
+other = "окт"
+[month_11]
+other = "ноя"
+[month_12]
+other = "дек"
+
+# ── strings that live in JS ──────────────────────────────────────────────────
+# Everything below is shipped to the browser by the js-bridge partial as
+# window.THEME_I18N; modules/i18n.js merges it over its English defaults. The
+# `js_` prefix marks exactly which keys leave the server.
+
+# theme / view popover
+[js_theme_head]
+other = "Тема"
+[js_popover_aria]
+other = "Тема и вид"
+[js_pin_panel]
+other = "закрепить панель"
+[js_key_or]
+other = "или"
+
+# focus mode
+[js_focus_exit_tip]
+other = "Выйти из фокуса"
+[js_focus_title]
+other = "Фокус: только текст (F)"
+[js_focus_aria]
+other = "Фокус: скрыть панели и шапку (F)"
+
+# ⌘K search modal
+[js_search_aria]
+other = "Поиск по гайдам"
+[js_search_placeholder]
+other = "искать гайд, серию, тему…"
+[js_search_empty]
+other = "Ничего не нашлось. Попробуй «gc», «слайс», «планировщик»…"
+[js_search_unbuilt]
+other = "Индекс поиска ещё не собран. Соберётся командой pagefind --site public."
+
+# scroll-to-top button
+[js_scrolltop]
+other = "Наверх"
+
+# tags page (/tags/) filter
+[js_tag_feed_head]
+other = "лента"
+[js_tag_reset]
+other = "сбросить"
+[js_tag_empty_tail]
+other = " — такого тега нет. Проверь ссылку или выбери тему из облака выше."
+# bare plural word for the filter's "N гайдов" line: the count is only known in
+# the browser, so Hugo renders one word per probe count and Intl.PluralRules
+# picks the matching one (see modules/i18n.js plural()).
+[js_guides_word]
+one = "гайд"
+few = "гайда"
+many = "гайдов"
+other = "гайда"
