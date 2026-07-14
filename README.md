@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/justskiv/taiga/main/images/banner.svg" alt="taiga" width="100%" />
+  <img src="images/banner.svg" alt="taiga" width="100%" />
 </p>
 
 <p align="center">
@@ -11,12 +11,10 @@
 
 [![Hugo](https://img.shields.io/static/v1?label=Hugo&message=v0.146.0%2B&color=FF4088&logo=hugo&logoColor=white)](https://github.com/gohugoio/hugo/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](#status)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![No Node](https://img.shields.io/badge/node-not_required-3c3b38)](#requirements)
+[![Telegram](https://img.shields.io/badge/Telegram-@ntuzov-blue?logo=telegram&logoColor=white)](https://t.me/ntuzov)
 
 [![CI](https://github.com/justskiv/taiga/actions/workflows/hugo.yml/badge.svg)](https://github.com/justskiv/taiga/actions/workflows/hugo.yml)
-[![Demo](https://img.shields.io/badge/demo-justskiv.github.io/taiga-ea8a2e)](https://justskiv.github.io/taiga/)
-[![Telegram](https://img.shields.io/badge/Telegram-@ntuzov-blue?logo=telegram&logoColor=white)](https://t.me/ntuzov)
 
 **English** · [Русский](README.ru.md)
 
@@ -47,7 +45,7 @@ taiga, so every mechanism on the page is also the proof that the mechanism works
 **[Live demo →](https://justskiv.github.io/taiga/)**
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/justskiv/taiga/main/images/screenshot.png" alt="taiga — the demo site" width="100%" />
+  <img src="images/screenshot.png" alt="taiga — the demo site" width="100%" />
 </p>
 
 ## Two binaries and you're done

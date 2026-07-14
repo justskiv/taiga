@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/justskiv/taiga/main/images/banner.svg" alt="taiga" width="100%" />
+  <img src="images/banner.svg" alt="taiga" width="100%" />
 </p>
 
 <p align="center">
@@ -11,12 +11,10 @@
 
 [![Hugo](https://img.shields.io/static/v1?label=Hugo&message=v0.146.0%2B&color=FF4088&logo=hugo&logoColor=white)](https://github.com/gohugoio/hugo/releases)
 [![Status](https://img.shields.io/badge/status-beta-orange)](#статус)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![No Node](https://img.shields.io/badge/node-не_нужен-3c3b38)](#требования)
+[![Telegram](https://img.shields.io/badge/Telegram-@ntuzov-blue?logo=telegram&logoColor=white)](https://t.me/ntuzov)
 
 [![CI](https://github.com/justskiv/taiga/actions/workflows/hugo.yml/badge.svg)](https://github.com/justskiv/taiga/actions/workflows/hugo.yml)
-[![Demo](https://img.shields.io/badge/demo-justskiv.github.io/taiga-ea8a2e)](https://justskiv.github.io/taiga/)
-[![Telegram](https://img.shields.io/badge/Telegram-@ntuzov-blue?logo=telegram&logoColor=white)](https://t.me/ntuzov)
 
 [English](README.md) · **Русский**
 
@@ -48,7 +46,7 @@ taiga — тема для сайтов, которые **учат**: конте�
 **[Живое демо →](https://justskiv.github.io/taiga/)**
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/justskiv/taiga/main/images/screenshot.png" alt="taiga — демо-сайт" width="100%" />
+  <img src="images/screenshot.png" alt="taiga — демо-сайт" width="100%" />
 </p>
 
 ## Два бинарника — и всё
