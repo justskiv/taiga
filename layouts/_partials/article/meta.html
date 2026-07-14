@@ -1,6 +1,6 @@
 {{- /* Meta line: quiet editorial metadata, sits between the title and the lead.
-       «проверено на go1.26 · 64-бит», «~14 мин», «4 183 слова», optional
-       «интерактив: …». Each item is a muted label + emphasized value, split by a
+       "tested on go1.26 · 64-bit", "~14 min", "4,183 words", optional
+       "interactive: …". Each item is a muted label + emphasized value, split by a
        hairline; the word count is the quietest (all-muted). `version` renders
        verbatim (e.g. "go1.26", "PostgreSQL 17"), falling back to the site default;
        arch and the interactive list are optional per-article; mins is authored
@@ -9,7 +9,12 @@
        Class stays .tag (the site's meta override emits it too). */ -}}
 {{- $ver := .Params.version | default site.Params.versionDefault -}}
 <div class="meta">
-<span class="tag">{{ i18n "meta_tested_on" }} <b>{{ $ver }}</b>{{ with .Params.arch }} · {{ . }}{{ end }}</span>
+{{- /* No version and no site default ⇒ no chip. Rendering it unconditionally left
+       a dangling "tested on" label with an empty <b></b> on every page of a site
+       that never set one. */ -}}
+{{- with $ver }}
+<span class="tag">{{ i18n "meta_tested_on" }} <b>{{ . }}</b>{{ with $.Params.arch }} · {{ . }}{{ end }}</span>
+{{- end }}
 <span class="tag">~<b>{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</b></span>
 <span class="tag tag-quiet">{{ i18n "words" .WordCount }}</span>
 {{- with .Params.interactive }}
