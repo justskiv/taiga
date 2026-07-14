@@ -181,7 +181,7 @@ timeZone = "Europe/Moscow"
 
   # Default palette id — one of data/themes/<id>.toml (the theme ships seven). The
   # "A palette is one file" guide explains how this maps to CSS.
-  defaultTheme = "amber"
+  defaultTheme = "taiga"
 
   # Cross-cutting accent (optional). One hex repaints the accent across EVERY
   # palette at once — links, buttons, active states, the picker's swatch dot, the

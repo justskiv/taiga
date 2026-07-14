@@ -17,10 +17,20 @@ light = true
 "gtok-str" = "#9a6700"
 "body-glow" = "none"
 
-# brand accents (constant across built-in palettes; overridable)
-"accent" = "#ea8a2e"
-"accent-dim" = "rgba(234,138,46,.18)"
-"accent-glow" = "rgba(234,138,46,.28)"
+# brand accents (overridable)
+# DELIBERATELY DARKER THAN THE OTHER PALETTES — do not "restore" it to #55c0b7.
+# Same brand hue (glacier teal), deeper shade. --accent is not only link text: it
+# is also the CTA *background*, and the label on it is --bg-deep (14-home.css:
+# `.btn-cta{color:var(--bg-deep); background:var(--accent)}`). Here --bg-deep is
+# near-WHITE (#f6f8fa), so the accent must be dark enough to carry white text,
+# while on the dark palettes it must be light enough to carry near-black text.
+# Those requirements are disjoint: the light palette needs relative luminance
+# <= .169, the dark ones need >= .390. No single hex satisfies both — hence the
+# per-palette shade. #0e7a71 gives 4.89:1 on the CTA and 5.21:1 for links on
+# white; the amber it replaced scored 2.41:1 and 2.57:1 (both failing).
+"accent" = "#0e7a71"
+"accent-dim" = "rgba(14,122,113,.18)"
+"accent-glow" = "rgba(14,122,113,.28)"
 "accent-green" = "#a8c954"
 "accent-green-dim" = "rgba(168,201,84,.16)"
 "accent-green-glow" = "rgba(168,201,84,.22)"

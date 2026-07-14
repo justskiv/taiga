@@ -12,9 +12,11 @@
 <title>{{ $title }}</title>
 {{- $desc := .Description | default .Params.lead | default site.Params.heroLine -}}
 {{- /* Favicon accent square: params.accent → the default palette's accent →
-       amber. As a data-URI the SVG can't read CSS vars, so the colour is baked
-       here; with defaults it resolves to #ea8a2e (href stays byte-identical). */ -}}
-{{- $acc := site.Params.accent | default (index (index site.Data.themes (site.Params.defaultTheme | default "amber")) "accent") | default "#ea8a2e" -}}
+       glacier teal. As a data-URI the SVG can't read CSS vars, so the colour is
+       baked here. The literal is the last-resort fallback only (it is reached
+       solely if the palette file is missing the key); with any shipped palette
+       the value comes from data/themes/<id>.toml. */ -}}
+{{- $acc := site.Params.accent | default (index (index site.Data.themes (site.Params.defaultTheme | default "taiga")) "accent") | default "#55c0b7" -}}
 <meta name="description" content="{{ $desc }}">
 <link rel="canonical" href="{{ .Permalink }}">
 {{- /* hreflang alternates. .AllTranslations includes this page, so the set is

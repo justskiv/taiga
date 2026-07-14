@@ -4,12 +4,13 @@
 # format is forward-compatible. Fonts resolve in this folder first, then og/fonts/.
 name = "Dots"
 
-# kicker — mono, amber, upper-cased
+# kicker — mono, brand accent (glacier teal), upper-cased. Baked, not themed: OG
+# covers are rendered once at build time and have no palette. 8.3:1 on base.png.
 [[block]]
 text = "{kicker}"
 font = "JetBrainsMono-SemiBold.ttf"
 size = 27
-color = "#ea8a2e"
+color = "#55c0b7"
 x = 76
 y = 224
 upper = true

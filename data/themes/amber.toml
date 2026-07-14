@@ -16,9 +16,9 @@ weight = 10
 "gtok-str" = "#cbb279"
 
 # brand accents (constant across built-in palettes; overridable)
-"accent" = "#ea8a2e"
-"accent-dim" = "rgba(234,138,46,.18)"
-"accent-glow" = "rgba(234,138,46,.28)"
+"accent" = "#55c0b7"
+"accent-dim" = "rgba(85,192,183,.18)"
+"accent-glow" = "rgba(85,192,183,.28)"
 "accent-green" = "#a8c954"
 "accent-green-dim" = "rgba(168,201,84,.16)"
 "accent-green-glow" = "rgba(168,201,84,.22)"

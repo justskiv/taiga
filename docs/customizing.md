@@ -80,10 +80,18 @@ palettes, so one param repaints it everywhere at once:
 accent = "#7aa2f7"
 ```
 
-Now all seven built-in palettes — and any you added — use that colour instead of
-their native amber (`#ea8a2e`, which all seven share): links, buttons, active
-states, the accent dot in the picker's swatch, the crown of the logo mark and
-the same crown in the favicon. `--accent-dim` and `--accent-glow` are derived
+Now every built-in palette — and any you added — uses that colour instead of its
+native one: links, buttons, active states, the accent dot in the picker's swatch,
+the crown of the logo mark and the same crown in the favicon.
+
+The native accent is glacier teal, and it is **not one hex**: the dark palettes
+carry `#55c0b7` and `Light ☀` carries `#0e7a71`. That is not an inconsistency —
+it is forced. The accent is also a button *background* (`.btn-cta` paints
+`--bg-deep` on it), so on a dark palette it has to be light enough to hold
+near-black text, and on a light palette dark enough to hold near-white text.
+Those two demands do not overlap, so one hue is held at two luminances. Setting
+`accent` yourself collapses both to your single value — check it against a light
+palette before you ship. `--accent-dim` and `--accent-glow` are derived
 from it (`rgba(…, .18)` and `rgba(…, .28)`). Override either explicitly if the
 derived alpha isn't what you want:
 

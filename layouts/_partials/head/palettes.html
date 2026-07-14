@@ -5,7 +5,7 @@
        with `disabled = true` are skipped (a site can disable a theme's palette
        by overriding its file). Meta keys are not emitted as CSS vars. */ -}}
 {{- $skip := slice "name" "weight" "light" "disabled" -}}
-{{- $default := site.Params.defaultTheme | default "amber" -}}
+{{- $default := site.Params.defaultTheme | default "taiga" -}}
 {{- $themes := site.Data.themes -}}
 {{- /* Optional cross-cutting accent override (params.accent). When set, it
        replaces --accent/-dim/-glow in :root AND in every [data-theme] block,

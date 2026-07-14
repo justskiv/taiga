@@ -1,0 +1,42 @@
+name = "Taiga"
+weight = 5
+
+# surface / text ramp (swapped per theme)
+# The theme's namesake palette, taken from the README banner: the cold blue-grey
+# slate of a boreal forest in fog. bg-base/bg-surface are the banner's own spruce
+# mass (#141a1f–#1d252d); text-muted is its pale sky (#7f8b97). Nothing here is
+# warm — the fog is the subject, and the accent is the only lit thing in it.
+"bg-deep" = "#0e1318"
+"bg-base" = "#141a1f"
+"bg-surface" = "#1d252d"
+"bg-raised" = "#27313b"
+"bg-hover" = "#222b34"
+"border" = "#2e3944"
+"text-primary" = "#d3dce4"
+"text-secondary" = "#a2aeb9"
+"text-muted" = "#7f8b97"
+"text-ghost" = "#4d5a67"
+"text-strong" = "#eef3f8"
+"gtok-str" = "#cbb279"
+
+# Ambient body wash. The CSS default (01-base.css) is a WARM amber radial, which
+# is right for Amber/Lamp and wrong here; overridden with the banner's mist
+# (#747f8a) so the page is lit by fog rather than by a lamp.
+"body-glow" = "radial-gradient(1200px 600px at 80% -10%, rgba(116,127,138,.06), transparent 60%)"
+
+# brand accents (constant across built-in palettes; overridable)
+# Glacier teal — the brand accent. Same hue on every dark palette; the Light
+# palette carries a deeper shade of it (see light.toml) because --accent is also
+# the CTA *background* under --bg-deep text, and that flips direction on light.
+"accent" = "#55c0b7"
+"accent-dim" = "rgba(85,192,183,.18)"
+"accent-glow" = "rgba(85,192,183,.28)"
+"accent-green" = "#a8c954"
+"accent-green-dim" = "rgba(168,201,84,.16)"
+"accent-green-glow" = "rgba(168,201,84,.22)"
+"accent-copper" = "#c87a42"
+"accent-copper-dim" = "rgba(200,122,66,.18)"
+"accent-blue" = "#6ba4c9"
+"accent-blue-dim" = "rgba(107,164,201,.16)"
+"accent-gold" = "#d4a24e"
+"accent-gold-dim" = "rgba(212,162,78,.18)"

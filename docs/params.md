@@ -20,7 +20,7 @@ fully commented — copy it and edit.
 | `heroSat` | string | — | Trailing `· …` clause of the hero line, styled apart. Site-wide unless a language overrides it — see note 2. |
 | `featured` | string (content path) | — | "Guide of the week" card on the home page, e.g. `"howto/get-started"`. Omit to hide the card. Shared across languages — the path resolves to each language's own translation of that page. |
 | `feedInitial` | int | `8` | Posts shown on the home feed before the "N more guides" reveal button. |
-| `defaultTheme` | string (palette id) | `"amber"` | Palette applied before the reader picks one — an id of a `data/themes/<id>.toml` file. |
+| `defaultTheme` | string (palette id) | `"taiga"` | Palette applied before the reader picks one — an id of a `data/themes/<id>.toml` file. |
 | `accent` | string (`#rrggbb`) | — | Overrides the accent colour across **all** palettes at once (built-in and site) — a brand axis orthogonal to the palettes. Unset ⇒ each palette keeps its native accent. Must be a 6-digit hex, e.g. `"#7aa2f7"`; any other value fails the build. See [customizing.md](customizing.md#recolour). |
 | `accentDim` | CSS colour | derived | Override for the dimmed accent (focus rings, tinted fills). Default, when `accent` is set: `rgba(r,g,b,.18)` derived from it. Ignored unless `accent` is set. |
 | `accentGlow` | CSS colour | derived | Override for the accent glow (shadows). Default, when `accent` is set: `rgba(r,g,b,.28)` derived from it. Ignored unless `accent` is set. |

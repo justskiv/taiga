@@ -26,7 +26,7 @@
          image       string   — share image, an assets/ path (e.g. "og/soon.png")
 */ -}}
 {{- $cs := site.Params.comingSoon -}}
-{{- $pal := index site.Data.themes (site.Params.defaultTheme | default "amber") -}}
+{{- $pal := index site.Data.themes (site.Params.defaultTheme | default "taiga") -}}
 {{- $title := $cs.title | default site.Title -}}
 {{- $desc := $cs.description | default site.Params.heroLine -}}
 {{- $words := $cs.words | default (slice
