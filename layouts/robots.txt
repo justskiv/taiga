@@ -1,4 +1,11 @@
+{{- /* In coming-soon mode there is nothing to crawl and no sitemap (the kind is
+       disabled), so the site asks to be left alone until it has content. */ -}}
+{{- if site.Params.comingSoon.enable -}}
+User-agent: *
+Disallow: /
+{{ else -}}
 User-agent: *
 Disallow:
 
 Sitemap: {{ "sitemap.xml" | absURL }}
+{{ end -}}

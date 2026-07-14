@@ -1,3 +1,13 @@
+{{- /* Coming-soon mode (params.comingSoon.enable): the site answers every route
+       with a single standalone card and nothing else. The branch sits here, at
+       the one gate every HTML kind passes through, so head.html is never
+       reached — no CSS bundle, no search, no menus, no OG graph. Nothing leaks
+       into the published source because nothing runs, not because we stripped
+       it afterwards. Pair it with disableKinds so the build emits only the home
+       page and 404 (see docs/params.md). */ -}}
+{{- if site.Params.comingSoon.enable -}}
+{{- partial "coming-soon.html" . -}}
+{{- else -}}
 <!DOCTYPE html>
 <html lang="{{ .Language.LanguageCode }}" data-theme="{{ site.Params.defaultTheme | default "amber" }}">
 <head>
@@ -16,3 +26,4 @@
 {{ partial "scripts.html" . }}
 </body>
 </html>
+{{- end -}}

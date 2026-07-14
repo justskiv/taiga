@@ -1,0 +1,238 @@
+{{- /* The whole document, in one file, for coming-soon mode (see baseof.html).
+
+       Deliberately standalone: no head.html, no CSS bundle, no scripts.html.
+       Everything the page needs is inlined here, so the published source has
+       nothing in it but this card — no menu, no section links, no search index,
+       no hint of what is being built behind it. The three things it does reuse
+       are the ones that must not have a second source of truth:
+         logo.html          — the wordmark (a site may override it);
+         head/fonts.html    — the self-hosted faces;
+         hooks/head-extra   — the site's favicon / analytics.
+
+       The card: the wordmark as a Go pragma (which is what it is), and the
+       "soon"s as the string literals of a small, valid Go file — `var`, not
+       `const`, because a const array does not compile and this audience would
+       notice. A compile pass sweeps the listing and each line resolves in its
+       wake. That is the whole animation; it is CSS, and it stops dead under
+       prefers-reduced-motion.
+
+       Params (all under [params.comingSoon]):
+         enable      bool     — turn the whole mode on
+         title       string   — <title>; defaults to site.Title
+         description string   — meta + og:description; defaults to heroLine
+         words       []table  — {text, lang, cjk} per literal, in source order
+         foot        string   — trailing comment line; omit to drop the line
+         bg          colour   — page background; defaults to the palette bg-deep
+         image       string   — share image, an assets/ path (e.g. "og/soon.png")
+*/ -}}
+{{- $cs := site.Params.comingSoon -}}
+{{- $pal := index site.Data.themes (site.Params.defaultTheme | default "amber") -}}
+{{- $title := $cs.title | default site.Title -}}
+{{- $desc := $cs.description | default site.Params.heroLine -}}
+{{- $words := $cs.words | default (slice
+      (dict "text" "Soon" "lang" "en")
+      (dict "text" "Скоро" "lang" "ru")
+      (dict "text" "近日公開" "lang" "ja" "cjk" true)) -}}
+{{- $n := len $words -}}
+{{- /* Share image: comingSoon.image if the site ships one, else the theme's
+       generated poster. Prefer shipping one — the generated poster is built from
+       a base that bakes in the theme's own brand mark, which is the wrong mark
+       for a site that overrides logo.html. */ -}}
+{{- $og := "" -}}
+{{- with $cs.image }}{{ $og = resources.Get . }}{{ end -}}
+{{- if not $og }}{{ $og = partial "og-image.html" . }}{{ end -}}
+<!DOCTYPE html>
+<html lang="{{ .Language.LanguageCode }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $desc }}">
+{{- /* nothing to index until the guides ship; robots.txt says the same */}}
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="{{ $cs.bg | default (index $pal "bg-deep") }}">
+{{- partial "head/fonts.html" . }}
+{{- if .IsHome }}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ $title }}">
+<meta property="og:description" content="{{ $desc }}">
+<meta property="og:url" content="{{ .Permalink }}">
+{{- with $og }}
+<meta property="og:image" content="{{ .Permalink }}">
+<meta property="og:image:width" content="{{ .Width }}">
+<meta property="og:image:height" content="{{ .Height }}">
+{{- end }}
+<meta name="twitter:card" content="summary_large_image">
+{{- end }}
+<style>
+{{- /* safeCSS, or html/template mangles the rgba() palette values into
+       ZgotmplZ: it cannot tell a colour function from a url() and refuses the
+       parens. The values are ours, from data/themes/. */ -}}
+:root{
+  --bg:{{ $cs.bg | default (index $pal "bg-deep") | safeCSS }};
+  --border:{{ index $pal "border" | safeCSS }};
+  --primary:{{ index $pal "text-primary" | safeCSS }};
+  --secondary:{{ index $pal "text-secondary" | safeCSS }};
+  --muted:{{ index $pal "text-muted" | safeCSS }};
+  --ghost:{{ index $pal "text-ghost" | safeCSS }};
+  --accent:{{ index $pal "accent" | safeCSS }};
+  --green:{{ index $pal "accent-green" | safeCSS }};
+  --blue:{{ index $pal "accent-blue" | safeCSS }};
+  --gold:{{ index $pal "accent-gold" | safeCSS }};
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --cjk:'Hiragino Sans','Yu Gothic','Noto Sans JP','Meiryo',sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--bg)}
+body{
+  margin:0;min-height:100svh;
+  display:grid;place-items:center;
+  padding:clamp(1.5rem,5vw,4rem);
+  background:var(--bg);color:var(--primary);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+
+/* atmosphere. The vignette is black rather than a shade of the background:
+   tie it to --bg and it turns into a bright patch the moment --bg is darkened. */
+.wash{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 120% 90% at 50% 120%, rgba(0,0,0,.5), rgba(0,0,0,0) 60%);
+}
+.grain{
+  position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.stage{
+  position:relative;z-index:1;width:100%;max-width:46rem;
+  display:flex;flex-direction:column;gap:clamp(2rem,5vh,3.25rem);
+}
+
+/* wordmark */
+.mark{margin:0;font-size:clamp(1.65rem,5.2vw,2.6rem);line-height:1;display:flex;align-items:center}
+.pragma{
+  font-family:var(--mono);font-weight:700;
+  font-feature-settings:"liga" 0,"calt" 0;font-variant-ligatures:none;
+  letter-spacing:-.015em;white-space:nowrap;
+}
+.pragma-com{color:var(--muted)}
+.pragma-go{color:var(--accent)}
+.pragma-id{color:var(--primary)}
+.caret{display:inline-block;width:.55ch;height:1.05em;margin-left:.45ch;background:var(--accent)}
+
+/* listing */
+.listing{
+  position:relative;isolation:isolate;
+  padding:clamp(1.1rem,2.6vw,1.6rem) 0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.listing::before{
+  content:"";position:absolute;top:0;bottom:0;left:3.25ch;width:1px;
+  background:linear-gradient(180deg,transparent,var(--border) 18%,var(--border) 82%,transparent);
+}
+.code{
+  list-style:none;margin:0;padding:0;
+  font-family:var(--mono);
+  font-feature-settings:"liga" 0,"calt" 0;font-variant-ligatures:none;
+  font-size:clamp(.95rem,2.1vw,1.2rem);line-height:2.05;tab-size:4;
+}
+.ln{
+  display:grid;grid-template-columns:3.25ch 1fr;align-items:baseline;column-gap:1.65ch;
+  opacity:.26;
+  animation:resolve 12s linear infinite;
+  animation-delay:calc(var(--i) * .47s);
+  will-change:opacity;
+}
+@keyframes resolve{0%{opacity:.26}4%{opacity:1}78%{opacity:1}88%{opacity:.26}100%{opacity:.26}}
+.gut{text-align:right;color:var(--ghost);font-size:.72em;font-weight:500;user-select:none}
+.src{min-height:1em}
+.ln[data-ind] .src{padding-left:4ch}
+.kw{color:var(--blue)}
+.id{color:var(--primary)}
+.typ{color:var(--gold)}
+.pun{color:var(--muted)}
+.cmt{color:var(--secondary)}
+.qt{color:var(--muted)}
+
+/* the three "soon"s: string literals, set above the scaffolding that frames them */
+.val{color:var(--green);font-size:1.5em;font-weight:700;letter-spacing:-.01em}
+.val.cjk{font-family:var(--cjk);font-size:1.12em;font-weight:600;letter-spacing:.06em}
+
+/* the compile pass: a band of light travelling down the listing, lines resolving
+   in its wake. color-mix keeps it on the palette accent instead of a second
+   hardcoded amber. */
+.sweep{
+  position:absolute;left:-8%;right:-8%;top:0;height:100%;z-index:-1;
+  pointer-events:none;mix-blend-mode:screen;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent) 3.5%, transparent) 3.5%,
+    color-mix(in srgb, var(--accent) 13%, transparent) 7%,
+    color-mix(in srgb, var(--accent) 4%, transparent) 9.5%,
+    transparent 13%);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 14%,#000 82%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 14%,#000 82%,transparent 100%);
+  transform:translateY(-13%);opacity:0;
+  animation:sweep 12s linear infinite;
+  will-change:transform,opacity;
+}
+@keyframes sweep{
+  0%{transform:translateY(-13%);opacity:0}
+  2%{opacity:1}
+  40%{transform:translateY(100%);opacity:1}
+  46%{transform:translateY(114%);opacity:0}
+  100%{transform:translateY(114%);opacity:0}
+}
+
+@media (max-width:34rem){
+  .stage{gap:1.75rem}
+  .code{font-size:.92rem;line-height:1.95}
+  .ln{grid-template-columns:2.5ch 1fr;column-gap:1.2ch}
+  .listing::before{left:2.5ch}
+  .ln[data-ind] .src{padding-left:2.5ch}
+  .val{font-size:1.34em}
+  .val.cjk{font-size:1.02em}
+}
+
+/* reduced motion: no pass, everything already compiled */
+@media (prefers-reduced-motion:reduce){
+  .ln{opacity:1;animation:none}
+  .sweep{display:none}
+}
+</style>
+{{- /* site override point: favicon, analytics */ -}}
+{{- partial "hooks/head-extra.html" . -}}
+</head>
+<body>
+<div class="wash" aria-hidden="true"></div>
+
+<main class="stage">
+  <h1 class="mark">{{ partial "logo.html" }}<span class="caret" aria-hidden="true"></span></h1>
+
+  <section class="listing">
+    <div class="sweep" aria-hidden="true"></div>
+    <ol class="code">
+      <li class="ln" style="{{ printf "--i:%d" 0 | safeCSS }}"><span class="gut" aria-hidden="true">1</span><span class="src"><span class="kw">package</span> <span class="id">guides</span></span></li>
+      <li class="ln" style="{{ printf "--i:%d" 1 | safeCSS }}"><span class="gut" aria-hidden="true">2</span><span class="src"></span></li>
+      <li class="ln" style="{{ printf "--i:%d" 2 | safeCSS }}"><span class="gut" aria-hidden="true">3</span><span class="src"><span class="kw">var</span> <span class="id">soon</span> <span class="pun">= [...]</span><span class="typ">string</span><span class="pun">{</span></span></li>
+      {{- range $i, $w := $words }}
+      <li class="ln" data-ind style="{{ printf "--i:%d" (add $i 3) | safeCSS }}"><span class="gut" aria-hidden="true">{{ add $i 4 }}</span><span class="src"><span class="qt">"</span><span class="val{{ if $w.cjk }} cjk{{ end }}" lang="{{ $w.lang }}">{{ $w.text }}</span><span class="qt">"</span><span class="pun">,</span></span></li>
+      {{- end }}
+      <li class="ln" style="{{ printf "--i:%d" (add $n 3) | safeCSS }}"><span class="gut" aria-hidden="true">{{ add $n 4 }}</span><span class="src"><span class="pun">}</span></span></li>
+      {{- with $cs.foot }}
+      <li class="ln" style="{{ printf "--i:%d" (add $n 4) | safeCSS }}"><span class="gut" aria-hidden="true">{{ add $n 5 }}</span><span class="src"></span></li>
+      <li class="ln" style="{{ printf "--i:%d" (add $n 5) | safeCSS }}"><span class="gut" aria-hidden="true">{{ add $n 6 }}</span><span class="src"><span class="cmt">// {{ . }}</span></span></li>
+      {{- end }}
+    </ol>
+  </section>
+</main>
+
+<div class="grain" aria-hidden="true"></div>
+</body>
+</html>

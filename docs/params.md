@@ -34,6 +34,46 @@ fully commented — copy it and edit.
 ¹ `exampleSite` sets `rss.fullContent = true`; with no value the feed falls back
 to summaries.
 
+## Coming-soon mode
+
+A site with nothing published yet still wants its domain, its TLS and its deploy
+pipeline live, so that launch day is a flag flip rather than an infra project.
+`comingSoon.enable` makes the theme answer **every** route with one standalone
+card — the wordmark and a short "soon" line — and nothing else.
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `comingSoon.enable` | bool | `false` | Turn the mode on. |
+| `comingSoon.title` | string | `site.Title` | `<title>` and `og:title`. |
+| `comingSoon.description` | string | `heroLine` | Meta + `og:description`. |
+| `comingSoon.words` | list of strings | `["Soon", "Скоро", "近日公開"]` | The "soon" line, one word per language. The third is rendered with a CJK font stack. |
+| `comingSoon.foot` | string | — | Muted line under the card. Omit to hide it. |
+
+The branch sits in `baseof.html`, above `head.html` — so in this mode the CSS
+bundle, the search modal, the menus and the OG graph are never *built*, not
+stripped after the fact. The published source contains the card and nothing that
+hints at the site being written behind it. The card reuses `logo.html`,
+`head/fonts.html` and `hooks/head-extra.html`, so the wordmark, the faces and the
+favicon have no second source of truth.
+
+Pair it with `disableKinds` so Hugo does not even generate the other pages —
+that way a guide which loses its `draft: true` by accident still cannot reach the
+public build. Keep both in an overlay config the normal commands do not load, so
+`hugo server -D` keeps rendering drafts while you write:
+
+```toml
+# hugo.stub.toml — used only via: hugo --config hugo.toml,hugo.stub.toml
+disableKinds = ["page", "section", "taxonomy", "term", "rss", "sitemap"]
+[outputs]
+  home = ["html"]
+[params]
+  [params.comingSoon]
+    enable = true
+```
+
+`robots.txt` switches to `Disallow: /` on its own — there is nothing to crawl,
+and an empty page indexed today is a bad first impression tomorrow.
+
 ## Not parameters
 
 - **Palettes** are data files, one per palette (`data/themes/<id>.toml`), not

@@ -13,3 +13,9 @@
   [params.brand]
     name = "taiga"   # wordmark in header/footer — override per site
     tld = ""         # optional suffix (e.g. ".dev"); empty = just the name
+
+  # Coming-soon mode. OFF here so a normal install renders a normal site; the
+  # key must exist, because baseof.html reads comingSoon.enable directly (same
+  # idiom as brand.name above — the theme's defaults are the guard).
+  [params.comingSoon]
+    enable = false
