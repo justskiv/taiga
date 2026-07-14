@@ -22,5 +22,5 @@ features = ["blog", "syntax-highlighting", "multilingual", "search", "dark-mode"
 min_version = "0.146.0"
 
 [author]
-  name = "skiv"
+  name = "Nikolay Tuzov"
   homepage = "https://github.com/justskiv"
