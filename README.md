@@ -1,54 +1,101 @@
-# taiga
+<p align="center">
+  <img src="https://raw.githubusercontent.com/justskiv/taiga/main/images/banner.svg" alt="taiga" width="100%" />
+</p>
 
-A dark, minimalist Hugo theme for a **learning platform**: rubrics → series →
-guides with interactive widgets in the text. Topic-agnostic — the demo teaches
-the theme itself, but nothing in the templates is tied to any subject.
+<p align="center">
+  A dark, minimal Hugo theme for <b>learning platforms</b> — rubrics, course series,<br>
+  and interactive widgets living inside the text.
+</p>
 
-![Screenshot](https://raw.githubusercontent.com/justskiv/taiga/main/images/screenshot.png)
+<div align="center">
 
-**Two binaries and you're done: `hugo` and `pagefind`.** No Node, no npm, no CDN,
-no trackers. Vanilla JS bundled by Hugo's built-in esbuild, plain CSS, self-hosted
-woff2 fonts, a static search index. That constraint is the whole design.
+[![Hugo](https://img.shields.io/static/v1?label=Hugo&message=v0.146.0%2B&color=FF4088&logo=hugo&logoColor=white)](https://github.com/gohugoio/hugo/releases)
+[![Status](https://img.shields.io/badge/status-beta-orange)](#status)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![No Node](https://img.shields.io/badge/node-not_required-3c3b38)](#requirements)
+
+[![CI](https://github.com/justskiv/taiga/actions/workflows/hugo.yml/badge.svg)](https://github.com/justskiv/taiga/actions/workflows/hugo.yml)
+[![Demo](https://img.shields.io/badge/demo-justskiv.github.io/taiga-ea8a2e)](https://justskiv.github.io/taiga/)
+[![Telegram](https://img.shields.io/badge/Telegram-@ntuzov-blue?logo=telegram&logoColor=white)](https://t.me/ntuzov)
+
+**English** · [Русский](README.ru.md)
+
+</div>
+
+---
+
+## Status
+
+> [!WARNING]
+> **v0.0.1 — beta. Unstable, and honestly so.**
+>
+> Params, template names and CSS tokens can still be renamed **without a
+> deprecation path**, and a `hugo mod get -u` may break your site on any commit.
+> I do not recommend building on it yet — if you do, pin a commit and accept the
+> risk. A stable release is coming, and from that point breaking changes get a
+> major bump and a migration note. Until then, treat every version as provisional.
+
+## What it is
+
+taiga is a theme for sites that **teach**: content is organised as rubrics →
+course series → guides, and a guide can carry live JavaScript widgets in the
+middle of its prose.
+
+The demo is the theme documenting itself — it is written *in* taiga, *about*
+taiga, so every mechanism on the page is also the proof that the mechanism works.
+
+**[Live demo →](https://justskiv.github.io/taiga/)**
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/justskiv/taiga/main/images/screenshot.png" alt="taiga — the demo site" width="100%" />
+</p>
+
+## Two binaries and you're done
+
+`hugo` and `pagefind`. No Node, no npm, no CDN, no trackers, no build pipeline to
+babysit. Vanilla JS bundled by Hugo's built-in esbuild, plain CSS, self-hosted
+woff2 fonts, a static search index. That constraint is not an accident — it is the
+whole design, and every feature below is built to live inside it.
 
 ## Features
 
-- **Interactive widgets as content.** A `widgets.js` next to a guide's `index.md`
-  is found, minified and loaded only on that page; one `{{< widget >}}` shortcode
-  in the text, and the `Taiga.widget` runtime isolates failures so one broken
-  widget never takes down its neighbours.
+- **Interactive widgets as content.** Drop a `widgets.js` next to a guide's
+  `index.md`: it is found, minified and loaded on that page only. One
+  `{{< widget >}}` in the text mounts it, and the `Taiga.widget` runtime isolates
+  failures so one broken widget never takes down its neighbours.
 - **A broken internal link fails the build.** A render hook checks every internal
-  link against real pages (`params.linkcheck = "error" | "warn"`).
-- **Open Graph covers with no external service.** `images.Text` draws a cover for
-  each guide at build time — backdrop, series kicker, title, minutes. Cover
-  **styles are folders** (`assets/og/<style>/`); a site adds or overrides one
-  without forking.
-- **Full-text search without a server.** Pagefind indexes the built site; ⌘K
-  finds terms *inside* articles, with stemming and a snippet — in the theme's own
-  modal, loaded lazily on first open.
-- **Series as a first-class mechanic.** A taxonomy plus `series_weight` gives the
-  series panel, "part N of M" kickers, and a bottom bridge scaled by reading time
-  with "~N min left" — all server-rendered from one source of truth.
+  link against real pages (`linkcheck = "error" | "warn"`).
+- **Open Graph covers with no external service.** `images.Text` draws a cover per
+  guide at build time — backdrop, series kicker, title, minutes. Cover styles are
+  *folders* (`assets/og/<style>/`); a site adds or overrides one without forking.
+- **Full-text search without a server.** Pagefind indexes the built site; ⌘K finds
+  terms *inside* articles, with stemming and a snippet, in the theme's own modal.
+- **Series as a first-class mechanic.** A taxonomy plus `series_weight` gives you
+  the series panel, "part N of M" kickers, and a bottom bridge scaled by reading
+  time — all server-rendered from one source of truth.
 - **Server-side syntax highlighting.** Go is highlighted at build time (Chroma,
-  recoloured to the palette) with `hl_lines` support; everything else renders as
-  clean plain code. No client-side highlighter, no flash.
+  recoloured to the palette) with `hl_lines`. No client-side highlighter, no flash.
 - **Palettes are data.** Each of the seven palettes is one `data/themes/<id>.toml`
-  file; a site adds its own with a single file and it shows up in the CSS and the
-  theme picker. Seven built in, dark by default.
-- **Roadmap as data, a guide archetype, and customization as a discipline** —
-  hooks, `custom.css`, stable design tokens, everything restylable without a fork.
+  file; a site adds its own with a single file and it appears in the CSS and in the
+  theme picker. Dark by default.
+- **Bilingual, and the demo proves it.** English and Russian ship as UI strings,
+  dates and JS strings; the language switcher appears by itself once a site has a
+  second language. Adding a third is content + config + one i18n file — no template
+  edits.
 
 ## Requirements
 
-- **Hugo ≥ 0.146** (developed against v0.154.x). The `extended` build is **not**
-  required — this is a plain-CSS theme.
-- **[Pagefind](https://pagefind.app/)** for search (a second build step; no Node).
+| | |
+|---|---|
+| **Hugo** | ≥ 0.146 (developed against v0.154.x). The `extended` build is **not** required — this is a plain-CSS theme. |
+| **[Pagefind](https://pagefind.app/)** | For search. A second build step, and still no Node. |
 
-## Installation
+## Install
 
 Pick one.
 
-**1. Hugo Module** (recommended). Add the import to your site config — with a
-module import you do **not** also set `theme`:
+**Hugo Module** (recommended). Add the import to your site config — with a module
+import you do **not** also set `theme`:
 
 ```toml
 [module]
@@ -58,14 +105,13 @@ module import you do **not** also set `theme`:
 
 Then `hugo mod get -u`.
 
-**2. Git submodule.** Add it under `themes/`, then set `theme = "taiga"` in your
-config:
+**Git submodule.** Add it under `themes/`, then set `theme = "taiga"`:
 
 ```sh
 git submodule add https://github.com/justskiv/taiga.git themes/taiga
 ```
 
-**3. Copy.** Clone or download into `themes/taiga`, then set `theme = "taiga"`.
+**Copy.** Clone or download into `themes/taiga`, then set `theme = "taiga"`.
 
 ## Quick start
 
@@ -82,22 +128,27 @@ To run the bundled demo from a clone of this repo:
 hugo server -s exampleSite --themesDir ../..
 ```
 
-(For the full build with search: `hugo -s exampleSite --themesDir ../.. --gc --minify`
-then `pagefind --site exampleSite/public`.)
+For the full build, with search:
 
-## Configuration & docs
+```sh
+hugo -s exampleSite --themesDir ../.. --gc --minify
+pagefind --site exampleSite/public
+```
 
-- [docs/params.md](docs/params.md) — every parameter, with defaults.
-- [docs/authoring.md](docs/authoring.md) — writing a guide: front matter,
-  shortcodes, code, diagrams, widgets, voice.
-- [docs/customizing.md](docs/customizing.md) — restyling without a fork:
-  params, `custom.css`, palettes, hooks, partials, i18n, cover styles.
-- [docs/i18n.md](docs/i18n.md) — adding a language.
+## Documentation
 
-The commented [`exampleSite/hugo.toml`](exampleSite/hugo.toml) is the second,
-copy-ready reference config.
+| | |
+|---|---|
+| [docs/params.md](docs/params.md) | Every parameter, with defaults. |
+| [docs/authoring.md](docs/authoring.md) | Writing a guide: front matter, shortcodes, code, diagrams, widgets. |
+| [docs/customizing.md](docs/customizing.md) | Restyling without a fork: params, `custom.css`, palettes, hooks, partials. |
+| [docs/i18n.md](docs/i18n.md) | Adding a language. |
+
+Russian mirrors live in [`docs/ru/`](docs/ru/). The commented
+[`exampleSite/hugo.toml`](exampleSite/hugo.toml) is a second, copy-ready reference
+config — every key in it is annotated.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Bundled fonts (Inter, JetBrains Mono) are under the
-SIL Open Font License; see the `.txt` files beside them in `assets/fonts/`.
+MIT — see [LICENSE](LICENSE). The bundled fonts (Inter, JetBrains Mono) are under
+the SIL Open Font License; see the `.txt` files beside them in `assets/fonts/`.

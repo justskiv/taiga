@@ -1,12 +1,26 @@
+# Showcase descriptor for themes.gohugo.io. Hugo itself no longer needs this file
+# — the supported Hugo range lives in hugo.toml's [module.hugoVersion] — but the
+# theme site builder reads exactly these keys to render the theme's card, so they
+# stay, and they stay in English: this is the shop window.
+#
+# Caveat worth knowing: Hugo folds every key in this file into the theme module's
+# params. Keep it to the documented schema; do not park config here.
+
 name = "taiga"
 license = "MIT"
 licenselink = "https://github.com/justskiv/taiga/blob/main/LICENSE"
-description = "Тёмная минималистичная тема учебной платформы: рубрики, серии-курсы, интерактивные виджеты в тексте, self-hosted шрифты, полнотекстовый поиск. Без Node и внешних зависимостей."
+description = "A dark, minimal Hugo theme for learning platforms: rubrics, course series, interactive widgets inside the text, build-time OG covers and full-text search. Two binaries and you are done — hugo and pagefind. No Node, no CDN, no trackers."
 homepage = "https://github.com/justskiv/taiga"
 demosite = "https://justskiv.github.io/taiga/"
-tags = ["blog", "docs", "minimal", "dark", "multilingual", "education"]
-features = ["blog", "syntax-highlighting", "multilingual", "search"]
+
+tags = ["blog", "docs", "minimal", "dark", "multilingual", "education", "course", "search"]
+features = ["blog", "syntax-highlighting", "multilingual", "search", "dark-mode", "open-graph", "rss"]
+
+# Legacy fallback only: Hugo reads `min_version` from here just once, and only if
+# [module.hugoVersion] min is unset in hugo.toml — where it IS set. Kept because
+# some tooling still looks for it.
 min_version = "0.146.0"
 
 [author]
   name = "skiv"
+  homepage = "https://github.com/justskiv"

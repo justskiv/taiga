@@ -9,24 +9,74 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **Multilingual, for real.** The theme claimed to be language-agnostic while
+  shipping no way to switch languages. Now:
+  - a **language switcher** appears in the header by itself once a site has a
+    second language — no param, no partial to write;
+  - **`hreflang` alternates** (plus `x-default`) are emitted. The docs used to
+    claim this already worked. It did not;
+  - **UI strings reach JavaScript.** `window.THEME_I18N` was read by `i18n.js` and
+    **emitted by nothing** — so the ⌘K modal, the popover, the focus button, the
+    minimap and the tags filter were hardcoded Russian on every site. A
+    `js-bridge.html` partial now renders the catalogue from i18n;
+  - **plurals are CLDR-driven on both sides** (`Intl.PluralRules` against Hugo's
+    own plural forms), instead of a hand-rolled Russian rule;
+  - **dates are language-aware**: month names come from `month_1`…`month_12`.
+  - The i18n catalogues went from 67 to 106 keys, `ru` and `en` in lockstep.
 - **`params.accent`** — a single param repaints the accent across **every**
   palette at once (built-in and site), a brand axis orthogonal to the palettes.
   `accentDim` / `accentGlow` override the derived `rgba(…, .18)` / `rgba(…, .28)`.
-  The favicon square and the logo mark follow it too. Unset ⇒ each palette keeps
-  its native accent and the output is byte-for-byte unchanged. A non-`#rrggbb`
-  value fails the build. See [customizing.md](docs/customizing.md#recolour).
+  The favicon and the logo mark follow it too. Unset ⇒ each palette keeps its
+  native accent and the output is byte-for-byte unchanged. A non-`#rrggbb` value
+  fails the build. See [customizing.md](docs/customizing.md#recolour).
+- **Per-language roadmap data.** A site ships either a flat `data/roadmap.toml`
+  (unchanged) or a folder `data/roadmap/<lang>.toml`. Hugo's `data/` is not
+  language-aware, so a bilingual site had no way to translate its roadmap.
+- **`scripts/check-links.py --base-path`** for sites built under a subpath, and it
+  now reports a link that *escapes* the subpath as an error rather than skipping it.
+- Russian mirrors of the documentation under `docs/ru/`.
 
 ### Changed
 
+- **A new brand mark.** The four-square block gave way to a conifer that is also a
+  hierarchy — a crown over two tiers over a trunk, one level per content tier
+  (rubric → series → guides). Only the crown takes the accent. The favicon and the
+  fallback rubric glyph follow.
 - **Renamed the primary accent token** `--accent-amber` → `--accent` (with its
   `-dim` / `-glow`; palette key `accent-amber` → `accent`). A site that references
   the old name in `custom.css` or a palette file must rename it. The secondary
   accents (`--accent-green` / `-copper` / `-blue` / `-gold`) are unchanged.
+- **The demo is bilingual** (English at `/`, Russian at `/ru/`) and is deployed to
+  GitHub Pages, which is what makes `demosite` in `theme.toml` a real URL.
 
-## [0.1.0] — 2026-07-04
+### Removed
 
-Initial release: a topic-agnostic learning-platform theme (rubrics → series →
-guides), packaged as the repository root with a self-documenting `exampleSite`.
+- **`layouts/_partials/date-ru.html`.** Its replacement is `date.html`, which takes
+  month names from i18n. The old partial hardcoded Russian months, and its *name*
+  was language-bound — one site physically could not render both `ru` and `en`
+  dates. A site that overrode `date-ru.html` must move that override to `date.html`.
+- **`params.search.enable`** from the example config. No template ever read it:
+  search is always on and degrades to a hint when the index is missing.
+
+### Fixed
+
+- **`partialCached` ignored the language.** The header was cached per section and
+  the footer had no cache variant at all, so on a multilingual site `/howto/` and
+  `/ru/howto/` collided on one key and both rendered whichever language built
+  first — wrong menus, wrong strings, wrong feed link.
+- **Search 404'd on any site served from a subpath.** `search.js` hardcoded
+  `/pagefind/pagefind.js`; it now derives the path from `baseURL`. This broke every
+  GitHub Pages *project* site, which is the most common way to host a Hugo demo.
+- **Root-absolute links to generated files escaped the subpath.** A `/index.xml`
+  or `/sitemap.xml` written in content was emitted verbatim, pointing at the domain
+  root. `render-link.html` now rebases them through `relURL`.
+
+## [0.0.1] — 2026-07-04
+
+First cut: a topic-agnostic learning-platform theme (rubrics → series → guides),
+packaged as the repository root with a self-documenting `exampleSite`. Beta — see
+the status note in the [README](README.md#status): until the first stable tag,
+anything here can be renamed without a deprecation path.
 
 ### Added
 
