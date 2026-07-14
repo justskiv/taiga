@@ -17,10 +17,21 @@
 {{- else if hasPrefix $d "#" -}}
   <a href="{{ $d }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
 {{- else if and (hasPrefix $d "/") (path.Ext $u.Path) -}}
-  {{- /* link to a generated/static file (RSS /index.xml, sitemap, an image or a
-         download): pass through as-is — GetPage resolves content pages, not output
-         URLs, so these must not go through the page check. */ -}}
-  <a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+  {{- /* Link to a generated/static file (RSS /index.xml, sitemap, an image or a
+         download): skip the page check — GetPage resolves content pages, not
+         output URLs. But still send it through relURL, or a root-absolute path
+         escapes the baseURL subpath: on a site served from /taiga/, a literal
+         "/index.xml" points at the domain root and 404s. relURL (not relLangURL)
+         on purpose — it rebases the path and nothing else, so a shared static
+         asset does not sprout a language prefix it does not have on disk. Write
+         the language-specific path yourself when you mean one.
+
+         The leading slash is trimmed first, and that is not cosmetic: relURL
+         leaves an already-rooted "/index.xml" alone and only rebases a relative
+         "index.xml". Feed it the slash and it silently no-ops — which is exactly
+         how this bug shipped. (footer.html writes "index.xml" for the same
+         reason.) */ -}}
+  <a href="{{ strings.TrimPrefix "/" $u.Path | relURL }}{{ with $u.Fragment }}#{{ . }}{{ end }}"{{ with $.Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
 {{- else if hasPrefix $d "/" -}}
   {{- $target := site.GetPage $u.Path -}}
   {{- if $target -}}
