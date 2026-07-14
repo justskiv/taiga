@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  A dark, minimal Hugo theme for <b>learning platforms</b> — rubrics, course series,<br>
+  A minimal Hugo theme for <b>learning platforms</b> — rubrics, course series,<br>
   and interactive widgets living inside the text.
 </p>
 
@@ -73,7 +73,7 @@ whole design, and every feature below is built to live inside it.
   recoloured to the palette) with `hl_lines`. No client-side highlighter, no flash.
 - **Palettes are data.** Each of the seven palettes is one `data/themes/<id>.toml`
   file; a site adds its own with a single file and it appears in the CSS and in the
-  theme picker. Dark by default.
+  theme picker. Dark, grey and light ship in the box.
 - **Bilingual, and the demo proves it.** English and Russian ship as UI strings,
   dates and JS strings; the language switcher appears by itself once a site has a
   second language. Adding a third is content + config + one i18n file — no template

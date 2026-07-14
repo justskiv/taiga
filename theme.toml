@@ -9,7 +9,7 @@
 name = "taiga"
 license = "MIT"
 licenselink = "https://github.com/justskiv/taiga/blob/main/LICENSE"
-description = "A dark, minimal Hugo theme for learning platforms: rubrics, course series, interactive widgets inside the text, build-time OG covers and full-text search. Two binaries and you are done — hugo and pagefind. No Node, no CDN, no trackers."
+description = "A minimal Hugo theme for learning platforms: rubrics, course series, interactive widgets inside the text, build-time OG covers and full-text search. Swappable colour palettes — dark, grey and light. Two binaries and you are done: hugo and pagefind. No Node, no CDN, no trackers."
 homepage = "https://github.com/justskiv/taiga"
 demosite = "https://justskiv.github.io/taiga/"
 
