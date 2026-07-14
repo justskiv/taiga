@@ -1,8 +1,16 @@
-{{- /* Brand mark: four rounded blocks, one accent. The neutral squares are
-       brand constants and stay literal; the accent square reads var(--accent)
-       so the mark follows the active palette and any params.accent override.
-       (The favicon is a separate data-URI that can't read CSS vars — see
-       head/meta.html.) Pass a pixel size to set width/height; omit to let CSS
-       size it. */ -}}
+{{- /* Brand mark — a conifer that is also a hierarchy: a pointed crown over two
+       trapezoid tiers over a trunk, each level wider than the one above it
+       (rubric → series → guides). The pun is structural, not decorative.
+
+       Three stacked horizontal masses is the point: it is the form that survives
+       being a 16px favicon, where finer conifers mush into a blob.
+
+       The neutral masses are brand constants and stay literal; only the crown
+       reads var(--accent), so the mark follows the active palette and any
+       params.accent override. The accent is always the apex — hold that rule if
+       you redraw this. (The favicon is a separate data-URI that cannot read CSS
+       vars — see head/meta.html.)
+
+       Pass a pixel size to set width/height; omit to let CSS size it. */ -}}
 {{- $size := . -}}
-<svg viewBox="0 0 32 32" aria-hidden="true"{{ with $size }} width="{{ . }}" height="{{ . }}"{{ end }}><rect width="32" height="32" rx="7" fill="#1d1d1c"/><rect x="6" y="6" width="9" height="9" rx="2" fill="#3c3b38"/><rect x="17" y="6" width="9" height="9" rx="2" fill="var(--accent)"/><rect x="6" y="17" width="9" height="9" rx="2" fill="#3c3b38"/><rect x="17" y="17" width="9" height="9" rx="2" fill="#3c3b38"/></svg>
+<svg viewBox="0 0 32 32" aria-hidden="true"{{ with $size }} width="{{ . }}" height="{{ . }}"{{ end }}><rect width="32" height="32" rx="7" fill="#1d1d1c"/><path d="M10.7 12.4L21.3 12.4L25.3 16.8L6.7 16.8Z" fill="#3c3b38"/><path d="M8.5 19.6L23.5 19.6L28.5 24L3.5 24Z" fill="#3c3b38"/><rect x="14.4" y="24" width="3.2" height="4.2" fill="#3c3b38"/><path d="M16 3.4L21.6 9.4L10.4 9.4Z" fill="var(--accent)"/></svg>
