@@ -14,8 +14,6 @@
 [![No Node](https://img.shields.io/badge/node-not_required-3c3b38)](#requirements)
 [![Telegram](https://img.shields.io/badge/Telegram-@ntuzov-blue?logo=telegram&logoColor=white)](https://t.me/ntuzov)
 
-[![CI](https://github.com/justskiv/taiga/actions/workflows/hugo.yml/badge.svg)](https://github.com/justskiv/taiga/actions/workflows/hugo.yml)
-
 **English** · [Русский](README.ru.md)
 
 </div>

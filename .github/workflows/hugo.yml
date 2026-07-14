@@ -77,7 +77,7 @@ jobs:
 
       # Only needed for the deploy job below, and only from main.
       - name: Upload the demo as a Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: taiga/exampleSite/public
@@ -89,7 +89,7 @@ jobs:
   # you). The build job above is unaffected either way.
   deploy:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       pages: write
