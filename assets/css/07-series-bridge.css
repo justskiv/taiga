@@ -1,5 +1,5 @@
 /* series bridge (JS upgrade of .series-nav on series articles): where you
-   stand, what's left, one loud "дальше". Flat surfaces only — emphasis via
+   stand, what's left, one loud "next". Flat surfaces only — emphasis via
    the amber scale, type hierarchy and the arrow. */
 .sbr{margin:34px 0 0}
 .sbr-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px;

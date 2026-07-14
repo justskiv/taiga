@@ -1,7 +1,7 @@
 /* ---- rubric page layout variants (switch in the view popover) ----
-   default «строки» — the base .series styles above.
-   «громко»: article titles are the only loud layer, everything else whispers.
-   «полка»: parts become tangible cards on a two-column shelf. */
+   default «rows» — the base .series styles above.
+   «loud»: article titles are the only loud layer, everything else whispers.
+   «shelf»: parts become tangible cards on a two-column shelf. */
 html[data-rubvar="loud"] .rubric .kicker{color:var(--text-muted); margin-bottom:14px}
 html[data-rubvar="loud"] .rubric h1{font-size:19px; font-weight:600; letter-spacing:-.005em; color:var(--text-secondary); margin:0 0 8px}
 html[data-rubvar="loud"] .rubric h1 .sub{color:inherit}

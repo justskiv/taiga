@@ -1,5 +1,5 @@
-{{- /* Kicker text as a plain string: "<рубрика> · <серия> · часть N из M" for a
-       series guide, "<рубрика> · разбор" for a standalone one. Shared by the
+{{- /* Kicker text as a plain string: "<rubric> · <series> · part N of M" for a
+       series guide, "<rubric> · deep dive" for a standalone one. Shared by the
        visible kicker and the Pagefind result breadcrumb so they never drift.
        Context = a guide page. */ -}}
 {{- $rubric := .CurrentSection.Params.label | default (lower .CurrentSection.Title) -}}

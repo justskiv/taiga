@@ -1,7 +1,7 @@
 {{- /* Series bridge (.sbr): the server-rendered replacement for the mock's
        buildSeriesBridge (which needed the deleted DG_INDEX). Text and structure
        mirror it 1:1 — head, a segment scale where each part's flex-grow ∝ its
-       minutes, a legend («позади N из M · впереди K частей · ~X мин»), the next
+       minutes, a legend («N of M behind you · K parts ahead · ~X min»), the next
        part as the primary CTA and the previous as a whisper. Rendered only for
        real series (>1 part), as in the mock. */ -}}
 {{- $s := partial "article/series-ctx.html" . -}}

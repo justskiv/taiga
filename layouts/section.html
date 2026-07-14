@@ -1,7 +1,7 @@
-{{- /* Rubric index: kicker "рубрика · <slug_mono>", h1 + .sub, lead, then the
+{{- /* Rubric index: kicker "rubric · <slug_mono>", h1 + .sub, lead, then the
        series blocks (from the series taxonomy) and any standalone reviews, then
-       the page's own markdown (e.g. a "Дальше" callout) and the .foot. Body class
-       "rubric" (set in baseof) drives the rows/loud/shelf list variants. */ -}}
+       the page's own markdown (e.g. a "what's next" callout) and the .foot. Body
+       class "rubric" (set in baseof) drives the rows/loud/shelf list variants. */ -}}
 {{ define "main" }}
 <main class="wrap">
   <div class="kicker"><span class="dot"></span>{{ i18n "rubric_word" }}{{ with .Params.slug_mono }} · {{ . }}{{ end }}</div>

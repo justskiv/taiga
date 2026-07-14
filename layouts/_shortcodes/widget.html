@@ -6,7 +6,8 @@
        3. {{< widget note="…" >}}HTML{{< /widget >}} → no id: raw HTML lives directly in
                                                         the figure (self-wiring widgets like
                                                         the drag builder that target their own ids).
-       cap defaults to «Поиграй»; note is the muted instruction after it. */ -}}
+       cap defaults to the i18n "widget_cap" («Play»); note is the muted
+       instruction after it. */ -}}
 {{- $id := .Get "id" -}}
 {{- $cap := .Get "cap" | default (i18n "widget_cap") -}}
 {{- $note := .Get "note" -}}

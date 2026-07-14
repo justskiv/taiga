@@ -41,11 +41,11 @@
                duplicates the wordmark drawn as {domain}. */ -}}
         {{- $titleText = site.Params.heroLine -}}
       {{- else if eq .Kind "section" -}}
-        {{- /* rubric index: "рубрика" kicks off the section title */ -}}
+        {{- /* rubric index: the "rubric" word kicks off the section title */ -}}
         {{- $kicker = i18n "rubric_word" -}}
       {{- else -}}
         {{- /* service / taxonomy page (about, roadmap, lab, /tags/): its own
-               kicker + editorial headline, so it's never mislabelled "рубрика"
+               kicker + editorial headline, so it's never mislabelled "rubric"
                and the kicker doesn't echo the short .Title. */ -}}
         {{- $kicker = .Params.kicker -}}
         {{- $titleText = .Params.headline | default .Title -}}

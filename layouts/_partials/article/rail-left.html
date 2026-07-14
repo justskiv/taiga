@@ -1,6 +1,6 @@
 {{- /* Left rail. Series article → all parts in order, li.cur on the current one,
        rail-k/rail-all pointing at the series anchor on the rubric page. Standalone
-       article → «ещё по теме»: the rubric plus 3–5 близких guides from front-matter
+       article → «related»: the rubric plus 3–5 related guides from front-matter
        `related:` (content paths). The collapsed minimap is built client-side from
        this markup (rails.js), so the DOM here is just the seed. */ -}}
 {{- $s := partial "article/series-ctx.html" . -}}

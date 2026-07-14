@@ -1,8 +1,8 @@
-# OG cover style "dots" (Точечная сетка). Text blocks drawn over base.png in
+# OG cover style "dots" (a dot grid). Text blocks drawn over base.png in
 # order via images.Text. Placeholders {title} {kicker} {meta} {domain} {part}
 # are filled by og-image.html (i18n-aware). Unknown keys are ignored, so the
 # format is forward-compatible. Fonts resolve in this folder first, then og/fonts/.
-name = "Точечная сетка"
+name = "Dots"
 
 # kicker — mono, amber, upper-cased
 [[block]]
@@ -34,7 +34,7 @@ color = "#7d786e"
 x = 76
 y = 545
 
-# bottom-right: "~N мин · goX.Y" (right edge at x, mono only)
+# bottom-right: "~N min · goX.Y" (right edge at x, mono only)
 [[block]]
 text = "{meta}"
 font = "JetBrainsMono-Medium.ttf"

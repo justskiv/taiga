@@ -17,8 +17,8 @@
    in the margin, no box, no chrome. Left: one dot per series part
    (filled=read, amber=current), each dot navigates. Right: miniature outline
    (h2 long dash, h3 short) synced with the scroll-spy. Hovering or focusing
-   the map peeks the full panel, blooming from the same centred spot; «закрепить
-   панель» at the overlay's bottom pins it back (as do [ ] / ⌘1 ⌘2). Hover
+   the map peeks the full panel, blooming from the same centred spot; "pin
+   panel" at the overlay's bottom pins it back (as do [ ] / ⌘1 ⌘2). Hover
    states stay gray — amber is reserved for the current marks. */
 html.rail-l-off .rail-l .rail-in{display:none}
 html.rail-r-off .rail-r .rail-in{display:none}

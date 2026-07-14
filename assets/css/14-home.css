@@ -41,7 +41,7 @@
 .rub2:hover .r-n{color:var(--text-secondary)}
 .rub2:hover .r-n::after{transform:translateX(2px); opacity:1}
 
-/* ---- home: featured guide ("гайд недели") ---- */
+/* ---- home: featured guide ("guide of the week") ---- */
 .featured{display:grid; grid-template-columns:minmax(0,1fr) 430px; gap:44px; align-items:center;
   margin-top:14px; padding:30px 34px; border:1px solid var(--border); border-radius:16px;
   background:var(--bg-surface)}

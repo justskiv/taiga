@@ -1,5 +1,6 @@
-/* Global hotkeys. Matched on e.code (physical key) so they survive the Russian
-   layout: [ and ] are х/ъ there, F is а — e.key would miss all of them. */
+/* Global hotkeys. Matched on e.code (physical key) so they survive non-Latin
+   layouts: on the Russian layout [ ], F and the rest all sit under Cyrillic
+   letters, so e.key would miss every one of them. */
 import { railOn, setRail } from './view.js';
 import { toggleFocus } from './focus.js';
 import { openSearch, closeSearch } from './search.js';

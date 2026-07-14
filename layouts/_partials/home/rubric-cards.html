@@ -7,7 +7,7 @@
 
        .r-n counts the section's whole library (series parts included) so it
        matches what the rubric page lists; when the section carries series it
-       reads "N гайдов · M серий", otherwise "N разборов". */ -}}
+       reads "N guides · M series", otherwise "N deep dives". */ -}}
 <section class="rubs2" aria-label="{{ i18n "nav_rubrics" }}">
 {{- range site.Params.rubricSections }}
   {{- $sec := site.GetPage (printf "/%s" .) -}}
@@ -24,9 +24,9 @@
     <span class="r-logo" data-logo="{{ $id }}">{{ partial $logoPartial $sec }}</span>
     <span class="r-t">{{ $sec.Title }}</span>
     {{ with $sec.Params.card_line }}<span class="r-d">{{ . }}</span>{{ end }}
-    {{/* Count line only when the rubric has guides (with series → "N гайдов · M
-         серий", else "N разборов"); an empty rubric shows a muted "готовится"
-         rather than a meaningless "0 разборов". */}}
+    {{/* Count line only when the rubric has guides (with series → "N guides · M
+         series", else "N deep dives"); an empty rubric shows a muted "in the
+         works" rather than a meaningless "0 deep dives". */}}
     {{ if gt $nGuides 0 }}<span class="r-n">{{ if gt $nSeries 0 }}{{ i18n "guides_count" $nGuides }} · {{ i18n "series_count" $nSeries }}{{ else }}{{ i18n "reviews_count" $nGuides }}{{ end }}</span>{{ else }}<span class="r-n r-n-empty">{{ i18n "rubric_empty" }}</span>{{ end }}
   </a>
   {{- end }}
