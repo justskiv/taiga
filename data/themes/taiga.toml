@@ -2,19 +2,28 @@ name = "Taiga"
 weight = 5
 
 # surface / text ramp (swapped per theme)
-# The theme's namesake palette, taken from the README banner: the cold blue-grey
-# slate of a boreal forest in fog. bg-base/bg-surface are the banner's own spruce
-# mass (#141a1f–#1d252d); text-muted is its pale sky (#7f8b97). Nothing here is
-# warm — the fog is the subject, and the accent is the only lit thing in it.
-"bg-deep" = "#0e1318"
-"bg-base" = "#141a1f"
-"bg-surface" = "#1d252d"
-"bg-raised" = "#27313b"
-"bg-hover" = "#222b34"
-"border" = "#2e3944"
-"text-primary" = "#d3dce4"
-"text-secondary" = "#a2aeb9"
-"text-muted" = "#7f8b97"
+# The theme's namesake palette: the cold blue-grey slate of a boreal forest in
+# fog. Hue ~208-210deg, low saturation kept from the degrey pass so it reads as
+# cool grey, not navy. This ramp is tuned for READING COMFORT, not max contrast:
+# the author reads long guides here for minutes, and near-white-on-near-black
+# glares (halation). Note body text sits on bg-deep, not bg-base — body{} paints
+# --bg-deep and .wrap is transparent, so bg-deep is the real reading canvas. So
+# the floor is lifted off near-black (bg-deep #1a1c1f) and the body pulled to an
+# off-white (#c6cfd6): body:canvas drops from a harsh ~13:1 to a restful ~10.8:1,
+# in the Nord / Tokyo Night band. bg-deep stays the deepest token and dark enough
+# to be the CTA button's *text* colour (bg-deep->accent 7.8:1, floor 4.5). The
+# surfaces lift in step so elevation still reads; text-secondary/-muted are lifted
+# too so they stay present on the raised card faces, not washed. Hue held, low
+# saturation kept — no re-saturation. See local/design/palette-comfort.html.
+"bg-deep" = "#1a1c1f"
+"bg-base" = "#202326"
+"bg-surface" = "#282d32"
+"bg-raised" = "#343b41"
+"bg-hover" = "#2d3339"
+"border" = "#3b434b"
+"text-primary" = "#c6cfd6"
+"text-secondary" = "#a7b4c1"
+"text-muted" = "#8796a2"
 "text-ghost" = "#4d5a67"
 "text-strong" = "#eef3f8"
 "gtok-str" = "#cbb279"
