@@ -15,7 +15,8 @@ x = 76
 y = 224
 upper = true
 
-# title — big Inter, wraps at width, tight leading
+# title — big Inter, tight leading. It wraps at the IMAGE edge; images.Text has
+# no width/wrap option, so the measure is the plate, not a number here.
 [[block]]
 text = "{title}"
 font = "Inter-ExtraBold.ttf"
@@ -23,7 +24,6 @@ size = 66
 color = "#e6dfd2"
 x = 76
 y = 270
-width = 1010
 lineheight = 1.13
 
 # bottom-left: the wordmark

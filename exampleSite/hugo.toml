@@ -219,7 +219,7 @@ timeZone = "Europe/Moscow"
 
   [params.ogImages]
     enable = true                        # generate share images at build time
-    style = "dots"                       # style = folder name under assets/og/
+    style = "taiga"                      # style = folder name under assets/og/
 
   [params.rss]
     fullContent = true                   # full guide body in the feed

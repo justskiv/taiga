@@ -7,8 +7,13 @@
             Style = front matter og_style | params.ogImages.style | "dots".
        Text blocks are drawn over base.png by images.Text in file order; the
        placeholders {title}{kicker}{meta}{domain}{part} are filled here (i18n).
-       images.Text has no right-align, so for mono blocks we shift x left by the
-       measured width (chars · size · 0.6); no letter-spacing, honestly. */ -}}
+
+       `align = "right"` on a block shifts x left by the measured width
+       (runes · size · 0.6), which is exact only for a 0.6em monospace — fine,
+       since only mono blocks use it. images.Text does have an `alignx` option
+       and this could lean on it instead; it is left alone until someone checks
+       what alignx aligns *against* (the image, or x?) and which Hugo release
+       added it, against the 0.146 floor in theme.toml. */ -}}
 {{- $out := "" -}}
 {{- if site.Params.ogImages.enable | default true -}}
   {{- /* 1. author override in the page bundle */ -}}
@@ -22,8 +27,14 @@
     {{- $style := .Params.og_style | default site.Params.ogImages.style | default "dots" -}}
     {{- $dir := printf "og/%s" $style -}}
     {{- $isGuide := and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}
-    {{- if not $isGuide -}}
-      {{- /* home/rubrics may use a fully-baked poster if the style ships one */ -}}
+    {{- if .IsHome -}}
+      {{- /* The home page may use a fully-baked poster if the style ships one:
+             it is the site's own face, and it has no title worth drawing — the
+             wordmark IS the title. Gate it on .IsHome and nothing else. The gate
+             used to be "not a guide", which quietly handed the same anonymous
+             poster to every rubric, /tags/, about and the roadmap — sixteen pages
+             in the demo, each of which had a perfectly good title to draw and
+             lost it. A rubric shared into a chat should say "How-to". */ -}}
       {{- with resources.Get (printf "%s/home.png" $dir) }}{{ $out = . }}{{ end -}}
     {{- end -}}
     {{- $base := resources.Get (printf "%s/base.png" $dir) -}}
@@ -68,7 +79,14 @@
                 {{- $x = int (sub (float $b.x) (mul (mul (strings.RuneCount $text) $b.size) 0.6)) -}}
               {{- end -}}
               {{- $opt := dict "font" . "size" $b.size "color" $b.color "x" $x "y" (int $b.y) -}}
-              {{- with $b.width }}{{ $opt = merge $opt (dict "width" (int .)) }}{{ end -}}
+              {{- /* No `width` here on purpose. images.Text takes exactly alignx,
+                     aligny, color, font, linespacing, size, x, y — there is no
+                     width option, and no wrap option: Hugo wraps at the image
+                     edge and nowhere else. A `width` key used to be read from the
+                     layout and merged in, where Hugo silently dropped it; setting
+                     it to 500 or to 1010 produced byte-identical pixels. A knob
+                     wired to nothing is worse than no knob, so it is gone. To
+                     really control the measure, break the line here. */ -}}
               {{- with $b.lineheight }}{{ $opt = merge $opt (dict "linespacing" (int (mul $b.size (sub (float .) 1.0)))) }}{{ end -}}
               {{- $filters = $filters | append (images.Text $text $opt) -}}
             {{- end -}}

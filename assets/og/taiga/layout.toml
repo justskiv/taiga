@@ -1,0 +1,89 @@
+# OG cover style "taiga" — the theme's namesake cover, and the second style in
+# the box. That matters beyond looks: the docs claim a cover style is just a
+# FOLDER (assets/og/<style>/), addable or overridable without forking the theme,
+# and until there were two of them the claim was untested. There are two now.
+# Switch with params.ogImages.style, or per page with `og_style` in front matter.
+#
+# The folder holds:
+#   base.png    1200x630, the plate. Text blocks below are drawn over it by
+#               images.Text, in file order, at build time.
+#   home.png    1200x630, a fully baked poster. og-image.html hands it to every
+#               page that is NOT a guide, and draws NOTHING over it — so a site
+#               adopting this style should drop its own og/taiga/home.png (a site
+#               file wins over a theme file), or it ships taiga's face as its own.
+#   layout.toml this file.
+#
+# Placeholders {title} {kicker} {meta} {domain} {part} are filled by og-image.html
+# (i18n-aware). Unknown keys are ignored, so the format stays forward-compatible.
+# Fonts resolve in this folder first, then og/fonts/.
+#
+# THE PICTURE AND THE TYPE DO NOT SHARE SPACE. The artwork is a masthead: a dusk
+# treeline dissolving into fog, all of it above y=210. Everything below that is
+# the front rank's own mass — the theme's --bg-base sinking to --bg-deep — and it
+# exists to be read on. A title may run to three lines (measured: ink bottoms out
+# at y=478) and still land on nothing but forest dark. Worst background pixel
+# found inside each block's real ink box, on this base.png:
+#
+#   kicker    #55c0b7 on #131b21   7.97:1
+#   title     #eef3f8 on #111920  15.89:1
+#   wordmark  #a2aeb9 on #0b1014   8.46:1
+#   meta      #8794a1 on #0b1014   6.17:1
+#
+# NB — there is no `width` key here and it is not an omission. images.Text takes
+# no width/wrap option at all (Hugo 0.154 documents exactly: alignx, aligny,
+# color, font, linespacing, size, x, y). It wraps on its own, at the image's edge.
+# `width = 1010` in the dots layout has never done anything: pass it or drop it,
+# the PNG is byte-identical. So a long title's right margin is not ours to set —
+# a Cyrillic title here runs to x=1149, leaving 51px where the left margin is 76.
+# The only real fix is for og-image.html to break the lines itself.
+name = "Taiga"
+
+# kicker — mono, glacier teal, upper-cased. Baked, not themed: covers are
+# rendered once at build time and have no palette to read. Same accent as the one
+# lit tree in the artwork; on a cover, as in the picture, teal is the only lit
+# thing.
+[[block]]
+text = "{kicker}"
+font = "JetBrainsMono-SemiBold.ttf"
+size = 27
+color = "#55c0b7"
+x = 76
+y = 224
+upper = true
+
+# title — Inter ExtraBold on --text-strong. Hugo wraps it (at the image edge, see
+# above); three lines bottom out at y=478, which is what fixes the footer rule at
+# 516. lineheight IS honoured: og-image.html turns it into linespacing, and the
+# measured line advance is 74px = size + int(size * 0.13).
+[[block]]
+text = "{title}"
+font = "Inter-ExtraBold.ttf"
+size = 66
+color = "#eef3f8"
+x = 76
+y = 270
+lineheight = 1.13
+
+# bottom-left: the wordmark. x=120, not 76 — the brand mark is baked into
+# base.png at x=76 and the two read as one lockup. Move this and the mark stops
+# meaning anything.
+[[block]]
+text = "{domain}"
+font = "JetBrainsMono-Medium.ttf"
+size = 24
+color = "#a2aeb9"
+x = 120
+y = 545
+
+# bottom-right: "~N min · v0.0.1". `align = "right"` is og-image.html's own key:
+# it shifts x left by runes · size · 0.6, which is exact for a 0.6em monospace and
+# wrong for anything else — so this block stays mono. (Hugo itself has had a real
+# `alignx` since these covers were written; og-image.html predates it.)
+[[block]]
+text = "{meta}"
+font = "JetBrainsMono-Medium.ttf"
+size = 24
+color = "#8794a1"
+x = 1124
+y = 545
+align = "right"
