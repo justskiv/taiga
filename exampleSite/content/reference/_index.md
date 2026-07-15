@@ -1,5 +1,9 @@
 ---
 title: "Reference"
+# A share card's text, not the page's. `lead` below is editorial copy for
+# someone who has already arrived; this is for someone deciding whether to.
+# Without it the lead lands in og:description and gets cut at 200 chars.
+description: "Pages you open when you need them: every component on one testbed, and the hotkeys."
 params:
   label: "reference"
   slug_mono: "reference"

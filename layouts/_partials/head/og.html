@@ -3,10 +3,19 @@
        og-image.html yields (generated cover, bundle override, or nothing when
        disabled/unavailable) — resolved once. property= for og:*, name= for
        twitter:*. JSON-LD: TechArticle + BreadcrumbList on guides, WebSite on the
-       home page. */ -}}
+       home page.
+
+       The description is capped at 200 characters. Every social client already
+       cuts it around there — but it cuts mid-word, and a rubric's lead is easily
+       twice that, so the card ends on a severed syllable. `truncate` cuts on a
+       word boundary and adds the ellipsis itself. plainify first: a `lead` may
+       carry inline markup, and a stray tag in a meta attribute is worse than a
+       long line. The JSON-LD and the drawn cover use the same capped string, so
+       the card, the crawler and the image never disagree. */ -}}
 {{- $isGuide := and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}
 {{- $title := .Title | default site.Title -}}
 {{- $desc := .Description | default .Params.lead | default site.Params.heroLine -}}
+{{- $desc = $desc | plainify | chomp | truncate 200 -}}
 {{- $locale := replace (site.Language.LanguageCode | default site.Language.Lang) "-" "_" -}}
 {{- $img := partial "og-image.html" . -}}
 <meta property="og:type" content="{{ cond $isGuide "article" "website" }}">
