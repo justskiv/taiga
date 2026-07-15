@@ -37,8 +37,8 @@ taiga is a theme for sites that **teach**: content is organised as rubrics →
 course series → guides, and a guide can carry live JavaScript widgets in the
 middle of its prose.
 
-The demo is the theme documenting itself — it is written *in* taiga, *about*
-taiga, so every mechanism on the page is also the proof that the mechanism works.
+The demo is built on nothing but taiga, and every guide on it is about taiga — so
+each mechanism runs on the very page that describes it. The page is its own proof.
 
 **[Live demo →](https://justskiv.github.io/taiga/)**
 

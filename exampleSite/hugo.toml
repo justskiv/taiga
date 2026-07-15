@@ -57,7 +57,7 @@ timeZone = "Europe/Moscow"
       # Home intro line, split into a lead clause and a trailing "· …" satellite so
       # the theme can style them apart. Together they read as one sentence.
       heroLine = "a theme for learning guides: series, widgets in the text, search — with no node"
-      heroSat = "· this demo is written in it, about it"
+      heroSat = "· and this very demo is built on it"
       footerTag = "the theme's demo site — every mechanism proven on itself"
 
     # Main navigation, in order. `params.badge` renders a generic <sup> badge on any
@@ -112,7 +112,7 @@ timeZone = "Europe/Moscow"
 
     [languages.ru.params]
       heroLine = "тема для учебных гайдов: серии, виджеты в тексте, поиск — без node"
-      heroSat = "· это демо написано ею о ней самой"
+      heroSat = "· и это демо собрано на ней же"
       footerTag = "демо-сайт темы — каждый механизм проверен на себе"
 
     [[languages.ru.menus.main]]

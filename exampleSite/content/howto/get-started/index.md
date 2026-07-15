@@ -14,7 +14,7 @@ rail_title: "Install"
 
 ## What this theme is {#what-it-is}
 
-A theme for learning guides that are read in order, not at random. Content sits on three levels: rubrics → series → guides. A series is declared with two front matter fields; everything else — "part N of M" in the kicker, the panel with the table of contents on the left, the bridge with "~N min left" at the bottom — is counted at build time. A guide is a folder: its interactive widgets, styles and cover lie next to the text, and it moves as a whole, one folder. Everything you see on this demo — the feed, search, palettes, cover generation — is a stock mechanism of the theme: the demo is written in it about it.
+A theme for learning guides that are read in order, not at random. Content sits on three levels: rubrics → series → guides. A series is declared with two front matter fields; everything else — "part N of M" in the kicker, the panel with the table of contents on the left, the bridge with "~N min left" at the bottom — is counted at build time. A guide is a folder: its interactive widgets, styles and cover lie next to the text, and it moves as a whole, one folder. Everything you see on this demo — the feed, search, palettes, cover generation — is a stock mechanism of the theme: the demo is built on nothing but it.
 
 Two binaries, and that is the whole toolchain. The first is plain `hugo`, not extended: there is no Sass in the theme, and esbuild for JS is built into the standard binary. The second is `pagefind`, full-text search over the built site. Node, npm and `node_modules` take part in neither the build nor development. The minimum Hugo version is declared in the theme's config: a binary that is too old stops the build with a clear error rather than with strange behavior.
 
