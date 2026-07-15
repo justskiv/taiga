@@ -7,6 +7,8 @@ other = "на главную"
 other = "Рубрики"
 [search]
 other = "Поиск"
+[repo_link]
+other = "Исходный код"
 [search_label]
 other = "поиск"
 [lang_switch]

@@ -226,6 +226,7 @@ timeZone = "Europe/Moscow"
 
   [params.social]
     twitter = ""                         # @handle for twitter:site (empty = omit)
+    github = "https://github.com/justskiv/taiga"  # repo URL → source icon in the header (unset = no icon)
 
 # Taxonomy TERM pages never render (tags link to /tags/#tag; series carry metadata
 # only), but their data stays available to templates (.GetTerms / term.Pages).

@@ -31,6 +31,7 @@ fully commented — copy it and edit.
 | `rss.fullContent` | bool | `false` | Put the full guide body in the RSS feed rather than a summary — see note 1. |
 | `footerTag` | string | falls back to `heroLine` | Tagline line in the footer. Site-wide unless a language overrides it — see note 2. |
 | `social.twitter` | string | `""` | `@handle` for `twitter:site`. Empty ⇒ the tag is omitted. |
+| `social.github` | string (URL) | — | Repository URL. Sets a source-code icon in the header. Unset ⇒ no icon. |
 | `rubricSections` | list of strings | — | Which content sections are **rubrics** — their leaf pages get the full guide layout (two rails, kicker, meta, TOC, series bridge). Every other page gets the plain column. Also drives the home rubric cards and the 404 rubric list. |
 
 **Notes**

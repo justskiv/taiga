@@ -27,6 +27,12 @@ sup.beta{font-family:var(--font-mono); font-size:9px; color:var(--accent); margi
 .lang-sw a.on{color:var(--accent)}
 .lang-sep{color:var(--text-muted); opacity:.45}
 kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 5px; background:var(--bg-base)}
+/* source link: a square icon button matching the popover control (.tp-btn) so the
+   header's right-hand controls read as one set. Neutral until hover, then accent. */
+.gh-link{width:34px; height:34px; flex:none; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:9px; background:var(--bg-surface); color:var(--text-secondary); transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.gh-link:hover{color:var(--accent); border-color:var(--accent-dim); background:var(--bg-raised)}
+.gh-link:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.gh-link svg{width:18px; height:18px}
 /* command-trigger button: magnifier · label · ⌘K keycap, on a fixed 32px row so
    the three optically center; asymmetric padding (11 left / 8 right) balances the
    bare icon against the boxed keycap */
