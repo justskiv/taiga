@@ -1,4 +1,4 @@
-name = "Amber"
+name = { en = "Amber", ru = "Янтарь" }
 weight = 10
 
 # surface / text ramp (swapped per theme)

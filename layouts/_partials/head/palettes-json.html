@@ -1,13 +1,24 @@
 {{- /* Theme list for the popover picker, built from the same data. popover.js
        reads this instead of a hardcoded table; it never sees palette values
-       beyond the four swatch colors. Ordered by weight. */ -}}
+       beyond the four swatch colors. Ordered by weight.
+
+       A palette's `name` is a plain string, or an inline table of translations
+       keyed by language (`name = { en = "Amber", ru = "Янтарь" }`) — the picker
+       shows the current language's entry and falls back to `en`. Kept in the
+       data file, not i18n/: a palette stays one self-contained file, and a
+       site's custom palette can't trip --printI18nWarnings over a key it never
+       declared. */ -}}
 {{- $skip := slice "name" "weight" "light" "disabled" -}}
 {{- $list := slice -}}
 {{- range $id, $t := site.Data.themes -}}
   {{- if not $t.disabled -}}
+    {{- $name := $t.name -}}
+    {{- if reflect.IsMap $name -}}
+      {{- $name = index $name site.Language.Lang | default (index $name "en") -}}
+    {{- end -}}
     {{- $list = $list | append (dict
         "id" $id
-        "name" $t.name
+        "name" $name
         "weight" (or $t.weight 100)
         "sw" (slice (index $t "bg-base") (index $t "bg-surface") (index $t "bg-raised") (index $t "text-primary"))) -}}
   {{- end -}}

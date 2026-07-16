@@ -1,4 +1,4 @@
-name = "Light ☀"
+name = { en = "Light ☀", ru = "Белая ☀" }
 weight = 70
 light = true
 
