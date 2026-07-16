@@ -65,6 +65,16 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   The favicon and the logo mark follow it too. Unset ⇒ each palette keeps its
   native accent and the output is byte-for-byte unchanged. A non-`#rrggbb` value
   fails the build. See [customizing.md](docs/customizing.md#recolour).
+- **Localizable palette names.** A palette's `name` may be a table of
+  translations (`name = { en = "Amber", ru = "Янтарь" }`); the picker shows the
+  current language's entry, falling back to `en`. Plain strings work as before.
+  The four names that translate ship both languages; GitHub/Nord/Obsidian/One
+  Dark are proper names and stay strings.
+- **`color = "accent"` in OG layouts.** A cover text block may name the brand
+  accent instead of retyping a hex; og-image.html resolves it like the favicon
+  does (`params.accent`, else the default palette's accent) and bakes it. The
+  `dots` kicker uses it; the `taiga` kicker deliberately keeps its literal —
+  that teal belongs to the artwork, not the brand axis.
 - **Per-language roadmap data.** A site ships either a flat `data/roadmap.toml`
   (unchanged) or a folder `data/roadmap/<lang>.toml`. Hugo's `data/` is not
   language-aware, so a bilingual site had no way to translate its roadmap.
@@ -106,6 +116,9 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 - **Root-absolute links to generated files escaped the subpath.** A `/index.xml`
   or `/sitemap.xml` written in content was emitted verbatim, pointing at the domain
   root. `render-link.html` now rebases them through `relURL`.
+- **The coming-soon card ignored `params.accent`.** It read the accent straight
+  from the default palette's data file, bypassing the brand axis — the one page
+  a pre-launch site actually shows was the one page the rebrand param missed.
 
 ## [0.0.1] — 2026-07-04
 

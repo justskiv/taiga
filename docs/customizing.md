@@ -66,6 +66,11 @@ picker automatically — no theme edit. Because Hugo merges the theme's data wit
 yours (yours wins on a name clash), you can also **override** a shipped palette
 (same filename, new values) or **disable** one (`disabled = true`).
 
+`name` is the picker label — a plain string, or a table of translations keyed
+by language: `name = { en = "Mine", ru = "Моя" }`. The picker shows the current
+language's entry and falls back to `en`. It lives in the palette file, not in
+`i18n/`, so a palette stays one self-contained file.
+
 The metadata keys — `name`, `weight`, `light`, `disabled` — are never emitted as
 CSS variables. Everything else in the file is.
 
@@ -110,9 +115,13 @@ accent of `params.defaultTheme`. It stays put when the reader switches palette.
 
 **What the handle does *not* reach:**
 
-- **OG cover images** — the accent is baked into `base.png`. For a full rebrand,
-  ship your own [cover style](#og-cover-styles) folder rather than expecting the
-  param to repaint the artwork.
+- **OG cover artwork** — whatever colour lives in `base.png` is baked. The
+  *text* blocks can follow the axis: a layout block with `color = "accent"` is
+  baked with the resolved brand colour (the shipped `dots` kicker does this;
+  the `taiga` kicker stays a literal on purpose — its teal belongs to the
+  artwork). For a full rebrand, still ship your own
+  [cover style](#og-cover-styles) folder rather than expecting the param to
+  repaint the artwork.
 - **Secondary accents** (`--accent-green`, `--accent-copper`, `--accent-blue`,
   `--accent-gold`) and the code-string colour `--gtok-str` are palette variables,
   not part of the one accent axis. Change them in the palette files (below).
@@ -292,6 +301,10 @@ Select it site-wide with `params.ogImages.style = "mystyle"`, or per page with
 `og_style:`. You can also override a shipped style by mirroring its folder.
 (`images.Text` can't letter-space and only right-aligns monospace — the shipped
 `dots` style documents both in its `layout.toml`.)
+
+A block's `color` in `layout.toml` is a `#rrggbb` literal, or the word
+`accent`: the brand accent resolved at build time exactly like the favicon's —
+`params.accent` first, else the accent of the `params.defaultTheme` palette.
 
 ## 9. An author section with no trace in the theme
 
