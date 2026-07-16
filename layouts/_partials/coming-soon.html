@@ -77,7 +77,9 @@
   --secondary:{{ index $pal "text-secondary" | safeCSS }};
   --muted:{{ index $pal "text-muted" | safeCSS }};
   --ghost:{{ index $pal "text-ghost" | safeCSS }};
-  --accent:{{ index $pal "accent" | safeCSS }};
+  {{- /* params.accent is the brand axis and must reach this page too — it
+         bypasses head/palettes.html where the override is normally applied. */}}
+  --accent:{{ site.Params.accent | default (index $pal "accent") | safeCSS }};
   --green:{{ index $pal "accent-green" | safeCSS }};
   --blue:{{ index $pal "accent-blue" | safeCSS }};
   --gold:{{ index $pal "accent-gold" | safeCSS }};
