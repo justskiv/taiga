@@ -1,26 +1,32 @@
 {{- /* Series context for the current article, resolved once and shared by kicker,
-       rail-left and series-bridge. Returns a dict:
-         isSeries  bool   — true only when the term has >1 page
-         term      page   — the series term
+       rail-left, series-bridge, feed cards and OG. A series is a SUB-SECTION of a
+       rubric — the guide lives in content/<rubric>/<series>/<slug>/ — so membership
+       is positional: .CurrentSection is the series exactly when the page sits
+       deeper than its root section (.FirstSection, the rubric) — unless that
+       sub-section is a standalone CONTAINER (params.standalone: true in its
+       _index.md), a tidiness folder whose children are ordinary standalone
+       guides. Returns a dict:
+         isSeries  bool   — true only when the series has >1 listed part
+         term      page   — the series section page (its landing)
          label     string — short lowercase series name (params.label | lower title)
-         href      string — rubric anchor, e.g. /<section>/#<series-slug>
-         slug      string — series slug (= anchor id)
-         pages     pages  — series parts ordered by series_weight
+         href      string — the series landing URL
+         slug      string — series slug (= folder name; anchor id on the rubric)
+         pages     pages  — series parts, weight-ascending (section default order)
          pos,total int    — 1-based position of this page, and part count
-       A non-series page returns {isSeries:false}. */ -}}
+       A standalone guide — a direct child of the rubric, or a child of a
+       container — returns {isSeries:false}. */ -}}
 {{- $ctx := dict "isSeries" false -}}
-{{- with .GetTerms "series" -}}
-  {{- $term := index . 0 -}}
-  {{- $pages := partialCached "series/pages.html" $term $term.Path -}}
+{{- $sec := .CurrentSection -}}
+{{- if and $sec (not ($sec.Eq .FirstSection)) (not $sec.Params.standalone) -}}
+  {{- $pages := $sec.RegularPages -}}
   {{- $pos := 0 -}}
   {{- range $i, $p := $pages }}{{ if eq $p.RelPermalink $.RelPermalink }}{{ $pos = add $i 1 }}{{ end }}{{ end -}}
-  {{- $slug := $term.File.ContentBaseName -}}
   {{- $ctx = dict
       "isSeries" (gt (len $pages) 1)
-      "term" $term
-      "label" ($term.Params.label | default (lower $term.Title))
-      "slug" $slug
-      "href" (printf "%s#%s" $.CurrentSection.RelPermalink $slug)
+      "term" $sec
+      "label" ($sec.Params.label | default (lower $sec.Title))
+      "slug" (partial "series/slug.html" $sec)
+      "href" $sec.RelPermalink
       "pages" $pages
       "pos" $pos
       "total" (len $pages) -}}

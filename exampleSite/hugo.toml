@@ -155,12 +155,12 @@ timeZone = "Europe/Moscow"
       pageRef = "/about"
       weight = 50
 
-# Two taxonomies drive the whole content model: `tags` for cross-cutting topics,
-# `series` for ordered multi-part tracks. Names match the site config — the theme
-# reads exactly these keys.
+# One taxonomy: `tags`, for cross-cutting topics. The name matches the site
+# config — the theme reads exactly this key. Series are NOT a taxonomy: a series
+# is a folder, a sub-section of its rubric (content/<rubric>/<series>/), and
+# membership is where the bundle sits.
 [taxonomies]
   tag = "tags"
-  series = "series"
 
 [params]
   # NB: in TOML every scalar key must precede any [params.subtable] — otherwise it
@@ -170,9 +170,10 @@ timeZone = "Europe/Moscow"
   # (heroLine, heroSat, footerTag) live in [languages.xx.params] above.
 
   # "Guide of the week" — entry into the handbook series (a content path, not a
-  # URL: it resolves per language). Being a series member, the featured card also
-  # shows "part 1 of 3" and an "all parts" link, exercising that branch.
-  featured = "howto/get-started"
+  # URL: it resolves per language). Being a series part, the featured card also
+  # shows "part 1 of 3" and an "all parts" link to the series landing,
+  # exercising that branch.
+  featured = "howto/handbook/get-started"
 
   # Posts shown before the "N more guides" button. 3 of 9 feed guides visible, so
   # the reveal control is live in the demo (about/roadmap/playground carry no date
@@ -228,10 +229,10 @@ timeZone = "Europe/Moscow"
     twitter = ""                         # @handle for twitter:site (empty = omit)
     github = "https://github.com/justskiv/taiga"  # repo URL → source icon in the header (unset = no icon)
 
-# Taxonomy TERM pages never render (tags link to /tags/#tag; series carry metadata
-# only), but their data stays available to templates (.GetTerms / term.Pages).
-# kind=term covers both tags and series; the /tags/ and /series/ list nodes are
-# kind=taxonomy/section and unaffected.
+# Tag TERM pages never render (tags link to /tags/#tag), but their data stays
+# available to templates (.GetTerms / term.Pages). The /tags/ list node is
+# kind=taxonomy and unaffected. Series need no such block: a series is a section
+# with a landing page of its own, and it is meant to render.
 [[cascade]]
   [cascade.build]
     render = "never"

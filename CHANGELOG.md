@@ -7,7 +7,43 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ## [Unreleased]
 
+### Changed — BREAKING
+
+- **Series are rubric sub-sections now, not a taxonomy.** A series is a folder:
+  `content/<rubric>/<series>/<part>/`, its metadata in the folder's `_index.md`,
+  part order in each part's plain `weight` (was `series_weight`). The
+  `series: [...]` front-matter field, the `series` taxonomy and the
+  `content/series/` metadata tree are gone; migrate by `mv`-ing each part into
+  its series folder and its term `_index.md` to `content/<rubric>/<series>/_index.md`.
+  Why: one tree instead of two, membership you can see in the file manager, and
+  a series you can reorganize with `mv` alone.
+- **Every series now renders a landing page** at `/<rubric>/<series>/` — title,
+  tagline, description, the `_index.md` body as an epigraph, the parts list and
+  a start CTA (`_partials/series/landing.html`; body class `series`). The rubric
+  page keeps the anchored block, its heading now linking to the landing. A
+  series with an `_index.md` but no parts yet shows as an "in the works" teaser
+  on the rubric and an announcement on its landing.
+- **`_partials/series/pages.html` is retired** (the section's own `RegularPages`
+  ordering replaced it) and `series/slug.html` now slugs a section, not a term.
+  A site overriding either must revisit the override. Sites relying on the
+  default page sort of `site.RegularPages` should know guide feeds are now
+  explicitly date-sorted in `guides.html` — series parts carry `weight`, which
+  would otherwise hijack the default order.
+- New i18n keys: `series_start`, `series_soon`. New archetype: `series.md`
+  (scaffolds a series `_index.md`).
+
 ### Added
+
+- **Standalone containers.** A rubric with many loose guides can tuck them into
+  a sub-folder so they don't drown the series folders: a sub-section whose
+  `_index.md` sets `params.standalone: true` (+ `build.render: never`,
+  `list: local`) is a tidiness container, not a series — its children render,
+  list and search exactly like guides sitting directly in the rubric, and both
+  homes stay valid at once, so adoption is per-guide, not flag-day.
+- **`params.extraGuideSections`** — sections listed here (e.g. `["posts"]`)
+  join the guide feed, search, RSS and get the full article layout, but are
+  NOT rubrics: no home card, no 404 entry. For guides that belong to no
+  rubric. The kicker reads the section `_index.md`'s `label`, as on rubrics.
 
 - **Multilingual, for real.** The theme claimed to be language-agnostic while
   shipping no way to switch languages. Now:

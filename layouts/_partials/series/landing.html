@@ -1,0 +1,34 @@
+{{- /* Series landing — the page of one series (a rubric's sub-section). Header
+       kicker names the rubric; the h1 is the series title with its tagline as
+       the .sub line; the description is the lead; the page's own markdown (an
+       epigraph, a reading order note) renders after it. The parts list reuses
+       the rubric block's markup (.series/.slist — 15-rubric.css styles both),
+       topped with the same meta line and closed by a "start here" CTA to part 1.
+       A series with no listed parts yet renders as an announcement teaser
+       instead of an empty list. Context = the series section page. */ -}}
+{{- $rubric := .Parent -}}
+{{- $pages := .RegularPages -}}
+{{- $mins := 0 -}}{{ range $pages }}{{ $mins = add $mins (int (.Params.mins | default .ReadingTime)) }}{{ end -}}
+<main class="wrap">
+  <div class="kicker"><span class="dot"></span><a href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a> · {{ i18n "series_word" }}</div>
+  <h1>{{ .Title }}{{ with .Params.tagline }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
+  {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+  {{ .Content }}
+  {{- if $pages }}
+  <section class="series ser-landing">
+    <div class="ser-head">
+      <span class="ser-k">{{ i18n "series_word" }}</span>
+      <span class="ser-m">{{ i18n "parts_count" (len $pages) }} · ~{{ partial "rubric/duration.html" $mins }}</span>
+    </div>
+    <ol class="slist">
+      {{- range $pages }}
+      <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <span class="mins">{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span></a></li>
+      {{- end }}
+    </ol>
+    <a class="ser-start" href="{{ (index $pages 0).RelPermalink }}">{{ i18n "series_start" }} →</a>
+  </section>
+  {{- else }}
+  <p class="ser-soon">{{ i18n "series_soon" }}</p>
+  {{- end }}
+  {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
+</main>

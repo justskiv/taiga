@@ -1,8 +1,11 @@
-{{- /* All listable guides: regular pages in the rubric sections, newest first
-       (site.RegularPages is date-desc by default). Placeholders (`placeholder:
-       true` — metadata-only stubs for not-yet-converted articles, SPEC §4) are
-       INCLUDED here, so the home feed, tag cloud and rubric series blocks match
-       the mock (17 posts, all tags, 7/4/2 parts). They are held back only from
-       the finished-content surfaces — RSS and the search index — via
-       guides-published.html and the `placeholder` guard in page.html. */ -}}
-{{- return (where site.RegularPages "Section" "in" site.Params.rubricSections) -}}
+{{- /* All listable guides: regular pages in the rubric sections, newest first.
+       The date sort is EXPLICIT: series parts carry `weight` (their order inside
+       the series), and Hugo's default page sort puts weighted pages first — the
+       feed would list by part number instead of by date without .ByDate.Reverse.
+       Placeholders (`placeholder: true` — metadata-only stubs for
+       not-yet-converted articles, SPEC §4) are INCLUDED here, so the home feed,
+       tag cloud and rubric series blocks match the mock (17 posts, all tags,
+       7/4/2 parts). They are held back only from the finished-content surfaces —
+       RSS and the search index — via guides-published.html and the `placeholder`
+       guard in page.html. */ -}}
+{{- return (where site.RegularPages "Section" "in" (partialCached "guide-sections.html" .)).ByDate.Reverse -}}

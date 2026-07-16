@@ -2,7 +2,7 @@
        series guide, "<rubric> · deep dive" for a standalone one. Shared by the
        visible kicker and the Pagefind result breadcrumb so they never drift.
        Context = a guide page. */ -}}
-{{- $rubric := .CurrentSection.Params.label | default (lower .CurrentSection.Title) -}}
+{{- $rubric := .FirstSection.Params.label | default (lower .FirstSection.Title) -}}
 {{- $s := partial "article/series-ctx.html" . -}}
 {{- $out := $rubric -}}
 {{- if $s.isSeries -}}

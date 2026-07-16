@@ -4,6 +4,9 @@
 .series .ser-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--border)}
 .series .ser-t{margin:0; padding:0; border:0; font-size:24px; font-weight:750; letter-spacing:-.015em; color:var(--text-strong)}
 .series .ser-t::before{content:"§"; font-family:var(--font-mono); font-weight:600; font-size:15px; color:var(--accent); margin-right:10px; vertical-align:2px}
+/* the block title links to the series landing; keep it looking like a heading */
+.series .ser-t a{color:inherit; border-bottom:0; transition:color var(--dur) var(--ease)}
+.series .ser-t a:hover{color:var(--accent)}
 .series .ser-k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
 .series .ser-m{margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--text-muted)}
 .series .ser-d{margin:12px 0 4px; font-size:14.5px; color:var(--text-secondary); line-height:1.65; max-width:66ch}
@@ -17,6 +20,16 @@
 .slist a .mins{margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--text-ghost); flex:0 0 auto; padding-left:12px}
 .slist a .vmark{font-size:10px; color:var(--accent-green); opacity:0; flex:0 0 auto}
 .slist a.is-visited .vmark{opacity:1}
+/* announced series with no parts yet: same header, muted, no list */
+.series.ser-teaser .ser-t{color:var(--text-muted)}
+.series.ser-teaser .ser-t::before{color:var(--text-ghost)}
+.series.ser-teaser .ser-m{color:var(--text-ghost)}
+/* series landing: the parts block and its "start here" CTA */
+.ser-landing{margin-top:36px}
+.ser-start{display:inline-block; margin-top:18px; font-family:var(--font-mono); font-size:13px; color:var(--accent); border-bottom:0}
+.ser-start:hover{text-decoration:underline; text-underline-offset:4px}
+/* series landing of an announced, still-empty series */
+.ser-soon{margin-top:28px; font-size:14.5px; color:var(--text-muted); font-style:italic}
 /* standalone article list on rubric pages */
 .alist{list-style:none; margin:12px 0 0; padding:0}
 .alist li{margin:0}

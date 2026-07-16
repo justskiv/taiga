@@ -15,9 +15,11 @@
     {{- $id := $sec.Section -}}
     {{- $pages := where site.RegularPages "Section" $id -}}
     {{- $nGuides := len $pages -}}
-    {{- $seriesSlugs := slice -}}
-    {{- range $pages }}{{ with .GetTerms "series" }}{{ $seriesSlugs = $seriesSlugs | append (index . 0).Title }}{{ end }}{{ end -}}
-    {{- $nSeries := len (uniq $seriesSlugs) -}}
+    {{- /* Series are the rubric's sub-sections minus standalone containers;
+         announced-but-empty series count too — they are already visible as
+         teasers on the rubric page. */ -}}
+    {{- $nSeries := 0 -}}
+    {{- range $sec.Sections }}{{ if not .Params.standalone }}{{ $nSeries = add $nSeries 1 }}{{ end }}{{ end -}}
     {{- $logo := printf "home/logos/%s.html" $id -}}
     {{- $logoPartial := cond (templates.Exists (printf "_partials/%s" $logo)) $logo "home/logos/default.html" -}}
   <a class="rub2" href="{{ $sec.RelPermalink }}">

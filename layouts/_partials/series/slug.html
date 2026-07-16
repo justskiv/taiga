@@ -1,0 +1,11 @@
+{{- /* Stable slug for a series section — its folder name. Used as the landing's
+       anchor id on the rubric page and in the OG breadcrumb. A series folder
+       normally carries an _index.md (so .File is set); a bare folder without one
+       still resolves via its logical path. Context = the series section page. */ -}}
+{{- $slug := "" -}}
+{{- with .File -}}
+  {{- $slug = .ContentBaseName -}}
+{{- else -}}
+  {{- $slug = path.Base .Path -}}
+{{- end -}}
+{{- return $slug -}}

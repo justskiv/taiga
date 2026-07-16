@@ -1,0 +1,7 @@
+{{- /* Sections whose leaf pages are full guides: the rubrics
+       (params.rubricSections) plus any extra guide sections
+       (params.extraGuideSections). Pages of an extra section join the feed,
+       search, RSS and get the article layout — but the section is NOT a
+       rubric: no home card, no 404 entry. Call via partialCached — the union
+       is site-constant. */ -}}
+{{- return (union (site.Params.rubricSections | default slice) (site.Params.extraGuideSections | default slice)) -}}

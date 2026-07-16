@@ -4,8 +4,7 @@ slug: guide-is-a-bundle
 date: 2026-05-02
 description: "The theme's content model: an article is a leaf bundle, where its widgets, styles and cover sit next to the text."
 lead: "This article has a live widget, a script of its own and a slot for its own cover — and all of it lies in one folder next to the text. Let's take apart the “article = bundle” content model and see why it spares you from editing templates."
-series: ["anatomy"]
-series_weight: 10
+weight: 10
 tags: [bundle, widgets, shortcodes]
 mins: 5
 version: "v0.0.1"

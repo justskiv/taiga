@@ -4,8 +4,7 @@ slug: palette-is-a-file
 date: 2026-05-16
 description: "Palettes as data: a toml file in data/themes/, out of which the build makes CSS blocks and the picker's swatches."
 lead: "The picker in this page's header knows several palettes — and not one of them is hardcoded, neither in CSS nor in JS. Every palette is a toml file, and the build generates all the rest out of it. Let's take apart how that works, and repaint the page from inside the article."
-series: ["anatomy"]
-series_weight: 30
+weight: 30
 tags: [palettes, data]
 mins: 5
 version: "v0.0.1"
@@ -61,7 +60,7 @@ Now the main thing — extensibility. Your site needs a house palette? Put `data
 
 ## What's next {#what-next}
 
-The "Anatomy of the theme" series ends here: a guide is a folder, a series is a taxonomy, a palette is a file. Everything shown — and a dozen components we never got to — is gathered on one proving-ground page:
+The "Anatomy of the theme" series ends here: a guide is a folder, a series is a folder of guides, a palette is a file. Everything shown — and a dozen components we never got to — is gathered on one proving-ground page:
 
 {{< bigcard href="/reference/kitchen-sink/" k="Proving ground →" t="Kitchen-sink" s="Every component of the theme on one page — to look at and to copy" >}}
 

@@ -12,4 +12,4 @@ So the playground has something to show — a toy built on the theme's building 
 <div class="w-cap">Reaction time test. Right now this is a static fallback: turn on JS, and we'll check your milliseconds.</div>
 {{< /widget >}}
 
-Any section of your own gets added the same way — a glossary, a catalog, a trainer: a page, widgets if you need them, a menu item. It's covered step by step in "[Make it yours](/howto/make-it-yours/)".
+Any section of your own gets added the same way — a glossary, a catalog, a trainer: a page, widgets if you need them, a menu item. It's covered step by step in "[Make it yours](/howto/handbook/make-it-yours/)".

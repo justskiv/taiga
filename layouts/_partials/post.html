@@ -3,7 +3,7 @@
        tags filter (modules/tags-filter.js) can show/hide it client-side; it is
        inert on the home feed. The series line reuses the article series context
        (kicker helper), so "part N of M" stays consistent with the article. */ -}}
-{{- $rubric := .CurrentSection -}}
+{{- $rubric := .FirstSection -}}
 {{- $s := partial "article/series-ctx.html" . -}}
 {{- $tags := .Params.tags | default slice -}}
 <article class="post" data-tags="{{ delimit $tags " " }}">

@@ -8,7 +8,7 @@ tags: [hotkeys, panels]
 mins: 3
 version: "v0.0.1"
 related:
-  - "howto/get-started"
+  - "howto/handbook/get-started"
 ---
 
 ## Keys {#keys}

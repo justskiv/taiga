@@ -14,10 +14,12 @@
 {{- partial "head.html" . -}}
 </head>
 {{- /* body class drives rail composition and the popover's "view" section:
-       `article` = a guide (leaf page in a rubric), `rubric` = a rubric index. */ -}}
+       `article` = a guide (leaf page in a rubric), `rubric` = a rubric index,
+       `series` = a series landing (a rubric's sub-section) — it keeps the
+       default look; the data-rubvar list variants stay scoped to .rubric. */ -}}
 {{- $body := "" -}}
-{{- if eq .Kind "section" -}}{{ $body = "rubric" }}
-{{- else if and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}{{ $body = "article" }}
+{{- if eq .Kind "section" -}}{{ $body = cond .Parent.IsHome "rubric" "series" }}
+{{- else if and (eq .Kind "page") (in (partialCached "guide-sections.html" .) .Section) -}}{{ $body = "article" }}
 {{- end -}}
 <body{{ with $body }} class="{{ . }}"{{ end }}>
 {{- /* Both chrome partials are per-language: menus, i18n strings and the footer's

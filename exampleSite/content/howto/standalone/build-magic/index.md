@@ -8,9 +8,9 @@ tags: [og, search, build]
 mins: 6
 version: "v0.0.1"
 related:
-  - "inside/guide-is-a-bundle"
-  - "inside/series-knows-itself"
-  - "inside/palette-is-a-file"
+  - "inside/anatomy/guide-is-a-bundle"
+  - "inside/anatomy/series-knows-itself"
+  - "inside/anatomy/palette-is-a-file"
 ---
 
 ## A cover without a designer {#og-covers}

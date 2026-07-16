@@ -1,6 +1,6 @@
 {{- /* Left rail. Series article → all parts in order, li.cur on the current one,
-       rail-k/rail-all pointing at the series anchor on the rubric page. Standalone
-       article → «related»: the rubric plus 3–5 related guides from front-matter
+       rail-k/rail-all pointing at the series landing. Standalone article →
+       «related»: the rubric plus 3–5 related guides from front-matter
        `related:` (content paths). The collapsed minimap is built client-side from
        this markup (rails.js), so the DOM here is just the seed. */ -}}
 {{- $s := partial "article/series-ctx.html" . -}}
@@ -20,7 +20,7 @@
     <a class="rail-all" href="{{ $s.href }}">{{ i18n "all_series" }}</a>
 {{- else }}
     <div class="rail-h">
-      <a class="rail-k" href="{{ .CurrentSection.RelPermalink }}">{{ i18n "rail_related" }}</a>
+      <a class="rail-k" href="{{ .FirstSection.RelPermalink }}">{{ i18n "rail_related" }}</a>
       <button class="rail-x" data-rail="l" type="button" aria-label="{{ i18n "rail_hide_l" }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 7l-5 5 5 5"/></svg><span class="rail-tip" aria-hidden="true">{{ i18n "rail_hide_l" }} <kbd class="kb">[</kbd></span></button>
     </div>
     <ol class="snav">

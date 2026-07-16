@@ -3,8 +3,8 @@
        placeholders, so the cloud matches the mock's 29 tags · 17 guides); the
        client only filters by location.hash (modules/tags-filter.js). Term pages
        (/tags/<tag>/) never render — chips point at /tags/#<tag>, as in the mock.
-       Series terms share this template's kind but the cascade suppresses them,
-       so this only fires for tags. */ -}}
+       Series are rubric sub-sections, not a taxonomy, so this template only
+       ever fires for /tags/. */ -}}
 {{ define "main" }}
 {{- $guides := partial "guides.html" . -}}
 {{- /* tag → count, over every listable guide (placeholders included) */ -}}

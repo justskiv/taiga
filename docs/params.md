@@ -18,7 +18,7 @@ fully commented — copy it and edit.
 | `brand.tld` | string | `""` | Optional wordmark suffix, e.g. `".dev"`. Empty = just the name. |
 | `heroLine` | string | — | Home hero line (the lead half). Site-wide unless a language overrides it — see note 2. |
 | `heroSat` | string | — | Trailing `· …` clause of the hero line, styled apart. Site-wide unless a language overrides it — see note 2. |
-| `featured` | string (content path) | — | "Guide of the week" card on the home page, e.g. `"howto/get-started"`. Omit to hide the card. Shared across languages — the path resolves to each language's own translation of that page. |
+| `featured` | string (content path) | — | "Guide of the week" card on the home page, e.g. `"howto/handbook/get-started"`. Omit to hide the card. Shared across languages — the path resolves to each language's own translation of that page. |
 | `feedInitial` | int | `8` | Posts shown on the home feed before the "N more guides" reveal button. |
 | `defaultTheme` | string (palette id) | `"taiga"` | Palette applied before the reader picks one — an id of a `data/themes/<id>.toml` file. |
 | `accent` | string (`#rrggbb`) | — | Overrides the accent colour across **all** palettes at once (built-in and site) — a brand axis orthogonal to the palettes. Unset ⇒ each palette keeps its native accent. Must be a 6-digit hex, e.g. `"#7aa2f7"`; any other value fails the build. See [customizing.md](customizing.md#recolour). |
@@ -33,6 +33,7 @@ fully commented — copy it and edit.
 | `social.twitter` | string | `""` | `@handle` for `twitter:site`. Empty ⇒ the tag is omitted. |
 | `social.github` | string (URL) | — | Repository URL. Sets a source-code icon in the header. Unset ⇒ no icon. |
 | `rubricSections` | list of strings | — | Which content sections are **rubrics** — their leaf pages get the full guide layout (two rails, kicker, meta, TOC, series bridge). Every other page gets the plain column. Also drives the home rubric cards and the 404 rubric list. |
+| `extraGuideSections` | list of strings | `[]` | Sections whose pages are full guides (feed, search, RSS, article layout) **without** being rubrics — no home card, no 404 entry. For guides outside any rubric, e.g. `["posts"]`; the kicker takes the section `_index.md`'s `label`. See [authoring.md](authoring.md#standalone). |
 
 **Notes**
 
@@ -87,6 +88,22 @@ disableKinds = ["page", "section", "taxonomy", "term", "rss", "sitemap"]
 `robots.txt` switches to `Disallow: /` on its own — there is nothing to crawl,
 and an empty page indexed today is a bad first impression tomorrow.
 
+## Flat guide URLs
+
+Nested guide URLs (`/howto/handbook/get-started/`) are the default. A site can
+flatten its guides to the domain root with a standard Hugo permalink rule in its
+own config, one line per rubric:
+
+```toml
+[permalinks.page]
+  howto = "/:slugorfilename/"
+```
+
+This is a site decision, not a theme param — the theme resolves every internal
+link through the page's real permalink, so both shapes work. Rubric pages and
+series landings are section pages, untouched by `permalinks.page`: they keep
+their paths (`/howto/`, `/howto/handbook/`).
+
 ## Not parameters
 
 - **The language switcher** (`EN · RU` in the header) takes no param. It
@@ -108,6 +125,6 @@ and an empty page indexed today is a bad first impression tomorrow.
 
 ## Per-page front matter
 
-Article, rubric and series front matter (`title`, `slug`, `series`, `mins`,
+Article, rubric and series front matter (`title`, `slug`, `weight`, `mins`,
 `rail_title`, `placeholder`, `related`, …) is documented where you'll use it —
 see [authoring.md](authoring.md).

@@ -5,9 +5,8 @@ date: {{ .Date }}
 draft: true
 description: "One sentence — for the feed, for search and for meta."
 lead: "The article's lead paragraph (may run longer than the description)."
-series: []                # e.g. ["memory"] — put the part order in series_weight
-series_weight: 1
-related: []               # for non-series guides: 3–5 content paths for "related"
+weight: 1                 # part order inside a series folder; omit for standalone
+related: []               # for standalone guides: 3–5 content paths for "related"
 tags: []
 mins: 10                  # "~N min" chip; hand-tuned, not .ReadingTime
 version: "go1.26"         # free-form "tested on" chip, e.g. "go1.26", "PostgreSQL 17"

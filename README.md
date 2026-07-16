@@ -66,9 +66,10 @@ whole design, and every feature below is built to live inside it.
   *folders* (`assets/og/<style>/`); a site adds or overrides one without forking.
 - **Full-text search without a server.** Pagefind indexes the built site; ⌘K finds
   terms *inside* articles, with stemming and a snippet, in the theme's own modal.
-- **Series as a first-class mechanic.** A taxonomy plus `series_weight` gives you
-  the series panel, "part N of M" kickers, and a bottom bridge scaled by reading
-  time — all server-rendered from one source of truth.
+- **Series as a first-class mechanic.** A series is a folder inside its rubric —
+  that alone gives you a series landing page, the series panel, "part N of M"
+  kickers, and a bottom bridge scaled by reading time — all server-rendered from
+  one source of truth.
 - **Server-side syntax highlighting.** Go is highlighted at build time (Chroma,
   recoloured to the palette) with `hl_lines`. No client-side highlighter, no flash.
 - **Palettes are data.** Each of the seven palettes is one `data/themes/<id>.toml`

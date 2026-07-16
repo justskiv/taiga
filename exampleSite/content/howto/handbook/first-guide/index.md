@@ -4,8 +4,7 @@ slug: first-guide
 date: 2026-06-13
 description: "A guide scaffold in one command, the front matter canon, shortcodes, captions for code and a live widget in two touches."
 lead: "A guide in this theme is a folder that holds all of its belongings. We'll walk from the command that creates the scaffold to a live widget in the text — the widget in this article is real, and it was made in exactly the way described here."
-series: ["handbook"]
-series_weight: 20
+weight: 20
 tags: [authoring, front-matter, shortcodes]
 mins: 5
 version: "v0.0.1"
@@ -37,7 +36,7 @@ version: "v0.0.1"
 
 The two highlighted fields have non-obvious rules. `mins` is a handwritten, honest estimate of reading time: it lands in the article's chips and in the arithmetic of the series, which is why it is not trusted to an automatic count (omit the field and the theme will count for you). `version` is an arbitrary string for the version chip: the version of a language, of a DBMS, of your product — the theme renders it as-is. The archetype fills in `date` and `slug` too; the date lives only in the feed and the RSS — it appears nowhere in the text of the article.
 
-Two fields switch on a series — `series: ["track"]` and `series_weight` — and `rail_title` gives the panel its short name. How "part N of M" comes out of that is taken apart in "[A series knows itself](/inside/series-knows-itself/)".
+A guide becomes a series part by where it lives: its folder sits inside the series folder (`guides/track/my-part/`), and `weight` sets its order among the parts; `rail_title` gives the panel its short name. How "part N of M" comes out of that is taken apart in "[A series knows itself](/inside/anatomy/series-knows-itself/)".
 
 Mark up headings with explicit anchors: `## Section {#section-id}`, in Latin letters — then links and the table of contents do not depend on how the heading text transliterates. That matters the day the page gets a translation.
 

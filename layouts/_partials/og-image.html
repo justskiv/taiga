@@ -26,7 +26,7 @@
   {{- if not $out -}}
     {{- $style := .Params.og_style | default site.Params.ogImages.style | default "dots" -}}
     {{- $dir := printf "og/%s" $style -}}
-    {{- $isGuide := and (eq .Kind "page") (in site.Params.rubricSections .Section) -}}
+    {{- $isGuide := and (eq .Kind "page") (in (partialCached "guide-sections.html" .) .Section) -}}
     {{- if .IsHome -}}
       {{- /* The home page may use a fully-baked poster if the style ships one:
              it is the site's own face, and it has no title worth drawing — the
@@ -52,8 +52,14 @@
                duplicates the wordmark drawn as {domain}. */ -}}
         {{- $titleText = site.Params.heroLine -}}
       {{- else if eq .Kind "section" -}}
-        {{- /* rubric index: the "rubric" word kicks off the section title */ -}}
-        {{- $kicker = i18n "rubric_word" -}}
+        {{- /* rubric index → the "rubric" word; series landing (a rubric's
+               sub-section) → "series · <rubric>", so a shared series card is
+               never mislabelled as a rubric. */ -}}
+        {{- if .Parent.IsHome -}}
+          {{- $kicker = i18n "rubric_word" -}}
+        {{- else -}}
+          {{- $kicker = printf "%s · %s" (i18n "series_word") (.Parent.Params.label | default (lower .Parent.Title)) -}}
+        {{- end -}}
       {{- else -}}
         {{- /* service / taxonomy page (about, roadmap, lab, /tags/): its own
                kicker + editorial headline, so it's never mislabelled "rubric"

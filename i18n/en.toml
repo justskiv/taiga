@@ -94,6 +94,10 @@ other = "deep dive"
 other = "series"
 [all_series]
 other = "whole series →"
+[series_start]
+other = "start the series"
+[series_soon]
+other = "This series is in the works — parts will land in the feed."
 
 [sbr_behind]
 other = "<b>{{ .done }} of {{ .total }}</b> behind you"

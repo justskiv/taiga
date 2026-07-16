@@ -9,7 +9,7 @@ lead: "A testbed for every component in the theme: one instance of each shortcod
 ## Headings and anchors {#headings}
 
 Level two — with the `#` character, level three — with `##`. Inline: *italic*, **bold**,
-`code`, an internal link to the [reference guide](/inside/guide-is-a-bundle/).
+`code`, an internal link to the [reference guide](/inside/anatomy/guide-is-a-bundle/).
 
 ### Third-level subheading {#sub}
 
@@ -100,4 +100,4 @@ Form 3 — no id, arbitrary HTML directly in the figure:
 
 ## Card {#card}
 
-{{< bigcard href="/inside/guide-is-a-bundle/" k="To the reference →" t="A guide is a folder" s="A big CTA card: kicker, title, caption." >}}
+{{< bigcard href="/inside/anatomy/guide-is-a-bundle/" k="To the reference →" t="A guide is a folder" s="A big CTA card: kicker, title, caption." >}}

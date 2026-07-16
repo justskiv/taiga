@@ -10,7 +10,8 @@ translations and voice.
 ## Start from the archetype {#archetype}
 
 ```sh
-hugo new content howto/my-guide --kind guides
+hugo new content howto/my-guide --kind guides            # standalone guide
+hugo new content howto/handbook/my-guide --kind guides   # part of the "handbook" series
 ```
 
 You get a bundle skeleton — `index.md` with the core fields filled in plus a stub
@@ -20,7 +21,8 @@ A folder with no `widgets.js` is the first sign of that mistake.
 
 The first path segment must be a section listed in `params.rubricSections` —
 that is what makes the page a guide (two rails, kicker, meta chips, TOC, series
-bridge) rather than a plain column.
+bridge) rather than a plain column. A guide placed one folder deeper is a
+**series part** — see [Series](#series-and-weight).
 
 ## Front matter {#front-matter}
 
@@ -30,8 +32,7 @@ slug: memory-1-layout        # freezes the URL (…/memory-1-layout/)
 date: 2026-03-07             # feed order, RSS, sitemap — never shown in the article body
 description: "One sentence — for the feed, search and meta tags."
 lead: "Lead paragraph (may be longer than description)."
-series: ["memory"]           # membership; omit for a standalone guide
-series_weight: 1             # order within the series
+weight: 1                    # part order inside its series; omit for a standalone guide
 tags: [memory, layout, unsafe]
 mins: 12                     # "~12 min" chip — hand-tuned, not .ReadingTime
 version: "go1.26"            # free-form "tested on" chip; omit to fall back to versionDefault
@@ -46,7 +47,7 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `date` | yes | Orders the feed and RSS, and prints on the feed card. **Never appears in the article body.** |
 | `description` | yes | Feed card, search result, `og:description`, RSS `<description>`. |
 | `lead` | recommended | The opening paragraph. Also the fallback for `og:description`. |
-| `series`, `series_weight` | for series | See [Series and weight](#series-and-weight). |
+| `weight` | for series parts | Part order inside the series folder. See [Series](#series-and-weight). |
 | `tags` | recommended | Chips linking to the tags page, anchored at `#<tag>`. Keep **identical across translations**. |
 | `mins` | recommended | The reading-time chip, the rubric duration sum and the series-bridge scale; falls back to `.ReadingTime`. |
 | `version` | optional | Free-form "tested on" chip, rendered verbatim (`go1.26`, `PostgreSQL 17`). Falls back to `params.versionDefault`; unset on both ⇒ no chip. |
@@ -55,7 +56,7 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `interactive_label` | optional | Label for that chip; defaults to the i18n `meta_interactive`. |
 | `rail_title` | optional | Short label for the left rail, the minimap and the series bridge. Defaults to the title up to the first `:`. |
 | `linkTitle` | optional | Short title for the rubric page's series list. Doesn't touch the `<h1>` or `<title>`. |
-| `related` | standalone only | 3–5 **content paths** (`inside/palette-is-a-file`, not a URL) for the "related" rail. Ignored on a series guide, which shows its parts instead. |
+| `related` | standalone only | 3–5 **content paths** (`inside/anatomy/palette-is-a-file`, not a URL) for the "related" rail. Ignored on a series guide, which shows its parts instead. |
 | `placeholder` | optional | See [Placeholders](#placeholders). |
 | `og_image`, `og_style` | optional | See [Covers (OG images)](#covers-og-images). |
 | `sub` | optional | Overrides the automatic `title` split. |
@@ -68,25 +69,76 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 `/tags/`); on a guide the kicker is derived from the rubric and the series, and
 setting them does nothing.
 
-### Series and weight {#series-and-weight}
+### Series {#series-and-weight}
 
-Membership is two lines — `series: ["memory"]` + `series_weight: N`. Order, the
-"part N of M" kicker, the left rail, and the bottom bridge (segments scaled by
-`mins`, "~N min left") are all derived from that, server-side. Adding a part is
-dropping in a file with those two lines. A series with a single part renders as a
-standalone guide — the machinery only fires from two parts up.
+A series is a **folder** — a sub-section of its rubric. Membership is where the
+bundle sits, and nothing else:
 
-Series metadata lives in the term page `content/series/<id>/_index.md`, and the
-folder name `<id>` is the anchor the kicker and the bridge link to:
+```
+content/howto/
+  handbook/                 ← the series
+    _index.md               ← series metadata (below)
+    get-started/index.md    ← part, weight: 1
+    first-guide/index.md    ← part, weight: 2
+  build-magic/index.md      ← standalone guide (a direct child of the rubric)
+  standalone/               ← optional container for standalone guides (see below)
+    _index.md               ← params.standalone: true
+    build-magic/index.md    ← standalone guide, identical to the one above
+```
+
+`weight` in a part's front matter is its order inside the series. The "part N
+of M" kicker, the left rail, and the bottom bridge (segments scaled by `mins`,
+"~N min left") are all derived from the folder, server-side. Adding a part is
+dropping a bundle into the series folder; moving a guide in or out of a series
+is a `mv`. A series with a single part renders as a standalone guide — the
+machinery only fires from two parts up.
+
+Each series renders a **landing page** (`/<rubric>/<series>/`): title, tagline,
+description, the `_index.md` body as an epigraph, the parts list and a "start
+the series" CTA. The rubric page shows the same series as an anchored block
+(`/<rubric>/#<series>`); a series announced with an `_index.md` but no parts
+yet appears there as an "in the works" teaser, and its landing renders the
+announcement. Scaffold the `_index.md` with the archetype:
+
+```sh
+hugo new content howto/handbook/_index.md --kind series
+```
 
 ```yaml
-title: "Memory"             # series name, used in kickers and the rubric block
-description: "One line for the series block on the rubric page."
+title: "Memory"             # series name, used in kickers, the rubric block and the landing
+description: "One line for the series block on the rubric page and the landing."
 weight: 10                  # order of series on the rubric page
 params:
   label: "memory"           # short lowercase name in kickers (else the lowercased title)
   tagline: "3 parts, from a byte to the GC"   # optional line beside "series ·" on the rubric page
 ```
+
+### Standalone guides and containers {#standalone}
+
+A standalone guide is a direct child of its rubric — no folder, no `weight`.
+When loose guides start to drown the series folders, tuck them into a
+**container**: a sub-section whose `_index.md` is nothing but a marker. Both
+homes are equally valid, so adoption is one `mv` at a time:
+
+```yaml
+title: "Standalone"         # never rendered anywhere
+params:
+  standalone: true          # "my children are standalone guides, I am not a series"
+build:
+  render: never             # a container has no page of its own
+  list: local               # visible to the rubric's templates, not globally
+```
+
+A container holds **leaf bundles only** — never nest a series inside one. On a
+multilingual site the marker `_index.md` must exist **per language**
+(`_index.md` + `_index.ru.md`), or the other language tree reads the folder as
+a series.
+
+Guides that belong to **no rubric** get a top-level section of their own,
+listed in `params.extraGuideSections` (see [params.md](params.md)): its pages
+join the feed, search and RSS with the full article layout, and the kicker
+takes the section `_index.md`'s `label` — but the section is not a rubric (no
+home card, no 404 entry).
 
 ### Placeholders {#placeholders}
 
@@ -168,8 +220,8 @@ so a link survives a slug change — and, on a multilingual site, resolves to th
 translation in the current language.
 
 ```md
-[the bundle guide](/inside/guide-is-a-bundle)            ← content path, resolved
-[a section of it](/inside/guide-is-a-bundle#two-touches) ← fragment preserved
+[the bundle guide](/inside/anatomy/guide-is-a-bundle)            ← content path, resolved
+[a section of it](/inside/anatomy/guide-is-a-bundle#two-touches) ← fragment preserved
 ```
 
 A dead internal link **fails the build** (`params.linkcheck = "error"`, the
@@ -259,7 +311,7 @@ Taiga.widget("w-series-math", function (root) {
 Keep the strings in one object per language at the top of the widget and never
 inline a literal further down — that is the whole discipline. `indexOf("ru") === 0`
 rather than `=== "ru"` so a `languageCode` like `ru-RU` still matches. See
-`exampleSite/content/inside/series-knows-itself/widgets.js` for the full pattern.
+`exampleSite/content/inside/anatomy/series-knows-itself/widgets.js` for the full pattern.
 
 The same holds for every other bundle resource: an `og.png` override and a
 `widgets.css` are one file for both languages too.
@@ -296,7 +348,7 @@ the full guide layout.
 Content pairs **by file suffix**, inside the same bundle:
 
 ```
-content/inside/series-knows-itself/
+content/inside/anatomy/series-knows-itself/
   index.md        ← default language
   index.ru.md     ← the translation
   widgets.js      ← shared by both (see above)
@@ -306,19 +358,18 @@ Rubric and series index pages pair the same way: `_index.md` ↔ `_index.ru.md`.
 
 Two fields must stay **identical across the two files**:
 
-- **`slug`** — so the page and its translation share a URL path (`/inside/series-knows-itself/`
-  and `/ru/inside/series-knows-itself/`). The language switcher then hops between
+- **`slug`** — so the page and its translation share a URL path (`/inside/anatomy/series-knows-itself/`
+  and `/ru/inside/anatomy/series-knows-itself/`). The language switcher then hops between
   them in place instead of dumping the reader on the home page.
 - **`tags`** — so the tag chips, the tag cloud and the `/tags/#<tag>` feed line up
   on both sides. Translate the tag and you get two half-empty clouds.
 
 Everything else — `title`, `description`, `lead`, `rail_title`, prose — is
-translated. `series`, `series_weight`, `mins` and `version` are structural: copy
-them verbatim.
+translated. `weight`, `mins` and `version` are structural: copy them verbatim.
 
 Content paths inside front matter (`related:`) and in links resolve **per
 language**, so they are written once and identically in both files:
-`related: ["inside/palette-is-a-file"]` picks the English page from `index.md`
+`related: ["inside/anatomy/palette-is-a-file"]` picks the English page from `index.md`
 and the Russian one from `index.ru.md`.
 
 Nothing else is needed on the theme side: the language switcher appears by

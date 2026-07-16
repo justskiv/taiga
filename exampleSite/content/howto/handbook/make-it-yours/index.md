@@ -4,8 +4,7 @@ slug: make-it-yours
 date: 2026-06-20
 description: "Customization without a fork: a palette in one toml file, custom.css, hook partials, a section of your own and a second language."
 lead: "Everything in this part is a file in your site: the palette, the styles, the partials, the interface strings, the second language. Not one edit lands in the theme, and updating it stays an ordinary git pull."
-series: ["handbook"]
-series_weight: 30
+weight: 30
 tags: [customize, palettes, i18n]
 mins: 5
 version: "v0.0.1"
@@ -25,7 +24,7 @@ weight = 80       # position in the picker's list
 "text-primary" = "#d8dee6"
 ```
 
-Hugo merges the data of the theme and of the site (on a name clash the site wins), so the file finds its own way both into the CSS and into the palette picker in the header. Don't need one of the palettes the theme ships with — override its file with `disabled = true`, and it disappears everywhere. How CSS blocks and swatches come out of the toml is taken apart in "[A palette is one file](/inside/palette-is-a-file/)".
+Hugo merges the data of the theme and of the site (on a name clash the site wins), so the file finds its own way both into the CSS and into the palette picker in the header. Don't need one of the palettes the theme ships with — override its file with `disabled = true`, and it disappears everywhere. How CSS blocks and swatches come out of the toml is taken apart in "[A palette is one file](/inside/anatomy/palette-is-a-file/)".
 
 ## custom.css and hooks {#css-hooks}
 
@@ -45,7 +44,7 @@ The texts of the interface are not hardcoded in the templates. The server-side s
 
 ## A second language {#second-language}
 
-Adding a language is an additive step, not a migration. A `[languages.ru]` block is written into the config (plus `[languages.ru.params]` for the hero line and `[languages.ru.menus]` for the menu). The translations come as file suffixes: `index.ru.md` next to `index.md`, including the `_index` of the rubrics and the terms of the series; Hugo pairs the versions itself. A language switcher appears in the header when the site has more than one language, and Pagefind builds a separate index per language, by the page's `lang`. Template edits: zero. The step-by-step checklist is in the theme's `docs/i18n.md`.
+Adding a language is an additive step, not a migration. A `[languages.ru]` block is written into the config (plus `[languages.ru.params]` for the hero line and `[languages.ru.menus]` for the menu). The translations come as file suffixes: `index.ru.md` next to `index.md`, including the `_index` of the rubrics and the series; Hugo pairs the versions itself. A language switcher appears in the header when the site has more than one language, and Pagefind builds a separate index per language, by the page's `lang`. Template edits: zero. The step-by-step checklist is in the theme's `docs/i18n.md`.
 
 This page is the proof: you are reading the English version, and the Russian one lies next to it as `index.ru.md`.
 

@@ -111,6 +111,12 @@ other = "разбор"
 other = "серия"
 [all_series]
 other = "вся серия →"
+# series landing: the "start here" CTA and the announcement teaser of a
+# series that has no published parts yet
+[series_start]
+other = "начать серию"
+[series_soon]
+other = "Серия готовится — части появятся в ленте."
 
 # series bridge (.sbr) — text mirrors the mock's buildSeriesBridge 1:1
 [sbr_behind]

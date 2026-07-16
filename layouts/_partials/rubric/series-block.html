@@ -1,42 +1,37 @@
-{{- /* Series sections of a rubric page. One <section class="series"> per series
-       that has parts in this rubric, ordered by the series term's own weight. The
-       terms are reached through each page's .GetTerms "series" (render:never terms
-       aren't returned by site.GetPage, but .GetTerms resolves them), deduped by
-       slug. Part count and duration sum the whole series (stubs included) so they
-       match the article kicker's "part N of M" and the series bridge. Context =
-       the section page; part title uses .LinkTitle so a part can carry a short
-       title (linkTitle:) without touching the guide's <title>. */ -}}
-{{- $section := . -}}
-{{- $seen := dict -}}
-{{- $blocks := slice -}}
-{{- range $section.RegularPages -}}
-  {{- with .GetTerms "series" -}}
-    {{- $term := index . 0 -}}
-    {{- $slug := $term.File.ContentBaseName -}}
-    {{- if not (isset $seen $slug) -}}
-      {{- $seen = merge $seen (dict $slug true) -}}
-      {{- $pages := where $term.Pages "Section" $section.Section -}}
-      {{- $blocks = $blocks | append (dict "term" $term "pages" $pages "slug" $slug "w" $term.Weight) -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-{{- range sort $blocks "w" -}}
-  {{- $term := .term -}}
-  {{- $pages := .pages -}}
+{{- /* Series blocks of a rubric page. One <section class="series"> per series —
+       a sub-section of the rubric — ordered by the series' own front-matter
+       weight (the default sort of .Sections). The block header links to the
+       series landing; the anchor id keeps the /<rubric>/#<series> deep links
+       working. Part count and duration sum every listed part (stubs included) so
+       they match the article kicker's "part N of M" and the series bridge. An
+       announced series with no parts yet renders as a teaser — same header, an
+       "in the works" chip instead of the list. Context = the section page; part
+       title uses .LinkTitle so a part can carry a short title (linkTitle:)
+       without touching the guide's <title>. Standalone containers
+       (params.standalone — see alist.html) are not series and are skipped. */ -}}
+{{- range .Sections -}}
+  {{- if .Params.standalone }}{{ continue }}{{ end -}}
+  {{- $pages := .RegularPages -}}
   {{- $mins := 0 -}}{{ range $pages }}{{ $mins = add $mins (int (.Params.mins | default .ReadingTime)) }}{{ end -}}
-<section class="series" id="{{ .slug }}">
+<section class="series{{ if not $pages }} ser-teaser{{ end }}" id="{{ partial "series/slug.html" . }}">
   <div class="ser-head">
-    <h2 class="ser-t">{{ $term.Title }}</h2>
-    <span class="ser-k">{{ i18n "series_word" }}{{ with $term.Params.tagline }} · {{ . }}{{ end }}</span>
+    <h2 class="ser-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+    <span class="ser-k">{{ i18n "series_word" }}{{ with .Params.tagline }} · {{ . }}{{ end }}</span>
+    {{- if $pages }}
     <span class="ser-m">{{ i18n "parts_count" (len $pages) }} · ~{{ partial "rubric/duration.html" $mins }}</span>
+    {{- else }}
+    <span class="ser-m">{{ i18n "rubric_empty" }}</span>
+    {{- end }}
   </div>
-  {{- with $term.Description }}
+  {{- with .Description }}
   <p class="ser-d">{{ . }}</p>
   {{- end }}
+  {{- if $pages }}
   <ol class="slist">
     {{- range $pages }}
     <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <span class="mins">{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span></a></li>
     {{- end }}
   </ol>
+  {{- end }}
 </section>
 {{ end -}}

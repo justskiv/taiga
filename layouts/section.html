@@ -1,8 +1,12 @@
-{{- /* Rubric index: kicker "rubric · <slug_mono>", h1 + .sub, lead, then the
-       series blocks (from the series taxonomy) and any standalone reviews, then
+{{- /* Section pages come in two kinds, split by depth. A RUBRIC (top-level
+       section, direct child of home): kicker "rubric · <slug_mono>", h1 + .sub,
+       lead, then the series blocks (sub-sections) and the standalone guides, then
        the page's own markdown (e.g. a "what's next" callout) and the .foot. Body
-       class "rubric" (set in baseof) drives the rows/loud/shelf list variants. */ -}}
+       class "rubric" (set in baseof) drives the rows/loud/shelf list variants.
+       A SERIES (sub-section of a rubric) renders its landing instead — see
+       _partials/series/landing.html; body class "series". */ -}}
 {{ define "main" }}
+{{- if .Parent.IsHome -}}
 <main class="wrap">
   <div class="kicker"><span class="dot"></span>{{ i18n "rubric_word" }}{{ with .Params.slug_mono }} · {{ . }}{{ end }}</div>
   <h1>{{ .Title }}{{ with .Params.sub }}:<br><span class="sub">{{ . }}</span>{{ end }}</h1>
@@ -12,4 +16,7 @@
   {{ .Content }}
   {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
 </main>
+{{- else -}}
+{{ partial "series/landing.html" . }}
+{{- end -}}
 {{ end }}

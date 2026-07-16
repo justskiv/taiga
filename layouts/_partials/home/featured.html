@@ -8,7 +8,7 @@
 {{- with site.Params.featured -}}
 {{- with site.GetPage . -}}
 {{- $s := partial "article/series-ctx.html" . -}}
-{{- $rubric := .CurrentSection -}}
+{{- $rubric := .FirstSection -}}
 <div class="sec-h">{{ i18n "featured_head" }}</div>
 <section class="featured">
   <div class="f-body">
