@@ -171,10 +171,12 @@ body{
    hardcoded amber.
    The clip wrapper carries the listing-plus-bleed box and cuts off the band's
    translateY excursion: a transformed box past the viewport bottom counts as
-   scrollable overflow, and without the clip the page grew a scrollbar every
-   time the band travelled below the listing (body only clips overflow-x). */
+   scrollable overflow. The side bleed is capped at the viewport edge for the
+   same reason — past it, the page pans sideways on touch. */
 .sweep-clip{
-  position:absolute;left:-8%;right:-8%;top:0;height:100%;z-index:-1;
+  position:absolute;top:0;height:100%;z-index:-1;
+  left:max(-8%, calc((100% - 100vw) / 2));
+  right:max(-8%, calc((100% - 100vw) / 2));
   pointer-events:none;overflow:hidden;overflow:clip;
 }
 .sweep{
