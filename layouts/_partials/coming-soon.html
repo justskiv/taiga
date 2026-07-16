@@ -168,9 +168,17 @@ body{
 
 /* the compile pass: a band of light travelling down the listing, lines resolving
    in its wake. color-mix keeps it on the palette accent instead of a second
-   hardcoded amber. */
-.sweep{
+   hardcoded amber.
+   The clip wrapper carries the listing-plus-bleed box and cuts off the band's
+   translateY excursion: a transformed box past the viewport bottom counts as
+   scrollable overflow, and without the clip the page grew a scrollbar every
+   time the band travelled below the listing (body only clips overflow-x). */
+.sweep-clip{
   position:absolute;left:-8%;right:-8%;top:0;height:100%;z-index:-1;
+  pointer-events:none;overflow:hidden;overflow:clip;
+}
+.sweep{
+  position:absolute;inset:0;
   pointer-events:none;mix-blend-mode:screen;
   background:linear-gradient(180deg,
     transparent 0%,
@@ -218,7 +226,7 @@ body{
   <h1 class="mark">{{ partial "logo.html" }}<span class="caret" aria-hidden="true"></span></h1>
 
   <section class="listing">
-    <div class="sweep" aria-hidden="true"></div>
+    <div class="sweep-clip" aria-hidden="true"><div class="sweep"></div></div>
     <ol class="code">
       <li class="ln" style="{{ printf "--i:%d" 0 | safeCSS }}"><span class="gut" aria-hidden="true">1</span><span class="src"><span class="kw">package</span> <span class="id">guides</span></span></li>
       <li class="ln" style="{{ printf "--i:%d" 1 | safeCSS }}"><span class="gut" aria-hidden="true">2</span><span class="src"></span></li>
