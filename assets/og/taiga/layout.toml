@@ -38,10 +38,12 @@
 # The only real fix is for og-image.html to break the lines itself.
 name = "Taiga"
 
-# kicker — mono, glacier teal, upper-cased. Baked, not themed: covers are
-# rendered once at build time and have no palette to read. Same accent as the one
-# lit tree in the artwork; on a cover, as in the picture, teal is the only lit
-# thing.
+# kicker — mono, glacier teal, upper-cased. A literal on purpose, NOT the
+# "accent" keyword (which og-image.html would resolve to the site's brand): this
+# teal is the same accent as the one lit tree in the artwork baked into base.png,
+# and the contrast table above is measured for this exact hex on this exact
+# plate. On a cover, as in the picture, teal is the only lit thing — a rebranded
+# site should swap the whole folder, not tint one block.
 [[block]]
 text = "{kicker}"
 font = "JetBrainsMono-SemiBold.ttf"

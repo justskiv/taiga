@@ -4,13 +4,15 @@
 # format is forward-compatible. Fonts resolve in this folder first, then og/fonts/.
 name = "Dots"
 
-# kicker — mono, brand accent (glacier teal), upper-cased. Baked, not themed: OG
-# covers are rendered once at build time and have no palette. 8.3:1 on base.png.
+# kicker — mono, the brand accent, upper-cased. "accent" is resolved by
+# og-image.html at build time (params.accent, else the default palette's accent)
+# and baked in: the dots plate is neutral, so the kicker follows whatever brand
+# the site runs. The native glacier teal reads 8.3:1 on base.png.
 [[block]]
 text = "{kicker}"
 font = "JetBrainsMono-SemiBold.ttf"
 size = 27
-color = "#55c0b7"
+color = "accent"
 x = 76
 y = 224
 upper = true
