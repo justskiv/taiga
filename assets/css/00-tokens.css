@@ -10,4 +10,7 @@
   --content:760px;   /* reading column */
   --shell:1104px;    /* wide pages (index, rubrics) incl. 24px side paddings */
   --rail:236px;      /* side rails on article pages */
+  /* let height:auto (and other keyword sizes) animate — powers the fold
+     shortcode's reveal (22-fold.css); harmless elsewhere. Chromium 131+. */
+  interpolate-size:allow-keywords;
 }

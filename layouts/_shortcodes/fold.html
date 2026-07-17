@@ -1,0 +1,59 @@
+{{- /* Fold — a minimal inline disclosure. A quiet one-line summary that expands
+       into a panel of markdown, with no border or background, so it reads as
+       part of the prose (not a boxed widget). General-purpose; a "there is also
+       a video version" note is just one use of it.
+
+         {{< fold icon="video" title="There is a [video version](https://…)" >}}
+         …markdown body…
+         {{< /fold >}}
+
+       Params:
+         icon=   leading glyph, one of the keys in $icons below —
+                 video · info · tip · book · code · terminal · warning ·
+                 star · link · note. Default "info"; use "none" to omit it.
+         title=  summary line, rendered as INLINE markdown (links work). Required.
+         more=   collapsed toggle label. Default "Подробнее".
+         less=   expanded toggle label.  Default "Свернуть".
+         open=   "true" to render already expanded. Default collapsed.
+
+       Styling + the height-reveal animation live in assets/css/22-fold.css
+       (.fold …); the height animation needs interpolate-size, set on :root in
+       00-tokens.css. One tiny once-per-page script keeps a link inside the
+       summary from toggling the panel when it is clicked; without JS the only
+       cost is that such a click also toggles — the component still works. */ -}}
+
+{{- $icons := dict
+  "video"    `<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M10 8.4v7.2l6-3.6z" fill="currentColor" stroke="none"/>`
+  "info"     `<circle cx="12" cy="12" r="9.25"/><path d="M12 11v5"/><path d="M12 7.6h.01"/>`
+  "tip"      `<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.2 1 2.5h6c0-1.3.3-1.8 1-2.5A6 6 0 0 0 12 3z"/>`
+  "book"     `<path d="M12 7v13"/><path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9a3 3 0 0 1 3 3 3 3 0 0 1 3-3h4.5A1.5 1.5 0 0 1 21 5.5v11a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 0 0-2 2 2 2 0 0 0-2-2H4.5A1.5 1.5 0 0 1 3 16.5z"/>`
+  "code"     `<path d="m16 18 4-4-4-4"/><path d="m8 6-4 4 4 4"/><path d="m13 5-2 14"/>`
+  "terminal" `<path d="M12 18h6"/><path d="m5 16 5-5-5-5"/>`
+  "warning"  `<path d="M10.3 4.3 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/>`
+  "star"     `<path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.2l5.9-.9z"/>`
+  "link"     `<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>`
+  "note"     `<path d="M12 20h9"/><path d="M16.4 3.6a2 2 0 0 1 3 3L8.5 17.5l-4 1 1-4z"/>`
+-}}
+{{- $name := .Get "icon" | default "info" -}}
+{{- $title := .Get "title" -}}
+{{- if not $title }}{{ errorf "fold: missing required param title= (page %s)" .Page.Path }}{{ end -}}
+{{- if and (ne $name "none") (not (index $icons $name)) }}{{ warnf "fold: unknown icon %q (page %s)" $name .Page.Path }}{{ end -}}
+{{- $more := .Get "more" | default "Подробнее" -}}
+{{- $less := .Get "less" | default "Свернуть" -}}
+{{- $open := eq (.Get "open") "true" -}}
+<details class="fold"{{ if $open }} open{{ end }}>
+<summary>
+{{- if and (ne $name "none") (index $icons $name) -}}
+<svg class="fold-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ index $icons $name | safeHTML }}</svg>
+{{- end -}}
+<span class="fold-title">{{ .Page.RenderString $title }}</span>
+<span class="fold-toggle"><span class="fold-more">{{ $more }}</span><span class="fold-less">{{ $less }}</span><svg class="fold-chev" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+</summary>
+<div class="fold-body">
+{{ .Page.RenderString (dict "display" "block") .InnerDeindent }}
+</div>
+</details>
+{{- if not (.Page.Store.Get "foldScriptDone") -}}
+{{- .Page.Store.Set "foldScriptDone" true -}}
+<script>addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".fold summary a").forEach(function(a){a.addEventListener("click",function(e){e.stopPropagation()})})})</script>
+{{- end -}}
