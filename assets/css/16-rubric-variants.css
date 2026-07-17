@@ -22,8 +22,9 @@ html[data-rubvar="loud"] .rubric .slist a .vmark{font-size:12px}
 html[data-rubvar="loud"] .rubric .alist a{padding:16px 2px}
 html[data-rubvar="loud"] .rubric .alist .a-t{font-size:20px; font-weight:700; letter-spacing:-.012em; line-height:1.32; color:var(--text-strong)}
 html[data-rubvar="loud"] .rubric .alist .a-s{font-size:13px; color:var(--text-muted); margin-top:6px}
-html[data-rubvar="loud"] .rubric .callout{background:none; border:0; border-left:2px solid var(--border); border-radius:0; padding:2px 0 2px 14px; font-size:13px; color:var(--text-muted)}
-html[data-rubvar="loud"] .rubric .callout .clabel{color:var(--text-muted)}
+/* undo the article "legend" box here — rubric notes whisper as a muted left rule */
+html[data-rubvar="loud"] .rubric .callout{position:static; background:none; border:0; border-left:2px solid var(--border); border-radius:0; margin:16px 0; padding:2px 0 2px 14px; font-size:13px; color:var(--text-muted)}
+html[data-rubvar="loud"] .rubric .callout .clabel{position:static; transform:none; margin:0 0 4px; padding:0; background:none; color:var(--text-muted)}
 @media(max-width:640px){
   html[data-rubvar="loud"] .rubric .slist a{font-size:17.5px}
   html[data-rubvar="loud"] .rubric .alist .a-t{font-size:17.5px}

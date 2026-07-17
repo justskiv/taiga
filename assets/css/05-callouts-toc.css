@@ -1,12 +1,29 @@
-/* callouts */
-.callout{position:relative; margin:0 0 22px; padding:14px 16px 14px 18px; border:1px solid var(--border); border-left-width:3px; border-radius:var(--radius-sm); background:var(--bg-surface); font-size:15.5px; line-height:1.6}
-.callout .clabel{display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; font-weight:600}
+/* callouts — a "legend" block. The mono label straddles the top border like a
+   fieldset legend, so the type reads at a glance and the box gives the block a
+   clear boundary. Border + label carry the type colour (--cl); no fill. Still a
+   different device from blockquote (solid left rule + italic), so the two never
+   blur. The label punches through the top rule with the page bg (--bg-deep),
+   which every palette defines, so it works on light and dark alike. */
+.callout{--cl:var(--accent-blue); position:relative; margin:32px 0 22px;
+  border:1px solid color-mix(in srgb, var(--cl) 30%, transparent);
+  border-radius:var(--radius-sm); background:none; padding:15px 14px 12px;
+  font-size:15.5px; line-height:1.62; color:var(--text-primary)}
+/* label sits astride the top border; the --bg-deep chip cuts the rule behind it */
+.callout .clabel{position:absolute; top:0; left:12px; transform:translateY(-50%);
+  display:flex; align-items:center; gap:8px; margin:0; padding:0 8px;
+  background:var(--bg-deep);
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.12em;
+  text-transform:uppercase; font-weight:600; color:var(--cl)}
+/* marker tracks the label's own colour (currentColor), so contexts that recolour
+   the label — e.g. the muted rubric "loud" variant — recolour the marker too. */
+.callout .clabel::before{content:""; flex:none; width:7px; height:7px; border-radius:50%; background:currentColor}
 .callout p{margin:0}
 .callout p + p{margin-top:10px}
-.callout.note{border-left-color:var(--accent-blue)} .callout.note .clabel{color:var(--accent-blue)}
-.callout.key{border-left-color:var(--accent)} .callout.key .clabel{color:var(--accent)}
-.callout.trap{border-left-color:var(--accent-copper)} .callout.trap .clabel{color:var(--accent-copper)}
-.callout.internals{border-left-color:var(--accent-green)} .callout.internals .clabel{color:var(--accent-green)}
+.callout.note{--cl:var(--accent-blue)}
+.callout.key{--cl:var(--accent)}
+.callout.trap{--cl:var(--accent-copper)}
+.callout.internals{--cl:var(--accent-green)}
+.callout.warn{--cl:var(--accent-red)}
 
 /* in-article table of contents (narrow screens; the right rail replaces it on wide) */
 .toc{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px; margin:30px 0}
