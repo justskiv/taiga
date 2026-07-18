@@ -1,13 +1,66 @@
-{{- /* Images: always lazy/async; when the source is a page resource, resolve it
-       and stamp width/height so layout doesn't shift. The mock articles carry no
-       images, but the theme must handle them (reference/features-recipes.md §1d). */ -}}
+{{- /* Image render hook — resolve by basename, opt-in caption. Self-contained:
+       needs no site config.
+
+       Author writes a plain Markdown image, ![alt](name.png "optional caption").
+       The file is resolved by BASENAME so just the name is enough (Obsidian's
+       "shortest path"): first next to the article (a page-bundle resource, e.g.
+       img/name.png), then recursively under the site's assets/img/. Absolute and
+       site-rooted URLs pass through untouched. A name that resolves nowhere warns
+       — which `hugo --panicOnWarning` turns into a failed build — and is flagged
+       in the DOM, so a typo fails loudly instead of shipping a broken <img>.
+
+       A caption is opt-in: the Markdown title (the quoted text) wraps the image in
+       an inline .figure with a .figcaption, styled as a block caption in CSS. It is
+       a <span>, not a <figure>, on purpose: Goldmark wraps a stand-alone image in
+       a <p>, and a <span> is valid there — so the caption works without asking the
+       site to flip a markup parser flag (a theme cannot override the site's own
+       [markup] config). No title → a bare <img>, unchanged. width/height are
+       stamped for raster only, so an SVG resource (no intrinsic dimensions) never
+       trips the template. */ -}}
 {{- $dest := .Destination -}}
+{{- $name := path.Base $dest -}}
+{{- $u := urls.Parse $dest -}}
+{{- $external := or $u.IsAbs (hasPrefix $dest "/") -}}
 {{- $img := "" -}}
-{{- if not (urls.Parse $dest).IsAbs -}}
+{{- if not $external -}}
+  {{/* 1. next to the article — exact relative path */}}
   {{- $img = .PageInner.Resources.GetMatch $dest -}}
+  {{/* 2. next to the article — by basename, anywhere in the bundle */}}
+  {{- if not $img -}}
+    {{- $hits := .PageInner.Resources.Match (printf "**/%s" $name) -}}
+    {{- if $hits -}}
+      {{- if gt (len $hits) 1 -}}{{- warnf "render-image: %q is ambiguous — %d bundle matches for %s" $name (len $hits) .Page.File.Path -}}{{- end -}}
+      {{- $img = index $hits 0 -}}
+    {{- end -}}
+  {{- end -}}
+  {{/* 3. shared library — exact subpath under assets/img/ */}}
+  {{- if not $img }}{{ $img = resources.Get (path.Join "img" $dest) }}{{ end -}}
+  {{/* 4. shared library — by basename, anywhere under assets/img/ */}}
+  {{- if not $img -}}
+    {{- $hits := resources.Match (printf "img/**/%s" $name) -}}
+    {{- if $hits -}}
+      {{- if gt (len $hits) 1 -}}{{- warnf "render-image: %q is ambiguous — %d assets/img matches for %s" $name (len $hits) .Page.File.Path -}}{{- end -}}
+      {{- $img = index $hits 0 -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}
-<img
-  {{- if $img }} src="{{ $img.RelPermalink }}" width="{{ $img.Width }}" height="{{ $img.Height }}"
-  {{- else }} src="{{ $dest }}"{{ end }}
-  alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }}
-  loading="lazy" decoding="async">
+{{- /* Resolve to a concrete src + intrinsic dimensions (raster only), or flag a
+       name that matched nothing. $extra holds only machine-made, trusted
+       attributes; alt/title/caption stay in native template context below so
+       Hugo escapes them. */ -}}
+{{- $src := $dest -}}
+{{- $extra := "" -}}
+{{- if $img -}}
+  {{- $src = $img.RelPermalink -}}
+  {{- if ne (path.Ext $img.RelPermalink | lower) ".svg" -}}
+    {{- $extra = printf ` width="%d" height="%d"` $img.Width $img.Height -}}
+  {{- end -}}
+{{- else if not $external -}}
+  {{- warnf "render-image: %q not found (bundle or assets/img) for %s" $dest .Page.File.Path -}}
+  {{- $extra = ` data-image-missing="true"` -}}
+{{- end -}}
+{{- if .Title -}}
+<span class="figure"><img src="{{ $src }}"{{ $extra | safeHTMLAttr }} alt="{{ .PlainText }}" loading="lazy" decoding="async"><span class="figcaption">{{ .Title }}</span></span>
+{{- else -}}
+<img src="{{ $src }}"{{ $extra | safeHTMLAttr }} alt="{{ .PlainText }}" loading="lazy" decoding="async">
+{{- end -}}
