@@ -55,12 +55,15 @@ blockquote p{margin:0}
 
    Scope: prose containers inside the article/rubric column (.wrap), the
    container list wrapped in :where() so it adds no specificity and any
-   component rule still wins. Excluded: .toc (navigation, identified by
-   position), .hash heading anchors, .btn, and footnote marks — a superscript
-   digit is too small to carry an underline, and at that size the accent fill
-   never disturbs reading. */
+   component rule still wins. Excluded as navigation, not prose: .toc, the
+   .slist series-part rows (rubric block + series landing) and the .alist
+   rubric article rows — all identified by position and layout, and their
+   row-links wrap meta spans the underline would run under. Also excluded:
+   .hash heading anchors, .btn, and footnote marks — a superscript digit is
+   too small to carry an underline, and at that size the accent fill never
+   disturbs reading. */
 .wrap :where(p, li, dd, td, blockquote, .lead, .foot)
-  a:not(:where(.toc a, .hash, .btn, .footnote-ref, .footnote-backref)){
+  a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .footnote-ref, .footnote-backref)){
   color:inherit;
   border-bottom:0;              /* the base a:hover border must never resurface */
   text-decoration:underline;
@@ -78,7 +81,7 @@ blockquote p{margin:0}
              text-decoration-color var(--dur) var(--ease);
 }
 .wrap :where(p, li, dd, td, blockquote, .lead, .foot)
-  a:not(:where(.toc a, .hash, .btn, .footnote-ref, .footnote-backref)):hover{
+  a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .footnote-ref, .footnote-backref)):hover{
   color:var(--accent);
   /* the underline is deliberately NOT restyled here: it holds its rest state
      so hover changes as little as possible — the word warms, the pill fades
@@ -88,8 +91,10 @@ blockquote p{margin:0}
      blends into the pill fill. */
   background:var(--accent-dim);
 }
-.wrap :where(p, li, dd, td, blockquote, .lead, .foot)
-  a:not(:where(.toc a, .hash, .btn, .footnote-ref, .footnote-backref)):focus-visible{
+/* focus ring for every link in these containers, the excluded navigation
+   rows included — the outline is the theme's focus pattern, not part of the
+   quiet-link look */
+.wrap :where(p, li, dd, td, blockquote, .lead, .foot) a:focus-visible{
   outline:2px solid var(--accent); outline-offset:3px; border-radius:3px;
 }
 /* a linked image must not draw the underline beneath the picture, nor grow
