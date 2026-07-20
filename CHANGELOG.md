@@ -84,6 +84,14 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **Prose links are quiet now.** Inside the article column, links read in the
+  body colour with a translucent accent underline instead of a full-accent
+  fill; hover warms the word to the accent over a soft `--accent-dim` pill.
+  In link-dense guides the old accent-filled links pulled the eye on every
+  line and blurred the accent's structural roles (list markers, blockquote
+  rule, callouts). The always-on underline also closes WCAG 1.4.1, which the
+  hover-only border never did. Chrome links (cards, nav, TOC, series bridge)
+  keep the accent fill.
 - **A new brand mark.** The four-square block gave way to a conifer that is also a
   hierarchy — a crown over two tiers over a trunk, one level per content tier
   (rubric → series → guides). Only the crown takes the accent. The favicon and the

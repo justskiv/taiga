@@ -30,6 +30,72 @@ em{color:var(--text-primary); font-style:italic}
 blockquote{margin:0 0 22px; padding:2px 0 2px 18px; border-left:3px solid var(--accent); color:var(--text-secondary); font-style:italic}
 blockquote p{margin:0}
 
+/* prose links — quiet at rest, accent on intent. The base a{} (01-base.css)
+   paints links in full --accent, which is right for chrome (cards, nav, series
+   bridge) but too loud inside long-form prose: in link-dense paragraphs every
+   link is an accent-filled word, the eye snags on it, and the accent's
+   structural roles (list markers, the blockquote rule, callout frames) lose
+   their meaning. In prose the link cue moves from glyph fill to a translucent
+   accent underline: the word reads as body text, the line marks it as a link,
+   and hover warms the whole word to full accent over a soft --accent-dim pill.
+   The underline is load-bearing for WCAG 1.4.1 — an accent that sits well on
+   the page bg rarely reaches the 3:1 contrast against body text that a
+   colour-only cue would need — and text-decoration (not the base border-
+   bottom) buys skip-ink over descenders (у р ф ц щ). color:inherit rather
+   than a token, so a link inside blockquote or a callout adopts its
+   container's quieter tone. Everything routes through --accent/--accent-dim,
+   so the treatment follows whatever accent a palette or site pin defines.
+
+   The hover pill is padding-built, compensated by negative margins so the
+   line never moves: padding joins both the painted background and the pointer
+   hit area, keeping the visible pill and the hover zone in exact agreement.
+   (A box-shadow pill would paint outside the hit area — hover then drops
+   while the cursor is still on the visible pill.) box-decoration-break gives
+   each fragment of a line-wrapped link its own rounded pill.
+
+   Scope: prose containers inside the article/rubric column (.wrap), the
+   container list wrapped in :where() so it adds no specificity and any
+   component rule still wins. Excluded: .toc (navigation, identified by
+   position), .hash heading anchors, .btn, and footnote marks — a superscript
+   digit is too small to carry an underline, and at that size the accent fill
+   never disturbs reading. */
+.wrap :where(p, li, dd, td, blockquote, .lead, .foot)
+  a:not(:where(.toc a, .hash, .btn, .footnote-ref, .footnote-backref)){
+  color:inherit;
+  border-bottom:0;              /* the base a:hover border must never resurface */
+  text-decoration:underline;
+  text-decoration-color:color-mix(in srgb, var(--accent) 50%, transparent);
+  text-decoration-thickness:1px;
+  text-underline-offset:.18em;
+  text-decoration-skip-ink:auto;
+  /* 3px of side bleed keeps a sliver of daylight between the pill and the
+     neighbouring word (a space is ~4px at this size); 4px ate it whole */
+  padding:2px 3px; margin:0 -3px;
+  border-radius:5px;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+  transition:color var(--dur) var(--ease),
+             background-color var(--dur) var(--ease),
+             text-decoration-color var(--dur) var(--ease);
+}
+.wrap :where(p, li, dd, td, blockquote, .lead, .foot)
+  a:not(:where(.toc a, .hash, .btn, .footnote-ref, .footnote-backref)):hover{
+  color:var(--accent);
+  /* the underline is deliberately NOT restyled here: it holds its rest state
+     so hover changes as little as possible — the word warms, the pill fades
+     in, the line stays put as an anchor. Brightening it to full accent drew
+     a loud stripe inside the pill; hiding it made the state flip busier
+     (something vanishing while something appears). At 50% alpha it all but
+     blends into the pill fill. */
+  background:var(--accent-dim);
+}
+.wrap :where(p, li, dd, td, blockquote, .lead, .foot)
+  a:not(:where(.toc a, .hash, .btn, .footnote-ref, .footnote-backref)):focus-visible{
+  outline:2px solid var(--accent); outline-offset:3px; border-radius:3px;
+}
+/* a linked image must not draw the underline beneath the picture, nor grow
+   the pill box around it */
+.wrap :where(p, li) a:has(> img){text-decoration:none; padding:0; margin:0}
+
 /* thematic break (markdown ----): the same --border hairline as the lead deck
    and the h2 rules, with generous air so it reads as a deliberate section
    break rather than an underline */
