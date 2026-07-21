@@ -20,6 +20,14 @@
 .slist a .mins{margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--text-ghost); flex:0 0 auto; padding-left:12px}
 .slist a .vmark{font-size:10px; color:var(--accent-green); opacity:0; flex:0 0 auto}
 .slist a.is-visited .vmark{opacity:1}
+/* announced part: a locked, non-clickable title kept in the numbered rail. The
+   number and the hairline hang off the inner element (not the li), so mirror
+   them for .soon — minus every interactive rule: no hover, no pointer. */
+.slist .soon{display:flex; gap:14px; align-items:baseline; padding:11px 8px; color:var(--text-ghost); line-height:1.45; font-size:15.5px; cursor:default}
+.slist .soon::before{content:counter(si,decimal-leading-zero); font-family:var(--font-mono); font-size:11px; color:var(--text-ghost); flex:0 0 auto}
+.slist li + li .soon{border-top:1px solid color-mix(in srgb, var(--border) 55%, transparent)}
+/* "soon" tag, shared by the slist and the rail (.snav) locked items */
+.soon-tag{margin-left:auto; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-ghost); flex:0 0 auto; padding-left:12px}
 /* announced series with no parts yet: same header, muted, no list */
 .series.ser-teaser .ser-t{color:var(--text-muted)}
 .series.ser-teaser .ser-t::before{color:var(--text-ghost)}

@@ -3,6 +3,9 @@ title: "{{ replace .File.ContentBaseName `-` ` ` | title }}"
 slug: "{{ .File.ContentBaseName }}"   # freeze the URL slug
 date: {{ .Date }}
 draft: true
+# announce: true         # keep draft:true AND add this to tease a still-unwritten
+                         # part: its TITLE shows in the series (locked, non-clickable),
+                         # its body never reaches the build. Drop both lines to publish.
 description: "One sentence — for the feed, for search and for meta."
 lead: "The article's lead paragraph (may run longer than the description)."
 weight: 1                 # part order inside a series folder; omit for standalone

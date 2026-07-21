@@ -98,6 +98,9 @@ other = "whole series →"
 other = "start the series"
 [series_soon]
 other = "This series is in the works — parts will land in the feed."
+# a single announced (not-yet-published) part inside a live series
+[part_soon]
+other = "soon"
 
 [sbr_behind]
 other = "<b>{{ .done }} of {{ .total }}</b> behind you"

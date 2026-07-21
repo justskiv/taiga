@@ -117,6 +117,9 @@ other = "вся серия →"
 other = "начать серию"
 [series_soon]
 other = "Серия готовится — части появятся в ленте."
+# a single announced (not-yet-published) part inside a live series
+[part_soon]
+other = "скоро"
 
 # series bridge (.sbr) — text mirrors the mock's buildSeriesBridge 1:1
 [sbr_behind]

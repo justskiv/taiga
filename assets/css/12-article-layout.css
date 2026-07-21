@@ -57,6 +57,7 @@ html.rail-r-off .rail-r .rail-mini{display:flex}
   border:1.5px solid var(--text-ghost); background:transparent; flex:0 0 auto;
   transition:transform .14s var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease)}
 .mini-dot.is-visited{background:var(--text-muted); border-color:var(--text-muted)}
+.mini-dot.is-announce{border-style:dashed; border-color:var(--text-ghost); background:transparent; cursor:default}
 .rail-mini:hover .mini-dot{border-color:var(--text-muted)}
 .rail-mini .mini-dot:hover{border-color:var(--text-secondary); transform:scale(1.3)}
 .rail-mini .mini-dot.cur{background:var(--accent); border-color:var(--accent); box-shadow:0 0 8px var(--accent-glow)}
@@ -194,6 +195,9 @@ a.rail-k:hover{color:var(--accent); border:0}
 .snav li.cur a::before{content:"▸"; color:var(--accent)}
 .snav a .vmark{margin-left:auto; font-size:10px; color:var(--accent-green); opacity:0; flex:0 0 auto}
 .snav a.is-visited .vmark{opacity:1}
+/* announced part in the rail: non-clickable, muted; number mirrors .snav a */
+.snav .soon{display:flex; gap:9px; align-items:baseline; padding:6px 8px; color:var(--text-ghost); line-height:1.45; cursor:default}
+.snav .soon::before{content:counter(sn); font-family:var(--font-mono); font-size:10.5px; color:var(--text-ghost); min-width:1.1em; text-align:right; flex:0 0 auto}
 .rail-all{display:inline-block; margin-top:10px; font-family:var(--font-mono); font-size:11px; color:var(--text-muted); border:0}
 .rail-all:hover{color:var(--accent); border:0}
 /* toc (right rail, built by js) */

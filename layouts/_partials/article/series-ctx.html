@@ -11,16 +11,19 @@
          label     string — short lowercase series name (params.label | lower title)
          href      string — the series landing URL
          slug      string — series slug (= folder name; anchor id on the rubric)
-         pages     pages  — series parts, weight-ascending (section default order)
+         pages     dicts  — series parts from series/parts.html, weight-asc:
+                            {title,linkTitle,railTitle,mins,url,announce,weight};
+                            announced parts (draft+announce) carry url:"" so they
+                            render as non-clickable titles and count in pos/total
          pos,total int    — 1-based position of this page, and part count
        A standalone guide — a direct child of the rubric, or a child of a
        container — returns {isSeries:false}. */ -}}
 {{- $ctx := dict "isSeries" false -}}
 {{- $sec := .CurrentSection -}}
 {{- if and $sec (not ($sec.Eq .FirstSection)) (not $sec.Params.standalone) -}}
-  {{- $pages := $sec.RegularPages -}}
+  {{- $pages := partialCached "series/parts.html" $sec $sec.RelPermalink -}}
   {{- $pos := 0 -}}
-  {{- range $i, $p := $pages }}{{ if eq $p.RelPermalink $.RelPermalink }}{{ $pos = add $i 1 }}{{ end }}{{ end -}}
+  {{- range $i, $p := $pages }}{{ if eq $p.url $.RelPermalink }}{{ $pos = add $i 1 }}{{ end }}{{ end -}}
   {{- $ctx = dict
       "isSeries" (gt (len $pages) 1)
       "term" $sec

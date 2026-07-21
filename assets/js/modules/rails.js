@@ -13,12 +13,14 @@ export function bindRails() {
   if (railL && !railL.querySelector('.rail-mini')) {
     const mini = buildMini(railL, 'l', '[ ' + I18N.keyOr + ' ⌘1');
     Array.prototype.forEach.call(railL.querySelectorAll('.snav li'), function (li) {
-      const a = li.querySelector('a'); if (!a) return;
-      const d = document.createElement('a'); d.className = 'mini-dot';
-      d.href = a.getAttribute('href');
-      d.title = a.textContent.replace(/\s*✓\s*$/, '').trim();
+      const a = li.querySelector('a');
+      const s = a || li.querySelector('.soon');   // announce parts are a .soon <span>
+      if (!s) return;
+      const d = document.createElement(a ? 'a' : 'span'); d.className = 'mini-dot';
+      if (a) { d.href = a.getAttribute('href'); } else { d.classList.add('is-announce'); }
+      d.title = (a ? a.textContent : s.firstChild.textContent).replace(/\s*✓\s*$/, '').trim();
       if (li.classList.contains('cur')) d.classList.add('cur');
-      if (a.classList.contains('is-visited')) d.classList.add('is-visited');
+      if (a && a.classList.contains('is-visited')) d.classList.add('is-visited');
       mini.appendChild(d);
     });
   }

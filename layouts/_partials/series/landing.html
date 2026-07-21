@@ -7,8 +7,9 @@
        A series with no listed parts yet renders as an announcement teaser
        instead of an empty list. Context = the series section page. */ -}}
 {{- $rubric := .Parent -}}
-{{- $pages := .RegularPages -}}
-{{- $mins := 0 -}}{{ range $pages }}{{ $mins = add $mins (int (.Params.mins | default .ReadingTime)) }}{{ end -}}
+{{- $pages := partialCached "series/parts.html" . .RelPermalink -}}
+{{- $mins := 0 -}}{{ range $pages }}{{ if not .announce }}{{ $mins = add $mins .mins }}{{ end }}{{ end -}}
+{{- $start := "" -}}{{ range $pages }}{{ if and (eq $start "") .url }}{{ $start = .url }}{{ end }}{{ end -}}
 <main class="wrap">
   <div class="kicker"><span class="dot"></span><a href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a> · {{ i18n "series_word" }}</div>
   <h1>{{ .Title }}{{ with .Params.tagline }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
@@ -22,10 +23,14 @@
     </div>
     <ol class="slist">
       {{- range $pages }}
-      <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <span class="mins">{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span></a></li>
+      {{- if .announce }}
+      <li><span class="soon">{{ .linkTitle }}<span class="soon-tag">{{ i18n "part_soon" }}</span></span></li>
+      {{- else }}
+      <li><a href="{{ .url }}">{{ .linkTitle }} <span class="mins">{{ .mins }} {{ i18n "mins_abbr" }}</span></a></li>
+      {{- end }}
       {{- end }}
     </ol>
-    <a class="ser-start" href="{{ (index $pages 0).RelPermalink }}">{{ i18n "series_start" }} →</a>
+    {{- with $start }}<a class="ser-start" href="{{ . }}">{{ i18n "series_start" }} →</a>{{ end }}
   </section>
   {{- else }}
   <p class="ser-soon">{{ i18n "series_soon" }}</p>

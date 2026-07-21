@@ -11,8 +11,8 @@
        (params.standalone — see alist.html) are not series and are skipped. */ -}}
 {{- range .Sections -}}
   {{- if .Params.standalone }}{{ continue }}{{ end -}}
-  {{- $pages := .RegularPages -}}
-  {{- $mins := 0 -}}{{ range $pages }}{{ $mins = add $mins (int (.Params.mins | default .ReadingTime)) }}{{ end -}}
+  {{- $pages := partialCached "series/parts.html" . .RelPermalink -}}
+  {{- $mins := 0 -}}{{ range $pages }}{{ if not .announce }}{{ $mins = add $mins .mins }}{{ end }}{{ end -}}
 <section class="series{{ if not $pages }} ser-teaser{{ end }}" id="{{ partial "series/slug.html" . }}">
   <div class="ser-head">
     <h2 class="ser-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
@@ -29,7 +29,11 @@
   {{- if $pages }}
   <ol class="slist">
     {{- range $pages }}
-    <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <span class="mins">{{ .Params.mins | default .ReadingTime }} {{ i18n "mins_abbr" }}</span></a></li>
+    {{- if .announce }}
+    <li><span class="soon">{{ .linkTitle }}<span class="soon-tag">{{ i18n "part_soon" }}</span></span></li>
+    {{- else }}
+    <li><a href="{{ .url }}">{{ .linkTitle }} <span class="mins">{{ .mins }} {{ i18n "mins_abbr" }}</span></a></li>
+    {{- end }}
     {{- end }}
   </ol>
   {{- end }}

@@ -1,0 +1,59 @@
+{{- /* Unified parts list for one series. Input: the series section page ($sec).
+       Returns a slice of dicts, weight-ascending, each:
+         { title, linkTitle, railTitle, mins(int), url, announce(bool), weight }
+
+       Published parts come from .RegularPages and carry a real .url (links).
+       Announced parts are DRAFTS carrying `announce: true` — Hugo drops drafts
+       from the build entirely (no page, no RSS/sitemap/feed/search), so we read
+       the source file directly and surface ONLY the title; the markdown body is
+       never rendered and never reaches the output. Deduped by folder name: in
+       `hugo server -D` (drafts on) an announce is already a RegularPage and
+       renders as its real draft page, so it is NOT re-added as a locked title.
+
+       Wrap the call in partialCached (keyed by the series) — the file I/O then
+       runs once per series, not once per article. */ -}}
+{{- $sec := . -}}
+{{- $entries := slice -}}
+{{- $seen := slice -}}
+{{- range $sec.RegularPages -}}
+  {{- $seen = $seen | append .File.ContentBaseName -}}
+  {{- $entries = $entries | append (dict
+      "title" .Title
+      "linkTitle" .LinkTitle
+      "railTitle" (.Params.rail_title | default (index (split .Title ":") 0))
+      "mins" (int (.Params.mins | default .ReadingTime))
+      "url" .RelPermalink
+      "announce" false
+      "weight" .Weight) -}}
+{{- end -}}
+{{- with $sec.File -}}
+  {{- $dir := path.Join "content" .Dir -}}
+  {{- range (os.ReadDir $dir) -}}
+    {{- if and .IsDir (not (in $seen .Name)) -}}
+      {{- $idx := path.Join $dir .Name "index.md" -}}
+      {{- if os.FileExists $idx -}}
+        {{- $parts := split (os.ReadFile $idx) "---" -}}
+        {{- if ge (len $parts) 2 -}}
+          {{- $fm := index $parts 1 -}}
+          {{- if findRE `(?m)^announce:\s*true\b` $fm -}}
+            {{- $title := "" -}}
+            {{- with (findRESubmatch `(?m)^title:\s*(.+?)\s*$` $fm) -}}{{ $title = trim (index (index . 0) 1) "\"" }}{{- end -}}
+            {{- $weight := 0 -}}
+            {{- with (findRESubmatch `(?m)^weight:\s*(\d+)` $fm) -}}{{ $weight = int (index (index . 0) 1) }}{{- end -}}
+            {{- $rail := index (split $title ":") 0 -}}
+            {{- with (findRESubmatch `(?m)^rail_title:\s*(.+?)\s*$` $fm) -}}{{ $rail = trim (index (index . 0) 1) "\"" }}{{- end -}}
+            {{- $entries = $entries | append (dict
+                "title" $title
+                "linkTitle" $title
+                "railTitle" $rail
+                "mins" 0
+                "url" ""
+                "announce" true
+                "weight" $weight) -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return (sort $entries "weight" "asc") -}}

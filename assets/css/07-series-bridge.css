@@ -12,6 +12,9 @@
 .sbr-seg:hover{filter:brightness(1.35); transform:scaleY(1.4)}
 .sbr-seg.done{background:color-mix(in srgb, var(--accent) 45%, var(--bg-raised))}
 .sbr-seg.cur{background:var(--accent); box-shadow:0 0 10px var(--accent-glow)}
+/* announced (unpublished) part: a dashed, non-navigable segment */
+.sbr-seg.soon{background:transparent; box-shadow:none; border:1px dashed var(--text-ghost); cursor:default}
+.sbr-seg.soon:hover{filter:none; transform:none}
 .sbr-legend{font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted)}
 .sbr-legend b{color:var(--accent); font-weight:600}
 .sbr-next{display:flex; align-items:center; gap:18px; margin-top:16px; padding:19px 22px;
@@ -26,6 +29,11 @@
 .sbr-next .arr{margin-left:auto; flex:0 0 auto; color:var(--accent); font-size:22px; line-height:1;
   transform:translateX(0); transition:transform .18s var(--ease)}
 .sbr-next:hover .arr{transform:translateX(5px)}
+/* next part is still an announce: a non-clickable "coming" teaser, no arrow */
+.sbr-next.soon{cursor:default; border-style:dashed; background:transparent}
+.sbr-next.soon:hover{border-color:var(--text-ghost); transform:none; box-shadow:none}
+.sbr-next.soon .k{color:var(--text-ghost)}
+.sbr-next.soon .t{color:var(--text-muted)}
 .sbr-prev{display:inline-block; margin-top:12px; font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted); border:0;
   transition:color var(--dur) var(--ease)}
 .sbr-prev:hover{color:var(--accent); border:0}
