@@ -1,0 +1,74 @@
+{{- /* Term with a rich definition card:
+       {{< term "mcache" kind="структура рантайма" color="green"
+                href="/allocator/" >}}…markdown…{{< /term >}}
+
+       The first positional argument (or word=) is the word as it reads in the
+       sentence; title= overrides the card's heading when the two differ — which
+       in Russian prose they usually do, because the word is inflected
+       ("в кэшах ядра" → "Кэш процессора"). kind= is the free-text mono label,
+       color= picks its colour by name.
+
+       WHY THE CARD IS NOT EMITTED HERE. A shortcode inside a paragraph can only
+       emit inline HTML: the parser closes an open <p> the moment it meets <pre>,
+       <ul> or <div>, so a card rendered in place would tear the paragraph apart
+       the first time an author put a code block in a definition. Instead each
+       card is pushed onto Page.Store and article/term-cards.html renders the
+       lot after .Content — see that partial for the no-JS story. The word itself
+       stays a real <a href="#term-N">, so with JS off (and in print, and in RSS)
+       it still links to its definition at the foot of the article. */ -}}
+{{- $word := or (.Get "word") (.Get 0) -}}
+{{- with $word | default "" -}}{{- else -}}
+  {{- errorf "term: the word is required — {{< term \"mcache\" >}}…{{< /term >}} (%s)" $.Position -}}
+{{- end -}}
+{{- /* The card's colour is named outright. It used to be a semantic `type`
+       (key|trap|note|internals|warn) borrowed from callouts, which asked the
+       author to remember that "internals" means green and "trap" means copper —
+       a mapping that carries no meaning of its own when the only visible
+       difference IS the colour. Naming the colour is shorter to write and
+       impossible to misremember. Default: the brand accent. */ -}}
+{{- $color := .Get "color" | default "accent" -}}
+{{- $colors := slice "accent" "green" "copper" "blue" "gold" "red" -}}
+{{- if not (in $colors $color) -}}
+  {{- errorf "term %q: color=%q is not one of accent|green|copper|blue|gold|red (%s)" $word $color $.Position -}}
+{{- end -}}
+{{- $cls := cond (eq $color "accent") "" (printf " c-%s" $color) -}}
+{{- $href := .Get "href" -}}
+{{- /* Internal hrefs resolve to a permalink, so a definition's "read more" link
+       survives a slug change; external ones pass through. Same contract as
+       bigcard. */ -}}
+{{- with $href -}}
+  {{- if not (or (hasPrefix . "http") (hasPrefix . "#")) -}}
+    {{- with site.GetPage . -}}{{- $href = .RelPermalink -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- /* The id is a hash of the definition, NOT a running counter, because the
+       store outlives a single render: `hugo server` re-renders the content on
+       every save without clearing it, so a counter appends a fresh set of cards
+       each time (term-1..3, then term-4..6 …) and the prose ends up pointing at
+       the newest copy. Keying by content makes the whole thing idempotent — a
+       re-render overwrites nothing and adds nothing.
+
+       It also collapses honest repeats: the same word with the same definition
+       used twice in an article shares one card, and the second mention links to
+       the first. Only the first mention carries the -w id, so the card's
+       "back to the text" link has a single unambiguous target. */ -}}
+{{- $body := .Page.RenderString (dict "display" "block") .InnerDeindent -}}
+{{- $id := printf "term-%s" (substr (sha256 (printf "%s\x00%s" $word $body)) 0 10) -}}
+{{- $seen := .Page.Store.Get "termSeen" | default dict -}}
+{{- $first := not (isset $seen $id) -}}
+{{- if $first -}}
+  {{- $cards := .Page.Store.Get "termCards" | default slice -}}
+  {{- $card := dict
+        "id"    $id
+        "title" (.Page.RenderString (.Get "title" | default $word))
+        "kind"  (.Get "kind")
+        "cls"   $cls
+        "href"  $href
+        "more"  (.Get "more" | default (i18n "term_more"))
+        "body"  $body -}}
+  {{- .Page.Store.Set "termCards" ($cards | append $card) -}}
+  {{- .Page.Store.Set "termSeen" (merge $seen (dict $id true)) -}}
+{{- end -}}
+{{- /* No whitespace around the anchor: it sits mid-sentence, and a stray
+       newline here becomes a space before the next comma. */ -}}
+<a class="term{{ $cls }}" href="#{{ $id }}"{{ if $first }} id="{{ $id }}-w"{{ end }} data-term="{{ $id }}">{{ .Page.RenderString $word }}</a>

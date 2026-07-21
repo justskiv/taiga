@@ -1,0 +1,41 @@
+{{- /* Definition cards collected by the `term` shortcode (see its header for why
+       they are rendered here and not in place). Must be called AFTER .Content —
+       the store is filled while the content renders.
+
+       Two lives, one markup:
+
+       • No JS — the block is a plain definition list at the foot of the article,
+         and every {{< term >}} anchor in the prose links into it. The <noscript>
+         <style> below is what reveals it; the default is display:none, so the
+         cards never flash before term.js takes them.
+       • With JS — modules/term.js moves the block to <body>, turns each card
+         into a popover and anchors it to its word.
+
+       role="dialog" (not role="tooltip"): the card holds a heading and often a
+       link, and a tooltip must not contain interactive content — see W3C APG,
+       "Tooltip Pattern". aria-modal stays false: this is a NON-modal dialog, it
+       never traps focus. */ -}}
+{{- with .Store.Get "termCards" -}}
+<noscript><style>.term-cards{display:block}</style></noscript>
+<aside class="term-cards" aria-label="{{ i18n "term_cards_aria" }}">
+  <h2 class="term-cards-h">{{ i18n "term_cards_head" }}</h2>
+  {{- range $card := . }}
+  <div class="term-card{{ .cls }}" id="{{ .id }}" role="dialog" aria-modal="false"
+       aria-labelledby="{{ .id }}-h" tabindex="-1">
+    <div class="term-card-top">
+      <p class="term-card-h" id="{{ .id }}-h">{{ .title }}</p>
+      {{- with .kind }}
+      <span class="term-card-k">{{ . }}</span>
+      {{- end }}
+    </div>
+    <div class="term-card-b">{{ .body }}</div>
+    {{- with .href }}
+    <a class="term-card-more" href="{{ . }}"><span>{{ $card.more }}</span><span class="arw" aria-hidden="true">→</span></a>
+    {{- end }}
+    {{- /* Back-link closes the loop for the no-JS reading order: the reader
+           jumped down here from the prose, this returns them. */}}
+    <a class="term-card-back" href="#{{ .id }}-w">{{ i18n "term_back" }}</a>
+  </div>
+  {{- end }}
+</aside>
+{{- end -}}

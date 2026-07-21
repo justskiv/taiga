@@ -255,3 +255,13 @@ other = " — no such tag. Check the link, or pick a topic from the cloud above.
 [js_guides_word]
 one = "guide"
 other = "guides"
+
+# term shortcode: the definition card's footer link and its no-JS appendix.
+[term_more]
+other = "read more"
+[term_back]
+other = "← back to the text"
+[term_cards_head]
+other = "Definitions"
+[term_cards_aria]
+other = "Definitions of terms used in the article"

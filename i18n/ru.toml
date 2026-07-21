@@ -304,3 +304,15 @@ one = "гайд"
 few = "гайда"
 many = "гайдов"
 other = "гайда"
+
+# term shortcode: the definition card's footer link and its no-JS appendix.
+# term_more is the default text of the optional "read more" link (per-term
+# override with more=); the rest label the appendix that JS takes away.
+[term_more]
+other = "читать подробнее"
+[term_back]
+other = "← назад к тексту"
+[term_cards_head]
+other = "Определения"
+[term_cards_aria]
+other = "Определения терминов из статьи"

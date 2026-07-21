@@ -10,6 +10,7 @@ import { markVisited } from './modules/visited.js';
 import { buildToc } from './modules/toc.js';
 import { bindRails } from './modules/rails.js';
 import { bindTips } from './modules/tooltip.js';
+import { bindTerms } from './modules/term.js';
 import { bindKeys } from './modules/keys.js';
 import { mountScrollTop } from './modules/scrolltop.js';
 import { initFeatured } from './modules/featured.js';
@@ -48,6 +49,7 @@ onReady(function () {
   buildToc();
   bindRails();
   bindTips();
+  bindTerms();  /* articles only: self-guards on .term-cards */
   bindKeys();
   mountScrollTop();
   initFeatured();   /* home only: self-guards on #hd-strip/#hd-data */

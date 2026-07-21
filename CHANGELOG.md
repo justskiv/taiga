@@ -40,6 +40,34 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   `list: local`) is a tidiness container, not a series — its children render,
   list and search exactly like guides sitting directly in the rubric, and both
   homes stay valid at once, so adoption is per-guide, not flag-day.
+- **`term` shortcode — a word in the prose with a definition card behind it.**
+  `{{< term "mcache" >}}…markdown…{{< /term >}}`: hover opens the card, a click
+  pins it, Escape closes; the body takes anything Markdown does, including code
+  blocks and images. `kind=` labels it, `color=` picks its colour by name
+  (accent|green|copper|blue|gold|red), `href=`/`more=` add an optional "read
+  more" link, `title=` splits the card's heading from the inflected word in the
+  sentence. Colour is named, not derived from a semantic type: when the only
+  visible difference between "internals" and "trap" is green versus copper, the
+  mapping is something to memorise, not something that means anything.
+
+  It is a **non-modal `role="dialog"`, not a tooltip** — a tooltip may not hold
+  a link, and this one usually does (W3C APG). Behaviour meets WCAG 2.1 SC
+  1.4.13: the card is hoverable (a short close delay covers the gap),
+  dismissible (Escape, click outside, pointer away) and persistent — it follows the word on
+  scroll rather than vanishing, and never auto-hides on a timer. On touch it
+  becomes a bottom sheet; hover is gated behind `(hover: hover)`.
+
+  The cards do **not** render inside the paragraph — a `<pre>` there would close
+  the `<p>` and split the prose — so `article/term-cards.html` collects them
+  after `.Content`. With JS off that block is the article's "Definitions"
+  appendix and every term links into it; it is also what prints. The existing
+  `.l1-tip` engine is untouched: it stays the plain-text hint for diagram cells,
+  which it does well and which this deliberately is not.
+
+  New: `assets/css/23-term.css`, `assets/js/modules/term.js`, four i18n keys
+  (`term_more`, `term_back`, `term_cards_head`, `term_cards_aria`).
+  A site that overrides `page.html` must add the `article/term-cards.html` call
+  to pick this up.
 - **`params.extraGuideSections`** — sections listed here (e.g. `["posts"]`)
   join the guide feed, search, RSS and get the full article layout, but are
   NOT rubrics: no home card, no 404 entry. For guides that belong to no

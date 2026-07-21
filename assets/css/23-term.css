@@ -1,0 +1,307 @@
+/* term — a word in the prose and the definition card behind it.
+
+   The card is the heavy sibling of .l1-tip: that one is a text hint pinned to a
+   diagram cell (pointer-events:none, one line, dies on scroll), this one is a
+   panel you can hover into, scroll, and click a link inside. Different job,
+   different component — .l1-tip stays as it is for its 300-odd diagram cells.
+
+   The type colour rides the same --cl channel as .callout and takes the same
+   five names, so an author who knows callouts already knows this.
+
+   Card design principle: the type colour is dosed the way an item card reads
+   rarity — it breathes in the surface, names itself in the kicker, colours the
+   one link. Never a second frame, never a strip. One tinted surface, one
+   hairline edge; every other boundary inside the card is rhythm, not rules. */
+
+/* ── the word in the sentence ──────────────────────────────────────────────
+   Built as a sibling of the theme's quiet prose link (03-typography), not as a
+   different species: same text-decoration mechanics, same 1px, same translucent
+   accent, same pill on hover. One difference carries the whole meaning — the
+   line is DASHED, so the word reads as "there is more to say here" rather than
+   "this goes somewhere".
+
+   It used to be `border-bottom: 1px dotted`, and that was two mistakes. Dotted
+   at 1px renders as a row of faint specks that all but vanish at body size, and
+   a border-bottom sits on the box edge instead of on the text baseline, so it
+   ignored descenders and drifted away from the word. text-decoration with an
+   offset hugs the glyphs and skips ink under them. Dashes read at a glance
+   where dots did not, and against the solid underline of a real link the
+   difference is obvious without being louder.
+   .wrap outranks the :where()-zeroed prose-link selector. */
+.wrap .term{
+  color:inherit; cursor:help;
+  border-bottom:0;             /* the base a:hover border must never resurface */
+  text-decoration:none;
+  /* The pill is the prose link's, to the pixel: same 2px×3px padding, same
+     -3px margin, same 5px radius — so a term hover and a link hover are one
+     gesture. The link fills that box with background-color on hover.
+
+     The dotted rule can't be text-decoration here, because a text-decoration
+     underline spans the whole padded box and the 3px side padding would push
+     the dots past the glyphs (the overhang you saw). So it is drawn as a
+     background LAYER clipped to the content box — it hugs the word while the
+     padding still gives the pill its breathing room. Two layers, two clips:
+       · top  — the dot row, origin+clip content-box (the word)
+       · under — an empty layer, clip border-box, which is where background-color
+                 paints, so the pill covers the padding.
+     A dotted rule (not dashed) sidesteps the phase problem: dashes are owned by
+     the browser and land lopsided on any width, dots have a ~3px period so both
+     ends read even. Full accent, ~2px tall — the old 1px/55% wash vanished. */
+  padding:2px 3px; margin:0 -3px; border-radius:5px;
+  background-color:transparent;
+  background-image:
+    radial-gradient(circle closest-side, var(--accent) 90%, transparent),
+    none;
+  background-origin:content-box, border-box;
+  background-clip:content-box, border-box;
+  background-size:4px 2px, auto;
+  background-position:0 100%, 0 0;
+  background-repeat:repeat-x, no-repeat;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+  transition:color var(--dur) var(--ease),
+             background-color var(--dur) var(--ease);
+}
+/* hover/open does exactly ONE thing: the pill fades in. The word does NOT warm
+   to the accent, on purpose — warming it turned the word the same colour as its
+   own dotted rule, so the dots stopped reading as a separate marker and merged
+   into an all-accent glow. That merge looked like the underline "changing
+   style", a second event competing with the pill. Holding the word colour keeps
+   the dots a constant, quiet marker; the pill alone answers the hover.
+   (This is where a term parts from a prose link, which does warm — a term is a
+   definition, not a destination, and a calmer response fits it.) */
+.wrap .term:hover, .wrap .term:focus-visible, .wrap .term[aria-expanded="true"]{
+  background-color:var(--accent-dim);
+}
+.wrap .term:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+/* a term inside inline code keeps the code chip, loses the dashes */
+.wrap .term code{text-decoration:none}
+
+/* ── the cards block ───────────────────────────────────────────────────────
+   Hidden by default; term.js moves it to <body> and flips it to .is-live. With
+   JS off the <noscript><style> in article/term-cards.html reveals it in place
+   as a plain definition list, which is what every .term anchor links to. */
+.term-cards{display:none}
+
+/* no-JS presentation: a quiet appendix, styled like the article's own asides */
+.term-cards-h{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--text-muted);
+  font-weight:600; margin:52px 0 18px; padding-top:22px;
+  border-top:1px solid var(--border);
+}
+/* in the appendix the cards are read top to bottom, so they take the column
+   rather than shrink-wrapping to their text — a ragged stack of max-content
+   boxes reads as debris, not as a list */
+.term-cards:not(.is-live) .term-card{
+  width:auto; max-width:none; margin:0 0 20px;
+  scroll-margin-top:calc(var(--head-h, 60px) + 20px);
+}
+.term-cards:not(.is-live) .term-card:target{
+  border-color:color-mix(in srgb, var(--cl) 55%, var(--border));
+  box-shadow:0 10px 28px -14px color-mix(in srgb, var(--cl) 28%, transparent);
+}
+.term-cards.is-live{display:block}
+.term-cards.is-live .term-cards-h{display:none}
+
+/* ── the card ──────────────────────────────────────────────────────────────
+   Filled with the page's own canvas — --bg-deep, the exact colour the article
+   is printed on. Two earlier fills failed for the same underlying reason: the
+   stock --bg-raised is meant for small chips and reads as "forgot to paint it"
+   at this size, and tinting the surface with the card's colour turned copper
+   into mud. A canvas fill can do neither. It also tracks any palette for free,
+   because it IS the palette's canvas.
+
+   Nothing lighter, so the card is held by exactly two things: a neutral
+   hairline and depth. The border is not decoration — over running prose a
+   shadow alone smears into the glyphs behind it, and on light palettes, where
+   shadows are faint by nature, the edge would dissolve entirely. */
+.term-card{
+  --cl:var(--accent);
+  position:relative; overflow:hidden;
+  width:max-content; max-width:min(400px, calc(100vw - 32px));
+  /* 14px, not --radius: at 400px wide the 12px corner reads undersized, and
+     the theme's own big surfaces (.toc, .callout) sit at 12 on far narrower
+     boxes. Deliberate local value, not a new token. */
+  border-radius:14px;
+  background:var(--bg-deep);
+  border:1px solid var(--border);
+  /* the theme's floating-layer shadow, split in two: the long throw gives
+     altitude, the short one seats the card so it doesn't hover weightless */
+  box-shadow:0 20px 50px -16px rgba(0,0,0,.62),
+             0 4px 12px -6px rgba(0,0,0,.45);
+}
+/* colour is the author's choice (color="green"), not a semantic type name.
+   It reaches the kicker, its halo dot and the footer link — never the fill. */
+.term-card.c-green{--cl:var(--accent-green)}
+.term-card.c-copper{--cl:var(--accent-copper)}
+.term-card.c-blue{--cl:var(--accent-blue)}
+.term-card.c-gold{--cl:var(--accent-gold)}
+.term-card.c-red{--cl:var(--accent-red)}
+/* the content decides the width: a definition carrying a code block or a figure
+   needs more room than one carrying a sentence. */
+.term-card:has(pre), .term-card:has(img), .term-card:has(table){
+  max-width:min(460px, calc(100vw - 32px));
+}
+/* a pinned card firms its edge — the reader chose it, the card answers */
+.term-card.is-pinned{
+  border-color:color-mix(in srgb, var(--text-strong) 22%, var(--border));
+}
+
+/* header: kicker over title. The DOM keeps the title first for readers and
+   screen readers; column-reverse floats the type label above it, where an
+   overline belongs. The kicker is the theme's mono micro-label with the
+   halo dot from .l1-tip — the one ornament the card allows itself. */
+.term-card-top{
+  display:flex; flex-direction:column-reverse; align-items:flex-start;
+  gap:6px; padding:15px 18px 0;
+}
+.term-card-h{
+  margin:0; min-width:0;
+  font-size:16px; font-weight:650; line-height:1.3;
+  letter-spacing:-.01em; color:var(--text-strong);
+}
+.term-card-h code{font-size:.92em}
+.term-card-k{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; font-weight:600; color:var(--cl);
+  white-space:nowrap;
+}
+.term-card-k::before{
+  content:""; flex:none; width:5px; height:5px; border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 0 3px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+/* body: the author's markdown, one step quieter than the title — the size and
+   colour drop is what separates it from the header, not a rule */
+.term-card-b{
+  padding:9px 18px 15px;
+  max-height:min(46vh, 340px); overflow-y:auto; overscroll-behavior:contain;
+  font-size:14px; line-height:1.6; color:var(--text-secondary);
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb, var(--cl) 18%, var(--border)) transparent;
+}
+.term-card-b > :first-child{margin-top:0}
+.term-card-b > :last-child{margin-bottom:0}
+.term-card-b p{margin:0 0 9px}
+.term-card-b strong{color:var(--text-primary); font-weight:650}
+.term-card-b ul, .term-card-b ol{margin:0 0 9px; padding-left:18px}
+.term-card-b li{margin:0 0 5px}
+.term-card-b img, .term-card-b svg{max-width:100%; height:auto; border-radius:var(--radius-sm); display:block}
+/* the card is filled with --bg-deep, which is also what a code block normally
+   sits on — so the block would vanish into the card. Lift it a step instead:
+   here the code is the inset thing, not the recess. */
+.term-card-b pre{
+  margin:0 0 9px; padding:9px 11px; border-radius:var(--radius-sm);
+  font-size:12px; line-height:1.55; overflow-x:auto;
+  background:var(--bg-base);
+  border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.term-card-b code{font-size:.88em}
+.term-card-b table{font-size:12.5px}
+/* the fade is added by term.js only when the body actually overflows, so a
+   short definition never gets a phantom cut on its last line */
+.term-card-b.is-scrollable{
+  -webkit-mask-image:linear-gradient(180deg, #000 calc(100% - 26px), transparent);
+  mask-image:linear-gradient(180deg, #000 calc(100% - 26px), transparent);
+}
+.term-card-b.is-scrollable.at-end{-webkit-mask-image:none; mask-image:none}
+
+/* footer link: a real row, not a coloured line adrift in the body's whitespace.
+   A full-bleed rule gives it a floor, the whole strip is the target, and the
+   arrow is pushed to the far edge so the thing reads as a row going somewhere.
+   As a bare inline link it looked unfinished — it is the card's only action and
+   it had nothing to sit on. */
+.term-card-more{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:11px 18px;
+  border-top:1px solid var(--border);
+  border-radius:0 0 13px 13px;   /* 14px frame minus the 1px border */
+  font-size:13px; font-weight:600; color:var(--cl);
+  text-decoration:none; border-bottom:0;
+  transition:background-color var(--dur) var(--ease);
+}
+.term-card-more:hover{background:color-mix(in srgb, var(--cl) 10%, transparent)}
+.term-card-more:focus-visible{outline:2px solid var(--cl); outline-offset:-2px}
+.term-card-more .arw{flex:none; font-size:15px; line-height:1}
+/* the back-link only makes sense in the no-JS appendix */
+.term-card-back{
+  display:block; padding:10px 18px 11px;
+  border-top:1px solid var(--border);
+  font-size:12px; color:var(--text-muted); text-decoration:none; border-bottom:0;
+}
+.term-cards.is-live .term-card-back{display:none}
+
+/* ── live (JS) positioning ─────────────────────────────────────────────────
+   z-index 200 matches .l1-tip, so cards and diagram hints share one stacking
+   plane and neither buries the other. */
+.term-cards.is-live .term-card{
+  position:fixed; z-index:200; left:0; top:0;
+  visibility:hidden; opacity:0; transform:translateY(5px) scale(.985);
+  /* visibility flips at the END of the fade-out (0s delayed by .16s) but at the
+     START of the fade-in (0s, no delay). The asymmetry matters: a card pinned by
+     click takes focus one frame later, and a still-hidden element cannot be
+     focused — with visibility interpolated, focus() silently does nothing. */
+  transition:opacity .16s var(--ease), transform .16s var(--ease),
+             border-color .16s var(--ease), visibility 0s .16s;
+}
+.term-cards.is-live .term-card.is-open{
+  visibility:visible; opacity:1; transform:none;
+  transition:opacity .16s var(--ease), transform .16s var(--ease),
+             border-color .16s var(--ease), visibility 0s;
+}
+
+/* ── touch: a bottom sheet ─────────────────────────────────────────────────
+   Hover does not exist here and a popover anchored to a word in a narrow column
+   has nowhere to go, so the card becomes a sheet: full width, thumb-reachable,
+   with the dismiss gesture people already know (tap the scrim, or Escape). */
+@media (max-width:640px){
+  .term-cards.is-live .term-card{
+    left:0; right:0; bottom:0; top:auto !important;
+    width:auto; max-width:none;
+    border-radius:var(--radius) var(--radius) 0 0;
+    /* only the top hairline survives: side borders against the screen edge
+       read as a misfit, and the shadow flips upward — the light is above */
+    border-left:0; border-right:0; border-bottom:0;
+    box-shadow:0 -16px 48px -12px rgba(0,0,0,.5);
+    padding-bottom:env(safe-area-inset-bottom);
+    transform:translateY(14px);
+  }
+  .term-cards.is-live .term-card.is-open{transform:translateY(0)}
+  .term-card-b{max-height:min(52vh, 380px)}
+  /* the scrim only appears with the sheet. A plain rgba(0,0,0,.5) is nearly
+     invisible on this theme's dark palettes — black over near-black — so the
+     separation comes from a blur, with the wash only deepening it. */
+  .term-scrim{
+    position:fixed; inset:0; z-index:199;
+    background:rgba(0,0,0,.45);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    opacity:0; visibility:hidden;
+    transition:opacity .16s var(--ease), visibility .16s;
+  }
+  .term-scrim.is-open{opacity:1; visibility:visible}
+}
+@media (min-width:641px){ .term-scrim{display:none} }
+
+@media (prefers-reduced-motion:reduce){
+  .wrap .term{transition:none}
+  .term-cards.is-live .term-card{transition:opacity .01s linear; transform:none}
+  .term-cards.is-live .term-card.is-open{transform:none}
+  .term-scrim{transition:none}
+}
+
+/* print: the cards are already a definition appendix — show them, drop the
+   chrome that only means something on screen */
+@media print{
+  .term-cards, .term-cards.is-live{display:block; position:static}
+  .term-cards.is-live .term-cards-h{display:block}
+  .term-cards .term-card{
+    position:static !important; visibility:visible; opacity:1; transform:none;
+    width:auto; max-width:none; margin:0 0 14px;
+    box-shadow:none; break-inside:avoid;
+  }
+  .term-card-b{max-height:none; overflow:visible}
+  .term-card-back{display:none}
+  .wrap .term{border-bottom:1px dotted #999; background:none; color:inherit}
+}

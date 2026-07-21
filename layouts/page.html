@@ -44,6 +44,11 @@
 {{ if $cut }}{{ .ContentWithoutSummary }}{{ else }}{{ .Content }}{{ end }}
 </div>
 {{ end }}
+{{- /* Definition cards for {{< term >}}. AFTER .Content — the shortcode fills
+       the store as the content renders. Outside data-pagefind-body on purpose:
+       a definition is an aside, and indexing it would sit the same sentence in
+       two search results. */ -}}
+{{ partial "article/term-cards.html" . }}
 {{ partial "article/series-bridge.html" . }}
 {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
   </main>
@@ -58,6 +63,7 @@
   {{ with .Params.kicker }}<span data-pagefind-meta="crumb:{{ . }}"></span>{{ end }}
   {{ .Content }}
   </div>
+  {{ partial "article/term-cards.html" . }}
   {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
 </main>
 {{- end -}}
