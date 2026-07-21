@@ -149,7 +149,7 @@ search index**. Drop the flag and write the body when the guide is ready.
 
 ## Shortcodes {#shortcodes}
 
-Five, and that is the whole set.
+Seven, and that is the whole set.
 
 ### callout — `{{</* callout type="trap" */>}}` {#callout}
 
@@ -163,6 +163,84 @@ Markdown. `type` defaults to `note`.
 A slice header is three words: pointer, length, capacity.
 {{</* /callout */>}}
 ```
+
+### fold — `{{</* fold icon="video" title="…" */>}}` {#fold}
+
+A quiet, collapsible inline note. Collapsed it is a single line — icon,
+summary, and a "Подробнее ⌄" toggle — with no border or background, so it
+reads as part of the prose; a click slides the panel open by height. Use it
+for an aside the reader can take or skip: a video version, a caveat, a full
+listing. The body is Markdown, and `title=` is inline Markdown — a link in
+the summary works, and clicking it does not toggle the panel.
+
+```md
+{{</* fold icon="video" title="There is also a [video version](https://youtu.be/…)." */>}}
+Watch first, then read to cement it — some things land better on screen,
+others in text.
+{{</* /fold */>}}
+```
+
+| Parameter | Meaning |
+|---|---|
+| `title=` | the summary line, inline Markdown (required) |
+| `icon=` | leading glyph from the set below; default `info`, `none` to omit |
+| `more=` | collapsed toggle label (default `Подробнее`) |
+| `less=` | expanded toggle label (default `Свернуть`) |
+| `open=` | `true` to render already expanded |
+
+Icons: `video` · `info` · `tip` · `book` · `code` · `terminal` · `warning` ·
+`star` · `link` · `note`.
+
+The panel animates its height — a real slide, not a fade — via
+`interpolate-size` on `:root` (set in `00-tokens.css`); where a browser lacks
+it the panel snaps open. Labels default to Russian; override per call.
+
+### term — `{{</* term "mcache" */>}}` {#term}
+
+A word in the sentence with a full definition card behind it: hover opens the
+card, a click pins it so you can read and follow the link inside, Escape closes.
+The body is Markdown — bold, inline code, lists, links, code blocks, images.
+
+```md
+Every P owns an {{</* term "mcache" */>}}
+A per-P cache of small objects. Allocating from it takes **not a single
+atomic** — the fast path never touches shared state.
+{{</* /term */>}}, and hitting it is the cheapest allocation there is.
+```
+
+| Parameter | Meaning |
+|---|---|
+| *positional 0* or `word=` | the word as it reads in the sentence (required) |
+| `title=` | the card's heading, when it differs from the word — defaults to the word |
+| `kind=` | free-text mono label ("runtime struct", "hardware"), omit for none |
+| `color=` | `accent` (default, the brand colour) \| `green` \| `copper` \| `blue` \| `gold` \| `red` |
+| `href=` | target of the optional "read more" link; internal paths resolve to a permalink |
+| `more=` | that link's text (default: i18n `term_more`) |
+
+**Hugo will not let you mix positional and named parameters.** So it is either
+the short form `{{</* term "mcache" */>}}` or the fully named form — the moment
+you need `title=` or any other parameter, the word moves to `word=`:
+
+```md
+the data lives in the {{</* term word="core's caches" title="CPU cache"
+                           kind="hardware" color="green"
+                           href="/inside/caches/" more="Deep dive: the memory hierarchy" */>}}
+Three levels — L1, L2, L3. The closer to the core, the smaller and faster.
+{{</* /term */>}}, not in RAM.
+```
+
+Two things worth knowing:
+
+- **The card is not rendered where you write it.** A paragraph cannot legally
+  contain a `<pre>` or a `<div>` — the HTML parser would close it and tear the
+  paragraph apart — so the shortcode leaves an inline link in the prose and the
+  cards are collected and rendered after the article body. With JavaScript off
+  they show up there as a plain "Definitions" list, and every word links to its
+  own. That is the whole no-JS story, and it is also what prints.
+- **Repeating a term is free.** The card's id is a hash of word + definition, so
+  the same word with the same definition used five times shares one card, and
+  every mention opens it. Change the definition and you get a second card — if
+  that was not what you meant, keep the wording identical.
 
 ### widget — `{{</* widget id="w-x" */>}}` {#widget}
 

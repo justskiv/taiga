@@ -58,17 +58,79 @@ A Markdown table; render-table attaches the `.tbl-wrap` wrapper:
 The main idea with the default label. Inside — **markdown** and `code`.
 {{< /callout >}}
 
-{{< callout type="trap" >}}
+{{< callout color="copper" >}}
 A trap with the default label.
 {{< /callout >}}
 
-{{< callout type="internals" label="Under the hood: a custom label" >}}
+{{< callout color="green" label="Under the hood: a custom label" >}}
 An "under the hood" callout with an overridden label.
 {{< /callout >}}
 
 {{< callout type="note" >}}
 A historical footnote — the quietest type.
 {{< /callout >}}
+
+## Fold {#fold}
+
+A collapsible inline note — icon, summary, and a toggle; the panel slides open
+by height. `title=` is inline Markdown, the body is Markdown.
+
+{{< fold icon="video" title="There is also a [video version](https://youtu.be/dQw4w9WgXcQ) of this guide." >}}
+Watch first, then read to cement it — some things land better on screen,
+others in text. The link above opens the video **without** toggling the panel.
+{{< /fold >}}
+
+{{< fold icon="tip" title="A simplification made on purpose." >}}
+The real thing is a little more involved, but the simpler model is right in
+the essentials — the details come later.
+{{< /fold >}}
+
+{{< fold icon="code" more="Show code" less="Hide" open="true" title="A full listing, rendered already open." >}}
+```go
+func main() { println("hello") }
+```
+{{< /fold >}}
+
+## Terms {#terms}
+
+Hover an underlined word and its definition opens as a card; a click pins the
+card so you can read it and follow the link inside. With JavaScript off every
+definition sits as a list at the foot of the page, and each word links to its own.
+
+The plainest form — a word and a definition, default type:
+every P owns an {{< term "mcache" >}}
+A per-P cache of small objects. Allocating from it takes **not a single atomic** —
+that is the whole point: the fast path never touches shared state.
+{{< /term >}}, and hitting it is the cheapest allocation there is.
+
+With a type label, its colour, and a link in the card's footer:
+the compiler inserts a {{< term word="write barrier" title="Write barrier" kind="trap" color="copper" href="/inside/anatomy/palette-is-a-file/" more="Deep dive: barriers and the GC" >}}
+A snippet the runtime runs **before every pointer write** into the heap while the
+GC is running concurrently.
+
+```go
+// simplified: runtime/mbarrier.go
+func writePointer(slot *unsafe.Pointer, ptr unsafe.Pointer) {
+	shade(*slot)        // shade the old value grey
+	*slot = ptr
+}
+```
+
+Hence the invariant: a pointer written while the GC runs can never be lost.
+{{< /term >}} — which is why a pointer write costs more than an `int` write.
+
+When the word reads differently in the sentence than it should in the card's
+heading, `title=` splits the two:
+the data lives in the {{< term word="core's caches" title="CPU cache" kind="hardware" color="green" >}}
+Three levels — L1, L2, L3. The closer to the core, the smaller and faster:
+
+- **L1** — tens of kilobytes, ~4 cycles
+- **L2** — hundreds of kilobytes, ~12 cycles
+- **L3** — megabytes, shared per socket, ~40 cycles
+
+A miss past L3 means a trip to main memory — hundreds of cycles, and that trip
+is exactly what the word "locality" is hiding.
+{{< /term >}}, not in RAM.
 
 ## Diagrams {#diagrams}
 
