@@ -37,6 +37,16 @@ enableGitInfo = false
 
 timeZone = "Europe/Moscow"
 
+# Only Markdown is a renderable content type. Widget figures live as .html
+# page-bundle resources (widgets/<id>/figure.html) that the widget shortcode
+# reads via .Resources.Get; without this, Hugo also treats those .html files as
+# renderable pages, which crashes `hugo server` on edit and makes the resource's
+# .Content go through the HTML renderer instead of staying raw. None of the
+# .html under content/ contains Go template markup, so dropping them as pages is
+# safe.
+[contentTypes]
+  [contentTypes."text/markdown"]
+
 # ── Languages ────────────────────────────────────────────────────────────────
 # Per-language `params` and `menus` override the site-wide ones for that language.
 # Everything NOT repeated here (defaultTheme, featured, rubricSections, …) is

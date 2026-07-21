@@ -1,0 +1,14 @@
+/* reference/widget-anatomy — shared widget styles (bundle level).
+
+   Concatenated before every widgets/<id>/*.css of this page bundle (Name
+   order, "_shared" sorts first — see themes/taiga/layouts/_partials/head/css.html).
+
+   .wa-tag is used by BOTH widgets in this bundle: the static figure below
+   labels its files with it, and w-anatomy-toggle's badge is one too — a real
+   "referenced by 2+ widgets → shared" case (migration recipe, rule 2), not a
+   contrived one. */
+.wa-tag {
+  display: inline-block; margin-top: 8px; padding: 2px 9px; border-radius: 999px;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .02em;
+  color: var(--text-secondary); border: 1px solid var(--border); background: var(--bg-surface);
+}

@@ -1,0 +1,15 @@
+<!--
+  No-JS fallback for widget "w-anatomy-toggle" — bundle: reference/widget-anatomy.
+
+  Rendered into the mount at build time; replaced by widget.js the moment JS
+  runs. Pulled from this page resource because the {{< widget id="w-anatomy-toggle" >}}
+  call in index.md carries no inline body — the OTHER way to give a widget a
+  fallback, next to the inline-body form used elsewhere on this demo site
+  (e.g. playground/index.md's {{< widget id="w-reflex" >}}…{{< /widget >}}).
+  Both forms end up in the same "w-root" mount; this one just keeps the
+  markup out of the prose and colocated with widget.js/widget.css instead.
+-->
+<div class="w-row">
+  <span class="wa-tag">figure.html</span>
+</div>
+<div class="w-cap">This is the static fallback. Turn on JS and click "toggle".</div>

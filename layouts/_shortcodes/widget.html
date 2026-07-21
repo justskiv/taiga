@@ -1,21 +1,33 @@
-{{- /* Interactive widget figure. Three forms (ARCHITECTURE §4a):
-       1. {{< widget id="w-x" note="…" >}}          → empty mount <div id class="w-root">,
-                                                        the page's widgets.js fills it.
-       2. {{< widget id="w-x" note="…" >}}HTML{{< /widget >}} → HTML sits inside the mount
-                                                        as a static/no-JS fallback.
-       3. {{< widget note="…" >}}HTML{{< /widget >}} → no id: raw HTML lives directly in
-                                                        the figure (self-wiring widgets like
-                                                        the drag builder that target their own ids).
-       cap defaults to the i18n "widget_cap" («Play»); note is the muted
-       instruction after it. */ -}}
+{{- /* Interactive widget figure. Four forms (ARCHITECTURE §4a):
+       1. {{< widget id="w-x" note="…" >}}HTML{{< /widget >}}
+             inline HTML → static/no-JS fallback inside the mount.
+       2. {{< widget id="w-x" note="…" >}}{{< /widget >}}  or  {{< widget id="w-x" … />}}
+             no inline body → the fallback DOM is pulled from the page-bundle
+             resource  widgets/<id>/figure.html. This keeps the big fallback
+             sheets out of the prose in index.md, and colocates each figure
+             with its widget's own widget.js / widget.css in widgets/<id>/.
+       3. {{< widget id="w-x" … />}} with no such resource → empty mount <div>,
+             filled at runtime by the page bundle's widget script (widgets/…).
+       4. {{< widget note="…" >}}HTML{{< /widget >}}  (no id) → raw HTML in the
+             figure; self-wiring widgets target their own ids.
+
+       A leading <!-- … --> header comment inside a figure file is metadata and
+       is stripped here so it never reaches the DOM. cap defaults to the i18n
+       "widget_cap" («Play»); note is the muted instruction after it. */ -}}
 {{- $id := .Get "id" -}}
 {{- $cap := .Get "cap" | default (i18n "widget_cap") -}}
 {{- $note := .Get "note" -}}
+{{- $inner := .Inner -}}
+{{- if and $id (not (trim (string $inner) " \n\r\t")) -}}
+  {{- with .Page.Resources.Get (printf "widgets/%s/figure.html" $id) -}}
+    {{- $inner = .Content | replaceRE `(?s)\A\s*<!--.*?-->\s*` "" -}}
+  {{- end -}}
+{{- end -}}
 <figure class="widget">
 <figcaption>{{ $cap }}{{ with $note }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
 {{- if $id }}
-<div id="{{ $id }}" class="w-root">{{ with .Inner }}{{ . | safeHTML }}{{ end }}</div>
+<div id="{{ $id }}" class="w-root">{{ with $inner }}{{ . | safeHTML }}{{ end }}</div>
 {{- else }}
-{{ .Inner | safeHTML }}
+{{ $inner | safeHTML }}
 {{- end }}
 </figure>

@@ -1,0 +1,6 @@
+/* reference/widget-anatomy — w-anatomy-toggle: only this widget uses .wa-hl,
+   the accent state of the shared .wa-tag pill (widgets/_shared/shared.css)
+   while it names widget.js instead of figure.html. */
+.wa-hl {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-dim);
+}

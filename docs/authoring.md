@@ -3,7 +3,7 @@
 # Authoring a guide
 
 A guide is a **leaf bundle**: a folder with `index.md` and, when it has live
-illustrations, a `widgets.js` next to it. This page is the contract for writing
+illustrations, a `widgets/` folder next to it. This page is the contract for writing
 one — front matter, shortcodes, code, links, diagrams, widgets, covers,
 translations and voice.
 
@@ -15,9 +15,10 @@ hugo new content howto/handbook/my-guide --kind guides   # part of the "handbook
 ```
 
 You get a bundle skeleton — `index.md` with the core fields filled in plus a stub
-`widgets.js`. **Note the path has no `/index.md`**: pass the bundle folder, or
-Hugo drops into single-file mode and won't copy the archetype's sibling files.
-A folder with no `widgets.js` is the first sign of that mistake.
+`widgets/w-example/widget.js`. **Note the path has no `/index.md`**: pass the
+bundle folder, or Hugo drops into single-file mode and won't copy the
+archetype's sibling files. A folder with no `widgets/` is the first sign of
+that mistake.
 
 The first path segment must be a section listed in `params.rubricSections` —
 that is what makes the page a guide (two rails, kicker, meta chips, TOC, series
@@ -249,11 +250,14 @@ Three forms (see [Widgets](#widgets)):
 ```md
 {{</* widget id="w-escape" cap="Play" note="— drag the slider, watch the heap" */>}}
 ```
-- **empty mount** (self-closed): renders the caption + an empty `.w-root` your
-  `widgets.js` fills. `cap` overrides the default (i18n `widget_cap`); `note` is
-  the muted aside after it.
-- **static fallback** (`id` + inner): the inner HTML lives inside the mount until
-  JS replaces it — and stays if JS is off.
+- **self-closed, with `id`**: renders the caption + a `.w-root` mount. If the
+  bundle carries a page resource `widgets/w-escape/figure.html`, its content
+  fills the mount as the no-JS view; with no such resource the mount starts
+  empty and `widgets/w-escape/widget.js` fills it once it runs. `cap` overrides
+  the default caption (i18n `widget_cap`); `note` is the muted aside after it.
+- **with `id` and an inner body**: the inner HTML is the no-JS view instead of a
+  `figure.html` resource — for a fallback short enough to keep next to the
+  shortcode rather than in its own file.
 - **raw** (no `id`, inner only): the inner HTML is dropped straight into the figure.
 
 ### bigcard — `{{</* bigcard href="/playground/" k="Playground →" t="…" s="…" */>}}` {#bigcard}
@@ -340,10 +344,13 @@ The theme has no images in guides — memory diagrams are hand-built HTML inside
 A live illustration is two touches, no templates or head edits:
 
 1. In the text: the `widget` shortcode above.
-2. Next to `index.md`: a `widgets.js` (and optional `widgets.css`). The theme
-   finds, minifies, fingerprints and loads it **only on this page**.
+2. Next to `index.md`: a `widgets/<id>/` folder — `widget.js` and, if the
+   building-block classes below aren't enough, `widget.css`. The theme finds
+   every `widgets/**.js` and `widgets/**.css` in the bundle, concatenates each
+   in filename order, builds and fingerprints them, and loads the result
+   **only on this page**.
 
-Register each figure by its mount id:
+Register each figure by its mount id, in `widgets/w-escape/widget.js`:
 
 ```js
 Taiga.widget("w-escape", function (root) {
@@ -351,11 +358,22 @@ Taiga.widget("w-escape", function (root) {
 });
 ```
 
-`Taiga.widget` is a tiny runtime in the theme. It waits for the DOM, finds the
-mount by id and hands it to your callback inside a `try/catch`: a widget that
-throws logs to the console and doesn't take down its neighbours; a missing mount
-(shortcode removed) is skipped silently. The id in the shortcode and in
-`Taiga.widget(…)` must match character for character.
+`Taiga.widget` is a tiny runtime in the theme, and this call is the one thing
+that hasn't changed shape: it still waits for the DOM, finds the mount by id
+and hands it to your callback inside a `try/catch` — a widget that throws logs
+to the console and doesn't take down its neighbours; a missing mount (shortcode
+removed) is skipped silently. The id in the shortcode and in `Taiga.widget(…)`
+must match character for character.
+
+A bundle with more than one widget can add a `widgets/_shared/` folder for
+code or classes several of them need — a `lib.js` (the runtime guard plus any
+shared helpers) and a `shared.css`. The build sorts by filename, and `_shared`
+always sorts ahead of every `w-*` folder, so `_shared/lib.js` lands first in
+the concatenated script and its declarations are already in scope for every
+`widgets/<id>/widget.js` after it — they're fragments of one build, not
+separate files each with a closure of their own. A worked, commented example of
+the whole layout — a static widget, an interactive one, and `_shared/` — sits
+on the demo's `reference/widget-anatomy` page.
 
 Use the theme's building-block classes so the widget looks native without a line
 of your own CSS: `.w-row` (control row), `.w-btn` (`.primary`/`.ghost`),
@@ -364,13 +382,13 @@ of your own CSS: `.w-row` (control row), `.w-btn` (`.primary`/`.ghost`),
 a `.nval` readout. A widget should work offline with no dependencies and have a
 clear initial state.
 
-### One widgets.js, two languages {#widgets-i18n}
+### One widgets/ folder, two languages {#widgets-i18n}
 
-**A bundle's `widgets.js` is shared across translations.** Hugo has no
-`widgets.ru.js`: `index.md` and `index.ru.md` are two pages of *one* leaf bundle,
-and the bundle has exactly one `widgets.js` resource. So a widget with hardcoded
-strings shows the wrong language on half of a bilingual site — and nothing warns
-you.
+**A bundle's `widgets/` folder is shared across translations.** Hugo has no
+per-language variant of a page resource: `index.md` and `index.ru.md` are two
+pages of *one* leaf bundle, and the bundle has exactly one `widgets/` folder. So
+a widget with hardcoded strings shows the wrong language on half of a bilingual
+site — and nothing warns you.
 
 The demo solves it by branching on the document language, which the theme sets on
 `<html lang>`:
@@ -389,10 +407,11 @@ Taiga.widget("w-series-math", function (root) {
 Keep the strings in one object per language at the top of the widget and never
 inline a literal further down — that is the whole discipline. `indexOf("ru") === 0`
 rather than `=== "ru"` so a `languageCode` like `ru-RU` still matches. See
-`exampleSite/content/inside/anatomy/series-knows-itself/widgets.js` for the full pattern.
+`exampleSite/content/inside/anatomy/series-knows-itself/widgets/w-series-math/widget.js`
+for the full pattern.
 
-The same holds for every other bundle resource: an `og.png` override and a
-`widgets.css` are one file for both languages too.
+The same holds for every other bundle resource: an `og.png` override, a
+`figure.html`, and everything under `widgets/` are one copy for both languages.
 
 ## Covers (OG images) {#covers-og-images}
 
@@ -429,7 +448,7 @@ Content pairs **by file suffix**, inside the same bundle:
 content/inside/anatomy/series-knows-itself/
   index.md        ← default language
   index.ru.md     ← the translation
-  widgets.js      ← shared by both (see above)
+  widgets/        ← shared by both (see above)
 ```
 
 Rubric and series index pages pair the same way: `_index.md` ↔ `_index.ru.md`.

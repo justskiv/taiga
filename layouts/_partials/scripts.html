@@ -1,6 +1,6 @@
 {{- /* Main bundle (esbuild resolves the module imports into one iife), deferred
        at the end of body. prod: minify + fingerprint + integrity. A page bundle
-       may ship its own widgets.js; it is built and attached after main. */ -}}
+       may ship its own widgets/ folder; it is built and attached after main. */ -}}
 {{- $opts := dict "minify" hugo.IsProduction "target" "es2018" "format" "iife" "sourceMap" "" -}}
 {{- with resources.Get "js/main.js" -}}
   {{- with . | js.Build $opts -}}
@@ -13,8 +13,19 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- with .Resources.Get "widgets.js" -}}
-  {{- with . | js.Build (dict "minify" hugo.IsProduction "target" "es2018" "sourceMap" "") -}}
+{{- /* page-bundle widgets: one folder per widget under widgets/, plus a _shared/
+       level for the guard, helpers and factories the widgets share. Concatenated
+       in name order (_shared sorts before w-*, so shared code and the single
+       `var W = window.Taiga` guard sit above every registration) and built as one
+       iife — the widget files are fragments of that shared scope, not their own
+       closures. Attached after main so Taiga.widget already exists. */ -}}
+{{- /* Concat target MUST be page-unique — Hugo caches concatenated resources by
+       target path, so a fixed name collides across pages (every page would serve
+       whichever page's bundle won the cache). Key it by the page's UniqueID. */ -}}
+{{- $wjs := sort (.Resources.Match "widgets/**.js") "Name" -}}
+{{- with $wjs -}}
+  {{- $bundle := . | resources.Concat (printf "widgets/bundle-%s.js" $.File.UniqueID) -}}
+  {{- with $bundle | js.Build (dict "minify" hugo.IsProduction "target" "es2018" "format" "iife" "sourceMap" "") -}}
     {{- if hugo.IsProduction -}}
       {{- with . | fingerprint "sha256" }}
   <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous" defer></script>

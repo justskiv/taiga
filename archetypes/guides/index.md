@@ -17,4 +17,4 @@ version: "go1.26"         # free-form "tested on" chip, e.g. "go1.26", "PostgreS
 
 The lead and the body of the guide. Code blocks are plain fenced ```go … ```
 (Chroma highlights them). Live illustrations go through the `widget` shortcode,
-with their code in a `widgets.js` next to this file.
+with their code in `widgets/<id>/widget.js` next to this file.

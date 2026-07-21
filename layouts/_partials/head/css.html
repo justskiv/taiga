@@ -16,13 +16,20 @@
 {{- else -}}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 {{- end -}}
-{{- /* page-bundle widget styles: minified, fingerprinted, linked only here */ -}}
-{{- with .Resources.Get "widgets.css" -}}
+{{- /* page-bundle widget styles: one folder per widget under widgets/, plus a
+       _shared/ level for classes several widgets use. Concatenated in name order
+       (_shared sorts before w-*), minified + fingerprinted, linked only here.
+       The Concat target MUST be page-unique: Hugo caches concatenated resources
+       by target path, so a fixed name would collide across pages — every page
+       would serve whichever bundle won the cache. Key it by the page's UniqueID. */ -}}
+{{- $wcss := sort (.Resources.Match "widgets/**.css") "Name" -}}
+{{- with $wcss -}}
+  {{- $bundle := . | resources.Concat (printf "widgets/bundle-%s.css" $.File.UniqueID) -}}
   {{- if hugo.IsProduction -}}
-    {{- with . | minify | fingerprint "sha256" }}
+    {{- with $bundle | minify | fingerprint "sha256" }}
   <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
     {{- end -}}
   {{- else -}}
-  <link rel="stylesheet" href="{{ .RelPermalink }}">
+  <link rel="stylesheet" href="{{ $bundle.RelPermalink }}">
   {{- end -}}
 {{- end -}}

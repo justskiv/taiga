@@ -55,10 +55,12 @@ whole design, and every feature below is built to live inside it.
 
 ## Features
 
-- **Interactive widgets as content.** Drop a `widgets.js` next to a guide's
-  `index.md`: it is found, minified and loaded on that page only. One
-  `{{< widget >}}` in the text mounts it, and the `Taiga.widget` runtime isolates
-  failures so one broken widget never takes down its neighbours.
+- **Interactive widgets as content.** Drop `widgets/<id>/{widget.js, widget.css}`
+  next to a guide's `index.md` — one folder per widget, plus a `_shared/` folder
+  for code more than one of them needs — and the bundle is found, built and
+  loaded on that page only. One `{{< widget >}}` in the text mounts it,
+  `widgets/<id>/figure.html` supplies the no-JS view, and the `Taiga.widget`
+  runtime isolates failures so one broken widget never takes down its neighbours.
 - **A broken internal link fails the build.** A render hook checks every internal
   link against real pages (`linkcheck = "error" | "warn"`).
 - **Open Graph covers with no external service.** `images.Text` draws a cover per

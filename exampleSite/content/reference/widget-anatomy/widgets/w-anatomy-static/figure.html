@@ -1,0 +1,39 @@
+<!--
+  Static figure for widget "w-anatomy-static" — bundle: reference/widget-anatomy.
+
+  No widget.js at all for this id: it is never registered with Taiga.widget,
+  so the mount holds exactly this markup, forever — there is nothing for JS
+  to replace. That is the whole point of the "static" class of widget: a
+  figure.html with no matching widget.js.
+
+  Content-wise this figure draws the real widgets/ folder of the very bundle
+  it lives in (the tree below matches what `find widget-anatomy/widgets -type f`
+  prints). Built entirely from the theme's own diagram vocabulary —
+  .mem/.byte-strip/.byte-box/.seg-tag, all defined in the theme's own
+  assets/css/08-diagrams.css — plus this bundle's own .wa-tag pill
+  (widgets/_shared/shared.css, shared with w-anatomy-toggle below). No
+  widget.css of its own.
+-->
+<div class="mem">
+  <div class="mem-lab">widgets/ <span class="tot">→ this page bundle's own widget folder</span></div>
+
+  <div class="mem-lab">_shared/ <span class="tot">shared across every widget on this page</span></div>
+  <div class="byte-strip">
+    <div class="byte-seg"><div class="cells"><div class="byte-box f1" data-tip="lib.js · the guard, plus one helper (h) in scope for every widget.js below">js</div></div><div class="seg-tag">lib.js</div></div>
+    <div class="byte-seg"><div class="cells"><div class="byte-box f1" data-tip="shared.css · .wa-tag — used by this figure and by w-anatomy-toggle below">css</div></div><div class="seg-tag">shared.css</div></div>
+  </div>
+
+  <div class="mem-lab">w-anatomy-static/ <span class="tot">this widget — no JS, ever</span></div>
+  <div class="byte-strip">
+    <div class="byte-seg"><div class="cells"><div class="byte-box f0" data-tip="figure.html · this very file · the whole widget, rendered once at build time">fig</div></div><div class="seg-tag">figure.html</div></div>
+  </div>
+
+  <div class="mem-lab">w-anatomy-toggle/ <span class="tot">the widget below — JS takes over once it loads</span></div>
+  <div class="byte-strip">
+    <div class="byte-seg"><div class="cells"><div class="byte-box f0" data-tip="figure.html · the no-JS fallback, shown until widget.js runs">fig</div></div><div class="seg-tag">figure.html</div></div>
+    <div class="byte-seg"><div class="cells"><div class="byte-box f1" data-tip="widget.js · registers itself with Taiga.widget('w-anatomy-toggle', fn)">js</div></div><div class="seg-tag">widget.js</div></div>
+    <div class="byte-seg"><div class="cells"><div class="byte-box f2" data-tip="widget.css · one class only this widget uses">css</div></div><div class="seg-tag">widget.css</div></div>
+  </div>
+
+  <span class="wa-tag">static · no JS</span>
+</div>

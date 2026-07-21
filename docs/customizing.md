@@ -313,12 +313,14 @@ section built only from stock mechanisms. The demo's "Playground" is the worked
 example:
 
 - **the page** is `content/playground/index.md` — ordinary Markdown, an ordinary
-  leaf bundle — with a big interactive as a `widget` shortcode plus `widgets.js`
-  in the same bundle (the widget mechanism works for any bundle, not just guides);
+  leaf bundle — with a big interactive as a `widget` shortcode plus
+  `widgets/w-reflex/widget.js` in the same bundle (the widget mechanism works
+  for any bundle, not just guides);
 - **the nav badge** is `[[menus.main]]` with `params.badge = "β"` — a generic
   menu feature, not a "playground feature";
 - **section-only styles**, if the section needs any, go in that bundle as
-  `widgets.css` — the theme links it on that page alone and carries none itself;
+  `widgets/w-reflex/widget.css` (or `widgets/_shared/shared.css` for more than
+  one widget) — the theme links them on that page alone and carries none itself;
 - in search and the sitemap it's just another page.
 
 That's the template for any custom section: the theme stays clean, your site
