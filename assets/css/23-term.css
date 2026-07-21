@@ -173,19 +173,23 @@
   box-shadow:0 0 0 3px color-mix(in srgb, currentColor 20%, transparent);
 }
 
-/* body: the author's markdown, one step quieter than the title — the size and
-   colour drop is what separates it from the header, not a rule */
+/* body: the author's markdown at full reading contrast (--text-primary, the
+   body-copy colour), NOT the muted --text-secondary. The card is content the
+   reader deliberately opened — dimming it below the surrounding prose is
+   backwards. The header already separates itself by the title's weight and the
+   coloured kicker; the body needs no dimming to sit apart. On the --bg-deep
+   fill the secondary tone read greyer still. */
 .term-card-b{
   padding:9px 18px 15px;
   max-height:min(46vh, 340px); overflow-y:auto; overscroll-behavior:contain;
-  font-size:14px; line-height:1.6; color:var(--text-secondary);
+  font-size:14px; line-height:1.6; color:var(--text-primary);
   scrollbar-width:thin;
   scrollbar-color:color-mix(in srgb, var(--cl) 18%, var(--border)) transparent;
 }
 .term-card-b > :first-child{margin-top:0}
 .term-card-b > :last-child{margin-bottom:0}
 .term-card-b p{margin:0 0 9px}
-.term-card-b strong{color:var(--text-primary); font-weight:650}
+.term-card-b strong{color:var(--text-strong); font-weight:650}
 .term-card-b ul, .term-card-b ol{margin:0 0 9px; padding-left:18px}
 .term-card-b li{margin:0 0 5px}
 .term-card-b img, .term-card-b svg{max-width:100%; height:auto; border-radius:var(--radius-sm); display:block}
