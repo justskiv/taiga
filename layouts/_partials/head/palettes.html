@@ -27,16 +27,22 @@
   {{- end -}}
 {{- end -}}
 {{- $css := "" -}}
+{{- /* Light palettes opt out of the brand-accent override: --accent doubles as
+       the CTA *background* under near-white --bg-deep text, so a bright brand
+       accent fails contrast there. A light palette keeps its own (dark) accent
+       from its data file. See light.toml. */ -}}
 {{- $root := index $themes $default -}}
 {{- with $root -}}
+  {{- $rov := $ov -}}{{- if .light }}{{ $rov = dict }}{{ end -}}
   {{- $vars := "" -}}
-  {{- range $k, $v := . -}}{{- if not (in $skip $k) -}}{{- with index $ov $k }}{{ $v = . }}{{ end -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
+  {{- range $k, $v := . -}}{{- if not (in $skip $k) -}}{{- with index $rov $k }}{{ $v = . }}{{ end -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
   {{- $css = printf ":root{%s}" $vars -}}
 {{- end -}}
 {{- range $id, $t := $themes -}}
   {{- if not $t.disabled -}}
+    {{- $pov := $ov -}}{{- if $t.light }}{{ $pov = dict }}{{ end -}}
     {{- $vars := "" -}}
-    {{- range $k, $v := $t -}}{{- if not (in $skip $k) -}}{{- with index $ov $k }}{{ $v = . }}{{ end -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
+    {{- range $k, $v := $t -}}{{- if not (in $skip $k) -}}{{- with index $pov $k }}{{ $v = . }}{{ end -}}{{- $vars = printf "%s--%s:%s;" $vars $k $v -}}{{- end -}}{{- end -}}
     {{- $css = printf "%s\n[data-theme=%q]{%s}" $css $id $vars -}}
   {{- end -}}
 {{- end -}}

@@ -1,18 +1,25 @@
-name = "Obsidian"
+name = { en = "Graphite", ru = "Графит" }   # was "Obsidian"
 weight = 30
 
-# surface / text ramp (swapped per theme)
-"bg-deep" = "#161616"
-"bg-base" = "#1e1e1e"
-"bg-surface" = "#262626"
-"bg-raised" = "#333333"
-"bg-hover" = "#2d2d2d"
-"border" = "#363636"
-"text-primary" = "#e0e0e0"
-"text-secondary" = "#bcbcbc"
-"text-muted" = "#909090"
-"text-ghost" = "#8a8a8a"
-"text-strong" = "#f1f3f6"
+# surface / text ramp — neutral graphite reading theme, set to the AUTHENTIC
+# Obsidian "Minimal" (dark) default: canvas #262626 (Minimal --base-l 15%), body
+# text #d1d1d1 (Minimal --tx1 82%) = 9.9:1. Pinned by the site owner to match the
+# Minimal reference exactly. (Reading-product research found real readers cluster
+# a bit darker — Apple Books Dark #1c1c1e, Medium #121212 — so #1c1c1c is the
+# darker alternative if ever wanted; the owner chose the canonical Minimal value.)
+# Body is painted on --bg-deep, so bg-deep IS the reading canvas. Off near-black,
+# off near-white; headings carry weight, not extra brightness. Old values noted.
+"bg-deep" = "#262626"        # was #161616 (canvas; authentic Obsidian Minimal default)
+"bg-base" = "#2b2b2b"        # was #1e1e1e
+"bg-surface" = "#2f2f2f"     # was #262626
+"bg-raised" = "#3a3a3a"      # was #333333
+"bg-hover" = "#343434"       # was #2d2d2d
+"border" = "#3f3f3f"         # was #363636
+"text-primary" = "#d1d1d1"   # was #e0e0e0 (Obsidian Minimal tx1; 9.9:1 on canvas)
+"text-secondary" = "#a3a3a3" # was #bcbcbc
+"text-muted" = "#8f8f8f"     # was #909090
+"text-ghost" = "#6b6b6b"     # was #8a8a8a
+"text-strong" = "#e4e4e4"    # was #f1f3f6 (heading via weight, not near-white)
 "gtok-str" = "#cbb279"
 
 # brand accents (constant across built-in palettes; overridable)
@@ -28,3 +35,5 @@ weight = 30
 "accent-blue-dim" = "rgba(107,164,201,.16)"
 "accent-gold" = "#d4a24e"
 "accent-gold-dim" = "rgba(212,162,78,.18)"
+"accent-red" = "#d2695a"
+"accent-red-dim" = "rgba(210,105,90,.16)"

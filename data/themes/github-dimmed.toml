@@ -1,18 +1,20 @@
-name = { en = "Lamp", ru = "Лампа" }
-weight = 20
+name = "GitHub Dimmed"
+weight = 42
 
-# surface / text ramp (swapped per theme)
-"bg-deep" = "#16140f"
-"bg-base" = "#1c1a14"
-"bg-surface" = "#26231b"
-"bg-raised" = "#302d24"
-"bg-hover" = "#2c2921"
-"border" = "#38342b"
-"text-primary" = "#ded0c5"   # was #d9d2c4 (de-mud: hue ~90deg -> ~72deg, drop the yellow cast)
-"text-secondary" = "#c6baaf" # was #c2bbae (de-mud)
-"text-muted" = "#988c81"     # was #948d80 (de-mud)
-"text-ghost" = "#6c665b"
-"text-strong" = "#e6dfd2"
+# surface / text ramp — the COMFORTABLE GitHub (Primer "dark dimmed"): lifted off
+# the near-black default so long-form reading lands ~7.6:1 instead of the default
+# theme's glary 16:1. Body is painted on --bg-deep = Dimmed canvas #22272e.
+"bg-deep" = "#22272e"
+"bg-base" = "#2d333b"
+"bg-surface" = "#323942"
+"bg-raised" = "#3c444d"
+"bg-hover" = "#343b45"
+"border" = "#444c56"
+"text-primary" = "#adbac7"
+"text-secondary" = "#909dab"
+"text-muted" = "#768390"
+"text-ghost" = "#545d68"
+"text-strong" = "#cdd9e5"
 "gtok-str" = "#cbb279"
 
 # brand accents (constant across built-in palettes; overridable)

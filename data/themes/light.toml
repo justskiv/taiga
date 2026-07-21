@@ -18,19 +18,21 @@ light = true
 "body-glow" = "none"
 
 # brand accents (overridable)
-# DELIBERATELY DARKER THAN THE OTHER PALETTES — do not "restore" it to #55c0b7.
-# Same brand hue (glacier teal), deeper shade. --accent is not only link text: it
-# is also the CTA *background*, and the label on it is --bg-deep (14-home.css:
-# `.btn-cta{color:var(--bg-deep); background:var(--accent)}`). Here --bg-deep is
-# near-WHITE (#f6f8fa), so the accent must be dark enough to carry white text,
-# while on the dark palettes it must be light enough to carry near-black text.
-# Those requirements are disjoint: the light palette needs relative luminance
-# <= .169, the dark ones need >= .390. No single hex satisfies both — hence the
-# per-palette shade. #0e7a71 gives 4.89:1 on the CTA and 5.21:1 for links on
-# white; the amber it replaced scored 2.41:1 and 2.57:1 (both failing).
-"accent" = "#0e7a71"
-"accent-dim" = "rgba(14,122,113,.18)"
-"accent-glow" = "rgba(14,122,113,.28)"
+# DELIBERATELY DARK — keep the site's amber brand identity here, but a DARK shade.
+# --accent is not only link text: it is also the CTA *background*, and the label
+# on it is --bg-deep (14-home.css: `.btn-cta{color:var(--bg-deep); background:var(--accent)}`).
+# Here --bg-deep is near-WHITE (#f6f8fa), so the accent must be dark enough to
+# carry near-white text AND to read as a link on near-white. A bright brand
+# orange fails both directions: #ea8a2e scores 2.41:1 (fail). This dark orange
+# holds the amber identity while passing: #b45309 gives 4.72:1 for links on the
+# canvas and 4.72:1 on the CTA (5.02:1 on pure white). It is the same hue as the
+# dark-palette brand accent (#ea8a2e, hue ~28deg), only darkened.
+# NB: the global brand-accent override (params.accent) is SKIPPED for light
+# palettes in head/palettes.html, so this value actually reaches the page —
+# without that skip the bright #ea8a2e returns and re-breaks contrast (2.41:1).
+"accent" = "#b45309"   # was #0e7a71 (teal); now dark brand-orange
+"accent-dim" = "rgba(180,83,9,.18)"
+"accent-glow" = "rgba(180,83,9,.28)"
 "accent-green" = "#a8c954"
 "accent-green-dim" = "rgba(168,201,84,.16)"
 "accent-green-glow" = "rgba(168,201,84,.22)"
@@ -40,3 +42,5 @@ light = true
 "accent-blue-dim" = "rgba(107,164,201,.16)"
 "accent-gold" = "#d4a24e"
 "accent-gold-dim" = "rgba(212,162,78,.18)"
+"accent-red" = "#b5503f"
+"accent-red-dim" = "rgba(181,80,63,.12)"
