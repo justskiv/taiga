@@ -20,18 +20,26 @@
 .sbr-next{display:flex; align-items:center; gap:18px; margin-top:16px; padding:19px 22px;
   border:1px solid var(--border); border-radius:var(--radius); background:var(--bg-surface);
   color:var(--text-primary);
-  transition:border-color var(--dur) var(--ease), transform .16s var(--ease), box-shadow .16s var(--ease)}
-.sbr-next:hover{border-color:var(--accent); transform:translateY(-2px);
-  box-shadow:0 16px 34px -18px rgba(0,0,0,.6); border-bottom-color:var(--accent)}
+  transition:border-color var(--dur) var(--ease), background .18s var(--ease), transform .16s var(--ease), box-shadow .16s var(--ease)}
+/* hover: a warm amber wash and a half-strength border rather than a hard accent
+   line — an invitation, not an alarm. The title (dimmed at rest) brightens too. */
+.sbr-next:hover{border-color:color-mix(in srgb, var(--accent) 55%, var(--border));
+  border-bottom-color:color-mix(in srgb, var(--accent) 55%, var(--border));
+  background:color-mix(in srgb, var(--accent) 5%, var(--bg-surface));
+  transform:translateY(-1px); box-shadow:0 12px 26px -20px rgba(0,0,0,.55)}
 .sbr-next .sbr-body{min-width:0}
 .sbr-next .k{display:block; font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--accent); margin-bottom:6px}
-.sbr-next .t{display:block; font-size:17.5px; font-weight:700; letter-spacing:-.01em; line-height:1.3; color:var(--text-strong)}
+/* rest tone is a calm off-white, not the glaring --text-strong; it wakes up to
+   --text-strong under the cursor */
+.sbr-next .t{display:block; font-size:17.5px; font-weight:650; letter-spacing:-.01em; line-height:1.3;
+  color:color-mix(in srgb, var(--text-primary) 80%, var(--text-muted)); transition:color var(--dur) var(--ease)}
+.sbr-next:hover .t{color:var(--text-strong)}
 .sbr-next .arr{margin-left:auto; flex:0 0 auto; color:var(--accent); font-size:22px; line-height:1;
   transform:translateX(0); transition:transform .18s var(--ease)}
 .sbr-next:hover .arr{transform:translateX(5px)}
 /* next part is still an announce: a non-clickable "coming" teaser, no arrow */
 .sbr-next.soon{cursor:default; border-style:dashed; background:transparent}
-.sbr-next.soon:hover{border-color:var(--text-ghost); transform:none; box-shadow:none}
+.sbr-next.soon:hover{border-color:var(--text-ghost); background:transparent; transform:none; box-shadow:none}
 .sbr-next.soon .k{color:var(--text-ghost)}
 .sbr-next.soon .t{color:var(--text-muted)}
 .sbr-prev{display:inline-block; margin-top:12px; font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted); border:0;
