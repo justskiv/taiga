@@ -1,0 +1,68 @@
+{{- /* One YouTube card, scraped from the watch page at BUILD time and rendered
+       HIDDEN in the page. Context = the video URL (youtube.com/watch?v=… or
+       youtu.be/…). partialCached by URL. No API key: the watch page carries
+       videoDetails (title, author, lengthSeconds, viewCount) as inline JSON, and
+       i.ytimg.com serves thumbnails openly. Never fails the build — a network
+       error or a page that yields no videoDetails emits nothing, and the link
+       simply stays a plain external link. Mirrors scripts/build-yt.py. */ -}}
+{{- $url := . -}}
+{{- $u := urls.Parse $url -}}
+{{- $vid := "" -}}
+{{- if eq (strings.TrimPrefix "www." $u.Host) "youtu.be" -}}
+  {{- $vid = strings.TrimPrefix "/" $u.Path -}}
+{{- else -}}
+  {{- $vid = $u.Query.Get "v" -}}
+{{- end -}}
+{{- with $vid -}}
+{{- $opts := dict "headers" (dict
+      "User-Agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+      "Accept-Language" "ru,en;q=0.8"
+      "Cookie" "CONSENT=YES+1") -}}
+{{- $res := partial "article/lp/get.html" (dict "url" (printf "https://www.youtube.com/watch?v=%s" $vid) "opts" $opts) -}}
+{{- $title := "" -}}{{- $channel := "" -}}{{- $dur := "" -}}{{- $views := "" -}}
+{{- if $res -}}
+  {{- $src := $res.Content -}}
+  {{- /* videoDetails strings are JSON-escaped (&, \", …). transform.Unmarshal
+         only detects a JSON object/array, not a bare scalar, so wrap the captured
+         value in a one-key object and read it back unescaped. */ -}}
+  {{- with (findRESubmatch `"videoDetails":\{"videoId":"[^"]+","title":"((?:[^"\\]|\\.)*)"` $src) -}}
+    {{- $title = (transform.Unmarshal (printf `{"s":"%s"}` (index (index . 0) 1))).s -}}
+  {{- end -}}
+  {{- with (findRESubmatch `"author":"((?:[^"\\]|\\.)*)"` $src) -}}
+    {{- $channel = (transform.Unmarshal (printf `{"s":"%s"}` (index (index . 0) 1))).s -}}
+  {{- end -}}
+  {{- with (findRESubmatch `"lengthSeconds":"(\d+)"` $src) -}}
+    {{- $sec := int (index (index . 0) 1) -}}
+    {{- $h := div $sec 3600 -}}{{- $m := div (mod $sec 3600) 60 -}}{{- $s := mod $sec 60 -}}
+    {{- $dur = cond (gt $h 0) (printf "%d:%02d:%02d" $h $m $s) (printf "%d:%02d" $m $s) -}}
+  {{- end -}}
+  {{- with (findRESubmatch `"viewCount":"(\d+)"` $src) -}}
+    {{- $vc := int (index (index . 0) 1) -}}
+    {{- if ge $vc 1000000 -}}{{ $views = replace (printf "%.1fM" (div (float $vc) 1000000.0)) ".0M" "M" }}
+    {{- else if ge $vc 1000 -}}{{ $views = replace (printf "%.1fK" (div (float $vc) 1000.0)) ".0K" "K" }}
+    {{- else -}}{{ $views = string $vc }}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- with $title -}}
+{{- $thumb := partial "article/lp/img.html" (dict "url" (printf "https://i.ytimg.com/vi/%s/maxresdefault.jpg" $vid)) -}}
+{{- if not $thumb -}}
+  {{- $thumb = partial "article/lp/img.html" (dict "url" (printf "https://i.ytimg.com/vi/%s/mqdefault.jpg" $vid)) -}}
+{{- end -}}
+<div class="lp-yt-pre" data-lp-yt="{{ $url }}">
+  <div class="lp-card yt-card">
+    {{- /* the thumbnail IS the button: it links to the video (new tab) and answers
+           hover like a control — no in-place player, by the owner's choice */ -}}
+    <a class="yt-thumb" href="{{ $url }}" target="_blank" rel="noopener">
+      {{- with $thumb }}<img src="{{ . }}" alt="">{{ end }}
+      <span class="yt-btn"></span>
+      {{- with $dur }}<span class="yt-dur">{{ . }}</span>{{ end }}
+    </a>
+    <div class="yt-body">
+      <p class="yt-title">{{ . }}</p>
+      <p class="yt-meta">{{ with $channel }}{{ . }} · {{ end }}{{ with $views }}{{ . }} {{ i18n "lp_views" }}{{ end }}</p>
+    </div>
+    <a class="lp-row" href="{{ $url }}" target="_blank" rel="noopener"><span>{{ i18n "lp_watch_yt" }}</span><span class="arw" aria-hidden="true">↗</span></a>
+  </div>
+</div>
+{{- end -}}
+{{- end -}}

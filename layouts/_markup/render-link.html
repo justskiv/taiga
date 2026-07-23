@@ -4,13 +4,61 @@
        to the canonical .RelPermalink (so links survive URL/slug changes and .html→
        pretty). A dead internal link fails the build (params.linkcheck = "error")
        or warns (= "warn"). GetPage takes a CONTENT path, not an output URL — write
-       internal links by content path (reference/features-recipes.md §1b). */ -}}
+       internal links by content path (reference/features-recipes.md §1b).
+
+       LINK PREVIEWS (24-linkpreview.css / modules/linkpreview.js): the hook is
+       also where links are CLASSIFIED at build time. An internal link to a guide
+       or a series carries data-preview="<permalink>" so JS can fetch its build-time
+       fragment on hover. An external link gets a species mark via data-link
+       (ext | tg | yt); a t.me post from a whitelisted channel and any youtube
+       video also register their href on .Page.Store, so article/link-cards.html
+       can pre-render the hover card. All gated on params.linkPreviews.enable. */ -}}
 {{- $d := .Destination -}}
 {{- $u := urls.Parse $d -}}
 {{- $scheme := $u.Scheme -}}
+{{- $lp := site.Params.linkPreviews.enable | default false -}}
 {{- if $scheme -}}
   {{- if or (eq $scheme "http") (eq $scheme "https") -}}
-    <a href="{{ $d }}" target="_blank" rel="noopener"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+    {{- /* classify the outbound link: t.me / youtube get their own species mark
+           and, when previewable, register for a pre-rendered card. */ -}}
+    {{- $host := strings.TrimPrefix "www." $u.Host -}}
+    {{- $kind := "ext" -}}
+    {{- $reg := "" -}}
+    {{- /* the href/data/store value; a legacy blog.golang.org link is normalised
+           to its go.dev home (the redirect lands there anyway) so the card fetches
+           and the JS matches the canonical URL. */ -}}
+    {{- $regHref := $d -}}
+    {{- if or (eq $host "t.me") (eq $host "telegram.me") -}}
+      {{- $kind = "tg" -}}
+      {{- $seg := split (strings.TrimPrefix "/" $u.Path) "/" -}}
+      {{- $ch := index $seg 0 -}}
+      {{- $chans := site.Params.telegram.channels | default slice -}}
+      {{- if and $lp (ge (len $seg) 2) (index $seg 1) (in $chans $ch) -}}{{ $reg = "tg" }}{{- end -}}
+    {{- else if or (eq $host "youtube.com") (eq $host "youtu.be") -}}
+      {{- if or (eq $host "youtu.be") (and (eq $u.Path "/watch") ($u.Query.Get "v")) -}}
+        {{- $kind = "yt" -}}{{ if $lp }}{{ $reg = "yt" }}{{ end -}}
+      {{- end -}}
+    {{- else if or (hasSuffix $host ".wikipedia.org") (eq $host "wikipedia.org") -}}
+      {{- $kind = "wiki" -}}
+      {{- if and $lp (hasPrefix $u.Path "/wiki/") -}}{{ $reg = "wiki" }}{{- end -}}
+    {{- else if eq $host "go.dev" -}}
+      {{- if and (hasPrefix $u.Path "/blog/") (gt (len (strings.TrimPrefix "/blog/" $u.Path)) 0) -}}
+        {{- $kind = "gob" -}}{{ if $lp }}{{ $reg = "gob" }}{{ end -}}
+      {{- end -}}
+    {{- else if eq $host "blog.golang.org" -}}
+      {{- with (strings.TrimPrefix "/" $u.Path) -}}
+        {{- $kind = "gob" -}}
+        {{- $regHref = printf "https://go.dev/blog/%s" . -}}
+        {{- if $lp }}{{ $reg = "gob" }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $reg -}}
+      {{- $store := .Page.Store -}}
+      {{- $skey := printf "lp%s" (strings.Title $reg) -}}
+      {{- $list := $store.Get $skey | default slice -}}
+      {{- if not (in $list $regHref) -}}{{ $store.Set $skey ($list | append $regHref) }}{{- end -}}
+    {{- end -}}
+    <a href="{{ $regHref }}" target="_blank" rel="noopener"{{ if $lp }} data-link="{{ $kind }}"{{ with $reg }} data-{{ . }}="{{ $regHref }}"{{ end }}{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
   {{- else -}}
     <a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
   {{- end -}}
@@ -35,7 +83,17 @@
 {{- else if hasPrefix $d "/" -}}
   {{- $target := site.GetPage $u.Path -}}
   {{- if $target -}}
-    <a href="{{ $target.RelPermalink }}{{ with $u.Fragment }}#{{ . }}{{ end }}"{{ with $.Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+    {{- /* previewable target: a guide (kind=page in a guide section) or a series
+           (a rubric sub-section that is not a standalone container). A self-link
+           and a plain rubric/home section are not previewed. */ -}}
+    {{- $prev := "" -}}
+    {{- if and $lp (ne $target.RelPermalink $.Page.RelPermalink) -}}
+      {{- $guide := partialCached "guide-sections.html" . -}}
+      {{- if and (eq $target.Kind "page") (in $guide $target.Section) -}}{{ $prev = $target.RelPermalink }}
+      {{- else if and (eq $target.Kind "section") (not $target.Parent.IsHome) (not $target.Params.standalone) -}}{{ $prev = $target.RelPermalink }}
+      {{- end -}}
+    {{- end -}}
+    <a href="{{ $target.RelPermalink }}{{ with $u.Fragment }}#{{ . }}{{ end }}"{{ with $prev }} data-preview="{{ . }}"{{ end }}{{ with $.Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
   {{- else -}}
     {{- $msg := printf "broken internal link %q on page %q" $d .Page.Path -}}
     {{- if eq (site.Params.linkcheck | default "error") "warn" -}}{{ warnf "%s" $msg }}{{- else -}}{{ errorf "%s" $msg }}{{- end -}}

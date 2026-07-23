@@ -1,0 +1,24 @@
+{{- /* Resolve one Telegram custom emoji to a locally-published image. Context =
+       dict {id, fallback}. t.me serves the artwork at /i/emoji/<id>.json (the same
+       endpoint the official embed uses): {type, emoji, thumb}. A webp `emoji` is
+       the full asset; animated types degrade to their static `thumb`. CDN URLs
+       carry expiring tokens, so the image is fetched and republished locally.
+       Falls back to the inline standard-glyph URL, then to "" (the <b> glyph shows
+       through). partialCached by id. Mirrors build-tg.py custom_emoji(). */ -}}
+{{- $id := .id -}}
+{{- $fallback := .fallback -}}
+{{- $local := "" -}}
+{{- $j := partial "article/lp/get.html" (dict "url" (printf "https://t.me/i/emoji/%s.json" $id)) -}}
+{{- if $j -}}
+  {{- $data := $j.Content | transform.Unmarshal -}}
+  {{- if not $data.error -}}
+    {{- $imgurl := "" -}}
+    {{- if eq $data.type "webp" -}}{{ $imgurl = $data.emoji }}{{- end -}}
+    {{- if not $imgurl -}}{{ $imgurl = $data.thumb }}{{- end -}}
+    {{- with $imgurl -}}{{ $local = partial "article/lp/img.html" (dict "url" .) }}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $local -}}
+  {{- with $fallback -}}{{ $local = partial "article/lp/img.html" (dict "url" .) }}{{- end -}}
+{{- end -}}
+{{- return $local -}}

@@ -26,6 +26,9 @@ fully commented — copy it and edit.
 | `accentGlow` | CSS colour | derived | Override for the accent glow (shadows). Default, when `accent` is set: `rgba(r,g,b,.28)` derived from it. Ignored unless `accent` is set. |
 | `versionDefault` | string | — | Fallback for a guide's version chip when its front matter omits `version`. Free-form ("go1.26", "PostgreSQL 17") — see note 3. With neither set, the chip is omitted entirely. |
 | `linkcheck` | `"error"` \| `"warn"` | `"error"` | A broken internal link fails the build (`error`) or just logs (`warn`). |
+| `linkPreviews.enable` | bool | `false` | Hover preview cards on prose links — internal guides/series, your Telegram posts, YouTube, Wikipedia. If your site sets its own `[outputs]`, repeat the `preview` format on `page`/`section` — see [link-previews.md](link-previews.md). |
+| `linkPreviews.budgetWords` | int | `1400` | How much of an article an internal preview shows: whole H2 sections until this word budget, the rest listed as "further in the article". |
+| `telegram.channels` | list of strings | `[]` | Your OWN channel handles. A t.me post link from these earns a build-time preview card; any other t.me link gets only the ✈ mark. |
 | `ogImages.enable` | bool | `true` | Generate Open Graph share images at build time. |
 | `ogImages.style` | string (folder) | `"dots"` | Cover style = a folder name under `assets/og/` (see [customizing.md](customizing.md#og-cover-styles)). |
 | `rss.fullContent` | bool | `false` | Put the full guide body in the RSS feed rather than a summary — see note 1. |

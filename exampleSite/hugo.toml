@@ -239,6 +239,16 @@ timeZone = "Europe/Moscow"
     twitter = ""                         # @handle for twitter:site (empty = omit)
     github = "https://github.com/justskiv/taiga"  # repo URL → source icon in the header (unset = no icon)
 
+  # Link previews — ON in the demo so the feature is exercised. budgetWords caps
+  # how much of an article a hover preview shows. telegram.channels whitelists the
+  # author's own channel(s): a t.me post from @ntuzov earns a build-time card,
+  # any other t.me link gets only the ✈ mark. (Demo page: reference/kitchen-sink.)
+  [params.linkPreviews]
+    enable = true
+    budgetWords = 1400
+  [params.telegram]
+    channels = ["ntuzov"]
+
 # Tag TERM pages never render (tags link to /tags/#tag), but their data stays
 # available to templates (.GetTerms / term.Pages). The /tags/ list node is
 # kind=taxonomy and unaffected. Series need no such block: a series is a section
@@ -282,9 +292,12 @@ timeZone = "Europe/Moscow"
 # taxonomy and term list pages would otherwise each emit their own index.xml; a
 # single feed is wanted, so RSS is dropped from their outputs. With two languages
 # Hugo emits one feed per language (/index.xml and /ru/index.xml).
+# NB: "preview" on page + section is the link-preview fragment output (the theme
+# declares the format, but a site with its own [outputs] must repeat it — Hugo
+# overrides this map key by key, it does not append). See docs/link-previews.md.
 [outputs]
   home = ["html", "rss"]
-  section = ["html"]
+  section = ["html", "preview"]
   taxonomy = ["html"]
   term = ["html"]
-  page = ["html"]
+  page = ["html", "preview"]

@@ -1,0 +1,70 @@
+{{- /* One Wikipedia card, built at BUILD time from Wikimedia's official REST
+       summary API — the same endpoint Wikipedia's own hover previews use, and the
+       cleanest source of all: ready JSON, no regexes.
+
+         https://<lang>.wikipedia.org/api/rest_v1/page/summary/<title>?redirect=true
+
+       Context = the article URL (…/wiki/<title>). partialCached by lang|URL. Two
+       requirements learned the hard way: Wikimedia returns 403 without a
+       DESCRIPTIVE User-Agent (built from the site's baseURL), and a Cyrillic title
+       must be percent-encoded for the request. Skips the card for a disambiguation
+       or extract-less page (the link stays a plain external link with the W mark),
+       and degrades to nothing on any network/HTTP failure — the build never fails.
+       Thumbnail is republished locally via lp/img.html. Attribution (CC BY-SA) is
+       carried by the card itself: the title/extract shown with a link back. */ -}}
+{{- $url := . -}}
+{{- $u := urls.Parse $url -}}
+{{- $lang := index (split $u.Host ".") 0 -}}
+{{- $title := strings.TrimPrefix "/wiki/" $u.Path -}}
+{{- $ok := false -}}
+{{- $data := dict -}}
+{{- with $title -}}
+  {{- $api := printf "https://%s.wikipedia.org/api/rest_v1/page/summary/%s?redirect=true" $lang (urlquery .) -}}
+  {{- $ua := printf "taiga-link-previews/1.0 (+%s)" site.BaseURL -}}
+  {{- $res := partial "article/lp/get.html" (dict "url" $api "opts" (dict "headers" (dict "User-Agent" $ua "Accept" "application/json"))) -}}
+  {{- with $res -}}
+    {{- $j := transform.Unmarshal .Content -}}
+    {{- $type := $j.type | default "standard" -}}
+    {{- $extract := $j.extract | default "" -}}
+    {{- if and (ne $type "disambiguation") (ne $type "no-extract") $extract -}}
+      {{- $ok = true -}}
+      {{- $thumb := "" -}}
+      {{- with $j.thumbnail -}}{{ with .source -}}{{ $thumb = partial "article/lp/img.html" (dict "url" .) }}{{- end -}}{{- end -}}
+      {{- $page := $url -}}
+      {{- with $j.content_urls -}}{{ with .desktop -}}{{ with .page -}}{{ $page = . }}{{- end -}}{{- end -}}{{- end -}}
+      {{- /* the short gray line is only worth showing when it is a real
+             hand-written annotation. On ru.wikipedia `description` is often an
+             auto-generated snippet of the article's opening — it duplicates the
+             extract (and arrives cut mid-word). Keep it only when short. */ -}}
+      {{- $descr := $j.description | default "" -}}
+      {{- if gt (strings.RuneCount $descr) 80 -}}{{ $descr = "" }}{{- end -}}
+      {{- $data = dict
+          "lang" (upper (string ($j.lang | default $lang)))
+          "title" ($j.title | default $title)
+          "descr" $descr
+          "extract" $extract
+          "thumb" $thumb
+          "page" $page -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $ok -}}
+<div class="lp-wiki-pre" data-lp-wiki="{{ $url }}">
+  <div class="lp-card wk-card">
+    <div class="wk-head">
+      <span class="wk-mark">W</span>
+      <span class="lp-kick">{{ i18n "lp_wikipedia" }}</span>
+      <span class="wk-lang">{{ $data.lang }}</span>
+    </div>
+    <div class="wk-body">
+      {{- with $data.thumb }}<img class="wk-thumb" src="{{ . }}" alt="">{{ end }}
+      <h3 class="wk-title">{{ $data.title }}</h3>
+      {{- with $data.descr }}<p class="wk-descr">{{ . }}</p>{{ end }}
+      <div class="wk-extract lp-clip">
+        {{- range (split $data.extract "\n\n") }}{{ with (trim . " \n\t") }}<p>{{ . }}</p>{{ end }}{{ end -}}
+      </div>
+    </div>
+    <a class="lp-row" href="{{ $data.page }}" target="_blank" rel="noopener"><span>{{ i18n "lp_read_wiki" }}</span><span class="arw" aria-hidden="true">↗</span></a>
+  </div>
+</div>
+{{- end -}}

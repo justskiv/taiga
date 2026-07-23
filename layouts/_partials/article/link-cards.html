@@ -1,0 +1,25 @@
+{{- /* Pre-rendered t.me / youtube hover cards, collected while .Content rendered:
+       the render-link hook pushes each whitelisted t.me post and youtube video href
+       onto .Page.Store (lpTg / lpYt). This emits them as a HIDDEN store at the foot
+       of the article — modules/linkpreview.js lifts each card into the popover on
+       hover, matching the wrapper's data-lp-tg / data-lp-yt to the prose link's
+       href. Must run AFTER .Content, like article/term-cards.html. Each card is
+       fetched via resources.GetRemote at build time, partialCached by URL, and
+       degrades gracefully offline (channel fallback for tg, nothing for yt). */ -}}
+{{- $tg := .Store.Get "lpTg" | default slice -}}
+{{- $yt := .Store.Get "lpYt" | default slice -}}
+{{- $wiki := .Store.Get "lpWiki" | default slice -}}
+{{- $gob := .Store.Get "lpGob" | default slice -}}
+{{- /* partialCached key carries the language: the card's labels are i18n, and the
+       cache is shared across the whole build, so keying by URL alone would serve a
+       Russian page the English card that rendered first. The remote FETCH inside is
+       still deduped — GetRemote caches its HTTP response on disk. */ -}}
+{{- $lang := site.Language.Lang -}}
+{{- if or $tg $yt $wiki $gob -}}
+<div class="lp-store" aria-hidden="true">
+{{- range $tg }}{{ partialCached "article/lp/tg-card.html" . (printf "%s|%s" $lang .) }}{{ end -}}
+{{- range $yt }}{{ partialCached "article/lp/yt-card.html" . (printf "%s|%s" $lang .) }}{{ end -}}
+{{- range $wiki }}{{ partialCached "article/lp/wiki-card.html" . (printf "%s|%s" $lang .) }}{{ end -}}
+{{- range $gob }}{{ partialCached "article/lp/gob-card.html" . (printf "%s|%s" $lang .) }}{{ end -}}
+</div>
+{{- end -}}

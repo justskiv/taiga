@@ -1,0 +1,17 @@
+{{- /* Graceful remote fetch for the link-preview build step. Context = dict
+       {url, opts?}. resources.GetRemote raises a HARD template error on a fetch
+       failure — a transport error (DNS, dial timeout) OR an HTTP error — which
+       would fail the whole build the moment a network is flaky or absent. `try`
+       turns that into a value: on success .Value is the resource, on ANY failure
+       .Err is set and .Value is nil. Returns the usable resource or "" — so every
+       caller degrades instead of breaking, and an offline build still completes. */ -}}
+{{- $url := .url -}}
+{{- $r := "" -}}
+{{- with .opts -}}
+  {{- $r = try (resources.GetRemote $url .) -}}
+{{- else -}}
+  {{- $r = try (resources.GetRemote $url) -}}
+{{- end -}}
+{{- $out := "" -}}
+{{- with $r.Value -}}{{ $out = . }}{{- end -}}
+{{- return $out -}}

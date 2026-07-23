@@ -1,0 +1,153 @@
+{{- /* One Telegram post card, scraped from t.me/<ch>/<id>?embed=1 SSR at BUILD
+       time and rendered HIDDEN in the page (article/link-cards.html lifts it into
+       the hover popover; the wrapper's data-lp-tg matches the prose link's href).
+       Context = the post URL string. partialCached by URL → one fetch per post
+       for the whole build. Never fails the build: a network error or a missing
+       post degrades to the channel card. Mirrors scripts/build-tg.py parse_post().
+
+       Own text  = div.js-message_text (NOT js-message_reply_text). Missing → the
+       channel fallback. Photo, views, date, reply-quote, reactions and custom
+       emoji all follow the same regexes the mock's Python build step uses. */ -}}
+{{- $url := . -}}
+{{- $u := urls.Parse $url -}}
+{{- $seg := split (strings.TrimPrefix "/" $u.Path) "/" -}}
+{{- $ch := index $seg 0 -}}
+{{- $id := index $seg 1 -}}
+{{- $chan := partialCached "article/lp/tg-channel.html" $ch $ch -}}
+{{- $subsN := int (replaceRE `\D` "" $chan.subs) -}}
+
+{{- $plane := `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M2 3 L22 12 L2 21 L2 14 L15 12 L2 10 Z"/></svg>` -}}
+{{- $eye := `<svg class="tg-eye" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.6 10-6.6S22 12 22 12s-3.6 6.6-10 6.6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>` -}}
+
+{{- /* ── fetch + parse the post ───────────────────────────────────────────── */ -}}
+{{- $embed := printf "https://t.me/%s/%s?embed=1&mode=tme" $ch $id -}}
+{{- $res := partial "article/lp/get.html" (dict "url" $embed) -}}
+{{- $ok := false -}}
+{{- $text := "" -}}{{- $glyphs := dict -}}
+{{- $views := "" -}}{{- $date := "" -}}
+{{- $photo := dict -}}{{- $reply := dict -}}
+{{- $rxTop := slice -}}{{- $rxOther := 0 -}}
+{{- if $res -}}
+  {{- $src := $res.Content -}}
+  {{- with (findRESubmatch `(?s)class="tgme_widget_message_text js-message_text"[^>]*>(.*?)</div>\s*<` $src) -}}
+    {{- $ok = true -}}
+    {{- $text = index (index . 0) 1 -}}
+    {{- /* sanitize */ -}}
+    {{- $text = replaceRE `(?s)<(script|style|iframe)[^>]*>.*?</(script|style|iframe)>` "" $text -}}
+    {{- $text = replaceRE `(?is)\s+on[a-z]+="[^"]*"` "" $text -}}
+    {{- $text = replaceRE `(?is)\s+on[a-z]+='[^']*'` "" $text -}}
+    {{- /* custom-emoji pass: rewrite CDN urls to local, harvest id→glyph */ -}}
+    {{- range (findRESubmatch `(?s)<tg-emoji emoji-id="(\d+)"[^>]*>\s*<i class="emoji" style="background-image:url\('([^']+)'\)"[^>]*>(?:<b>([^<]*)</b>)?\s*</i>\s*</tg-emoji>` $text) -}}
+      {{- $eid := index . 1 -}}{{- $eurl := index . 2 -}}{{- $eglyph := index . 3 -}}
+      {{- if $eglyph -}}{{ $glyphs = merge $glyphs (dict $eid $eglyph) }}{{- end -}}
+      {{- $localurl := partialCached "article/lp/tg-emoji.html" (dict "id" $eid "fallback" $eurl) $eid -}}
+      {{- with $localurl -}}{{ $text = replace $text $eurl . }}{{- end -}}
+    {{- end -}}
+    {{- /* standard (non-custom) emoji stay as telegram.org's stable PNGs; make
+           their protocol-relative URLs explicit https so they load reliably. */ -}}
+    {{- $text = replaceRE `background-image:url\('//` `background-image:url('https://` $text -}}
+  {{- end -}}
+  {{- if $ok -}}
+    {{- with (findRESubmatch `tgme_widget_message_views">([^<]+)<` $src) -}}{{ $views = index (index . 0) 1 }}{{- end -}}
+    {{- with (findRESubmatch `<time[^>]*datetime="([^"]+)"` $src) -}}
+      {{- $t := time.AsTime (index (index . 0) 1) -}}
+      {{- $tday := $t.Format "2006-01-02" -}}
+      {{- if eq $tday (now.Format "2006-01-02") -}}{{ $date = i18n "lp_today" }}
+      {{- else if eq $tday ((now.AddDate 0 0 -1).Format "2006-01-02") -}}{{ $date = i18n "lp_yesterday" }}
+      {{- else -}}
+        {{- $date = printf "%d %s" $t.Day (i18n (printf "month_%d" (int $t.Month))) -}}
+        {{- if ne $t.Year now.Year -}}{{ $date = printf "%s %d" $date $t.Year }}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- with (findRESubmatch `tgme_widget_message_photo_wrap[^"]*"[^>]*style="[^"]*background-image:url\('([^']+)'\)` $src) -}}
+      {{- $purl := index (index . 0) 1 -}}
+      {{- $ratio := "56.25" -}}
+      {{- with (findRESubmatch `message_photo[^>]*style="padding-top:([\d.]+)%` $src) -}}{{ $ratio = index (index . 0) 1 }}{{- end -}}
+      {{- $pimg := partial "article/lp/img.html" (dict "url" $purl) -}}
+      {{- with $pimg -}}{{ $photo = dict "src" . "ratio" $ratio }}{{- end -}}
+    {{- end -}}
+    {{- with (findRESubmatch `(?s)tgme_widget_message_reply[^"]*" href="([^"]+)"(.*?)</a>` $src) -}}
+      {{- $rm := index . 0 -}}
+      {{- $rhref := index $rm 1 -}}{{- $rinner := index $rm 2 -}}
+      {{- $snippet := "" -}}
+      {{- with (findRESubmatch `(?s)js-message_reply_text"[^>]*>(.*?)</div>` $rinner) -}}
+        {{- $sn := replaceRE `\s+` " " (replaceRE "<[^>]+>" " " (index (index . 0) 1)) -}}
+        {{- $sn = trim $sn " " -}}
+        {{- $snippet = cond (gt (len $sn) 120) (substr $sn 0 120) $sn -}}
+      {{- end -}}
+      {{- $rthumb := "" -}}
+      {{- with (findRESubmatch `reply_thumb[^>]*background-image:url\('([^']+)'\)` $rinner) -}}
+        {{- $tt := partial "article/lp/img.html" (dict "url" (index (index . 0) 1)) -}}
+        {{- with $tt -}}{{ $rthumb = . }}{{- end -}}
+      {{- end -}}
+      {{- $reply = dict "url" $rhref "snippet" $snippet "thumb" $rthumb -}}
+    {{- end -}}
+    {{- /* reactions: standard-png ones carry a <b>glyph</b>; custom-emoji ones are
+           empty in SSR — resolved via the id→glyph dict harvested from the post
+           text, the rest folded into +N (mirrors build-tg.py parse_reactions). */ -}}
+    {{- with (findRESubmatch `(?s)js-message_reactions">(.*?)</div>` $src) -}}
+      {{- $block := index (index . 0) 1 -}}
+      {{- $merged := dict -}}
+      {{- range (findRESubmatch `(?s)<span class="tgme_reaction[^"]*">(.*?)</span>` $block) -}}
+        {{- $body := index . 1 -}}
+        {{- $n := 0 -}}{{ with (findRESubmatch `(\d+)\s*$` $body) }}{{ $n = int (index (index . 0) 1) }}{{ end -}}
+        {{- $glyph := "" -}}
+        {{- with (findRESubmatch `<b>([^<]+)</b>` $body) -}}{{ $glyph = index (index . 0) 1 }}
+        {{- else -}}{{ with (findRESubmatch `emoji-id="(\d+)"` $body) }}{{ $glyph = index $glyphs (index (index . 0) 1) }}{{ end }}{{- end -}}
+        {{- if and $glyph (gt $n 0) -}}{{ $merged = merge $merged (dict $glyph (add (int (index $merged $glyph | default 0)) $n)) }}
+        {{- else -}}{{ $rxOther = add $rxOther $n }}{{- end -}}
+      {{- end -}}
+      {{- $rxs := slice -}}
+      {{- range $k, $v := $merged -}}{{ $rxs = $rxs | append (dict "ch" $k "n" $v) }}{{- end -}}
+      {{- $rxs = sort $rxs "n" "desc" -}}
+      {{- $rxTop = first 4 $rxs -}}
+      {{- if gt (len $rxs) 4 -}}{{ range (after 4 $rxs) -}}{{ $rxOther = add $rxOther .n }}{{- end -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* ── initials fallback for the avatar ─────────────────────────────────── */ -}}
+{{- $ini := "" -}}{{- range first 2 (split $chan.name " ") -}}{{ if . }}{{ $ini = printf "%s%s" $ini (substr . 0 1) }}{{ end }}{{- end -}}
+{{- $ini = upper $ini -}}
+
+<div class="lp-tg-pre" data-lp-tg="{{ $url }}">
+  <div class="lp-card tg-card{{ if not $ok }} is-channel{{ end }}">
+    <header class="tg-head">
+      <span class="tg-avatar{{ if not $ok }} is-big{{ end }}">
+        {{- if $chan.avatar }}<img src="{{ $chan.avatar }}" alt="">{{ else }}{{ $ini | default "TG" }}{{ end -}}
+      </span>
+      <div class="tg-id">
+        <div class="tg-name">{{ $chan.name }}</div>
+        <div class="tg-sub">@{{ $chan.handle }}{{ with $chan.subs }} · {{ . }} {{ i18n "lp_subs_word" $subsN }}{{ end }}</div>
+      </div>
+      <span class="tg-plane">{{ $plane | safeHTML }}</span>
+    </header>
+    {{- if $ok }}
+    <div class="tg-post">
+      <div class="tg-bubble{{ if $photo.src }} has-photo{{ end }}">
+        {{- with $reply.url }}
+        <a class="tg-reply" href="{{ . }}">
+          {{- with $reply.thumb }}<img class="tg-reply-thumb" src="{{ . }}" alt="">{{ end -}}
+          <div class="tg-reply-txt"><div class="tg-reply-s">{{ $reply.snippet }}</div></div>
+        </a>
+        {{- end }}
+        {{- with $photo.src }}
+        <div class="tg-photo" style="padding-top:{{ $photo.ratio }}%"><img src="{{ . }}" alt=""></div>
+        {{- end }}
+        <div class="tg-text lp-clip">{{ $text | safeHTML }}</div>
+        {{- if or $rxTop $rxOther }}
+        <div class="tg-reactions">
+          {{- range $rxTop }}<span class="tg-react"><span class="tg-react-e">{{ .ch }}</span><span class="tg-react-n">{{ .n }}</span></span>{{ end -}}
+          {{- if gt $rxOther 0 }}<span class="tg-react is-more">+{{ $rxOther }}</span>{{ end -}}
+        </div>
+        {{- end }}
+        <div class="tg-meta"><span class="tg-views">{{ $eye | safeHTML }}{{ with $views }}<span class="tg-vc">{{ . }}</span>{{ end }}{{ with $date }}<span class="tg-dot">·</span><span>{{ . }}</span>{{ end }}</span></div>
+      </div>
+    </div>
+    <a class="lp-row" href="{{ $url }}" target="_blank" rel="noopener"><span>{{ i18n "lp_open_post" }}</span><span class="arw" aria-hidden="true">→</span></a>
+    {{- else }}
+    <div class="tg-channel-body"><p class="tg-channel-descr">{{ $chan.descr }}</p></div>
+    <a class="lp-row" href="https://t.me/{{ $chan.handle }}" target="_blank" rel="noopener"><span>{{ i18n "lp_open_channel" }}</span><span class="arw" aria-hidden="true">→</span></a>
+    {{- end }}
+  </div>
+</div>

@@ -15,6 +15,8 @@
 
 const CLOSE_DELAY = 120;  /* just enough to cross the 10px gap into the
                              card; longer and it reads as the card lingering */
+const OPEN_DELAY = 250;   /* hover intent — the one shared rhythm with link
+                             previews (modules/linkpreview.js); keep in sync */
 const GAP = 10;           /* card offset from the word */
 const EDGE = 12;          /* viewport gutter */
 
@@ -40,6 +42,7 @@ export function bindTerms() {
   let owner = null;     /* the word that opened it */
   let pinned = false;
   let closeT = 0;
+  let openT = 0;
 
   const clear = () => { clearTimeout(closeT); };
 
@@ -139,9 +142,16 @@ export function bindTerms() {
     if (fine.matches) {
       word.addEventListener('mouseenter', function () {
         clear();
-        if (open !== card) show(word, false);   /* open at once, no dwell */
+        clearTimeout(openT);
+        if (open === card) return;
+        /* the same hover-intent dwell as link previews: a passing cursor
+           opens nothing; the timer re-checks :hover when it fires */
+        openT = setTimeout(function () {
+          if (word.matches(':hover')) show(word, false);
+        }, OPEN_DELAY);
       });
       word.addEventListener('mouseleave', function () {
+        clearTimeout(openT);
         if (open === card && !pinned) scheduleClose();
       });
     }
@@ -155,6 +165,7 @@ export function bindTerms() {
 
     word.addEventListener('click', function (e) {
       e.preventDefault();
+      clearTimeout(openT);   /* a pin must not be undone by a pending hover */
       if (open === card && pinned) { hide(); return; }
       show(word, true);
     });

@@ -167,3 +167,31 @@ Form 3 — no id, arbitrary HTML directly in the figure:
 ## Card {#card}
 
 {{< bigcard href="/inside/anatomy/guide-is-a-bundle/" k="To the reference →" t="A guide is a folder" s="A big CTA card: kicker, title, caption." >}}
+
+## Link previews {#link-previews}
+
+On a fine pointer, hover any link below to see its preview card — the physics of
+the term card, one popover, built from a build-time fragment (internal) or a
+pre-rendered card (Telegram, YouTube).
+
+Internal links open a window into the page: a whole [guide preview](/inside/anatomy/guide-is-a-bundle/),
+a [section anchor](/inside/anatomy/guide-is-a-bundle/#bundle) that scopes the card
+to one section, and a [series index](/inside/anatomy/) that lists the parts.
+
+Telegram — a post from the author's own channel earns a card scraped at build
+time: [post 409](https://t.me/ntuzov/409) and [post 410](https://t.me/ntuzov/410).
+A [missing post](https://t.me/ntuzov/99999) degrades to the channel card, and a
+[foreign channel](https://t.me/telegram/999) gets only the ✈ mark, no card.
+
+YouTube — [a talk on the Go scheduler](https://www.youtube.com/watch?v=kedW1xO3Zbo)
+opens a video card with its thumbnail, duration and view count.
+
+An ordinary [outbound link](https://go.dev/blog/) carries only the ↗ mark.
+
+Wikipedia — a [work-stealing scheduler](https://en.wikipedia.org/wiki/Work_stealing)
+and [preemptive multitasking](https://ru.wikipedia.org/wiki/Вытесняющая_многозадачность)
+each open a summary card built from Wikimedia's REST API, carrying the W mark.
+
+The Go blog — a [preview of loop-variable scoping](https://go.dev/blog/loopvar-preview)
+and the classic [error handling in Go](https://go.dev/blog/error-handling-and-go)
+open a card with the italic Go mark, the byline and the post's opening.

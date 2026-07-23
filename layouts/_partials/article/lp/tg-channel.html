@@ -1,0 +1,30 @@
+{{- /* Telegram channel data, scraped from t.me/<ch> SSR at BUILD time. Context =
+       the channel handle. Returns a dict {handle,name,subs,descr,avatar}; on a
+       network failure it degrades to {handle, name:handle} so the card can still
+       name the channel. Wrap the call in partialCached (keyed by handle) — the
+       fetch then runs once per channel for the whole build. Mirrors
+       scripts/build-tg.py parse_channel(). */ -}}
+{{- $ch := . -}}
+{{- $out := dict "handle" $ch "name" $ch "subs" "" "descr" "" "avatar" "" -}}
+{{- $res := partial "article/lp/get.html" (dict "url" (printf "https://t.me/%s" $ch)) -}}
+{{- if $res -}}
+  {{- $src := $res.Content -}}
+  {{- with (findRESubmatch `(?s)tgme_page_title[^>]*>\s*<span[^>]*>(.*?)</span>` $src) -}}
+    {{- $name := replaceRE "<[^>]+>" "" (index (index . 0) 1) -}}
+    {{- $out = merge $out (dict "name" (trim $name " \n\t")) -}}
+  {{- end -}}
+  {{- with (findRESubmatch `tgme_page_extra">([\d\s\x{00A0}\x{202F}]+?)subscribers` $src) -}}
+    {{- $subs := replaceRE `[\x{00A0}\x{202F}]` " " (index (index . 0) 1) -}}
+    {{- $out = merge $out (dict "subs" (trim $subs " ")) -}}
+  {{- end -}}
+  {{- with (findRESubmatch `(?s)tgme_page_description[^>]*>(.*?)</div>` $src) -}}
+    {{- $d := replaceRE "<[^>]+>" "" (replaceRE `<br\s*/?>` "\n" (index (index . 0) 1)) -}}
+    {{- $d = replaceRE `\s*https?://\S+` "" (index (split $d "\n") 0) -}}
+    {{- $out = merge $out (dict "descr" (trim $d " :;,–—\n\t")) -}}
+  {{- end -}}
+  {{- with (findRESubmatch `tgme_page_photo_image[^>]*src="([^"]+)"` $src) -}}
+    {{- $a := partial "article/lp/img.html" (dict "url" (index (index . 0) 1)) -}}
+    {{- with $a -}}{{ $out = merge $out (dict "avatar" .) }}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

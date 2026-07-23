@@ -5,6 +5,27 @@
   [module.hugoVersion]
     min = "0.146.0"
 
+# Link previews (24-linkpreview.css / modules/linkpreview.js). A guide's hover
+# preview is a build-time fragment served as a secondary output — the `preview`
+# format: /<slug>/index.preview.html, a bare card (baseof.preview.html has no
+# chrome). Distinct baseName so it never collides with the page's index.html;
+# notAlternative keeps it out of rel=alternate <link>s and sitemaps.
+[outputFormats]
+  [outputFormats.preview]
+    mediaType = "text/html"
+    baseName = "index.preview"
+    isHTML = true
+    notAlternative = true
+    permalinkable = false
+
+# Guides (kind=page) and series landings (kind=section) get the preview output.
+# A site that sets its OWN [outputs] must repeat "preview" there — Hugo overrides
+# this map key by key, it does not append (see exampleSite/hugo.toml, docs/link-
+# previews.md). home/taxonomy/term deliberately have no preview output.
+[outputs]
+  page = ["html", "preview"]
+  section = ["html", "preview"]
+
 # Neutral defaults the theme falls back on when a site omits them; a site
 # overrides these in its own hugo.toml (full registry: docs/params.md). Kept to
 # the bare minimum — only the wordmark, so a fresh install shows a name rather
@@ -19,3 +40,14 @@
   # idiom as brand.name above — the theme's defaults are the guard).
   [params.comingSoon]
     enable = false
+
+  # Link previews. OFF by default so a fresh install ships nothing extra; a site
+  # opts in with enable = true. budgetWords caps how much of an article a hover
+  # preview shows, sliced by whole H2 sections. telegram.channels is the
+  # whitelist of "own" channels whose t.me posts earn a pre-rendered card
+  # (others get only the ✈ mark). See docs/link-previews.md.
+  [params.linkPreviews]
+    enable = false
+    budgetWords = 1400
+  [params.telegram]
+    channels = []

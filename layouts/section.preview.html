@@ -1,0 +1,33 @@
+{{- /* The `preview` output of a SERIES section: a table-of-contents card fetched
+       on hover of a link to the series landing. Rendered straight from data — no
+       content split needed. Only real series (a rubric sub-section that is not a
+       standalone container) produce a card; every other section emits an empty
+       fragment, which the JS treats as "nothing to preview". */ -}}
+{{ define "main" -}}
+{{- if and (not .Parent.IsHome) (not .Params.standalone) -}}
+{{- $pages := partialCached "series/parts.html" . .RelPermalink -}}
+{{- $total := len $pages -}}
+{{- $show := $pages -}}{{- $rest := 0 -}}
+{{- if gt $total 7 -}}{{ $show = first 6 $pages }}{{ $rest = sub $total 6 }}{{- end -}}
+<article class="lp-card ic ic--series" data-lp="series">
+  <div class="ic-head">
+    <span class="ic-kick">{{ i18n "series_word" }}</span>
+    <h3 class="ic-title">{{ .Title }}</h3>
+    {{- with .Description }}<p class="ic-lead">{{ . }}</p>{{ end }}
+  </div>
+  <div class="ic-parts">
+    {{- range $i, $p := $show }}
+    {{- if $p.announce }}
+    <div class="ic-part is-soon"><span class="ic-part-n">{{ add $i 1 }}</span><span class="ic-part-t">{{ $p.linkTitle }}</span><span class="ic-part-soon">{{ i18n "part_soon" }}</span></div>
+    {{- else }}
+    <a class="ic-part" href="{{ $p.url }}"><span class="ic-part-n">{{ add $i 1 }}</span><span class="ic-part-t">{{ $p.linkTitle }}</span></a>
+    {{- end }}
+    {{- end }}
+    {{- if gt $rest 0 }}
+    <div class="ic-part-more">{{ i18n "lp_more_parts" $rest }}</div>
+    {{- end }}
+  </div>
+  <a class="lp-row ic-foot" href="{{ .RelPermalink }}"><span>{{ i18n "lp_open_series" }}</span><span class="ic-foot-side"><span class="ic-foot-tail">{{ i18n "lp_articles" $total }}</span><span class="arw" aria-hidden="true">→</span></span></a>
+</article>
+{{- end -}}
+{{- end }}

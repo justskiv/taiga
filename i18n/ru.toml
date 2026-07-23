@@ -73,6 +73,8 @@ other = "Ловушка"
 other = "Под капотом"
 [callout_note]
 other = "Историческая сноска"
+[callout_warn]
+other = "Внимание"
 
 # widget figure caption
 [widget_cap]
@@ -316,3 +318,53 @@ other = "← назад к тексту"
 other = "Определения"
 [term_cards_aria]
 other = "Определения терминов из статьи"
+
+# ── link previews (24-linkpreview.css / modules/linkpreview.js) ───────────────
+# Всё рендерится на сервере — в превью-фрагмент и в пререндеренные tg/yt-карточки.
+[lp_read]
+other = "Читать статью"
+[lp_to_section]
+other = "К разделу"
+[lp_further]
+other = "Дальше в статье"
+[lp_of]
+other = "из"
+[lp_open_series]
+other = "Открыть серию"
+[lp_articles]
+one = "{{ .Count }} статья"
+few = "{{ .Count }} статьи"
+many = "{{ .Count }} статей"
+other = "{{ .Count }} статьи"
+[lp_more_parts]
+one = "…ещё {{ .Count }} часть"
+few = "…ещё {{ .Count }} части"
+many = "…ещё {{ .Count }} частей"
+other = "…ещё {{ .Count }} части"
+[lp_widget]
+other = "Интерактивная схема"
+[lp_run]
+other = "запускается в статье"
+[lp_open_post]
+other = "Открыть пост в Telegram"
+[lp_open_channel]
+other = "Открыть канал в Telegram"
+[lp_subs_word]
+one = "подписчик"
+few = "подписчика"
+many = "подписчиков"
+other = "подписчика"
+[lp_watch_yt]
+other = "Смотреть на YouTube"
+[lp_views]
+other = "просмотров"
+[lp_today]
+other = "сегодня"
+[lp_yesterday]
+other = "вчера"
+[lp_wikipedia]
+other = "Википедия"
+[lp_read_wiki]
+other = "Читать в Википедии"
+[lp_read_gob]
+other = "Читать в блоге Go"

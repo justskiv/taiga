@@ -27,6 +27,9 @@
 | `accentGlow` | CSS-цвет | вычисляется | Переопределение свечения акцента (тени). Дефолт при заданном `accent`: `rgba(r,g,b,.28)`, выведенный из него. Игнорируется, если `accent` не задан. |
 | `versionDefault` | строка | — | Фолбэк для чипа версии гайда, если front matter не задаёт `version`. Произвольная строка («go1.26», «PostgreSQL 17») — см. примечание 3. Если не задано ни то, ни другое, чип не выводится вовсе. |
 | `linkcheck` | `"error"` \| `"warn"` | `"error"` | Битая внутренняя ссылка валит сборку (`error`) или просто пишет предупреждение (`warn`). |
+| `linkPreviews.enable` | bool | `false` | Карточки-превью по ховеру на ссылках в тексте — внутренние гайды/серии, твои Telegram-посты, YouTube, Wikipedia. Если сайт задаёт свои `[outputs]`, повтори формат `preview` у `page`/`section` — см. [link-previews.md](link-previews.md). |
+| `linkPreviews.budgetWords` | int | `1400` | Сколько статьи показывает внутреннее превью: целые H2-разделы до этого бюджета слов, остальное — списком «дальше в статье». |
+| `telegram.channels` | list of strings | `[]` | Handle'ы ТВОИХ каналов. Ссылка на пост t.me из них получает билд-карточку; любой другой t.me — только значок ✈. |
 | `ogImages.enable` | bool | `true` | Генерировать обложки Open Graph во время сборки. |
 | `ogImages.style` | строка (папка) | `"dots"` | Стиль обложки = имя папки под `assets/og/` (см. [customizing.md](customizing.md#og-cover-styles)). |
 | `rss.fullContent` | bool | `false` | Класть в RSS-фид полный текст гайда, а не сокращение — см. примечание 1. |

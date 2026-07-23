@@ -1,0 +1,82 @@
+{{- /* One official Go blog card (go.dev/blog), scraped at BUILD time. Context =
+       the go.dev/blog URL. partialCached by lang|URL. The Go blog markup is stable
+       across generations (verified on 2011 and 2023 posts):
+         title    first  <h1>…</h1>  WITHOUT a class (the page's own
+                  <h1 class="small"><a href="/blog/">The Go Blog</a></h1> is skipped
+                  by requiring plain text, no nested tags);
+         byline   <p class="author"> AUTHORS <br> DATE </p>  (may be absent);
+         content  <div class='markdown'> … </div>  (NOTE single quotes).
+       Lead: the top-level blocks from the start of the markdown container up to the
+       first <h2 (the opening); if the post starts straight with an <h2 (real case:
+       error-handling-and-go, 2011) — the blocks between the first and second <h2.
+       Capped to ~4 paragraphs; the .lp-clip fade says the rest is there. No h1 or a
+       failed fetch → no card, the link stays external with the "Go" mark. */ -}}
+{{- $url := . -}}
+{{- $ua := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" -}}
+{{- $res := partial "article/lp/get.html" (dict "url" $url "opts" (dict "headers" (dict "User-Agent" $ua))) -}}
+{{- $ok := false -}}
+{{- $title := "" -}}{{- $authors := "" -}}{{- $date := "" -}}{{- $lead := "" -}}
+{{- with $res -}}
+  {{- $src := .Content -}}
+  {{- with (findRESubmatch `<h1>([^<]+)</h1>` $src) -}}
+    {{- $ok = true -}}
+    {{- $title = trim (index (index . 0) 1) " \n\t" -}}
+  {{- end -}}
+  {{- if $ok -}}
+    {{- /* byline */ -}}
+    {{- with (findRESubmatch `(?s)<p class="author">\s*(.*?)<br\s*/?>\s*(.*?)\s*</p>` $src) -}}
+      {{- $authors = trim (replaceRE "<[^>]+>" "" (index (index . 0) 1)) " \n\t" -}}
+      {{- $date = trim (replaceRE "<[^>]+>" "" (index (index . 0) 2)) " \n\t" -}}
+    {{- end -}}
+    {{- /* lead: blocks before the first <h2 inside the markdown container, or —
+           when the post opens straight with an <h2 — the blocks after it */ -}}
+    {{- $md := split $src "<div class='markdown'>" -}}
+    {{- if gt (len $md) 1 -}}
+      {{- $rest := index $md 1 -}}
+      {{- $chunks := split $rest "<h2" -}}
+      {{- $intro := index $chunks 0 -}}
+      {{- if trim (replaceRE "<[^>]+>" "" $intro) " \n\t\r" -}}
+        {{- $lead = $intro -}}
+      {{- else if gt (len $chunks) 1 -}}
+        {{- $sec := index $chunks 1 -}}
+        {{- $afterH := split $sec "</h2>" -}}
+        {{- if gt (len $afterH) 1 -}}{{ $lead = delimit (after 1 $afterH) "</h2>" }}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- /* hygiene + absolutise go.dev-relative links/images + cap to ~4 blocks */ -}}
+    {{- $lead = replaceRE `(?s)<(script|style|iframe)[^>]*>.*?</(script|style|iframe)>` "" $lead -}}
+    {{- $lead = replaceRE `(href|src)="/` `$1="https://go.dev/` $lead -}}
+    {{- $paras := split $lead "</p>" -}}
+    {{- if gt (len $paras) 4 -}}{{ $lead = printf "%s</p>" (delimit (first 4 $paras) "</p>") }}{{- end -}}
+    {{- $lead = trim $lead " \n\t\r" -}}
+  {{- end -}}
+{{- end -}}
+{{- if $ok -}}
+{{- /* date → Russian genitive on ru pages; left as-is (English) elsewhere */ -}}
+{{- if eq site.Language.Lang "ru" -}}
+  {{- $mon := dict "January" "января" "February" "февраля" "March" "марта" "April" "апреля"
+      "May" "мая" "June" "июня" "July" "июля" "August" "августа" "September" "сентября"
+      "October" "октября" "November" "ноября" "December" "декабря" -}}
+  {{- with (findRESubmatch `^\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})` $date) -}}
+    {{- $m := index $mon (index (index . 0) 2) -}}
+    {{- if $m -}}{{ $date = printf "%s %s %s" (index (index . 0) 1) $m (index (index . 0) 3) }}{{- end -}}
+  {{- end -}}
+  {{- $authors = replace $authors " and " " и " -}}
+{{- end -}}
+<div class="lp-gob-pre" data-lp-gob="{{ $url }}">
+  <div class="lp-card gob-card">
+    <div class="gob-head">
+      <span class="gob-mark">Go</span>
+      <span class="lp-kick">THE GO BLOG</span>
+    </div>
+    <div class="gob-body">
+      <h3 class="gob-title">{{ $title }}</h3>
+      {{- if or $authors $date }}
+      <div class="gob-meta">{{ with $authors }}<span>{{ . }}</span>{{ end }}{{ if and $authors $date }}<i>·</i>{{ end }}{{ with $date }}<span>{{ . }}</span>{{ end }}</div>
+      {{- end }}
+      {{- with $lead }}<div class="gob-lead lp-clip">{{ . | safeHTML }}</div>{{ end }}
+    </div>
+    <a class="lp-row" href="{{ $url }}" target="_blank" rel="noopener"><span>{{ i18n "lp_read_gob" }}</span><span class="arw" aria-hidden="true">↗</span></a>
+  </div>
+</div>
+{{- end -}}

@@ -1,0 +1,5 @@
+{{- /* Bare shell for the `preview` output format: a link-preview fragment is a
+       naked card, not a page. No <!doctype>, no <head>, no chrome — just the block
+       the page/section template fills. modules/linkpreview.js fetches this file
+       (/<slug>/index.preview.html) and mounts it in the hover popover. */ -}}
+{{- block "main" . }}{{ end -}}

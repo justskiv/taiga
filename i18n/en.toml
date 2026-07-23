@@ -61,6 +61,8 @@ other = "Trap"
 other = "Under the hood"
 [callout_note]
 other = "Historical note"
+[callout_warn]
+other = "Caution"
 
 [widget_cap]
 other = "Play"
@@ -265,3 +267,47 @@ other = "← back to the text"
 other = "Definitions"
 [term_cards_aria]
 other = "Definitions of terms used in the article"
+
+# ── link previews (24-linkpreview.css / modules/linkpreview.js) ───────────────
+# All server-rendered into the preview fragment / the pre-rendered tg/yt cards.
+[lp_read]
+other = "Read the article"
+[lp_to_section]
+other = "To the section"
+[lp_further]
+other = "Further in the article"
+[lp_of]
+other = "of"
+[lp_open_series]
+other = "Open the series"
+[lp_articles]
+one = "{{ .Count }} article"
+other = "{{ .Count }} articles"
+[lp_more_parts]
+one = "…{{ .Count }} more part"
+other = "…{{ .Count }} more parts"
+[lp_widget]
+other = "Interactive figure"
+[lp_run]
+other = "runs in the article"
+[lp_open_post]
+other = "Open the post in Telegram"
+[lp_open_channel]
+other = "Open the channel in Telegram"
+[lp_subs_word]
+one = "subscriber"
+other = "subscribers"
+[lp_watch_yt]
+other = "Watch on YouTube"
+[lp_views]
+other = "views"
+[lp_today]
+other = "today"
+[lp_yesterday]
+other = "yesterday"
+[lp_wikipedia]
+other = "Wikipedia"
+[lp_read_wiki]
+other = "Read on Wikipedia"
+[lp_read_gob]
+other = "Read on the Go blog"

@@ -1,0 +1,605 @@
+/* link previews — the hover cards behind prose links.
+
+   One family, three genres, the term card's physics (23-term.css): a link in the
+   prose grows a floating window on hover. An INTERNAL link opens a window into the
+   page it points at (article / section anchor / series index); a t.me link from a
+   whitelisted channel opens a Telegram post; a youtube link opens a video card.
+
+   Everything is a theme token, so every card is correct on all palettes (dark and
+   the Light one) with no re-tuning — the only new constants are the Telegram blue
+   and the YouTube red, brand colours that hold across palettes. Motion is the term
+   card's to the frame, so a hint and a preview read as one species opening. The
+   physics live in modules/linkpreview.js; this file is only clothes. */
+
+:root{
+  --tg-blue:#229ED9; --tg-blue-2:#2AABEE;
+  --yt-red:#f03e3e;
+}
+
+/* ── outbound link marks ───────────────────────────────────────────────────
+   The mark is punctuation, not an icon. It rides an inline-block ::after so the
+   quiet prose link's underline stops at the text and the mark floats free of it
+   (text-decoration does not propagate into inline-blocks); currentColor through
+   a mask keeps every mark on palette for free. It sits a hair gap (.1em ≪ a word
+   space) from its word — it belongs to that word, not the next — gray at the
+   secondary-text tone (.55, not the no-man's-land of .5). On hover the whole link
+   warms to accent and currentColor carries the mark with it, no colour of its
+   own. A classifier: only the silhouette changes — ↗ elsewhere on the web,
+   ✈ the author's Telegram, ▶ the author's YouTube, W Wikipedia, Go the go.dev
+   blog. Internal links carry no mark.
+
+   A "rail" — the link's underline running on beneath the mark — was investigated
+   and closed: a pseudo's decoration is painted BY the pseudo and the glyph mask
+   clips it away, so an underline cannot survive under a masked box without a
+   synthetic-stripe hack (wrong colour, pixel-seaming). Capsules, a colour at
+   rest, and idle animation were all tried and rejected by the owner. */
+a[data-link]::after{
+  content:""; display:inline-block;
+  width:.66em; height:.66em;
+  margin-left:.1em;                    /* hair gap ≪ word space: the mark
+                                          belongs to its word, not the next */
+  vertical-align:-.08em;               /* optical centre near cap-height */
+  background:currentColor; opacity:.55;
+  -webkit-mask:var(--lnk-icn) center/contain no-repeat;
+  mask:var(--lnk-icn) center/contain no-repeat;
+  transition:opacity var(--dur) var(--ease);
+}
+/* solid silhouettes carry more ink than a lowercase stroke — slimmed by size */
+a[data-link="tg"]::after,
+a[data-link="yt"]::after{
+  width:.58em; height:.58em; vertical-align:-.05em;
+}
+/* on hover the whole link warms to accent; currentColor carries the mark with
+   it — consistency of state, not loyalty to gray. No colour set here. */
+a[data-link]:hover::after{opacity:.9}
+a[data-link="ext"]{
+  --lnk-icn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M9 7h8v8'/%3E%3C/svg%3E");
+}
+a[data-link="tg"]{
+  --lnk-icn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M2 3 L22 12 L2 21 L2 14 L15 12 L2 10 Z'/%3E%3C/svg%3E");
+}
+a[data-link="yt"]{
+  --lnk-icn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' fill-rule='evenodd'%3E%3Cpath d='M21.6 7.2a2.8 2.8 0 0 0-1.97-1.98C17.9 4.75 12 4.75 12 4.75s-5.9 0-7.63.47A2.8 2.8 0 0 0 2.4 7.2 29.2 29.2 0 0 0 1.93 12c0 1.62.16 3.23.47 4.8a2.8 2.8 0 0 0 1.97 1.98c1.73.47 7.63.47 7.63.47s5.9 0 7.63-.47a2.8 2.8 0 0 0 1.97-1.97c.31-1.58.47-3.19.47-4.81a29.2 29.2 0 0 0-.47-4.8ZM9.75 15.02V8.98L15.5 12l-5.75 3.02Z'/%3E%3C/svg%3E");
+}
+/* W — Wikipedia's serif favicon letter; a glyph made of TYPE, not a mask, but
+   obeying the same grammar (same alpha, only the silhouette differs) */
+a[data-link="wiki"]::after{
+  -webkit-mask:none; mask:none; background:none;
+  content:"W"; width:auto; height:auto; vertical-align:baseline;
+  font-family:'Linux Libertine', Georgia, 'Times New Roman', serif;
+  font-weight:700; font-size:.6em; line-height:1;
+}
+/* Go — the official blog: an italic "Go" wordmark nod, again type not a mask
+   (a gopher is illegible at 10px). Same alpha grammar as the others. */
+a[data-link="gob"]::after{
+  -webkit-mask:none; mask:none; background:none;
+  content:"Go"; width:auto; height:auto; vertical-align:baseline;
+  font-weight:700; font-style:italic; font-size:.58em; line-height:1;
+  letter-spacing:-.01em;
+}
+/* the classifier glyph belongs on PROSE links. In COMPONENT CHROME — a fold's
+   summary line, a callout label, a big CTA card — it reads as breakage: a stray
+   mark beside the component's own icon, ahead of the component's punctuation.
+   Suppress the mark there (the hover preview still works, only the ::after is
+   muted), the same way the theme keeps its quiet-link styling out of chrome. */
+:where(summary, .fold-title, .clabel, .bigcard, .bc-k, .bc-t, .bc-s) a[data-link]::after{
+  display:none;
+}
+
+/* ── popover shell ─────────────────────────────────────────────────────────
+   Owns position and the enter/exit motion, nothing visual — the card decides
+   its own chrome. Motion is the term card's, to the frame. */
+.lp-pop{
+  position:fixed; z-index:200; left:0; top:0; width:max-content;
+  visibility:hidden; opacity:0; transform:translateY(5px) scale(.985);
+  transition:opacity .16s var(--ease), transform .16s var(--ease), visibility 0s .16s;
+}
+.lp-pop.is-open{
+  visibility:visible; opacity:1; transform:none;
+  transition:opacity .16s var(--ease), transform .16s var(--ease), visibility 0s;
+}
+/* invisible 12px halo: bridges the 10px gap back to the anchor link and
+   forgives near-miss cursor exits at the edges — the close timer re-checks
+   :hover, and :hover honestly counts this pseudo. Kept modest on purpose:
+   wider would start stealing hover and clicks from the prose around the
+   card. (Term cards keep temporal grace only — their overflow:hidden clips
+   any halo.) */
+.lp-pop::before{content:""; position:absolute; inset:-12px}
+@media (prefers-reduced-motion:reduce){
+  .lp-pop, .lp-pop.is-open{transition:opacity .01s linear; transform:none}
+}
+
+/* ── card chassis ──────────────────────────────────────────────────────────
+   The term card's materials: the page's own canvas (--bg-deep), one neutral
+   hairline, the theme's floating-layer shadow. Sized up — a page window, not a
+   word hint. */
+.lp-card{
+  position:relative; overflow:hidden;
+  width:max-content; max-width:min(440px, calc(100vw - 32px));
+  border-radius:14px;
+  background:var(--bg-deep);
+  border:1px solid var(--border);
+  box-shadow:0 20px 50px -16px rgba(0,0,0,.62),
+             0 4px 12px -6px rgba(0,0,0,.45);
+}
+/* scrollable region: the engine marks overflow with .is-ovf and end-of-scroll
+   with .at-end (same contract as the term card's body fade) */
+.lp-scroll{overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb, var(--accent) 18%, var(--border)) transparent}
+.lp-clip{overflow:hidden}
+.lp-scroll.is-ovf, .lp-clip.is-ovf{
+  -webkit-mask-image:linear-gradient(180deg, #000 calc(100% - 30px), transparent);
+  mask-image:linear-gradient(180deg, #000 calc(100% - 30px), transparent);
+}
+.lp-scroll.is-ovf.at-end{-webkit-mask-image:none; mask-image:none}
+
+/* footer action row — the term card's action row, reusable. --cl seeds the
+   accent (the internal card keeps --accent; tg/yt override to their brand). */
+.lp-row{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:11px 18px;
+  border-top:1px solid var(--border);
+  font-size:13px; font-weight:600; color:var(--cl, var(--accent));
+  text-decoration:none; border-bottom:0;
+  transition:background-color var(--dur) var(--ease);
+}
+.lp-row:hover{background:color-mix(in srgb, var(--cl, var(--accent)) 10%, transparent)}
+.lp-row .arw{flex:none; font-size:15px; line-height:1; transition:transform var(--dur) var(--ease)}
+.lp-row:hover .arw{transform:translateX(3px)}
+
+/* mono micro-label + the term card's signal dot */
+.lp-kick{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; font-weight:600; white-space:nowrap; color:var(--accent);
+}
+
+/* custom emoji in t.me post text: an image with a glyph fallback
+   (<i class="emoji" style="background-image:…"><b>🖥</b></i>) — show the image,
+   hide the char. */
+.lp-pop i.emoji, .lp-tg-pre i.emoji{
+  display:inline-block; width:1.25em; height:1.25em;
+  margin:0 .05em; vertical-align:-.28em;
+  background-position:center; background-size:contain; background-repeat:no-repeat;
+  font-style:normal;
+}
+.lp-pop i.emoji b, .lp-tg-pre i.emoji b{display:none}
+
+/* skeleton line */
+.lp-skl{
+  height:10px; border-radius:5px;
+  background:linear-gradient(90deg, var(--bg-raised) 25%, var(--bg-hover) 45%, var(--bg-raised) 65%);
+  background-size:200% 100%;
+  animation:lp-shimmer 1.1s linear infinite;
+}
+@keyframes lp-shimmer{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.lp-skl{animation:none}}
+
+/* the prerendered tg/yt cards ship hidden in the page; JS lifts them out */
+.lp-store{display:none}
+
+/* ═══ internal article preview ═════════════════════════════════════════════
+   A page window, not a word hint: the article's own header in miniature (title,
+   meta, series), the opening prose plus whole H2 sections up to a word budget,
+   then a muted "further in the article" list, and a load-bearing "read the
+   article" footer. Accent is dosed the theme's way — kicker, footer, the series
+   micro-meter — never a fill or a second border. */
+.ic{width:min(440px, calc(100vw - 32px)); --cl:var(--accent)}
+/* JS toggles article/anchor parts with the [hidden] attribute; several of them
+   are flex/row elements whose display rule would otherwise outrank the UA
+   [hidden]{display:none}. Make hidden win. */
+.lp-pop [hidden]{display:none !important}
+
+/* the flow = head + prose as ONE scroll region, faithful to the page: nothing
+   of the article head is pinned; only the footer is. */
+.ic-flow{max-height:min(70vh, 600px)}
+.ic-head{padding:13px 18px 12px}
+.ic-title{
+  margin:0; font-size:17.5px; font-weight:650; line-height:1.28;
+  letter-spacing:-.01em; color:var(--text-strong); overflow-wrap:break-word;
+}
+.ic-meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:7px;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted);
+}
+.ic-meta i{font-style:normal; color:var(--text-ghost)}
+.ic-ver{font-weight:600; color:var(--text-secondary)}
+/* the series-landing card carries a description; an article page does not */
+.ic-lead{margin:12px 0 0; font-size:14.5px; line-height:1.55; color:var(--text-secondary)}
+
+/* series belonging: identity (name) left, a discrete progress meter + n/total
+   right. Flat, never boxed. */
+.ic-series{display:flex; align-items:center; gap:10px; margin-top:9px}
+.ic-series-left{display:flex; align-items:center; gap:8px; min-width:0}
+.ic-series-k{
+  flex:none; font-family:var(--font-mono); font-size:10px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+}
+.ic-series-name{
+  font-size:12.5px; color:var(--text-secondary);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.ic-series-right{display:flex; align-items:center; gap:9px; margin-left:auto; flex:none}
+.ic-series-bar{display:flex; gap:2px}
+.ic-series-bar i{width:3px; height:10px; border-radius:1.5px; background:var(--border)}
+.ic-series-bar i.on{background:var(--accent)}
+.ic-series-bar.cont{width:56px; height:4px; border-radius:2px; background:var(--border); overflow:hidden}
+.ic-series-bar.cont .fill{display:block; height:100%; background:var(--accent)}
+.ic-series-pos{font-family:var(--font-mono); font-size:11px; color:var(--text-muted); white-space:nowrap}
+.ic-series-pos b{color:var(--accent); font-weight:600}
+
+/* body prose: the article in miniature. h2 scaled + calmed, quiet prose links. */
+.ic-body{padding:1px 18px 14px; font-size:14px; line-height:1.62; color:var(--text-secondary)}
+.ic-body > :first-child{margin-top:0}
+.ic-body > :last-child{margin-bottom:0}
+.ic-body p{margin:0 0 10px}
+.ic-sec{display:block}
+.ic-sec[hidden]{display:none}
+.ic-body h2{
+  margin:18px 0 7px; padding:0; border:0;
+  font-size:15px; font-weight:650; line-height:1.3; letter-spacing:-.01em;
+  color:var(--text-strong);
+}
+.ic-body h2 .hash{display:none}                 /* no in-preview anchors */
+.ic-body h2:first-child{margin-top:2px}
+.ic-body h3{margin:14px 0 6px; font-size:13.5px; font-weight:650; color:var(--text-primary)}
+.ic-body strong{color:var(--text-strong); font-weight:650}
+.ic-body em{color:var(--text-primary); font-style:italic}
+.ic-body code{font-size:.86em}
+.ic-body img, .ic-body svg{max-width:100%; height:auto; border-radius:var(--radius-sm); display:block; margin:0 0 10px}
+.ic-body pre{
+  margin:0 0 10px; padding:9px 11px; border-radius:var(--radius-sm);
+  font-size:12px; line-height:1.55; overflow-x:auto;
+  background:var(--bg-base); border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.ic-body pre code{font-size:1em; background:none; border:0; padding:0}
+.ic-body ul, .ic-body ol{margin:0 0 10px; padding-left:20px}
+.ic-body li{margin:0 0 5px}
+.ic-body :where(p, li, blockquote) a{
+  color:inherit; border-bottom:0;
+  text-decoration:underline;
+  text-decoration-color:color-mix(in srgb, var(--accent) 50%, transparent);
+  text-decoration-thickness:1px; text-underline-offset:.18em;
+  padding:0 2px; margin:0 -2px; border-radius:5px;
+  transition:color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.ic-body :where(p, li, blockquote) a:hover{color:var(--accent); background:var(--accent-dim)}
+.ic-body a[data-link]::after{opacity:.4}
+
+/* "further in the article": a muted list of the H2s the budget dropped */
+.ic-more{margin-top:16px; padding-top:12px; border-top:1px solid var(--border)}
+.ic-more-h{
+  display:block; margin-bottom:7px;
+  font-family:var(--font-mono); font-size:10px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted);
+}
+.ic-more-list{margin:0; padding:0; list-style:none}
+.ic-more-list li{
+  margin:0 0 5px; padding-left:14px; position:relative;
+  font-size:13px; line-height:1.4; color:var(--text-muted);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.ic-more-list li::before{content:"·"; position:absolute; left:3px; color:var(--text-ghost)}
+
+/* footer */
+.ic-foot-side{display:inline-flex; align-items:center; gap:8px}
+.ic-foot-tail{font-family:var(--font-mono); font-size:11.5px; font-weight:500; color:var(--text-muted)}
+
+/* anchor mode: a section-scoped aiming window. JS reveals the context line and
+   the anchor footer, hides meta / series / other sections. */
+.ic-anchor-ctx{
+  display:flex; align-items:center; gap:7px; margin-bottom:9px;
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.05em;
+  color:var(--text-muted); white-space:nowrap; overflow:hidden;
+}
+.ic-anchor-ctx .g{flex:none; color:var(--accent); font-weight:600}
+.ic-anchor-ctx .t{overflow:hidden; text-overflow:ellipsis; min-width:0}
+.ic.is-anchor .ic-flow{max-height:min(44vh, 320px)}
+.ic.is-anchor .ic-title{font-size:16.5px}
+
+/* series index card */
+.ic-kick{
+  display:inline-flex; align-items:center; gap:7px; margin-bottom:9px;
+  font-family:var(--font-mono); font-size:10px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+}
+.ic-kick::before{
+  content:""; flex:none; width:5px; height:5px; border-radius:50%;
+  background:currentColor; box-shadow:0 0 0 3px color-mix(in srgb, currentColor 20%, transparent);
+}
+.ic-parts{padding:3px 12px 7px}
+.ic-part{
+  display:flex; align-items:center; gap:11px; padding:7px 6px; border-radius:7px;
+  color:var(--text-primary); text-decoration:none; border-bottom:0;
+  transition:background-color var(--dur) var(--ease);
+}
+a.ic-part:hover{background:var(--bg-surface)}
+.ic-part-n{
+  flex:none; min-width:1.6em; text-align:right;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted);
+  font-variant-numeric:tabular-nums;
+}
+.ic-part-t{
+  flex:1; min-width:0; font-size:13.5px; line-height:1.35;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.ic-part.is-soon{color:var(--text-ghost); cursor:default}
+.ic-part.is-soon .ic-part-n{color:var(--text-ghost)}
+.ic-part-soon{
+  flex:none; font-family:var(--font-mono); font-size:9.5px; font-weight:600;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--text-ghost);
+  border:1px solid var(--border); border-radius:5px; padding:1px 5px;
+}
+.ic-part-more{padding:9px 12px 2px 8px; font-size:12.5px; color:var(--text-muted)}
+
+/* ── in-preview widget placeholder + codapi badge ──────────────────────────
+   An interactive figure cannot run in a 440px window, so it is replaced at
+   build time by a hairline placeholder; a codapi snippet's <pre> stays, and a
+   quiet badge says the code runs in the article. */
+.lp-widget{
+  display:flex; align-items:center; gap:10px;
+  margin:0 0 10px; padding:11px 13px; border-radius:var(--radius-sm);
+  border:1px dashed var(--border); background:color-mix(in srgb, var(--bg-surface) 60%, transparent);
+}
+.lp-widget-ic{flex:none; display:inline-flex; color:var(--text-muted)}
+.lp-widget-t{font-size:12.5px; line-height:1.4; color:var(--text-secondary); min-width:0}
+.lp-widget-cap{color:var(--text-muted)}
+.lp-run-badge{
+  margin:-4px 0 12px; font-family:var(--font-mono); font-size:11px; color:var(--text-muted);
+}
+
+/* ═══ Telegram card ════════════════════════════════════════════════════════
+   A post from the author's OWN channel, in the "site" style settled by the
+   owner: no bubble, no tail — the site quotes the channel, identity and text
+   straight on the canvas. Telegram blue is rationed: the plane, the footer, a
+   faint reply bar. Every colour is a token → correct on Light too. */
+.tg-card{
+  --pad:16px; --cl:var(--tg-blue);
+  width:min(390px, calc(100vw - 32px)); max-width:min(390px, calc(100vw - 32px));
+  display:flex; flex-direction:column; max-height:calc(100vh - 24px);
+}
+.tg-head{display:flex; align-items:flex-start; gap:10px; padding:13px var(--pad) 11px; flex:none}
+.tg-avatar{
+  position:relative; overflow:hidden;
+  flex:none; width:34px; height:34px; border-radius:50%;
+  display:grid; place-items:center;
+  font-family:var(--font-sans); font-weight:600; font-size:12px; letter-spacing:.02em;
+  color:#fff; background:linear-gradient(135deg, var(--accent-copper, #c87a42), var(--accent, #ea8a2e));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16), 0 1px 2px rgba(0,0,0,.28);
+}
+.tg-avatar img{width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block}
+.tg-avatar.is-big{width:44px; height:44px; font-size:15px}
+.tg-id{flex:1 1 auto; min-width:0}
+.tg-name{
+  font-size:14px; font-weight:650; line-height:1.25; color:var(--text-strong);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.tg-sub{
+  margin-top:2px; font-size:12px; line-height:1.3; color:var(--text-muted);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.tg-plane{flex:none; display:inline-flex; margin-top:2px; color:var(--tg-blue)}
+.tg-plane svg{display:block; transform:rotate(-16deg)}
+
+.tg-post{padding:0 var(--pad) 13px; flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
+.tg-bubble{flex:1 1 auto; min-height:0; display:flex; flex-direction:column}
+.tg-reply, .tg-photo, .tg-reactions, .tg-meta{flex:none}
+
+/* reply quote */
+.tg-reply{
+  display:flex; align-items:center; gap:8px; overflow:hidden;
+  margin-bottom:8px; padding:5px 9px 5px 8px;
+  border-radius:5px 7px 7px 5px; border-left:2px solid var(--cl);
+  background:color-mix(in srgb, var(--cl) 9%, transparent);
+  text-decoration:none; border-bottom:0;
+  transition:background-color var(--dur) var(--ease);
+}
+.tg-reply:hover{background:color-mix(in srgb, var(--cl) 15%, transparent)}
+.tg-reply-thumb{flex:none; width:30px; height:30px; border-radius:5px; object-fit:cover; background:var(--bg-raised)}
+.tg-reply-txt{min-width:0}
+.tg-reply-s{
+  font-size:12px; line-height:1.3; color:var(--text-secondary);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* photo */
+.tg-photo{position:relative; width:100%; margin-bottom:8px; border-radius:8px; overflow:hidden; background:var(--bg-raised)}
+.tg-photo img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block}
+
+/* post text straight on the canvas */
+.tg-text{
+  font-size:13.5px; line-height:1.58; color:var(--text-secondary);
+  max-height:min(46vh, 380px); overflow:hidden; overflow-wrap:break-word;
+  flex:0 1 auto; min-height:110px;
+}
+.tg-bubble.has-photo .tg-text{max-height:min(54vh, 460px)}
+.tg-text b{font-weight:650; color:var(--text-strong)}
+.tg-text i:not(.emoji){font-style:italic}
+.tg-text a{
+  color:var(--cl); border-bottom:0; text-decoration:underline;
+  text-decoration-color:color-mix(in srgb, var(--cl) 45%, transparent);
+  text-decoration-thickness:1px; text-underline-offset:.15em;
+  transition:color var(--dur) var(--ease), text-decoration-color var(--dur) var(--ease);
+}
+.tg-text a:hover{color:var(--tg-blue-2); text-decoration-color:var(--tg-blue-2)}
+
+/* reactions */
+.tg-reactions{display:flex; flex-wrap:wrap; gap:5px; margin-top:9px}
+.tg-react{
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:999px; background:var(--bg-raised);
+  font-size:11.5px; line-height:1.55; color:var(--text-secondary);
+}
+.tg-react-n{font-variant-numeric:tabular-nums}
+.tg-react.is-more{color:var(--text-muted)}
+
+/* meta (site style: left-aligned, a little above the footer) */
+.tg-meta{
+  display:flex; align-items:center; justify-content:flex-start; gap:6px;
+  margin-top:8px; font-family:var(--font-mono); font-size:10.5px; color:var(--text-muted);
+}
+.tg-views{display:inline-flex; align-items:center; gap:5px}
+.tg-eye{flex:none; margin-bottom:-1px}
+.tg-views .tg-dot{opacity:.6}
+
+.tg-card .lp-row{flex:none}
+
+/* channel fallback */
+.tg-channel-body{padding:2px var(--pad) 14px}
+.tg-channel-descr{margin:0; font-size:13.5px; line-height:1.55; color:var(--text-secondary)}
+
+/* ═══ YouTube card ═════════════════════════════════════════════════════════ */
+.yt-card{width:min(400px, calc(100vw - 32px)); --cl:var(--yt-red)}
+/* the thumbnail is a LINK to the video (new tab) and answers hover like a
+   control — no in-place player. */
+.yt-thumb{
+  position:relative; display:block; aspect-ratio:16/9; overflow:hidden;
+  background:
+    radial-gradient(120% 140% at 20% 0%, rgba(240,62,62,.16), transparent 55%),
+    linear-gradient(150deg, var(--bg-raised), var(--bg-base));
+  border-bottom:1px solid var(--border);
+}
+.yt-thumb img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  transition:transform .35s var(--ease);
+}
+.yt-thumb:hover img{transform:scale(1.04)}
+/* the base a:hover paints an accent border under every link — on a picture it
+   reads as a stray orange hairline; hold the thumb's own neutral edge */
+.yt-thumb:hover{border-bottom-color:var(--border)}
+.yt-btn{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:52px; height:36px; border-radius:10px; background:var(--yt-red);
+  box-shadow:0 8px 24px -6px rgba(240,62,62,.5);
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.yt-thumb:hover .yt-btn{
+  transform:translate(-50%,-50%) scale(1.12);
+  box-shadow:0 10px 30px -6px rgba(240,62,62,.65);
+}
+.yt-btn::after{
+  content:""; position:absolute; left:55%; top:50%; transform:translate(-50%,-50%);
+  border-style:solid; border-width:7px 0 7px 12px;
+  border-color:transparent transparent transparent #fff;
+}
+.yt-dur{
+  position:absolute; right:8px; bottom:8px; padding:2px 7px; border-radius:6px;
+  background:rgba(0,0,0,.72); color:#fff;
+  font-family:var(--font-mono); font-size:11px; line-height:1.5;
+}
+@media (prefers-reduced-motion:reduce){
+  .yt-thumb img, .yt-btn{transition:none}
+  .yt-thumb:hover img{transform:none}
+  .yt-thumb:hover .yt-btn{transform:translate(-50%,-50%)}
+}
+.yt-body{padding:13px 18px}
+.yt-title{
+  margin:0; font-size:15px; font-weight:650; line-height:1.35; color:var(--text-strong);
+  letter-spacing:-.01em;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.yt-meta{margin:7px 0 0; font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted)}
+
+/* ═══ Wikipedia card ═══════════════════════════════════════════════════════
+   Same chassis and physics; the wiki identity is dosed through TYPOGRAPHY, not
+   chrome — a serif "W" mark and a serif article title against the site's Inter,
+   the short gray description line Wikipedia prints under titles, and the wiki
+   link-blue reserved for the single action row. Every colour is a token; the
+   blue adapts per scheme (the theme's light hook is [data-theme="light"]). */
+.wk-card{
+  width:min(400px, calc(100vw - 32px));
+  --wk-blue:#84a3e0;                    /* wiki link-blue, lifted for dark */
+  --wk-serif:'Linux Libertine', Georgia, 'Times New Roman', serif;
+}
+:root[data-theme="light"] .wk-card{--wk-blue:#3366cc}
+/* header: a CHROME strip set apart by the same hairline the article crumb uses */
+.wk-head{
+  display:flex; align-items:center; gap:8px;
+  padding:11px 18px; border-bottom:1px solid var(--border);
+}
+.wk-mark{
+  flex:none; font-family:var(--wk-serif); font-weight:700;
+  font-size:17px; line-height:1; color:var(--text-strong);
+}
+.wk-head .lp-kick{color:var(--text-muted)}
+.wk-lang{
+  margin-left:auto; flex:none;
+  font-family:var(--font-mono); font-size:9.5px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--text-ghost);
+  border:1px solid var(--border); border-radius:4px; padding:1px 5px; line-height:1.5;
+}
+/* body: thumbnail floats right like wiki's own hovercards */
+.wk-body{padding:12px 18px 14px}
+.wk-body::after{content:""; display:block; clear:both}
+.wk-thumb{
+  float:right; width:92px; height:92px; object-fit:cover;
+  border-radius:8px; border:1px solid var(--border);
+  margin:4px 0 10px 12px;
+}
+.wk-title{
+  margin:0; font-family:var(--wk-serif);
+  font-size:19px; font-weight:600; line-height:1.25;
+  color:var(--text-strong); overflow-wrap:break-word;
+}
+.wk-descr{margin:3px 0 0; font-size:12px; line-height:1.45; color:var(--text-muted)}
+.wk-extract{
+  margin-top:9px; font-size:13.5px; line-height:1.6; color:var(--text-secondary);
+  max-height:min(44vh, 340px);          /* engine adds .is-ovf → fade */
+}
+.wk-extract p{margin:0 0 9px}
+.wk-extract p:last-child{margin-bottom:0}
+.wk-card .lp-row{--cl:var(--wk-blue)}
+
+/* ═══ Go blog card ═════════════════════════════════════════════════════════
+   The official go.dev/blog. A CHROME strip (hairline, like wiki) with the
+   italic "Go" mark in the Go brand blue and the blog's own name; the body is
+   the site's Inter (go.dev is grotesque too — no mimicry). --gob-blue adapts:
+   the brand cyan on dark, their darker text-blue on the Light palette. */
+.gob-card{
+  width:min(400px, calc(100vw - 32px));
+  --gob-blue:#00ADD8; --cl:var(--gob-blue);
+}
+:root[data-theme="light"] .gob-card{--gob-blue:#007D9C}
+.gob-head{
+  display:flex; align-items:center; gap:8px;
+  padding:11px 18px; border-bottom:1px solid var(--border);
+}
+.gob-mark{
+  flex:none; font-weight:700; font-style:italic; font-size:17px; line-height:1;
+  letter-spacing:-.01em; color:var(--gob-blue);
+}
+.gob-head .lp-kick{color:var(--text-muted)}
+.gob-body{padding:12px 18px 14px}
+.gob-title{
+  margin:0; font-size:17.5px; font-weight:650; line-height:1.3;
+  letter-spacing:-.01em; color:var(--text-strong); overflow-wrap:break-word;
+}
+.gob-meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:6px;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted);
+}
+.gob-meta i{font-style:normal; color:var(--text-ghost)}
+.gob-lead{
+  margin-top:10px; font-size:13.75px; line-height:1.6; color:var(--text-secondary);
+  max-height:min(44vh, 360px);
+}
+.gob-lead > :first-child{margin-top:0}
+.gob-lead > :last-child{margin-bottom:0}
+.gob-lead p{margin:0 0 9px}
+.gob-lead pre{
+  margin:0 0 9px; padding:9px 11px; border-radius:var(--radius-sm);
+  font-size:12px; line-height:1.55; overflow-x:auto;
+  background:var(--bg-base); border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.gob-lead code{font-size:.9em}
+.gob-lead ul, .gob-lead ol{margin:0 0 9px; padding-left:20px}
+.gob-lead li{margin:0 0 5px}
+.gob-lead a{
+  color:var(--gob-blue); border-bottom:0; text-decoration:underline;
+  text-decoration-thickness:1px; text-underline-offset:.15em;
+}
+.gob-lead img{max-width:100%; height:auto; border-radius:var(--radius-sm)}
+.gob-card .lp-row{--cl:var(--gob-blue)}
+
+/* ── touch: no hover, the feature stays off (links behave normally). The marks
+   still classify. Nothing to do here — the JS never binds on coarse pointers. */

@@ -1,0 +1,72 @@
+{{- /* The `preview` output of a guide: /<slug>/index.preview.html — a naked card
+       fragment fetched on hover by modules/linkpreview.js. It carries the WHOLE
+       article, sliced into <section data-lp-h2> blocks (the intro plus one per H2);
+       the JS shows the intro and whole sections up to a word budget, lists the rest
+       under "further in the article", and for a #anchor link reshapes the same
+       fragment into a section-scoped window. Interactive parts are neutered at
+       build time: widgets become a placeholder, codapi a quiet badge, and any
+       stray script/style/iframe is stripped. */ -}}
+{{ define "main" -}}
+{{- $budget := site.Params.linkPreviews.budgetWords | default 1400 -}}
+{{- $mins := .Params.mins | default (partial "article/reading-time.html" .) -}}
+{{- $ver := .Params.version | default site.Params.versionDefault -}}
+{{- $s := partial "article/series-ctx.html" . -}}
+{{- /* ── neutralize interactive markup, in this order ────────────────────── */ -}}
+{{- $c := .Content -}}
+{{- $c = replaceRE `(?s)<script[^>]*>.*?</script>` "" $c -}}
+{{- $c = replaceRE `(?s)<style[^>]*>.*?</style>` "" $c -}}
+{{- $c = replaceRE `(?s)<iframe[^>]*>.*?</iframe>` "" $c -}}
+{{- $c = replaceRE `<iframe[^>]*/?>` "" $c -}}
+{{- $badge := printf `<p class="lp-run-badge">▶ %s</p>` (i18n "lp_run") -}}
+{{- $c = replaceRE `(?s)<codapi-snippet[^>]*>.*?</codapi-snippet>` $badge $c -}}
+{{- $c = replaceRE `(?s)<codapi-settings[^>]*>.*?</codapi-settings>` "" $c -}}
+{{- $c = replaceRE `<codapi-settings[^>]*/?>` "" $c -}}
+{{- $gear := `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>` -}}
+{{- $wrepl := printf `<div class="lp-widget"><span class="lp-widget-ic">%s</span><span class="lp-widget-t">%s <span class="lp-widget-cap">— $1</span></span></div>` $gear (i18n "lp_widget") -}}
+{{- $c = replaceRE `(?s)<figure class="widget">\s*<figcaption>(.*?)</figcaption>.*?</figure>` $wrepl $c -}}
+{{- /* ── split into intro + one section per H2 ────────────────────────────── */ -}}
+{{- $chunks := split $c "<h2 " -}}
+<article class="lp-card ic" data-lp="article" data-lp-budget="{{ $budget }}">
+  <div class="ic-anchor-ctx" hidden><span class="g">§</span><span class="t">{{ .Title }}</span></div>
+  <div class="ic-flow lp-scroll">
+    <div class="ic-head">
+      <h3 class="ic-title">{{ .Title }}</h3>
+      <div class="ic-meta">
+        {{- $bits := slice -}}
+        {{- if not .Date.IsZero }}{{ $bits = $bits | append (partial "date.html" .Date) }}{{ end -}}
+        {{- with $mins }}{{ $bits = $bits | append (printf "%v %s" . (i18n "mins_abbr")) }}{{ end -}}
+        {{- range $i, $b := $bits }}{{ if $i }}<i>·</i>{{ end }}<span>{{ $b }}</span>{{ end -}}
+        {{- with $ver }}{{ if $bits }}<i>·</i>{{ end }}<span><b class="ic-ver">{{ . }}</b></span>{{ end -}}
+      </div>
+      {{- if $s.isSeries }}
+      <div class="ic-series">
+        <div class="ic-series-left">
+          <span class="ic-series-k">{{ i18n "series_word" }}</span>
+          <span class="ic-series-name">{{ $s.label }}</span>
+        </div>
+        <div class="ic-series-right">
+          {{- $total := $s.total -}}{{- $pos := $s.pos -}}
+          {{- if le $total 14 }}
+          <div class="ic-series-bar">{{ range seq $total }}<i{{ if le . $pos }} class="on"{{ end }}></i>{{ end }}</div>
+          {{- else }}
+          <div class="ic-series-bar cont"><span class="fill" style="width:{{ math.Round (mul (div (float $pos) $total) 100) }}%"></span></div>
+          {{- end }}
+          <span class="ic-series-pos"><b>{{ $pos }}</b> {{ i18n "lp_of" }} {{ $total }}</span>
+        </div>
+      </div>
+      {{- end }}
+    </div>
+    <div class="ic-body">
+      <div class="ic-intro">{{ index $chunks 0 | safeHTML }}</div>
+      {{- range $i, $chunk := $chunks }}{{ if $i -}}
+        {{- $sec := printf "<h2 %s" $chunk -}}
+        {{- $id := "" -}}{{ with findRESubmatch `id="([^"]+)"` $sec 1 }}{{ $id = index (index . 0) 1 }}{{ end -}}
+      <section class="ic-sec" data-lp-h2="{{ $id }}">{{ $sec | safeHTML }}</section>
+      {{- end }}{{ end }}
+      <div class="ic-more" hidden><span class="ic-more-h">{{ i18n "lp_further" }}</span><ul class="ic-more-list"></ul></div>
+    </div>
+  </div>
+  <a class="lp-row ic-foot" href="{{ .RelPermalink }}"><span>{{ i18n "lp_read" }}</span><span class="ic-foot-side">{{ with $mins }}<span class="ic-foot-tail">{{ . }} {{ i18n "mins_abbr" }}</span>{{ end }}<span class="arw" aria-hidden="true">→</span></span></a>
+  <a class="lp-row ic-foot ic-foot-anchor" href="{{ .RelPermalink }}" hidden><span>{{ i18n "lp_to_section" }}</span><span class="ic-foot-side"><span class="arw" aria-hidden="true">→</span></span></a>
+</article>
+{{- end }}

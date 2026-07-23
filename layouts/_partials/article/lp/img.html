@@ -1,0 +1,19 @@
+{{- /* Fetch a remote image and republish it under a SHORT, stable local name.
+       Context = dict {url, opts?}. Returns the local .RelPermalink, or "" on any
+       failure. Two reasons this is not a bare resources.GetRemote + .RelPermalink:
+       t.me CDN URLs end in a ~300-char token, and Hugo would try to publish the
+       image under that name — longer than the 255-byte filesystem limit, which
+       fails the build. resources.Copy renames it to lp/<hash>.<ext>, keyed by the
+       URL so it is deduped and cache-stable, with the extension taken from the
+       response media type (a t.me photo URL has none). */ -}}
+{{- $url := .url -}}
+{{- $res := partial "article/lp/get.html" (dict "url" $url "opts" .opts) -}}
+{{- $out := "" -}}
+{{- with $res -}}
+  {{- $ext := "bin" -}}
+  {{- with .MediaType -}}{{ $ext = .SubType }}{{- end -}}
+  {{- $name := printf "lp/%s.%s" (substr (sha256 $url) 0 20) $ext -}}
+  {{- $copied := try (resources.Copy $name .) -}}
+  {{- with $copied.Value -}}{{ $out = .RelPermalink }}{{- end -}}
+{{- end -}}
+{{- return $out -}}
