@@ -29,8 +29,11 @@
       {{- end }}
     </div>
     <div class="term-card-b">{{ .body }}</div>
+    {{- /* External (http/https) hrefs open in a new tab, matching the site-wide
+           link render hook (_markup/render-link.html); internal hrefs that the
+           term shortcode resolved to a /permalink stay in-tab. */ -}}
     {{- with .href }}
-    <a class="term-card-more" href="{{ . }}"><span>{{ $card.more }}</span><span class="arw" aria-hidden="true">→</span></a>
+    <a class="term-card-more" href="{{ . }}"{{ if hasPrefix . "http" }} target="_blank" rel="noopener"{{ end }}><span>{{ $card.more }}</span><span class="arw" aria-hidden="true">→</span></a>
     {{- end }}
     {{- /* Back-link closes the loop for the no-JS reading order: the reader
            jumped down here from the prose, this returns them. */}}
