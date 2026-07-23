@@ -1,5 +1,5 @@
 /* typography */
-h2{font-size:27px; line-height:1.2; font-weight:700; letter-spacing:-.01em; margin:52px 0 16px; padding-top:18px; border-top:1px solid var(--border)}
+h2{font-size:27px; line-height:1.2; font-weight:700; letter-spacing:-.01em; margin:52px 0 16px}
 h3{font-size:20px; font-weight:650; margin:34px 0 12px; color:var(--text-primary)}
 /* markdown-style hash prefix on headings — a clickable deep-link anchor */
 h2 .hash, h3 .hash, h4 .hash{

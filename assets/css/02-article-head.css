@@ -7,7 +7,7 @@ h1 .sub{color:var(--accent)}
 /* article standfirst: a deliberate deck, not just bigger body text — brighter
    (primary, so it's emphasized rather than faded), a step up in size, tighter
    leading for a denser display texture, and closed by a full-width hairline (the
-   same solid --border as the meta ticks and h2 rules) so the head ends on a clean
+   same solid --border as the meta ticks and hr rules) so the head ends on a clean
    line and the article starts fresh below it. .layout scopes this to real
    articles; rubric/taxonomy/404 leads keep the plain deck. No lead → no element →
    no rule, and the meta line's own margin carries the gap to the body.
