@@ -151,10 +151,11 @@ build:
 
 ### callout — `{{</* callout type="trap" */>}}` {#callout}
 
-Четыре типа: `key` (главная мысль), `trap` (ловушка), `note` (историческая
-сноска), `internals` (под капотом). Подпись берётся из i18n (`callout_key`,
-`callout_trap`, `callout_note`, `callout_internals`), переопределяется через
-`label=`. Тело — Markdown. По умолчанию `type` — `note`.
+Пять типов: `key` (главная мысль), `trap` (ловушка), `note` (историческая
+сноска), `internals` (под капотом), `warn` (внимание). Подпись берётся из i18n
+(`callout_key`, `callout_trap`, `callout_note`, `callout_internals`,
+`callout_warn`), переопределяется через `label=`. Тело — Markdown. По умолчанию
+`type` — `note`.
 
 ```md
 {{</* callout type="key" */>}}

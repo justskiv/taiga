@@ -58,16 +58,20 @@ Markdown-таблица, обёртку `.tbl-wrap` вешает render-table:
 Главная мысль с дефолтным лейблом. Внутри — **markdown** и `код`.
 {{< /callout >}}
 
-{{< callout color="copper" >}}
+{{< callout type="trap" >}}
 Ловушка с дефолтным лейблом.
 {{< /callout >}}
 
-{{< callout color="green" label="Под капотом: свой лейбл" >}}
+{{< callout type="internals" label="Под капотом: свой лейбл" >}}
 Коллаут «под капотом» с переопределённым лейблом.
 {{< /callout >}}
 
 {{< callout type="note" >}}
 Историческая сноска — самый тихий тип.
+{{< /callout >}}
+
+{{< callout type="warn" >}}
+Внимание — самый громкий тип, красный.
 {{< /callout >}}
 
 ## Fold {#fold}

@@ -154,10 +154,10 @@ Seven, and that is the whole set.
 
 ### callout — `{{</* callout type="trap" */>}}` {#callout}
 
-Four types: `key` (key idea), `trap`, `note` (historical note), `internals`
-(under the hood). The label comes from i18n (`callout_key`, `callout_trap`,
-`callout_note`, `callout_internals`); override with `label=`. The body is
-Markdown. `type` defaults to `note`.
+Five types: `key` (key idea), `trap`, `note` (historical note), `internals`
+(under the hood), `warn` (caution). The label comes from i18n (`callout_key`,
+`callout_trap`, `callout_note`, `callout_internals`, `callout_warn`); override
+with `label=`. The body is Markdown. `type` defaults to `note`.
 
 ```md
 {{</* callout type="key" */>}}

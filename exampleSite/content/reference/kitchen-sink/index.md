@@ -58,16 +58,20 @@ A Markdown table; render-table attaches the `.tbl-wrap` wrapper:
 The main idea with the default label. Inside — **markdown** and `code`.
 {{< /callout >}}
 
-{{< callout color="copper" >}}
+{{< callout type="trap" >}}
 A trap with the default label.
 {{< /callout >}}
 
-{{< callout color="green" label="Under the hood: a custom label" >}}
+{{< callout type="internals" label="Under the hood: a custom label" >}}
 An "under the hood" callout with an overridden label.
 {{< /callout >}}
 
 {{< callout type="note" >}}
 A historical footnote — the quietest type.
+{{< /callout >}}
+
+{{< callout type="warn" >}}
+A caution — the loudest type, in red.
 {{< /callout >}}
 
 ## Fold {#fold}
