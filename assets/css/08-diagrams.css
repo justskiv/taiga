@@ -64,11 +64,15 @@
   transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 .l1-tip.show{opacity:1; transform:translateY(0)}
-.l1-tip .l1-tip-title{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; line-height:1.35; color:var(--accent)}
+/* with data-tip-tone the whole title takes the entity colour, not just
+   the dot; untoned tips keep the site accent */
+.l1-tip .l1-tip-title{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; line-height:1.35; color:var(--l1-tip-tone, var(--accent))}
 .l1-tip .l1-tip-sub{margin-top:3px; font-size:11px; line-height:1.45; font-weight:500; color:var(--text-muted)}
 .l1-tip .l1-tip-sub:empty{display:none}
+/* the dot takes the hovered cell's entity colour via data-tip-tone
+   (tooltip.js sets --l1-tip-tone); without the attribute — site accent */
 .l1-tip .l1-tip-dot{flex:0 0 auto; width:8px; height:8px; border-radius:50%;
-  background:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent)}
+  background:var(--l1-tip-tone, var(--accent)); box-shadow:0 0 0 3px color-mix(in srgb, var(--l1-tip-tone, var(--accent)) 22%, transparent)}
 .l1-tip .l1-tip-arrow{position:absolute; left:50%; width:9px; height:9px;
   background:var(--bg-raised); border:1px solid var(--border); border-radius:0 0 2px 0;
   transform:translateX(-50%) rotate(45deg)}

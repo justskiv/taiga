@@ -8,11 +8,18 @@ export function bindTips() {
   let curCell = null;
 
   function show(cell) {
+    clearTimeout(showTimer); pendCell = null;
     curCell = cell;
     const raw = cell.getAttribute('data-tip') || '';
     const cut = raw.indexOf('·');
     if (cut > 0) { tEl.textContent = raw.slice(0, cut).trim(); sEl.textContent = raw.slice(cut + 1).trim(); }
     else { tEl.textContent = raw; sEl.textContent = ''; }
+    /* optional entity colour for the dot: a CSS colour, or a custom
+       property name resolved against the cell (palette-aware) */
+    let tone = cell.getAttribute('data-tip-tone');
+    if (tone && tone.slice(0, 2) === '--') tone = getComputedStyle(cell).getPropertyValue(tone).trim();
+    if (tone) tip.style.setProperty('--l1-tip-tone', tone);
+    else tip.style.removeProperty('--l1-tip-tone');
     tip.classList.add('show');
     const r = cell.getBoundingClientRect();
     tip.classList.remove('below');
@@ -28,7 +35,21 @@ export function bindTips() {
     ax = Math.max(10, Math.min(ax, tw - 10));
     arrow.style.left = ax + 'px';
   }
-  function hide() { curCell = null; tip.classList.remove('show'); }
+  function hide() {
+    clearTimeout(showTimer); pendCell = null;
+    curCell = null; tip.classList.remove('show');
+  }
+  /* short open delay so sweeping the cursor across cells does not
+     flicker the card; once a tip is up, moving between cells retargets
+     it instantly (warm-tooltip pattern) */
+  let showTimer = 0, pendCell = null;
+  function scheduleShow(cell) {
+    if (cell === curCell || cell === pendCell) return;
+    clearTimeout(showTimer); pendCell = null;
+    if (curCell) { show(cell); return; }
+    pendCell = cell;
+    showTimer = setTimeout(function () { pendCell = null; show(cell); }, 180);
+  }
   /* widgets re-render cells; if the hovered one was replaced no mouseout
      fires — poll connectivity while the tip is up */
   setInterval(function () { if (curCell && !curCell.isConnected) hide(); }, 300);
@@ -37,8 +58,8 @@ export function bindTips() {
   });
   document.addEventListener('mouseover', function (e) {
     const cell = e.target.closest && e.target.closest('[data-tip]');
-    if (cell) { if (cell.tabIndex < 0) cell.tabIndex = 0; show(cell); }
-    else if (curCell) hide();
+    if (cell) { if (cell.tabIndex < 0) cell.tabIndex = 0; scheduleShow(cell); }
+    else if (curCell || pendCell) hide();
   });
   document.addEventListener('focusin', function (e) {
     const cell = e.target.closest && e.target.closest('[data-tip]');
