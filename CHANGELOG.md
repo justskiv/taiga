@@ -144,6 +144,20 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **The feed card's meta line got a hierarchy.** Five items at one size and one
+  colour, split by a flat gap, read as a single grey smear — and the loudest of
+  them (the tags) mattered least. The row is grouped now: rubric first as the
+  only accent, then series·part, reading time and date, hairline cuts between
+  them (the article head's device, reused), and the tags pushed to the card's
+  right edge. That last move also squares the card — the row now ends where the
+  cover band ends, so the banner stops looking shifted right against text that
+  never reached it. Deliberately NO rule under the row: a full-width hairline
+  there is indistinguishable from the one between posts, and two equal lines per
+  card leave the reader guessing which one ends what. The cover and the title
+  each gained air, and the `read →` tail grew to 13.5px with the underline moved
+  to hover (on the word only — the arrow keeps its own small motion). Markup:
+  meta items carry `p-cut` where a divider follows, and the tail's label sits in
+  its own `<span class="tx">`.
 - **Image dimming is keyed on `data-scheme` now**, not on "any palette that
   isn't `light`". Same behaviour on every shipped palette, but a new dark or
   light palette now inherits it by declaring its own lightness instead of by

@@ -46,16 +46,25 @@
 {{- with $cover.url }}
 <a class="p-cover" href="{{ $.RelPermalink }}" tabindex="-1" aria-hidden="true"><img src="{{ . }}" alt=""{{ with $cover.w }} width="{{ . }}"{{ end }}{{ with $cover.h }} height="{{ . }}"{{ end }} loading="lazy" decoding="async"></a>
 {{- end }}
-<div class="p-m"><span>{{ partial "date.html" .Date }}</span>
-{{- "" -}}<a class="pr" href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
-{{- if $s.isSeries }}<a class="ps" href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>
-{{- else }}<span>{{ i18n "kicker_standalone" }}</span>{{ end }}
-{{- "" -}}<span>{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</span>
+{{- /* Meta line, ordered by what the reader decides on: what this is (rubric,
+       then series·part), how big it is, when it landed — tags last, and the CSS
+       pushes them to the card's right edge, where they close the row against
+       the cover above. `p-cut` asks for the hairline that separates an item
+       from the next one; it is a trailing pseudo-element, so on a wrapped row
+       it stays with the item that ends the line instead of opening the next
+       one. The last item before the tags does not carry it. */ -}}
+<div class="p-m"><a class="pr p-cut" href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
+{{- if $s.isSeries }}<a class="ps p-cut" href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>
+{{- else }}<span class="p-cut">{{ i18n "kicker_standalone" }}</span>{{ end }}
+{{- "" -}}<span class="p-cut">{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</span>
+{{- "" -}}<span>{{ partial "date.html" .Date }}</span>
 {{- with $tags }}<span class="p-tags">{{ $tagsURL := "tags/" | relLangURL }}{{ range $i, $t := . }}{{ if $i }} {{ end }}<a href="{{ $tagsURL }}#{{ $t }}">#{{ $t }}</a>{{ end }}</span>{{ end -}}
 </div>
 <h3 class="p-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
 {{- if $lead }}
-<div class="p-lead">{{ $lead | safeHTML }}<p class="p-more-w"><a class="p-more" href="{{ .RelPermalink }}">{{ i18n "feed_read" }} <span class="ar">→</span></a></p></div>
+{{- /* The word carries the underline, not the link: a text-decoration set on
+       the <a> propagates to every child, arrow included. */ -}}
+<div class="p-lead">{{ $lead | safeHTML }}<p class="p-more-w"><a class="p-more" href="{{ .RelPermalink }}"><span class="tx">{{ i18n "feed_read" }}</span> <span class="ar">→</span></a></p></div>
 {{- else }}
 <p class="p-s">{{ .Description }}</p>
 {{- end }}
