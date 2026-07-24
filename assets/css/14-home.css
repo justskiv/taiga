@@ -17,6 +17,69 @@
 .hero-line .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent-glow); flex:0 0 auto}
 .hero-line .sat{color:var(--text-secondary)}
 
+/* ---- home: hero zone background markup (params.home.grid) ----
+   A full-bleed layer confined to the hero zone (heading + kicker + cards,
+   bleeding 34px toward the feed). The ink is DERIVED from --border — the
+   palette's own "barely visible line" token — so every palette draws lines it
+   already tuned for itself (5% of text-primary vanished on white canvases);
+   "fade" dissolves the grid toward the feed through a mask. A palette MAY pin
+   its own ink via a `gridline` / `griddot` token in data/themes/<id>.toml —
+   none has to, the derivation below is the working default. z-index:-1 keeps
+   the layer under all content. */
+.hero-zone{position:relative;
+  --_gridline:var(--gridline, color-mix(in srgb, var(--border) 45%, transparent));
+  --_griddot:var(--griddot, color-mix(in srgb, var(--border) 90%, transparent));
+  --gstep:46px}
+/* light canvases flatten low-alpha ink (Weber: the same delta reads weaker on
+   white), so the grid runs denser there — just under the palette's hairline
+   borders; dark palettes keep the exact pre-derivation look via the 45% base */
+[data-scheme="light"] .hero-zone{
+  --_gridline:var(--gridline, color-mix(in srgb, var(--border) 80%, transparent));
+  --_griddot:var(--griddot, var(--border))}
+.hero-zone[data-grid]::before{content:""; position:absolute; z-index:-1; pointer-events:none;
+  top:0; bottom:-34px; left:50%; width:100vw; transform:translateX(-50%);
+  background-position:50% 0; display:none}
+/* the 100vw layer must never spawn a horizontal scrollbar: clip (not hidden —
+   hidden would turn <html> into a scroll container and break sticky) exactly
+   on the pages that draw the layer */
+html:has(.hero-zone[data-grid]){overflow-x:clip}
+.hero-zone[data-grid="grid"]::before,
+.hero-zone[data-grid="fade"]::before{display:block;
+  background-image:
+    linear-gradient(to right, var(--_gridline) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--_gridline) 1px, transparent 1px);
+  background-size:var(--gstep) var(--gstep)}
+.hero-zone[data-grid="fade"]::before{
+  -webkit-mask-image:linear-gradient(to bottom, #000 52%, transparent 97%);
+  mask-image:linear-gradient(to bottom, #000 52%, transparent 97%)}
+.hero-zone[data-grid="dots"]::before{display:block;
+  background-image:radial-gradient(circle 1.3px, var(--_griddot) 98%, transparent);
+  background-size:var(--gstep) var(--gstep)}
+
+/* ---- home: hero heading scene (params.home.hero = "wordmark") ----
+   The mark is the header brand writ large (logo.html + brand name); with the
+   scene on, the kicker (.hero-line) demotes to a centered subtitle and the
+   rubric tiles breathe — both keyed off sibling combinators, so a home
+   without the scene keeps today's exact layout. */
+.hero-head{padding-top:56px}
+.hh-inner{display:flex; align-items:flex-end; justify-content:center; gap:24px; flex-wrap:wrap}
+.hh-mark{display:inline-flex; align-items:center; font-family:var(--font-mono); font-weight:700;
+  font-size:clamp(42px, 6.4vw, 64px); letter-spacing:-.02em; line-height:1.1;
+  color:var(--text-strong); white-space:nowrap}
+.hh-mark svg{width:1.4em; height:1.4em; display:block; border-radius:.27em; margin-right:.4em}
+.hh-mark .tld{color:var(--accent)}
+.hh-mascot{flex:0 0 auto}
+.hh-mascot svg{display:block; height:96px; width:auto}
+.hero-head + .hero-line{justify-content:center; padding:18px 0 4px}
+.hero-head ~ .rubs2{margin-top:38px}
+/* narrow screens: the mark and the mascot shrink together so the heading row
+   never overflows a 390px viewport */
+@media(max-width:560px){
+  .hh-inner{gap:14px}
+  .hh-mark{font-size:clamp(30px, 9.6vw, 42px)}
+  .hh-mascot svg{height:66px}
+}
+
 /* ---- home: rubric cards (the showcase) ---- */
 .rubs2{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:22px 0 0}
 @media(max-width:880px){.rubs2{grid-template-columns:1fr}}
@@ -28,9 +91,10 @@
 /* hover lifts the SIGN, not the card — attention lands where the meaning is */
 .rub2:hover{border-color:color-mix(in srgb, var(--accent) 45%, var(--border));
   box-shadow:0 20px 44px -20px rgba(0,0,0,.6)}
-.rub2 .r-logo{width:80px; height:80px; margin-bottom:10px; transition:transform .18s var(--ease), filter .18s var(--ease)}
+.rub2 .r-logo{width:80px; height:80px; margin-bottom:10px; transition:transform .18s var(--ease)}
 .rub2 .r-logo svg{width:100%; height:100%; display:block}
-.rub2:hover .r-logo{transform:translateY(-3px) scale(1.06); filter:drop-shadow(0 6px 16px var(--accent-glow))}
+/* hover = lift/scale only — no glow: drop-shadow on the sign reads as toy-like */
+.rub2:hover .r-logo{transform:translateY(-3px) scale(1.06)}
 @media (prefers-reduced-motion:reduce){ .rub2:hover .r-logo{transform:none} }
 .rub2 .r-t{font-size:20px; font-weight:700; letter-spacing:-.01em; color:var(--text-strong)}
 .rub2 .r-d{font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted); letter-spacing:.02em}
@@ -40,6 +104,15 @@
   transform:translateX(-2px); opacity:.55; transition:transform .18s var(--ease), opacity .18s var(--ease)}
 .rub2:hover .r-n{color:var(--text-secondary)}
 .rub2:hover .r-n::after{transform:translateX(2px); opacity:1}
+
+/* ---- home: naked rubric cards (params.home.rubricCards = "naked") ----
+   No box at all — free columns on the page (the background markup holds the
+   composition instead), the logo grown to the card's hero. Hover stays on the
+   sign and the arrow: a 1px column lift, no border, no shadow, no glow. */
+.rubs2-naked .rub2{background:transparent; border-color:transparent}
+.rubs2-naked .rub2:hover{border-color:transparent; box-shadow:none; transform:translateY(-1px)}
+.rubs2-naked .rub2 .r-logo{width:112px; height:112px}
+@media (prefers-reduced-motion:reduce){ .rubs2-naked .rub2:hover{transform:none} }
 
 /* ---- home: featured guide ("guide of the week") ---- */
 .featured{display:grid; grid-template-columns:minmax(0,1fr) 430px; gap:44px; align-items:center;
@@ -55,12 +128,6 @@
 .featured .f-s{font-size:15px; color:var(--text-secondary); line-height:1.65; margin:0 0 20px; max-width:56ch}
 .featured .w-root{padding:18px; background:var(--bg-base)}
 
-/* "in progress" strip */
-.wip{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:22px 0 0; font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted)}
-.wip .dot-live{width:7px; height:7px; border-radius:50%; background:var(--accent-green); box-shadow:0 0 8px var(--accent-green-glow); flex:0 0 auto}
-.wip b{color:var(--text-secondary); font-weight:600}
-.wip a{color:var(--text-secondary); border-bottom:1px solid var(--border)}
-.wip a:hover{color:var(--accent); border-bottom-color:var(--accent)}
 /* compact info cards (lab: planned sandboxes) */
 .rubs{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:26px 0 0}
 @media(max-width:880px){.rubs{grid-template-columns:1fr}}
@@ -100,3 +167,20 @@
   transition:color var(--dur) var(--ease), background var(--dur) var(--ease)}
 .feed-btn:hover{color:var(--accent); background:var(--bg-surface)}
 .feed-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---- light scheme: lift the home page's secondary ink one step ----
+   Muted rows tuned on dark canvases wash out on white (the same Weber
+   flattening the grid ink gets): kicker, card subtopics/counters, section
+   labels and feed meta all drifted to "faded page". One ramp step restores
+   presence without turning labels into content — article pages keep their
+   ramp untouched. */
+[data-scheme="light"] .hero-line{color:var(--text-secondary)}
+[data-scheme="light"] .hero-line .sat{color:var(--text-primary)}
+[data-scheme="light"] .rub2 .r-d{color:var(--text-secondary)}
+[data-scheme="light"] .rub2 .r-n{color:var(--text-secondary)}
+[data-scheme="light"] .rub2:hover .r-n{color:var(--text-primary)}
+[data-scheme="light"] .sec-h{color:var(--text-secondary)}
+[data-scheme="light"] .sec-h a{color:var(--text-secondary)}
+[data-scheme="light"] .post .p-m{color:var(--text-secondary)}
+[data-scheme="light"] .post .p-m a.ps{color:var(--text-secondary)}
+[data-scheme="light"] .post .p-tags a{color:var(--text-secondary)}

@@ -9,9 +9,25 @@ const THEME_KEY = 'taiga.theme';
 
 export function curTheme() { return root.getAttribute('data-theme') || read(THEME_KEY) || 'amber'; }
 
+/* light-palette ids come from the #dg-themes JSON (palettes-json.html emits a
+   `light` flag per palette); lazily cached — the element exists by the time
+   the deferred bundle runs */
+let lightIds = null;
+function isLight(id) {
+  if (!lightIds) {
+    lightIds = {};
+    try {
+      const el = document.getElementById('dg-themes');
+      (el ? JSON.parse(el.textContent) : []).forEach(function (t) { if (t.light) lightIds[t.id] = 1; });
+    } catch (e) { /* malformed JSON → treat every palette as dark */ }
+  }
+  return lightIds[id] === 1;
+}
+
 export function setTheme(id) {
   root.classList.add('theme-switching');   /* kill transitions for one frame */
   root.setAttribute('data-theme', id);
+  root.setAttribute('data-scheme', isLight(id) ? 'light' : 'dark');
   store(THEME_KEY, id);
   void root.offsetHeight;
   requestAnimationFrame(function () { root.classList.remove('theme-switching'); });

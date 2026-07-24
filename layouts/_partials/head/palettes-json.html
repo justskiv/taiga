@@ -20,6 +20,7 @@
         "id" $id
         "name" $name
         "weight" (or $t.weight 100)
+        "light" ($t.light | default false)
         "sw" (slice (index $t "bg-base") (index $t "bg-surface") (index $t "bg-raised") (index $t "text-primary"))) -}}
   {{- end -}}
 {{- end -}}

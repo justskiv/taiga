@@ -159,6 +159,9 @@ other = "читать гайд"
 other = "вся серия"
 [feed_head]
 other = "лента гайдов"
+# quiet tail link under a long feed preview (params.home.feedPreview = "summary")
+[feed_read]
+other = "читать"
 [wip_writing]
 other = "пишутся"
 [wip_roadmap]

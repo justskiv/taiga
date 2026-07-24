@@ -5,8 +5,11 @@
        feedInitial there is no hidden tail and no button. */ -}}
 {{- $guides := partial "guides.html" . -}}
 {{- $initial := site.Params.feedInitial | default 8 -}}
-<div class="sec-h" id="feed">{{ i18n "feed_head" }}</div>
-<div class="feed">
+{{- /* feed-long: the summary preview mode (see post.html) narrows the column
+       so the 15px lead holds a ~75-char measure, and steps the title up 2px. */ -}}
+{{- $long := eq ((site.Params.home | default dict).feedPreview | default "description") "summary" -}}
+<div class="feed-sep" aria-hidden="true"></div>
+<div class="feed{{ if $long }} feed-long{{ end }}" id="feed">
 {{- range first $initial $guides }}
 {{ partial "post.html" . }}
 {{- end }}

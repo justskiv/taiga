@@ -23,6 +23,14 @@
 {{ partial "article/kicker.html" . }}
 <h1 data-pagefind-meta="title">{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
 {{ partial "article/meta.html" . }}
+{{- /* Cover (params.article.cover): the picture the page names as `cover`, shown
+       WHOLE — the feed crops the same file into a band, an article does not. It
+       is decoration above the prose, hence empty alt; eager with its dimensions
+       stated, since it is the page's largest paint and must not shift the text
+       under it. */ -}}
+{{- if (site.Params.article | default dict).cover }}{{ with partial "page-cover.html" . }}
+<div class="a-cover"><img src="{{ .url }}" alt=""{{ with .w }} width="{{ . }}"{{ end }}{{ with .h }} height="{{ . }}"{{ end }} decoding="async"></div>
+{{ end }}{{ end }}
 {{- /* Standfirst: prose before the <!--more--> divider is the lead (.Summary),
        everything after is the body (.ContentWithoutSummary). Gated on the divider
        being present in the raw markdown, NOT on .Truncated — .Truncated is also

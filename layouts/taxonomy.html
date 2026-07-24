@@ -32,7 +32,8 @@
 
   <section id="tagSec" hidden aria-live="polite">
     <div class="sec-h" id="tagHead"></div>
-    <div class="feed" id="tagFeed">
+    {{- /* mirrors home/feed.html: summary previews need the long-measure column */ -}}
+    <div class="feed{{ if eq ((site.Params.home | default dict).feedPreview | default "description") "summary" }} feed-long{{ end }}" id="tagFeed">
       {{- range $guides }}
       {{ partial "post.html" . }}
       {{- end }}

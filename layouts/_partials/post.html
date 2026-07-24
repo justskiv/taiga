@@ -2,11 +2,50 @@
        feed. Context = a guide page. `data-tags` carries the page's tags so the
        tags filter (modules/tags-filter.js) can show/hide it client-side; it is
        inert on the home feed. The series line reuses the article series context
-       (kicker helper), so "part N of M" stays consistent with the article. */ -}}
+       (kicker helper), so "part N of M" stays consistent with the article.
+
+       Preview (params.home.feedPreview): "description" (default) renders the
+       front-matter description as today; "summary" renders the article's own
+       lead — .Summary up to the <!--more--> divider, inline markup kept — with
+       a quiet "read →" tail. Only pages that CARRY the divider switch: without
+       it Hugo would synthesize an auto-summary (raw first N words, mid-sentence
+       cut), so those pages keep the description.
+
+       The lead keeps its own images (CSS fits them to the column — the image
+       hook stamps intrinsic width/height, so unstyled they overflow), but drops
+       what cannot work here: <figure> widgets and diagrams, whose bundles are
+       not on this page, and embeds. HTML comments go too — a shortcode
+       commented out in Markdown still RENDERS, so its whole body would ride
+       along invisibly. A lead left empty after that falls back to the
+       description.
+
+       Cover (params.home.feedCover = "banner"): a wide banner above everything
+       else on the card, from the cover the page names in front matter (see
+       page-cover.html). The lead is left exactly as written — a guide that opens
+       on a picture keeps it there; whether that reads well next to a banner is
+       the author's call, not the template's. */ -}}
+{{- $home := site.Params.home | default dict -}}
+{{- $long := and (eq ($home.feedPreview | default "description") "summary")
+                 (strings.Contains .RawContent "<!--more-->") -}}
+{{- $lead := "" -}}
+{{- if $long -}}
+  {{- $lead = .Summary
+        | replaceRE `(?s)<!--.*?-->` ""
+        | replaceRE `(?s)<(figure|video|iframe)\b.*?</(figure|video|iframe)>` ""
+        | replaceRE `(?s)<p>\s*</p>` "" -}}
+  {{- if not (strings.Contains $lead "<p") }}{{ $lead = "" }}{{ end -}}
+{{- end -}}
+{{- $cover := dict -}}
+{{- if eq ($home.feedCover | default "") "banner" }}{{ $cover = partial "page-cover.html" . }}{{ end -}}
 {{- $rubric := .FirstSection -}}
 {{- $s := partial "article/series-ctx.html" . -}}
 {{- $tags := .Params.tags | default slice -}}
 <article class="post" data-tags="{{ delimit $tags " " }}">
+{{- /* The banner repeats the title's link, so it is taken out of the tab order
+       and hidden from assistive tech: decoration, not a second way in. */ -}}
+{{- with $cover.url }}
+<a class="p-cover" href="{{ $.RelPermalink }}" tabindex="-1" aria-hidden="true"><img src="{{ . }}" alt=""{{ with $cover.w }} width="{{ . }}"{{ end }}{{ with $cover.h }} height="{{ . }}"{{ end }} loading="lazy" decoding="async"></a>
+{{- end }}
 <div class="p-m"><span>{{ partial "date.html" .Date }}</span>
 {{- "" -}}<a class="pr" href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
 {{- if $s.isSeries }}<a class="ps" href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>
@@ -15,5 +54,9 @@
 {{- with $tags }}<span class="p-tags">{{ $tagsURL := "tags/" | relLangURL }}{{ range $i, $t := . }}{{ if $i }} {{ end }}<a href="{{ $tagsURL }}#{{ $t }}">#{{ $t }}</a>{{ end }}</span>{{ end -}}
 </div>
 <h3 class="p-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+{{- if $lead }}
+<div class="p-lead">{{ $lead | safeHTML }}<p class="p-more-w"><a class="p-more" href="{{ .RelPermalink }}">{{ i18n "feed_read" }} <span class="ar">→</span></a></p></div>
+{{- else }}
 <p class="p-s">{{ .Description }}</p>
+{{- end }}
 </article>

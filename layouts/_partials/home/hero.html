@@ -1,0 +1,18 @@
+{{- /* Home hero scene (params.home.hero = "wordmark"): the brand wordmark at
+       display size — the same building blocks as the header brand (logo.html +
+       brand.name/tld), so a site that overrides logo.html (or restyles the
+       brand in custom.css) gets its own mark here for free. The duplication
+       with the navbar is deliberate scene-setting, not an accident.
+
+       Mascot slot: a site may ship _partials/home/mascot.html (inline SVG
+       artwork, transparent background) and it renders beside the mark — the
+       same site-side lookup pattern as home/logos/<section>.html, so the theme
+       itself stays subject-agnostic. No site partial → no slot. */ -}}
+<div class="hero-head">
+  <div class="hh-inner">
+    <span class="hh-mark">{{ partial "logo.html" }}{{ site.Params.brand.name }}<span class="tld">{{ site.Params.brand.tld }}</span></span>
+    {{- if templates.Exists "_partials/home/mascot.html" }}
+    <span class="hh-mascot" aria-hidden="true">{{ partial "home/mascot.html" . }}</span>
+    {{- end }}
+  </div>
+</div>

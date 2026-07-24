@@ -1,9 +1,13 @@
 /* ---- site footer ---- */
+/* One text row, three fonts/sizes (brand, tagline, links) — so the row aligns
+   on the shared baseline, not on box centers: centering boxes of unequal
+   line-height leaves the baselines to chance and the tagline visibly drifts
+   against the brand. A shared line-height keeps wrapped rows (narrow screens)
+   on one rhythm; the row gap there is matched with .foot-links' own wrap gap. */
 .site-foot{border-top:1px solid var(--border)}
-.foot-in{max-width:var(--shell); margin:0 auto; padding:26px 24px 36px; display:flex; align-items:center; gap:20px; flex-wrap:wrap; font-size:13px; color:var(--text-muted)}
+.foot-in{max-width:var(--shell); margin:0 auto; padding:26px 24px 36px; display:flex; align-items:baseline; gap:12px 20px; flex-wrap:wrap; font-size:13px; line-height:1.5; color:var(--text-muted)}
 .foot-in .brand{font-size:13px; color:var(--text-secondary)}
 .foot-tag{font-size:12.5px}
-.foot-links{display:flex; gap:16px; margin-left:auto; flex-wrap:wrap}
+.foot-links{display:flex; align-items:baseline; gap:12px 16px; margin-left:auto; flex-wrap:wrap}
 .foot-links a{color:var(--text-muted); border:0; font-size:12.5px; transition:color var(--dur) var(--ease)}
 .foot-links a:hover{color:var(--text-secondary)}
-.foot-links .soon{color:var(--text-ghost); font-size:12.5px; cursor:default}

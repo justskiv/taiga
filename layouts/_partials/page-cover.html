@@ -1,0 +1,37 @@
+{{- /* The banner a feed card wears above its title (params.home.feedCover =
+       "banner"). Context = the guide page. Returns { url, w, h }, or an empty
+       dict when the page names no cover — that card then renders as it always
+       has, so a feed mixing guides with and without covers stays coherent.
+
+       The cover is the one the page names in front matter as `cover` — one
+       field, also read by the share card (og-cover.html), so a single line
+       drives both and the two can never disagree. Naming is enough:
+       resolve-image.html finds the file the way the image render hook does
+       (bundle first, then assets/img), so `cover.webp` next to index.md needs
+       no path. A site-rooted or absolute URL passes through as-is.
+
+       Sizing: a raster resource is re-encoded to WebP and capped at the feed
+       column's 2× width; nothing is upscaled, so a small picture is only
+       converted. Width-only — the banner crop is CSS (`--feed-cover-ratio`), so
+       baking the ratio into the file here would quietly override a site that
+       retunes it. SVG, and anything that is not a local raster (a static/ file,
+       another host), passes through untouched: it has no dimensions to read and
+       no pipeline to run. */ -}}
+{{- $path := .Params.cover | default "" -}}
+{{- $out := dict -}}
+{{- with $path -}}
+  {{- $res := partial "resolve-image.html" (dict "page" $ "path" .) -}}
+  {{- if $res -}}
+    {{- if and (eq $res.ResourceType "image") (ne (path.Ext $res.RelPermalink | lower) ".svg") -}}
+      {{- $tw := 1640 -}}
+      {{- if lt $res.Width $tw }}{{ $tw = $res.Width }}{{ end -}}
+      {{- $small := $res.Resize (printf "%dx webp q78" $tw) -}}
+      {{- $out = dict "url" $small.RelPermalink "w" $small.Width "h" $small.Height -}}
+    {{- else -}}
+      {{- $out = dict "url" $res.RelPermalink -}}
+    {{- end -}}
+  {{- else if or (urls.Parse .).IsAbs (hasPrefix . "/") -}}
+    {{- $out = dict "url" . -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

@@ -136,6 +136,9 @@ other = "read guide"
 other = "whole series"
 [feed_head]
 other = "the feed"
+# quiet tail link under a long feed preview (params.home.feedPreview = "summary")
+[feed_read]
+other = "read"
 [wip_writing]
 other = "writing"
 [wip_roadmap]

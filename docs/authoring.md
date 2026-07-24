@@ -60,6 +60,7 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `related` | standalone only | 3–5 **content paths** (`inside/anatomy/palette-is-a-file`, not a URL) for the "related" rail. Ignored on a series guide, which shows its parts instead. |
 | `placeholder` | optional | See [Placeholders](#placeholders). |
 | `og_image`, `og_style` | optional | See [Covers (OG images)](#covers-og-images). |
+| `cover` | optional | The page's own picture — the feed banner and the share card. See [Covers (OG images)](#covers-og-images). |
 | `sub` | optional | Overrides the automatic `title` split. |
 | `intro` | optional | Markdown rendered between the meta chips and the TOC. |
 | `foot` | optional | Markdown rendered at the very bottom, below the series bridge. |
@@ -421,6 +422,34 @@ page. To override one guide: drop an `og.png` (or `og.jpg`) in its bundle, or se
 `og_image:` in front matter. To change the style for a page, `og_style:`;
 site-wide, `params.ogImages.style`
 (see [customizing.md](customizing.md#og-cover-styles)).
+
+A guide can also name its own picture. One field carries it, and it feeds both
+the feed banner and the share card, so the two can never disagree:
+
+```yaml
+cover: cover.webp
+```
+
+Precedence, highest first: `cover` → the bundle's `og.png` → `og_image:` → the
+drawn cover. Naming a picture therefore switches the generator off for that
+page.
+
+The path is resolved the way a Markdown image is: next to the article (the exact
+path, or just the file name anywhere in its bundle), then under `assets/` and
+`assets/img/`. A leading `/` is dropped before those lookups, so
+`/img/cover.webp` still finds `assets/img/cover.webp`. What matches nothing is
+passed through as a URL — that is how a file in `static/` or a picture on another
+host works — and a bare name that resolves nowhere warns, since it can only be a
+typo.
+
+These fields feed the share card, the Twitter card and the JSON-LD. They also
+feed the feed card's cover band, if the site turned it on with
+`params.home.feedCover = "banner"` — and there the same picture is found one
+more way: a guide that simply *opens* on an image needs no front matter at all,
+since that opening image becomes the band and is lifted out of the preview text
+so it is not shown twice. Nothing prints a cover inside the article itself.
+
+
 
 ## Rubrics {#rubrics}
 

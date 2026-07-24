@@ -7,8 +7,13 @@
 
        .r-n counts the section's whole library (series parts included) so it
        matches what the rubric page lists; when the section carries series it
-       reads "N guides · M series", otherwise "N deep dives". */ -}}
-<section class="rubs2" aria-label="{{ i18n "nav_rubrics" }}">
+       reads "N guides · M series", otherwise "N deep dives".
+
+       params.home.rubricCards = "naked" drops the card box (fill + border) and
+       grows the logo — free columns on the page, the vdoing mechanic; the
+       default "boxed" is today's card, untouched. */ -}}
+{{- $cards := (site.Params.home | default dict).rubricCards | default "boxed" -}}
+<section class="rubs2{{ if eq $cards "naked" }} rubs2-naked{{ end }}" aria-label="{{ i18n "nav_rubrics" }}">
 {{- range site.Params.rubricSections }}
   {{- $sec := site.GetPage (printf "/%s" .) -}}
   {{- if $sec }}

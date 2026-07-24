@@ -1,9 +1,10 @@
 {{- /* OpenGraph + Twitter + article meta, then JSON-LD. Description cascades
        page → lead → site hero, so no tag is ever empty. og:image is whatever
-       og-image.html yields (generated cover, bundle override, or nothing when
-       disabled/unavailable) — resolved once. property= for og:*, name= for
-       twitter:*. JSON-LD: TechArticle + BreadcrumbList on guides, WebSite on the
-       home page.
+       og-cover.html yields (front-matter cover, generated cover, bundle
+       override, or nothing when disabled/unavailable) — resolved once, as a
+       dict whose width/height/type are filled only for a picture the site owns.
+       property= for og:*, name= for twitter:*. JSON-LD: TechArticle +
+       BreadcrumbList on guides, WebSite on the home page.
 
        The description is capped at 200 characters. Every social client already
        cuts it around there — but it cuts mid-word, and a rubric's lead is easily
@@ -17,7 +18,7 @@
 {{- $desc := .Description | default .Params.lead | default site.Params.heroLine -}}
 {{- $desc = $desc | plainify | chomp | truncate 200 -}}
 {{- $locale := replace (site.Language.LanguageCode | default site.Language.Lang) "-" "_" -}}
-{{- $img := partial "og-image.html" . -}}
+{{- $img := partial "og-cover.html" . -}}
 <meta property="og:type" content="{{ cond $isGuide "article" "website" }}">
 <meta property="og:site_name" content="{{ site.Title }}">
 <meta property="og:title" content="{{ $title }}">
@@ -25,17 +26,23 @@
 <meta property="og:url" content="{{ .Permalink }}">
 <meta property="og:locale" content="{{ $locale }}">
 {{- with $img }}
-<meta property="og:image" content="{{ .Permalink }}">
-<meta property="og:image:type" content="image/png">
-<meta property="og:image:width" content="{{ .Width }}">
-<meta property="og:image:height" content="{{ .Height }}">
+<meta property="og:image" content="{{ .url }}">
+{{- with .type }}
+<meta property="og:image:type" content="{{ . }}">
+{{- end }}
+{{- with .width }}
+<meta property="og:image:width" content="{{ . }}">
+{{- end }}
+{{- with .height }}
+<meta property="og:image:height" content="{{ . }}">
+{{- end }}
 <meta property="og:image:alt" content="{{ $title }}">
 {{- end }}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $title }}">
 <meta name="twitter:description" content="{{ $desc }}">
 {{- with $img }}
-<meta name="twitter:image" content="{{ .Permalink }}">
+<meta name="twitter:image" content="{{ .url }}">
 {{- end }}
 {{- with site.Params.social.twitter }}
 <meta name="twitter:site" content="{{ . }}">
@@ -59,7 +66,7 @@
       "dateModified" (.Lastmod.Format "2006-01-02")
       "inLanguage" site.Language.Lang
       "publisher" (dict "@type" "Organization" "name" site.Title "url" site.Home.Permalink) -}}
-  {{- with $img }}{{ $article = merge $article (dict "image" .Permalink) }}{{ end -}}
+  {{- with $img }}{{ $article = merge $article (dict "image" .url) }}{{ end -}}
   {{- $crumbs := slice
       (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.Home.Permalink)
       (dict "@type" "ListItem" "position" 2 "name" .FirstSection.Title "item" .FirstSection.Permalink) -}}

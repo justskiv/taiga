@@ -2,6 +2,12 @@
 .layout{display:grid; grid-template-columns:1fr minmax(0,var(--content)) 1fr; column-gap:44px; max-width:1600px; margin:0 auto; padding:0 24px}
 .layout > .wrap{grid-column:2; grid-row:1; max-width:none; margin:0; padding:48px 0 96px; min-width:0}
 .wrap p > img{display:block; box-sizing:border-box; max-width:100%; height:auto; margin-left:auto; margin-right:auto}
+/* the page's cover (params.article.cover), between the meta line and the prose:
+   the whole picture at column width — the crop belongs to the feed's band, not
+   here. It dims with every other picture on a dark palette (03-typography.css),
+   since it lives inside .wrap. */
+.a-cover{margin:0 0 26px}
+.a-cover img{display:block; width:100%; height:auto; border-radius:var(--radius); border:1px solid var(--border)}
 /* A titled Markdown image — ![alt](x.png "caption") — is wrapped by
    render-image.html in an inline .figure (a <span>, valid inside the auto-added
    <p>, so no markup-parser config is needed). Shown as a block: the image

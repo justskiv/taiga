@@ -1,5 +1,5 @@
 /* typography */
-h2{font-size:27px; line-height:1.2; font-weight:700; letter-spacing:-.01em; margin:52px 0 16px}
+h2{font-size:27px; line-height:1.2; font-weight:700; letter-spacing:-.01em; margin:42px 0 16px}
 h3{font-size:20px; font-weight:650; margin:34px 0 12px; color:var(--text-primary)}
 /* markdown-style hash prefix on headings — a clickable deep-link anchor */
 h2 .hash, h3 .hash, h4 .hash{
@@ -124,12 +124,23 @@ pre code{font-size:13.5px; line-height:1.7; color:var(--text-primary); white-spa
    so a bright screenshot never punches a hole in a dark page. Gated on
    (hover: hover) so it runs only on pointer devices — a touch screen has no
    hover to undo the dimming, which would leave images dark for good.
-   `light` (data/themes/light.toml, `light = true`) is the sole non-dark
-   palette, so it's the one theme excluded here. */
+   Keyed on data-scheme, the root element's lightness flag (baseof.html from the
+   palette's `light = true`, kept in sync by prefs.js / view.js — see
+   docs/customizing.md): it names the property that actually matters, and a new
+   light palette joins by declaring itself light rather than by being added to a
+   list of exceptions here.
+   Every hoverable picture on the site shares this one mechanic — prose images,
+   pictures inside a feed preview, and the feed's banner cover (.p-cover,
+   14-home.css). The cover's hover target
+   is its frame, not the <img>, because the image scales inside that frame and a
+   pointer near the cropped edge must still count as "on it". Timing lives with
+   each component: the cover animates brightness together with its zoom. */
 @media (hover:hover){
-  :root:not([data-theme="light"]) .wrap img{filter:brightness(.5); transition:filter .6s ease-out}
-  :root:not([data-theme="light"]) .wrap img:hover{filter:none}
+  [data-scheme="dark"] :where(.wrap, .p-lead) img{filter:brightness(.5); transition:filter .6s ease-out}
+  [data-scheme="dark"] :where(.wrap, .p-lead) img:hover{filter:none}
+  [data-scheme="dark"] .p-cover img{filter:brightness(.5)}
+  [data-scheme="dark"] .p-cover:hover img{filter:none}
 }
 @media (prefers-reduced-motion:reduce){
-  :root:not([data-theme="light"]) .wrap img{transition:none}
+  [data-scheme="dark"] :where(.wrap, .p-lead) img{transition:none}
 }

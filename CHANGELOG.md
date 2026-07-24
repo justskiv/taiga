@@ -34,6 +34,38 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **Feed cards can wear a cover band** — `params.home.feedCover = "banner"`
+  (unset ⇒ off, exactly as before). The picture is the one the
+  guide names in front matter as `cover`; a guide without one keeps the plain
+  card, and a picture already in the lead stays where the author put it. The frame
+  owns the shape: `--feed-cover-ratio` (default `3 / 1`) crops with object-fit,
+  so the ratio is a site's to retune and no two cards disagree; on hover the
+  image scales inside the fixed frame. Raster covers are re-encoded to WebP and
+  capped at the column's 2× width, never upscaled; SVG and off-site pictures
+  pass through untouched.
+- **A page can name its own cover** with `cover:` in front matter — one field
+  for both the feed banner and the share card, so the two can never disagree.
+  It wins over `og.png` / `og_image:` and switches
+  the drawn cover off for that page; the path resolves like a Markdown image
+  (bundle, then `assets/` and `assets/img/`, leading `/` dropped), and anything
+  that resolves nowhere is passed through as a URL, so a file in `static/` or a
+  picture on another host works too. New partial `og-cover.html` — `og-image.html`
+  keeps its contract and stays the generator.
+- **An article can show its cover** — `params.article.cover = true` prints the
+  same `cover:` picture between the meta line and the prose, WHOLE: the band is
+  the feed's crop, an article shows the artwork. Unset ⇒ nothing above the lead,
+  as before.
+- **A breathing home** — four independent axes under `params.home`, each unset
+  by default, so the page stays byte-for-byte the old one until a site opts in.
+  `hero = "wordmark"` puts the header brand above the kicker as a heading scene
+  (a site may hang a mascot beside it through `_partials/home/mascot.html`);
+  `grid = "grid" | "fade" | "dots"` draws background markup behind that zone in
+  the palette's own hairline ink; `rubricCards = "naked"` drops the card box and
+  grows the logo, letting the markup hold the composition instead of borders;
+  `feedPreview = "summary"` swaps the front-matter description for the guide's
+  own lead up to `<!--more-->`, narrows the column to a ~75-char measure and
+  closes it with a quiet "read →" (new i18n key `feed_read`). The feed heading
+  gives way to a centred rule that fades at both ends.
 - **Standalone containers.** A rubric with many loose guides can tuck them into
   a sub-folder so they don't drown the series folders: a sub-section whose
   `_index.md` sets `params.standalone: true` (+ `build.render: never`,
@@ -112,6 +144,16 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **Image dimming is keyed on `data-scheme` now**, not on "any palette that
+  isn't `light`". Same behaviour on every shipped palette, but a new dark or
+  light palette now inherits it by declaring its own lightness instead of by
+  being remembered in a selector here — and the feed's cover band joins the
+  same mechanic rather than growing a second one.
+- **The article standfirst reads as body text.** The prose before `<!--more-->`
+  is the article's opening, not a display deck: it loses the size step, the
+  brighter colour and the hairline under it. Headings breathe a little tighter
+  above (`h2` 52px → 42px), and the footer row aligns on the shared baseline
+  instead of on box centres, so brand and tagline stop drifting apart.
 - **Prose links are quiet now.** Inside the article column, links read in the
   body colour with a translucent accent underline instead of a full-accent
   fill; hover warms the word to the accent over a soft `--accent-dim` pill.

@@ -11,6 +11,27 @@ keeps working. The order here is roughly cheapest-first.
 Behaviour and text are params (full list: [params.md](params.md)). Set them in
 your `hugo.toml [params]`. Reach for a param before anything heavier.
 
+### Home page look {#home-look}
+
+Four independent axes under `[params.home]` retune the home page; each one
+unset falls back to the classic layout, so an existing site changes nothing:
+
+```toml
+[params.home]
+  hero = "wordmark"        # heading scene above the kicker: the header brand writ large
+  grid = "fade"            # markup behind the hero: "grid" | "fade" (dissolves) | "dots"
+  rubricCards = "naked"    # drop the card boxes, grow the rubric logos to 112px
+  feedPreview = "summary"  # feed previews = each guide's own lead + a "read →" tail
+```
+
+With the hero on, the kicker line becomes its centered subtitle. The grid ink
+derives from the active palette's text ramp, so it survives palette switches —
+light ones included. `feedPreview = "summary"` uses the lead **before a
+`<!--more-->` divider**; a guide without the divider keeps showing its
+front-matter description. The hero can also carry a mascot: ship
+`layouts/_partials/home/mascot.html` (inline SVG artwork) and it renders
+beside the mark — the same site-side slot pattern as the rubric logos.
+
 ## 2. custom.css — restyle anything
 
 If your site has `assets/css/custom.css`, the theme appends it **last** in the
@@ -74,6 +95,10 @@ language's entry and falls back to `en`. It lives in the palette file, not in
 
 The metadata keys — `name`, `weight`, `light`, `disabled` — are never emitted as
 CSS variables. Everything else in the file is.
+
+`light = true` also stamps the root element with `data-scheme="light"` (any
+other palette yields `data-scheme="dark"`), so CSS can target all light
+palettes at once — the theme itself keys the home hero grid density off it.
 
 ### Recolour the accent {#recolour}
 
@@ -306,6 +331,12 @@ Select it site-wide with `params.ogImages.style = "mystyle"`, or per page with
 A block's `color` in `layout.toml` is a `#rrggbb` literal, or the word
 `accent`: the brand accent resolved at build time exactly like the favicon's —
 `params.accent` first, else the accent of the `params.defaultTheme` palette.
+
+Styles are for the pages that let the theme draw their cover. A page that names
+a picture of its own — `cover:`, `og_image:`, or an `og.png`
+in its bundle — skips the generator entirely; see
+[authoring.md](authoring.md#covers-og-images) for the order and how the path is
+resolved.
 
 ## 9. An author section with no trace in the theme
 

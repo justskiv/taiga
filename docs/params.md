@@ -20,6 +20,11 @@ fully commented — copy it and edit.
 | `heroSat` | string | — | Trailing `· …` clause of the hero line, styled apart. Site-wide unless a language overrides it — see note 2. |
 | `featured` | string (content path) | — | "Guide of the week" card on the home page, e.g. `"howto/handbook/get-started"`. Omit to hide the card. Shared across languages — the path resolves to each language's own translation of that page. |
 | `feedInitial` | int | `8` | Posts shown on the home feed before the "N more guides" reveal button. |
+| `home.hero` | `"wordmark"` | — | Home heading scene above the kicker: the header brand (logo + name) writ large, the kicker demoted to its centered subtitle. A site may add a mascot beside the mark by shipping `_partials/home/mascot.html`. Unset ⇒ no scene, today's layout. See [customizing.md](customizing.md#home-look). |
+| `home.grid` | `"grid"` \| `"fade"` \| `"dots"` | — | Background markup behind the home hero zone, drawn at the threshold of visibility in the active palette's own ink; `"fade"` dissolves it toward the feed. Unset ⇒ plain background. |
+| `home.rubricCards` | `"boxed"` \| `"naked"` | `"boxed"` | Rubric card chrome: `"naked"` drops the box (fill + border) and grows the logo to 112px — free columns on the page. |
+| `home.feedPreview` | `"description"` \| `"summary"` | `"description"` | Feed preview text: `"summary"` renders each guide's own lead (up to the `<!--more-->` divider, inline markup kept) with a quiet "read →" tail; guides without the divider keep the front-matter description. |
+| `home.feedCover` | `"banner"` | — | Gives each feed card a wide cover band above its meta line — the picture the guide names as `cover`. Guides with no cover keep the plain card. Crop ratio: the `--feed-cover-ratio` CSS variable. Unset ⇒ no covers, as before. See [authoring.md](authoring.md#covers-og-images). |
 | `defaultTheme` | string (palette id) | `"taiga"` | Palette applied before the reader picks one — an id of a `data/themes/<id>.toml` file. |
 | `accent` | string (`#rrggbb`) | — | Overrides the accent colour across **all** palettes at once (built-in and site) — a brand axis orthogonal to the palettes. Unset ⇒ each palette keeps its native accent. Must be a 6-digit hex, e.g. `"#7aa2f7"`; any other value fails the build. See [customizing.md](customizing.md#recolour). |
 | `accentDim` | CSS colour | derived | Override for the dimmed accent (focus rings, tinted fills). Default, when `accent` is set: `rgba(r,g,b,.18)` derived from it. Ignored unless `accent` is set. |
@@ -129,5 +134,5 @@ their paths (`/howto/`, `/howto/handbook/`).
 ## Per-page front matter
 
 Article, rubric and series front matter (`title`, `slug`, `weight`, `mins`,
-`rail_title`, `placeholder`, `related`, …) is documented where you'll use it —
-see [authoring.md](authoring.md).
+`rail_title`, `placeholder`, `related`, `cover`, …) is
+documented where you'll use it — see [authoring.md](authoring.md).

@@ -9,7 +9,11 @@
 {{- partial "coming-soon.html" . -}}
 {{- else -}}
 <!DOCTYPE html>
-<html lang="{{ .Language.LanguageCode }}" data-theme="{{ site.Params.defaultTheme | default "taiga" }}">
+{{- /* data-scheme mirrors the palette's `light` flag (data/themes/<id>.toml) so
+       CSS can address all light palettes at once; prefs.js / view.js keep it in
+       sync when the reader switches away from the default. */ -}}
+{{- $dt := site.Params.defaultTheme | default "taiga" -}}
+<html lang="{{ .Language.LanguageCode }}" data-theme="{{ $dt }}" data-scheme="{{ if (index site.Data.themes $dt).light }}light{{ else }}dark{{ end }}">
 <head>
 {{- partial "head.html" . -}}
 </head>

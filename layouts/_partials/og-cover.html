@@ -1,0 +1,43 @@
+{{- /* The page's social cover as a plain dict — { url, width, height, type } —
+       or an empty dict when there is none. `url` is always absolute; the other
+       three are present only when the picture is a resource the site owns (a
+       page-bundle file or something under assets/), because a file in static/
+       or on another host has no build-time dimensions to state.
+
+       Precedence:
+         1. front matter `cover` — the page's own picture, the same field the
+            feed banner reads (page-cover.html), so one line drives both;
+         2. whatever og-image.html yields — the bundle's `og.png`, `og_image:`,
+            or the cover the theme draws at build time.
+       A picture named in front matter therefore always wins over the drawn
+       cover; the generator runs only when `cover` is unset.
+
+       The path goes through resolve-image.html — the same lookup a Markdown
+       image gets. What resolves nowhere is passed through as a URL: that is how
+       a file in static/ or a picture on another host works. Only a BARE
+       relative name that matched nothing warns, since that one can only be a
+       typo. */ -}}
+{{- $path := .Params.cover | default "" -}}
+{{- $res := "" -}}
+{{- $url := "" -}}
+{{- with $path -}}
+  {{- $res = partial "resolve-image.html" (dict "page" $ "path" .) -}}
+  {{- if not $res -}}
+    {{- if or (urls.Parse .).IsAbs (hasPrefix . "/") -}}
+      {{- $url = . -}}
+    {{- else -}}
+      {{- warnf "og-cover: %q not found (page bundle, assets, assets/img) for %s" . $.RelPermalink -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not (or $res $url) }}{{ $res = partial "og-image.html" . }}{{ end -}}
+{{- $out := dict -}}
+{{- with $url }}{{ $out = dict "url" (. | absURL) }}{{ end -}}
+{{- with $res -}}
+  {{- $out = dict "url" .Permalink -}}
+  {{- /* an SVG has no intrinsic width/height to read */ -}}
+  {{- if ne (path.Ext .RelPermalink | lower) ".svg" -}}
+    {{- $out = merge $out (dict "width" .Width "height" .Height "type" .MediaType.Type) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

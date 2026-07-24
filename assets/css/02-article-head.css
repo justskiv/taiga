@@ -4,19 +4,11 @@
 h1{font-size:38px; line-height:1.15; font-weight:750; letter-spacing:-.02em; margin:0 0 18px}
 h1 .sub{color:var(--accent)}
 .lead{font-size:19px; line-height:1.6; color:var(--text-secondary); margin:0 0 18px}
-/* article standfirst: a deliberate deck, not just bigger body text — brighter
-   (primary, so it's emphasized rather than faded), a step up in size, tighter
-   leading for a denser display texture, and closed by a full-width hairline (the
-   same solid --border as the meta ticks and hr rules) so the head ends on a clean
-   line and the article starts fresh below it. .layout scopes this to real
-   articles; rubric/taxonomy/404 leads keep the plain deck. No lead → no element →
-   no rule, and the meta line's own margin carries the gap to the body.
-   The deck is now the prose before <!--more--> (.Summary), so it can run to
-   several paragraphs; type sits on the wrapper and cascades into the child <p>s,
-   which means it still applies to the legacy single <p class="lead"> too. */
-.layout .lead{font-size:20px; line-height:1.5; color:var(--text-primary); margin:0 0 28px; padding-bottom:20px; border-bottom:1px solid var(--border)}
-.layout .lead p{font-size:inherit; line-height:inherit; color:inherit; margin:0 0 14px}
-.layout .lead p:last-child{margin-bottom:0}
+/* article standfirst: the prose before <!--more--> is the article's opening, not
+   a display deck — it reads as body text, so the wrapper carries no type of its
+   own and the child <p>s take the ordinary prose rules. .layout scopes this to
+   real articles; rubric/taxonomy/404 leads keep the plain deck above. */
+.layout .lead{font-size:inherit; line-height:inherit; color:inherit; margin:0}
 /* meta line: quiet metadata between the title and the lead — muted label +
    emphasized value, borderless (editorial, not a tag cloud), items split by a
    hairline. -2 top collapses with h1's 18px to a snug 16px (binds it to the

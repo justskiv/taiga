@@ -1,7 +1,20 @@
 {{- /* Home: intro line, rubric showcase, guide of the week, feed, and the
-       "in progress" strip. Each block is its own partial under home/. */ -}}
+       "in progress" strip. Each block is its own partial under home/.
+
+       The hero zone (params.home.*): an optional heading scene above the
+       kicker (hero = "wordmark") and an optional background markup layer
+       drawn by the zone's ::before (grid = "grid" | "fade" | "dots" — see
+       14-home.css). Both default to off, which renders exactly the previous
+       page: the wrapper itself is inert. */ -}}
 {{ define "main" }}
+{{- $home := site.Params.home | default dict -}}
 <main class="shell page-pad" style="padding-top:0">
+
+  <section class="hero-zone"{{ with $home.grid }} data-grid="{{ . }}"{{ end }}>
+
+  {{- if eq $home.hero "wordmark" }}
+  {{ partial "home/hero.html" . }}
+  {{- end }}
 
   <div class="hero-line">
     <span class="dot"></span>
@@ -11,11 +24,11 @@
 
   {{ partial "home/rubric-cards.html" . }}
 
+  </section>
+
   {{ partial "home/featured.html" . }}
 
   {{ partial "home/feed.html" . }}
-
-  {{ partial "home/wip.html" . }}
 
 </main>
 {{ end }}

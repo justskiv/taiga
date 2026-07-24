@@ -1,0 +1,27 @@
+{{- /* Resolve an author-written image path to a site resource — the lookup
+       render-image.html performs for a Markdown image, without the caption,
+       the ambiguity warnings or the markup. Returns the resource, or "" when
+       the path is remote or matches nothing (the caller decides whether that
+       is a typo worth a warning or a URL worth passing through).
+
+       Order: the exact path in the page bundle, the basename anywhere in the
+       bundle, then the same two under assets/ and assets/img/. A leading "/"
+       is dropped first, so a site-rooted `/img/cover.webp` still finds
+       `assets/img/cover.webp` — and, usefully, a rendered `src` can be handed
+       straight back here to recover the resource it was built from.
+
+       Args: `page` (the Page whose bundle to search), `path`. */ -}}
+{{- $page := .page -}}
+{{- $res := "" -}}
+{{- with .path -}}
+  {{- if not (urls.Parse .).IsAbs -}}
+    {{- $rel := strings.TrimPrefix "/" . -}}
+    {{- $name := path.Base $rel -}}
+    {{- with $page.Resources.GetMatch $rel }}{{ $res = . }}{{ end -}}
+    {{- if not $res }}{{ with $page.Resources.GetMatch (printf "**/%s" $name) }}{{ $res = . }}{{ end }}{{ end -}}
+    {{- if not $res }}{{ with resources.Get $rel }}{{ $res = . }}{{ end }}{{ end -}}
+    {{- if not $res }}{{ with resources.Get (path.Join "img" $rel) }}{{ $res = . }}{{ end }}{{ end -}}
+    {{- if not $res }}{{ with resources.Match (printf "img/**/%s" $name) }}{{ $res = index . 0 }}{{ end }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $res -}}
