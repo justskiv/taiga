@@ -42,7 +42,8 @@ Colours come from the **palette** (see below), so they change per theme:
 `--border`, `--text-primary`, `--text-secondary`, `--text-muted`, `--text-ghost`,
 `--text-strong`, `--gtok-str`, and the accents `--accent` (+ `-dim`,
 `-glow`), `--accent-green` (+ `-dim`, `-glow`), `--accent-copper` (+ `-dim`),
-`--accent-blue` (+ `-dim`), `--accent-gold` (+ `-dim`).
+`--accent-blue` (+ `-dim`), `--accent-gold` (+ `-dim`),
+`--accent-violet` (+ `-dim`).
 
 The primary `--accent` is special: a site can repaint it across every palette
 with a single param — see [Recolour the accent](#recolour).

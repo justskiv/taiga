@@ -27,9 +27,9 @@
        difference IS the colour. Naming the colour is shorter to write and
        impossible to misremember. Default: the brand accent. */ -}}
 {{- $color := .Get "color" | default "accent" -}}
-{{- $colors := slice "accent" "green" "copper" "blue" "gold" "red" -}}
+{{- $colors := slice "accent" "green" "copper" "blue" "gold" "red" "violet" -}}
 {{- if not (in $colors $color) -}}
-  {{- errorf "term %q: color=%q is not one of accent|green|copper|blue|gold|red (%s)" $word $color $.Position -}}
+  {{- errorf "term %q: color=%q is not one of accent|green|copper|blue|gold|red|violet (%s)" $word $color $.Position -}}
 {{- end -}}
 {{- $cls := cond (eq $color "accent") "" (printf " c-%s" $color) -}}
 {{- $href := .Get "href" -}}

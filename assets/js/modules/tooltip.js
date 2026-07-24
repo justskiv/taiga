@@ -1,11 +1,18 @@
 /* Floating tooltip for [data-tip] diagram cells. A single element appended to
-   <body>; positions itself above the cell (or below when clamped). */
+   <body>; positions itself above the cell (or below when clamped).
+
+   A cell may name the card's colour with data-tip-color, from the same list
+   the term shortcode takes; it rides the same --cl channel, so the kicker and
+   its halo dot follow whatever the current palette gives that name. Cells
+   without the attribute keep the site accent. */
+const TIP_COLORS = ['green', 'copper', 'blue', 'gold', 'red', 'violet'];
+
 export function bindTips() {
   const tip = document.createElement('div'); tip.className = 'l1-tip'; tip.setAttribute('role', 'tooltip');
   tip.innerHTML = '<div class="l1-tip-title"><span class="l1-tip-dot"></span><span class="l1-tip-t"></span></div><div class="l1-tip-sub"></div><div class="l1-tip-arrow"></div>';
   document.body.appendChild(tip);
   const tEl = tip.querySelector('.l1-tip-t'), sEl = tip.querySelector('.l1-tip-sub');
-  let curCell = null;
+  let curCell = null, curColor = '';
 
   function show(cell) {
     clearTimeout(showTimer); pendCell = null;
@@ -14,12 +21,15 @@ export function bindTips() {
     const cut = raw.indexOf('·');
     if (cut > 0) { tEl.textContent = raw.slice(0, cut).trim(); sEl.textContent = raw.slice(cut + 1).trim(); }
     else { tEl.textContent = raw; sEl.textContent = ''; }
-    /* optional entity colour for the dot: a CSS colour, or a custom
-       property name resolved against the cell (palette-aware) */
-    let tone = cell.getAttribute('data-tip-tone');
-    if (tone && tone.slice(0, 2) === '--') tone = getComputedStyle(cell).getPropertyValue(tone).trim();
-    if (tone) tip.style.setProperty('--l1-tip-tone', tone);
-    else tip.style.removeProperty('--l1-tip-tone');
+    /* one card serves every cell, so the previous colour comes off first;
+       an unknown name is ignored and the card falls back to the accent */
+    const named = cell.getAttribute('data-tip-color') || '';
+    const color = TIP_COLORS.indexOf(named) < 0 ? '' : named;
+    if (curColor !== color) {
+      if (curColor) tip.classList.remove('c-' + curColor);
+      if (color) tip.classList.add('c-' + color);
+      curColor = color;
+    }
     tip.classList.add('show');
     const r = cell.getBoundingClientRect();
     tip.classList.remove('below');

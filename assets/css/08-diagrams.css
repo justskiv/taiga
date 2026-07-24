@@ -54,6 +54,7 @@
 }
 /* floating tooltip (single element appended to <body> by site.js) */
 .l1-tip{
+  --cl:var(--accent);
   position:fixed; z-index:200; left:0; top:0; pointer-events:none;
   max-width:248px; width:max-content;
   padding:8px 11px; border-radius:var(--radius);
@@ -64,15 +65,21 @@
   transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 .l1-tip.show{opacity:1; transform:translateY(0)}
-/* with data-tip-tone the whole title takes the entity colour, not just
-   the dot; untoned tips keep the site accent */
-.l1-tip .l1-tip-title{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; line-height:1.35; color:var(--l1-tip-tone, var(--accent))}
+.l1-tip .l1-tip-title{display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; line-height:1.35; color:var(--cl)}
 .l1-tip .l1-tip-sub{margin-top:3px; font-size:11px; line-height:1.45; font-weight:500; color:var(--text-muted)}
 .l1-tip .l1-tip-sub:empty{display:none}
-/* the dot takes the hovered cell's entity colour via data-tip-tone
-   (tooltip.js sets --l1-tip-tone); without the attribute — site accent */
 .l1-tip .l1-tip-dot{flex:0 0 auto; width:8px; height:8px; border-radius:50%;
-  background:var(--l1-tip-tone, var(--accent)); box-shadow:0 0 0 3px color-mix(in srgb, var(--l1-tip-tone, var(--accent)) 22%, transparent)}
+  background:var(--cl); box-shadow:0 0 0 3px color-mix(in srgb, var(--cl) 22%, transparent)}
+/* a cell can name the card's colour (data-tip-color="green"), the same names
+   the term shortcode takes, on the same --cl channel. Meant for cells whose
+   colour already carries meaning — a widget's entity roles — so the card
+   stops calling every one of them "the accent". */
+.l1-tip.c-green{--cl:var(--accent-green)}
+.l1-tip.c-copper{--cl:var(--accent-copper)}
+.l1-tip.c-blue{--cl:var(--accent-blue)}
+.l1-tip.c-gold{--cl:var(--accent-gold)}
+.l1-tip.c-red{--cl:var(--accent-red)}
+.l1-tip.c-violet{--cl:var(--accent-violet)}
 .l1-tip .l1-tip-arrow{position:absolute; left:50%; width:9px; height:9px;
   background:var(--bg-raised); border:1px solid var(--border); border-radius:0 0 2px 0;
   transform:translateX(-50%) rotate(45deg)}

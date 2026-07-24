@@ -44,3 +44,8 @@ light = true
 "accent-gold-dim" = "rgba(212,162,78,.18)"
 "accent-red" = "#b5503f"
 "accent-red-dim" = "rgba(181,80,63,.12)"
+# Violet is the one brand accent that also needs darkening here: #a48bd4 is a
+# pastel that dissolves on near-white. This shade keeps the hue and reads as
+# text on the canvas.
+"accent-violet" = "#7a5fb8"
+"accent-violet-dim" = "rgba(122,95,184,.14)"

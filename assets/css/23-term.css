@@ -137,6 +137,7 @@
 .term-card.c-blue{--cl:var(--accent-blue)}
 .term-card.c-gold{--cl:var(--accent-gold)}
 .term-card.c-red{--cl:var(--accent-red)}
+.term-card.c-violet{--cl:var(--accent-violet)}
 /* the content decides the width: a definition carrying a code block or a figure
    needs more room than one carrying a sentence. */
 .term-card:has(pre), .term-card:has(img), .term-card:has(table){
