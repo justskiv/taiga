@@ -1,7 +1,13 @@
 /* base */
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+/* The page is a full-height flex column so the footer can be pinned to the
+   bottom of the viewport on a short page (an empty rubric, the 404) instead of
+   floating mid-screen: the content block between header and footer takes the
+   slack. `dvh` after `vh` for mobile browsers whose toolbars change the
+   viewport height. */
 body{
+  min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
   margin:0; background:var(--bg-deep);
   /* Single faint warm glow lifts the hero region on dark themes. The light
      palette suppresses it (a warm rgba wash over near-white reads as a dingy
@@ -16,6 +22,21 @@ body{
    prefixed rule as its own selector — a combined list drops the whole rule. */
 ::selection{background:var(--accent-glow)}
 ::-moz-selection{background:var(--accent-glow)}
+/* The content block grows into whatever the page does not fill; header and
+   footer keep their own height.
+
+   `width:100%` is the load-bearing half, and not obviously so. The column
+   centres itself with `margin:0 auto` (see .wrap below), and auto side margins
+   on a flex item switch its cross size from STRETCH to fit-content — that is,
+   to max(min-content, available). A <pre> reports its longest line as
+   min-content, because `white-space:pre` makes that line unbreakable, so one
+   code block wider than the viewport stretched the whole column past the
+   screen edge and dragged the headings and the right-hand padding out with it:
+   text cut off on the right, while the <pre>'s own overflow-x sat unused.
+   Pinning the width puts the column back on the viewport and leaves the
+   listing to scroll inside its own box. `min-width:0` does NOT fix this — the
+   automatic minimum size applies to the MAIN axis, which is vertical here. */
+body > main, body > .layout{flex:1 1 auto; width:100%}
 .wrap{max-width:var(--content); margin:0 auto; padding:48px 24px 96px}
 a{color:var(--accent); text-decoration:none; border-bottom:1px solid transparent; transition:border-color var(--dur) var(--ease)}
 a:hover{border-bottom-color:var(--accent)}

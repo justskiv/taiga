@@ -9,6 +9,21 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **The footer is pinned to the bottom of the viewport on short pages.** The
+  page is a full-height flex column and the content block takes the slack, so
+  an empty rubric or the 404 no longer leaves the footer floating mid-screen.
+  Sites carrying this as a local override can drop it.
+
+  It arrives with the fix for the overflow it used to cause. The column centres
+  itself with `margin:0 auto`, and auto side margins on a flex item swap its
+  cross size from stretch to fit-content — max(min-content, available). A
+  `<pre>` reports its longest line as min-content (`white-space:pre` makes that
+  line unbreakable), so one code block wider than the viewport stretched the
+  whole column past the screen edge and took the headings and the right-hand
+  padding with it: text cut off on the right on every page carrying a listing,
+  while the listing's own `overflow-x` sat unused. The column's width is
+  pinned now. Note that `min-width:0`, the usual reflex, does nothing here —
+  the automatic minimum size applies to the main axis, which is vertical.
 - **The header collapses into a disclosure menu below 900px.** The rubric links
   and the round buttons stopped fitting one row at ~845px (~897px on an article,
   which adds the focus toggle), so the links were being cut off rather than
