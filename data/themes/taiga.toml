@@ -50,5 +50,7 @@ group = { en = "Originals", ru = "Свои" }
 "accent-blue-dim" = "rgba(107,164,201,.16)"
 "accent-gold" = "#d4a24e"
 "accent-gold-dim" = "rgba(212,162,78,.18)"
+"accent-red" = "#d2695a"
+"accent-red-dim" = "rgba(210,105,90,.16)"
 "accent-violet" = "#a48bd4"
 "accent-violet-dim" = "rgba(164,139,212,.16)"
