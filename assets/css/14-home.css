@@ -201,9 +201,11 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
 .feed-long{max-width:var(--feed-measure); margin-inline:auto}
 .sec-h:has(+ .feed-long){max-width:var(--feed-measure); margin-inline:auto}
 .feed-long .p-t{font-size:20px}
-.p-lead p{margin:7px 0 0; font-size:15px; line-height:1.66; color:var(--text-secondary); max-width:74ch}
-/* intro prose, inked like prose on light — see .lead in 02-article-head */
-[data-scheme="light"] .p-lead p{color:var(--text-primary)}
+/* A card's summary is prose, not a caption — it is the article's own opening
+   sentences. Set in the secondary tone it reads as greyed-out beside the title,
+   and the grey next to it makes the title look brighter than it is. Size and
+   weight already separate the two. Same call as .lead (02-article-head). */
+.p-lead p{margin:7px 0 0; font-size:15px; line-height:1.66; color:var(--text-primary); max-width:74ch}
 .p-lead code{font-family:var(--font-mono); font-size:.84em; padding:1px 5px; border-radius:5px;
   background:color-mix(in srgb, var(--text-primary) 9%, transparent)}
 /* An article that opens with a cover brings it into the feed. The image hook
