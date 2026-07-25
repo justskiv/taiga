@@ -17,8 +17,19 @@
 {{- $u := urls.Parse $d -}}
 {{- $scheme := $u.Scheme -}}
 {{- $lp := site.Params.linkPreviews.enable | default false -}}
+{{- /* Opt out of link decoration (species marks + hover previews). Two knobs, both
+       honoured below: a page sets `linkMarks: false` in its params to strip marks
+       from every link on it; a single link passes "no-mark" as its title —
+       [text](href "no-mark") — to render just that one plain ("raw" also accepted).
+       The title is the quoted string AFTER the url, with nothing between:
+       [text](https://example.com "no-mark") — no stray words. Used where links are
+       calls-to-action (the support page) and the ✈/↗ marks read as clutter. */ -}}
+{{- $raw := or (eq .Page.Params.linkMarks false) (in (slice "no-mark" "raw") .Title) -}}
 {{- if $scheme -}}
   {{- if or (eq $scheme "http") (eq $scheme "https") -}}
+    {{- if $raw -}}
+    <a href="{{ $d }}" target="_blank" rel="noopener"{{ with .Title }}{{ if not (in (slice "no-mark" "raw") .) }} title="{{ . }}"{{ end }}{{ end }}>{{ .Text | safeHTML }}</a>
+    {{- else -}}
     {{- /* classify the outbound link: t.me / youtube get their own species mark
            and, when previewable, register for a pre-rendered card. */ -}}
     {{- $host := strings.TrimPrefix "www." $u.Host -}}
@@ -59,6 +70,7 @@
       {{- if not (in $list $regHref) -}}{{ $store.Set $skey ($list | append $regHref) }}{{- end -}}
     {{- end -}}
     <a href="{{ $regHref }}" target="_blank" rel="noopener"{{ if $lp }} data-link="{{ $kind }}"{{ with $reg }} data-{{ . }}="{{ $regHref }}"{{ end }}{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+    {{- end -}}
   {{- else -}}
     <a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
   {{- end -}}
@@ -87,7 +99,7 @@
            (a rubric sub-section that is not a standalone container). A self-link
            and a plain rubric/home section are not previewed. */ -}}
     {{- $prev := "" -}}
-    {{- if and $lp (ne $target.RelPermalink $.Page.RelPermalink) -}}
+    {{- if and $lp (not $raw) (ne $target.RelPermalink $.Page.RelPermalink) -}}
       {{- $guide := partialCached "guide-sections.html" . -}}
       {{- if and (eq $target.Kind "page") (in $guide $target.Section) -}}{{ $prev = $target.RelPermalink }}
       {{- else if and (eq $target.Kind "section") (not $target.Parent.IsHome) (not $target.Params.standalone) -}}{{ $prev = $target.RelPermalink }}
