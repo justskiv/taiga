@@ -4,6 +4,11 @@
 h1{font-size:38px; line-height:1.15; font-weight:750; letter-spacing:-.02em; margin:0 0 18px}
 h1 .sub{color:var(--accent)}
 .lead{font-size:19px; line-height:1.6; color:var(--text-secondary); margin:0 0 18px}
+/* A lead is prose, not a caption. Against near-black body copy on white the
+   secondary tone reads as greyed-out, and the lead ends up looking weaker than
+   what it introduces; size already says "lead", so colour need not. Same for
+   the other two intro blocks: .ser-d (15-rubric), .p-lead p (14-home). */
+[data-scheme="light"] .lead{color:var(--text-primary)}
 /* article standfirst: the prose before <!--more--> is the article's opening, not
    a display deck — it reads as body text, so the wrapper carries no type of its
    own and the child <p>s take the ordinary prose rules. .layout scopes this to

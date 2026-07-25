@@ -202,6 +202,8 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
 .sec-h:has(+ .feed-long){max-width:var(--feed-measure); margin-inline:auto}
 .feed-long .p-t{font-size:20px}
 .p-lead p{margin:7px 0 0; font-size:15px; line-height:1.66; color:var(--text-secondary); max-width:74ch}
+/* intro prose, inked like prose on light — see .lead in 02-article-head */
+[data-scheme="light"] .p-lead p{color:var(--text-primary)}
 .p-lead code{font-family:var(--font-mono); font-size:.84em; padding:1px 5px; border-radius:5px;
   background:color-mix(in srgb, var(--text-primary) 9%, transparent)}
 /* An article that opens with a cover brings it into the feed. The image hook
@@ -209,6 +211,12 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
    blows the layout open. Same for anything else a lead can carry. */
 .p-lead img, .p-lead svg{display:block; max-width:100%; height:auto; margin:11px 0 4px;
   border-radius:10px; border:1px solid var(--border)}
+/* Same edge the article's own cover gets on a light canvas (12-article-layout):
+   the picture's light field and the page's meet, and the hairline is not enough
+   to say where one ends. Both feed shapes — the plain lead picture and the
+   banner crop, whose frame lives on the wrapping link, not the img. */
+[data-scheme="light"] .p-lead img,
+[data-scheme="light"] .post .p-cover{border-color:var(--text-ghost)}
 .p-lead .figure{display:block}
 .p-lead .figcaption{display:block; margin:2px 0 0; font-size:12px; color:var(--text-muted)}
 .p-lead pre, .p-lead table{display:block; max-width:100%; overflow-x:auto}

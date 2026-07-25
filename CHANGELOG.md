@@ -7,6 +7,66 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ## [Unreleased]
 
+### Changed
+
+- **The Light palette is rebuilt.** Four accents — `--accent-green`,
+  `--accent-blue`, `--accent-gold`, `--accent-copper` — had been the dark
+  palettes' values byte for byte, and lost 63-82% of their presence on a white
+  canvas (green fell to 1.77:1, gold to 2.17:1). Not cosmetic: `20-chroma.css`
+  maps function names to green, built-in types to blue and numbers to copper, so
+  three of the five colours in a Go listing were illegible.
+
+  Darkening them in place is not the fix either — that reads as no highlighting
+  at all. How much chroma a hue can carry at a given contrast varies ~3x by hue
+  on a light canvas, and the hues that stay rich near white are the opposite of
+  those that stay rich near black, so the contrast-to-hue allocation has to
+  invert between schemes rather than mirror. The accents now sit at 4.2-5.7:1
+  with OKLCH lightness 0.50-0.57, separated by hue rather than by lightness
+  (worst pair dE 0.109 in OKLab, was 0.054). Three hues moved where the cost was
+  only visual: green 123°→145°, blue 238°→248°, `--gtok-str` 75°→95°. The `-dim`
+  and `-glow` washes stay cut from the *bright* shades — on white, ink and tint
+  want opposite ends of the scale, and a wash diluted from dark ink turns grey.
+  Numbers move onto violet and comments step down to `--text-ghost`, both scoped
+  to `[data-scheme="light"]`.
+
+  Neutrals dropped their Primer blue cast (hue ~210°) for achromatic greys, so
+  the warm brand accent no longer sits on near-complementary ground. The text
+  ramp is derived from the dark palettes' *relative* step down from primary
+  rather than their absolute ratios — light's primary is far blacker against its
+  canvas, so equal ratios read a step weaker. `body-glow` is a faint warm wash
+  instead of `none`.
+- **The Light ramp has four distinct steps again.** `bg-base` and `bg-surface`
+  were both `#ffffff`, which collapsed the four-step ramp into three and made
+  every card-inside-a-panel invisible — a widget's buttons against its own
+  frame, the selected row in the search modal, the keycaps in the header.
+  Lowering the canvas makes room for the step. Ordering is unchanged: on a light
+  canvas `bg-raised` is a chip tone *below* the canvas (hover darkens) and
+  `bg-base` is a step *up* from `bg-deep` — see the new
+  [Writing a light palette](docs/customizing.md#light-palettes) section, which
+  writes those rules down for the first time.
+- **Intro prose is inked as prose on light** — a rubric lead, a series
+  description and a feed card's summary take `--text-primary` there instead of
+  `--text-secondary`, which against near-black body copy read as greyed-out and
+  left the intro looking weaker than what it introduced.
+- **Covers get a real edge on light**, on the article and in the feed: a
+  picture's light field and the page's meet, and the palette hairline was not
+  enough to say where one ended.
+- **Palette swatches are exaggerated, not accurate.** The six closest canvases
+  sit 0.006-0.014 apart in OKLab — invisible at 32×24, and doubly so on a light
+  palette's white popover. The chip is now saturated so each palette's real hue
+  reads; the achromatic ones stay neutral.
+- `--accent-red` (+ `-dim`) is documented in `customizing.md` at last. It has
+  been a real token since every palette got it — `.callout.warn`,
+  `.term-card.c-red`, `.l1-tip.c-red` — and was simply missing from the list.
+
+### Fixed
+
+- **The `.byte-box` value swatches went unreadable on light palettes.** Their
+  ink is a fixed near-black, which assumes a light mid-tone fill — true of every
+  dark palette, but not of a light one whose accents must be dark to work as
+  text. The ink now flips to the surface colour under `[data-scheme="light"]`.
+  The `.f0` swatch, already marginal at 3.72:1, improves to 5.16:1 with it.
+
 ### Changed — BREAKING
 
 - **Series are rubric sub-sections now, not a taxonomy.** A series is a folder:

@@ -75,7 +75,7 @@ Colours come from the **palette** (see below), so they change per theme:
 `--text-strong`, `--gtok-str`, and the accents `--accent` (+ `-dim`,
 `-glow`), `--accent-green` (+ `-dim`, `-glow`), `--accent-copper` (+ `-dim`),
 `--accent-blue` (+ `-dim`), `--accent-gold` (+ `-dim`),
-`--accent-violet` (+ `-dim`).
+`--accent-red` (+ `-dim`), `--accent-violet` (+ `-dim`).
 
 The primary `--accent` is special: a site can repaint it across every palette
 with a single param — see [Recolour the accent](#recolour).
@@ -126,6 +126,54 @@ every palette and a swatch carrying it would show one identical dot per row.
 `light = true` also stamps the root element with `data-scheme="light"` (any
 other palette yields `data-scheme="dark"`), so CSS can target all light
 palettes at once — the theme itself keys the home hero grid density off it.
+
+### Writing a light palette {#light-palettes}
+
+A light palette is not a dark one with the backgrounds swapped. Three rules,
+learned the hard way — `data/themes/light.toml` carries the worked example and
+the numbers.
+
+**Do not copy the dark accents, and do not simply darken them either.** Copying
+is the obvious mistake — a mid-tone drawn to glow on black loses most of its
+presence on white; three of the accents feed syntax highlighting
+(`--accent-blue` = built-in types, `--accent-green` = functions,
+`--accent-copper` = numbers), so leaving them bright makes Go listings
+illegible, not merely pale. But darkening them until they clear a contrast
+target is the *second* mistake, and it reads as no highlighting at all. How much
+chroma a hue can carry at a given contrast varies about **3×** by hue on a light
+canvas — gold tops out around C 0.10 at 7:1 where blue reaches 0.31 — and the
+hues that stay rich near white are the opposite of the ones that stay rich near
+black. Mirroring a dark palette's contrast ranking therefore hands the loudest
+jobs to the hues with the least room to be colourful.
+
+**Aim for 4.2–5.7:1 against `bg-deep`, OKLCH lightness 0.50–0.57, chroma ≤0.18**
+for anything that carries text; **3:1** for large graphics and logo strokes.
+Never drag a warm or green hue below roughly 0.6 of its own chroma-peak
+lightness — past that it stops reading as a hue and turns brown-black. Higher
+contrast is affordable only on blue, violet and red; spend it on roles that
+never share a line of code with each other, such as callout types.
+
+**Separate accents by hue, not by lightness,** and keep the warm arc (hue
+20–90°) to about three accents. A palette that stacks five warm accents has only
+lightness left to tell them apart, and on white there is not enough range for
+that. An accent that also inks text on its own `-dim` wash needs ~0.5 of
+contrast headroom, because the wash composites over the canvas and darkens the
+ground under that text.
+
+**The `-dim`/`-glow` washes are *not* the ink at low alpha.** On a dark canvas
+they can be, because the ink is already light and saturated. On white the two
+roles pull apart: ink must be dark to be read, a wash must stay light to stay a
+colour at all. Dilute the dark ink instead and you get grey — a dark green at
+tint alpha keeps under a third of the chroma. So build the washes from the
+family's *bright* shade and keep the ink dark. Same split applies inside a
+component: a lamp, a lit cell or a status dot is a fill, not ink.
+
+**The four ramp steps still have a direction.** On light it is not "more
+elevated is lighter" — `bg-raised` is a chip tone that sits *below* the canvas,
+because hover darkens; `bg-base` is a step *up* from `bg-deep`, so a code block
+nested in a card does not vanish into it; and `bg-hover` stays lighter than
+`bg-raised`. Keep `bg-base` and `bg-surface` distinct, or every
+card-inside-a-panel disappears.
 
 ### Recolour the accent {#recolour}
 

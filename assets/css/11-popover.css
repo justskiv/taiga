@@ -48,11 +48,19 @@
    temperature is carried almost entirely by the text tones — which is why they
    get the area here, and why the frame is tinted with the palette's own text
    instead of the current one's: a warm palette then reads warm around its whole
-   perimeter, not along two 2px lines. */
+   perimeter, not along two 2px lines.
+
+   The swatch is deliberately not colour-accurate. The six closest canvas pairs
+   sit 0.006-0.014 apart in OKLab, which a 32x24 chip cannot show — least of all
+   on a light palette's white popover, where every dark swatch collapses into
+   the same rectangle. Saturating the chip amplifies the hue each palette really
+   has, in proportion; the achromatic ones stay neutral. A legend, not a
+   preview: its job is telling twelve rows apart at a glance. */
 .tp-sw{
   position:relative; width:32px; height:24px; flex-shrink:0; overflow:hidden;
   border-radius:5px; background:var(--sw-bg);
   border:1px solid color-mix(in srgb, var(--sw-tx) 28%, transparent);
+  filter:saturate(3);
 }
 .tp-sw::after{content:''; position:absolute; inset:7px 3px -1px; border-radius:3px 3px 0 0; background:var(--sw-card)}
 .tp-sw i{position:absolute; border-radius:1px; z-index:1}

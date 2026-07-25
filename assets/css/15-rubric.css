@@ -10,6 +10,8 @@
 .series .ser-k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
 .series .ser-m{margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--text-muted)}
 .series .ser-d{margin:12px 0 4px; font-size:14.5px; color:var(--text-secondary); line-height:1.65; max-width:66ch}
+/* intro prose, inked like prose on light — see .lead in 02-article-head */
+[data-scheme="light"] .series .ser-d{color:var(--text-primary)}
 .slist{list-style:none; counter-reset:si; margin:6px 0 0; padding:0}
 .slist li{margin:0; counter-increment:si}
 .slist li + li a{border-top:1px solid color-mix(in srgb, var(--border) 55%, transparent)}

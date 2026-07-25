@@ -30,6 +30,14 @@
 .byte-box{width:24px; height:30px; border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600; color:#0f0f0ecc; border:1px solid transparent}
 .byte-box.pad{background:repeating-linear-gradient(45deg,var(--accent-dim),var(--accent-dim) 4px,transparent 4px,transparent 8px); border:1px dashed var(--accent); color:var(--accent)}
 .byte-box.f0{background:var(--accent)} .byte-box.f1{background:var(--accent-green)} .byte-box.f2{background:var(--accent-gold)}
+/* The box ink above is a fixed near-black, which assumes a light mid-tone fill.
+   A light palette inks its accents dark, so those fills go dark and the label
+   drops to ~2.2:1 — flip the ink rather than weaken the fill. Spell out
+   .f0/.f1/.f2: a bare `.byte-box` would match at the same specificity as
+   `.byte-box.pad` above and steal its accent ink. */
+[data-scheme="light"] .byte-box.f0,
+[data-scheme="light"] .byte-box.f1,
+[data-scheme="light"] .byte-box.f2{color:var(--bg-surface)}
 .byte-seg .seg-tag{font-size:10px; color:var(--text-secondary); text-align:center; white-space:nowrap}
 .byte-seg .seg-tag.padtag{color:var(--accent-copper)}
 

@@ -3,50 +3,107 @@ weight = 70
 light = true
 group = { en = "Light", ru = "Светлые" }
 
-# surface / text ramp (swapped per theme)
-"bg-deep" = "#f6f8fa"
-"bg-base" = "#ffffff"
+# ── surfaces ──────────────────────────────────────────────────────────────────
+# Achromatic on purpose: the brand accent is warm, and a blue-grey ramp sits
+# near-complementary to it, which reads the amber as dirty. Hue-less greys let
+# the accent own the only hue on the page.
+#
+# DIRECTION IS LOAD-BEARING — do not reorder. On a light canvas the ramp is not
+# "more elevated = lighter" like the dark palettes; components rely on:
+#   · bg-base is a step UP from bg-deep — a `pre` nested in .term-card/.lp-card
+#     (both filled with bg-deep) lifts to bg-base so it does not vanish
+#   · bg-surface > bg-base — cards sit on panels, and if these two are equal
+#     every card-inside-a-panel disappears (widget buttons on their own frame,
+#     the selected row in the search modal, the header keycaps)
+#   · bg-raised is DARKER than bg-surface — hover darkens, site-wide
+#   · bg-hover is lighter than bg-raised — the link-preview skeleton shimmer
+#     sweeps a light band through a dimmer track
+# Body is painted on --bg-deep, so bg-deep IS the reading canvas.
+"bg-deep" = "#f4f4f4"
+"bg-base" = "#fafafa"
 "bg-surface" = "#ffffff"
-"bg-raised" = "#eaeef2"
-"bg-hover" = "#eff2f5"
-"border" = "#d1d9e0"
-"text-primary" = "#1f2328"
-"text-secondary" = "#59636e"
-"text-muted" = "#66707c"
-"text-ghost" = "#949ca6"
-"text-strong" = "#0b0d10"
-"gtok-str" = "#9a6700"
-"body-glow" = "none"
+"bg-raised" = "#e8e8e8"
+"bg-hover" = "#eeeeee"
+"border" = "#d4d4d4"
 
-# brand accents (overridable)
-# DELIBERATELY DARK — keep the site's amber brand identity here, but a DARK shade.
-# --accent is not only link text: it is also the CTA *background*, and the label
-# on it is --bg-deep (14-home.css: `.btn-cta{color:var(--bg-deep); background:var(--accent)}`).
-# Here --bg-deep is near-WHITE (#f6f8fa), so the accent must be dark enough to
-# carry near-white text AND to read as a link on near-white. A bright brand
-# orange fails both directions: #ea8a2e scores 2.41:1 (fail). This dark orange
-# holds the amber identity while passing: #b45309 gives 4.72:1 for links on the
-# canvas and 4.72:1 on the CTA (5.02:1 on pure white). It is the same hue as the
-# dark-palette brand accent (#ea8a2e, hue ~28deg), only darkened.
-# NB: the global brand-accent override (params.accent) is SKIPPED for light
-# palettes in head/palettes.html, so this value actually reaches the page —
-# without that skip the bright #ea8a2e returns and re-breaks contrast (2.41:1).
-"accent" = "#b45309"   # was #0e7a71 (teal); now dark brand-orange
+# ── text ──────────────────────────────────────────────────────────────────────
+# Derived, not chosen: each tone keeps the same STEP DOWN FROM PRIMARY that the
+# dark palettes give it — 0.60 of primary's contrast for secondary, 0.45 muted,
+# 0.27 ghost. Copying the dark palette's absolute ratios does not work: primary
+# is far blacker here relative to its canvas (14.3:1 against Onyx's 11.8:1), so
+# a tone carrying Onyx's exact ratio still reads a step weaker beside it. The
+# eye judges distance from body text, not the number.
+"text-primary" = "#232323"
+"text-secondary" = "#474747"
+"text-muted" = "#585858"
+"text-ghost" = "#7c7c7c"
+"text-strong" = "#0d0d0d"
+
+# ── accents ───────────────────────────────────────────────────────────────────
+# NOT the dark values darkened. How much chroma a hue can carry at a given
+# contrast varies ~3x by hue on a light canvas (at 7:1 here gold tops out at
+# C 0.097, blue reaches 0.311), and the hues richest near white are the opposite
+# of those richest near black. Rules:
+#
+#   1. Coloured code tokens: 4.2-5.7:1, OKLCH L 0.50-0.57, chroma capped ~0.18.
+#      Never put a warm or green hue below ~0.6 of its own chroma-peak lightness
+#      — past that it stops reading as a hue and turns brown-black.
+#   2. Higher contrast is affordable only on blue, violet and red. Spend it on
+#      roles that never share a line of code (callout types), not on tokens.
+#   3. Separate by HUE, not lightness: worst pair among the five code tokens is
+#      dE 0.109 in OKLab, minimum hue gap ~20 degrees.
+#   4. Keep the warm arc (hue 20-90) thin — three accents is the practical max.
+#
+# Hues move where the cost is only visual: green 123 -> 145 (+68% chroma at the
+# same contrast, and an actual green instead of army olive), blue 238 -> 248
+# (+23%), string 75 -> 95 (breaks a 3-degree collision with gold). The dark
+# palettes keep the original hues, so the greens differ by 22 degrees between
+# schemes — deliberate, a hue that reads as mud is worse than one that shifts.
+#
+# --accent must stay dark: it is also the CTA *background* and the label on it
+# is --bg-deep (14-home.css `.btn-cta`), so it has to pass in both directions —
+# 4.55:1 as ink on the canvas and 4.55:1 for the label on the button. The global
+# params.accent override is skipped for light palettes (head/palettes.html), so
+# this value is what actually reaches the page.
+#
+# The -dim / -glow washes are deliberately NOT cut from the inks above. On white
+# the two roles pull apart: ink must be dark to be legible, a wash must stay
+# light and saturated to read as a colour at all. Diluting a dark ink yields
+# grey — green keeps 28% of the tint's chroma that way, gold 45%. So the washes
+# are built from the family's bright shades at their original alphas. Checked
+# both ways: dark ink on its own tint is 4.0-7.9:1 (the badge/chip pattern),
+# body text on a tinted panel 4.8-5.5:1.
+"accent" = "#b65200"                    # keywords, brand, CTA   4.55:1  H49
 "accent-dim" = "rgba(180,83,9,.18)"
 "accent-glow" = "rgba(180,83,9,.28)"
-"accent-green" = "#a8c954"
+# Green and blue carry a second job: they also ink text that sits on their OWN
+# -dim wash (widget panels, badges). A wash is translucent and composites over
+# the canvas, so it always darkens the ground under that text — an accent parked
+# exactly on 4.5:1 fails there. These two keep ~0.5 of headroom for it.
+"accent-green" = "#027a1e"              # functions, "internals" 5.02:1  H145
 "accent-green-dim" = "rgba(168,201,84,.16)"
 "accent-green-glow" = "rgba(168,201,84,.22)"
-"accent-copper" = "#c87a42"
-"accent-copper-dim" = "rgba(200,122,66,.18)"
-"accent-blue" = "#6ba4c9"
+"accent-blue" = "#036ab0"               # built-in types, "note" 5.17:1  H248
 "accent-blue-dim" = "rgba(107,164,201,.16)"
-"accent-gold" = "#d4a24e"
-"accent-gold-dim" = "rgba(212,162,78,.18)"
-"accent-red" = "#b5503f"
-"accent-red-dim" = "rgba(181,80,63,.12)"
-# Violet is the one brand accent that also needs darkening here: #a48bd4 is a
-# pastel that dissolves on near-white. This shade keeps the hue and reads as
-# text on the canvas.
-"accent-violet" = "#7a5fb8"
+# numbers on light (see 20-chroma.css) + decorative term/tip colour: violet has
+# the most chroma headroom of any hue here, and moving numbers onto it takes
+# them out of the crowded warm arc.
+"accent-violet" = "#7846ba"             # numbers, decorative    5.64:1  H300
 "accent-violet-dim" = "rgba(122,95,184,.14)"
+"accent-red" = "#b12532"                # "warn" callouts        6.00:1  H22
+"accent-red-dim" = "rgba(181,80,63,.12)"
+"accent-copper" = "#813c00"             # "trap" callouts        7.40:1  H52
+"accent-copper-dim" = "rgba(200,122,66,.18)"
+"accent-gold" = "#734f00"               # decorative only        6.71:1  H78
+"accent-gold-dim" = "rgba(212,162,78,.18)"
+"gtok-str" = "#8b7400"                  # Go string literals     4.15:1  H95
+#
+# Known residual: copper and gold sit dE 0.054 apart — two dark browns held
+# apart by lightness, not hue. Tolerable only because neither carries body text
+# and they never meet in one block. Rotating gold out of the warm arc would fix
+# it properly, at the cost of renaming an author-facing colour.
+
+# A whisper of the brand behind the hero, where the dark palettes have a warm
+# radial glow. At .04 the peak tint is a 1.05:1 delta — the same order as the
+# hero grid lines, so it reads as atmosphere and never as a band.
+"body-glow" = "radial-gradient(1200px 600px at 80% -10%, rgba(180,83,9,.04), transparent 60%)"

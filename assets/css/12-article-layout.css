@@ -8,6 +8,12 @@
    since it lives inside .wrap. */
 .a-cover{margin:0 0 26px}
 .a-cover img{display:block; width:100%; height:auto; border-radius:var(--radius); border:1px solid var(--border)}
+/* On a dark palette a cover holds its own edge — the picture's own light field
+   ends and the near-black canvas begins. On a light one the two whites meet and
+   the hairline above (1.35:1 against the canvas) is not enough to say where the
+   picture stops. Give it a real edge there; the covers are pen-and-ink drawings,
+   so a dark thin rule reads as part of the artwork rather than as chrome. */
+[data-scheme="light"] .a-cover img{border-color:var(--text-ghost)}
 /* A titled Markdown image — ![alt](x.png "caption") — is wrapped by
    render-image.html in an inline .figure (a <span>, valid inside the auto-added
    <p>, so no markup-parser config is needed). Shown as a block: the image
