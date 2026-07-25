@@ -13,8 +13,8 @@ your `hugo.toml [params]`. Reach for a param before anything heavier.
 
 ### Home page look {#home-look}
 
-Four independent axes under `[params.home]` retune the home page; each one
-unset falls back to the classic layout, so an existing site changes nothing:
+Independent axes under `[params.home]` retune the home page; each one unset
+falls back to the classic layout, so an existing site changes nothing:
 
 ```toml
 [params.home]
@@ -22,6 +22,10 @@ unset falls back to the classic layout, so an existing site changes nothing:
   grid = "fade"            # markup behind the hero: "grid" | "fade" (dissolves) | "dots"
   rubricCards = "naked"    # drop the card boxes, grow the rubric logos to 112px
   feedPreview = "summary"  # feed previews = each guide's own lead + a "read →" tail
+  feedCover = "banner"     # cover band atop each card (the guide's own `cover:`)
+
+[params.article]
+  cover = true             # print that same picture above the article's prose
 ```
 
 With the hero on, the kicker line becomes its centered subtitle. The grid ink
@@ -31,6 +35,11 @@ light ones included. `feedPreview = "summary"` uses the lead **before a
 front-matter description. The hero can also carry a mascot: ship
 `layouts/_partials/home/mascot.html` (inline SVG artwork) and it renders
 beside the mark — the same site-side slot pattern as the rubric logos.
+
+The two cover axes read one field, the guide's `cover:` (see
+[authoring.md](authoring.md#covers-og-images)). The band crops to
+`--feed-cover-ratio`, the article shows the picture whole — so covers drawn at
+the band's ratio need no crop anywhere.
 
 ## 2. custom.css — restyle anything
 
@@ -57,6 +66,8 @@ Structure (`assets/css/00-tokens.css`):
 | `--font-sans` / `--font-mono` | Inter / JetBrains Mono | Font stacks |
 | `--radius-sm` / `--radius` | `8px` / `12px` | Corner radii |
 | `--dur` / `--ease` | `.14s` / `cubic-bezier(.2,0,0,1)` | Transition duration and easing |
+| `--feed-measure` | `740px` | Feed column width in `feedPreview = "summary"` (a ~75-char measure) |
+| `--feed-cover-ratio` | `3 / 1` | Aspect the feed's cover band crops to |
 
 Colours come from the **palette** (see below), so they change per theme:
 `--bg-deep`, `--bg-base`, `--bg-surface`, `--bg-raised`, `--bg-hover`,

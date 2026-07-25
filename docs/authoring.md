@@ -47,7 +47,7 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `slug` | yes | Freezes the pretty URL; keep it stable once published, and **identical across translations** (see [Translating a guide](#translating-a-guide)). |
 | `date` | yes | Orders the feed and RSS, and prints on the feed card. **Never appears in the article body.** |
 | `description` | yes | Feed card, search result, `og:description`, RSS `<description>`. |
-| `lead` | recommended | The opening paragraph. Also the fallback for `og:description`. |
+| `lead` | legacy | One-paragraph opening, kept for guides written before the `<!--more-->` divider (below). Also the fallback for `og:description`. |
 | `weight` | for series parts | Part order inside the series folder. See [Series](#series-and-weight). |
 | `tags` | recommended | Chips linking to the tags page, anchored at `#<tag>`. Keep **identical across translations**. |
 | `mins` | recommended | The reading-time chip, the rubric duration sum and the series-bridge scale; falls back to `.ReadingTime`. |
@@ -70,6 +70,25 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 `kicker:` and `headline:` are read only on **non-guide** pages (about, roadmap,
 `/tags/`); on a guide the kicker is derived from the rubric and the series, and
 setting them does nothing.
+
+### The lead and `<!--more-->`
+
+Put a `<!--more-->` line after the guide's opening prose:
+
+```markdown
+Opening paragraphs that stand on their own and earn the click.
+
+<!--more-->
+
+## First section
+```
+
+That divider does two jobs. In the article it splits the standfirst from the
+body — the prose above it is the opening, styled as ordinary body text. In the
+feed it becomes the preview, if the site set `params.home.feedPreview =
+"summary"`; a guide **without** the divider keeps showing its `description`
+instead, because Hugo would otherwise synthesise a summary that cuts
+mid-sentence. So end the lead on a hook, not in the middle of an example.
 
 ### Series {#series-and-weight}
 
@@ -442,12 +461,22 @@ passed through as a URL — that is how a file in `static/` or a picture on anot
 host works — and a bare name that resolves nowhere warns, since it can only be a
 typo.
 
-These fields feed the share card, the Twitter card and the JSON-LD. They also
-feed the feed card's cover band, if the site turned it on with
-`params.home.feedCover = "banner"` — and there the same picture is found one
-more way: a guide that simply *opens* on an image needs no front matter at all,
-since that opening image becomes the band and is lifted out of the preview text
-so it is not shown twice. Nothing prints a cover inside the article itself.
+`cover` feeds the share card, the Twitter card and the JSON-LD. The same
+picture shows up on the site's own pages too, if it turned those on:
+`params.home.feedCover = "banner"` gives each feed card a cover band, and
+`params.article.cover` prints the picture above the article's prose. Only
+`cover` does that — an image inside the guide's text stays where the author put
+it, and the drawn OG cover never leaves the meta tags, since the title baked
+into it would double the one printed right beside it.
+
+The band **crops** to `--feed-cover-ratio` (`3 / 1` by default); the article
+shows the picture **whole**. Draw a cover at the band's ratio and both places
+show the same frame — a taller one loses its top and bottom in the feed. A site
+whose artwork wants another shape retunes that one variable in `custom.css`.
+
+A raster cover is re-encoded to WebP at twice the column width and never
+upscaled; an SVG, a file in `static/` and an off-site picture pass through
+untouched.
 
 
 
