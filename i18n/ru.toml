@@ -162,10 +162,6 @@ other = "лента гайдов"
 # quiet tail link under a long feed preview (params.home.feedPreview = "summary")
 [feed_read]
 other = "читать"
-[wip_writing]
-other = "пишутся"
-[wip_roadmap]
-other = "роадмап"
 
 # count plurals (CLDR ru: one/few/many + other for fractionals)
 [guides_count]

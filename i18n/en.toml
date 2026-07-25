@@ -139,10 +139,6 @@ other = "the feed"
 # quiet tail link under a long feed preview (params.home.feedPreview = "summary")
 [feed_read]
 other = "read"
-[wip_writing]
-other = "writing"
-[wip_roadmap]
-other = "roadmap"
 
 [guides_count]
 one = "{{ .Count }} guide"

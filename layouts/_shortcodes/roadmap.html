@@ -6,8 +6,7 @@
 
        Hugo's data/ is not language-aware, so the roadmap resolves in two shapes:
        a flat data/roadmap.toml (one language, what it always was) or a folder
-       data/roadmap/<lang>.toml, which Hugo hands over as a map keyed by language.
-       Same two lines in home/wip.html — keep them in step. */ -}}
+       data/roadmap/<lang>.toml, which Hugo hands over as a map keyed by language. */ -}}
 {{- $rm := site.Data.roadmap | default dict -}}
 {{- with index $rm site.Language.Lang }}{{ $rm = . }}{{ end -}}
 {{- $anchor := i18n "anchor_sec" -}}
