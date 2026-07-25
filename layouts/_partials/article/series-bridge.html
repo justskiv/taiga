@@ -25,7 +25,11 @@
 {{- end -}}
 {{- end -}}
 </div>
-<div class="sbr-legend">{{ if lt $pos $total }}{{ i18n "sbr_behind" (dict "done" $pos "total" $total) | safeHTML }} · {{ i18n "sbr_ahead" (dict "n" $ahead) }} {{ i18n "parts_word" $ahead }} · {{ i18n "sbr_left" (dict "mins" $minsLeft) | safeHTML }}{{ else }}{{ i18n "sbr_done" (dict "total" $total) | safeHTML }}{{ end }}</div>
+{{- /* The minutes clause is dropped when nothing ahead has a reading time —
+       every remaining part is an announce, which carries mins 0 (see
+       series/parts.html). "~0 min left" reads as a bug, and the same guard is
+       already on the next-part chip below (`with $next.mins`). */ -}}
+<div class="sbr-legend">{{ if lt $pos $total }}{{ i18n "sbr_behind" (dict "done" $pos "total" $total) | safeHTML }} · {{ i18n "sbr_ahead" (dict "n" $ahead) }} {{ i18n "parts_word" $ahead }}{{ with $minsLeft }} · {{ i18n "sbr_left" (dict "mins" .) | safeHTML }}{{ end }}{{ else }}{{ i18n "sbr_done" (dict "total" $total) | safeHTML }}{{ end }}</div>
 {{- if lt $pos $total -}}
 {{- $next := index $pages $pos -}}
 {{- if $next.announce -}}

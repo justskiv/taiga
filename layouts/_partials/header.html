@@ -1,26 +1,78 @@
-{{- /* Site header: brand, rubric nav (active item + optional badge), language
-       switcher, search button, optional source link, popover mount. Cached by
-       language + section,
+{{- /* Site header: brand, rubric nav (active item + optional badge, folded into a
+       disclosure menu on a narrow screen), language switcher, search button,
+       optional source link, popover mount. Cached by language + section,
        falling back to the page URL for section-less pages (home/404/lab) whose
        active item differs at section "" — and, on a multilingual site, by page
        too: the switcher links to THIS page's translation, which varies inside a
        section (see baseof.html).
        Note: no flex gap on .brand — the wordmark is a bare text node (brand.name)
        + .tld, a gap would split them; the svg carries the spacing. */ -}}
+{{- /* The two secondary controls are rendered twice: once as a round icon in the
+       header row, once as a labelled row inside the narrow-screen menu below.
+       Only ever one of the pair is displayed (10-header.css), so the a11y tree
+       never sees a duplicate link — but the icon paths would drift apart if they
+       were written out twice, hence the variables. */ -}}
+{{- $rssIcon := `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>` | safeHTML -}}
+{{- $ghIcon := `<svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>` | safeHTML -}}
+{{- $rss := site.Home.OutputFormats.Get "rss" -}}
+{{- $gh := site.Params.social.github -}}
+{{- /* Menu entries with the devOnly ones already dropped (they show on the dev
+       server, never in a production build — see the entry in the site config).
+       Resolved up front because the burger and its panel must not render for a
+       site whose main menu is empty, or entirely devOnly in a production build:
+       a control that opens onto nothing. */ -}}
+{{- $nav := slice -}}
+{{- range site.Menus.main -}}
+  {{- if and .Params.devOnly hugo.IsProduction }}{{ continue }}{{ end -}}
+  {{- $nav = $nav | append . -}}
+{{- end -}}
 <header class="site-head">
-  <div class="head-in">
+  <div class="head-in{{ if $nav }} has-nav{{ end }}">
     <a class="brand" href="{{ "" | relLangURL }}" aria-label="{{ site.Params.brand.name }}{{ site.Params.brand.tld }} — {{ i18n "to_home" }}">
       {{ partial "logo.html" }}
       {{ site.Params.brand.name }}<span class="tld">{{ site.Params.brand.tld }}</span>
     </a>
-    <nav class="nav" aria-label="{{ i18n "nav_rubrics" }}">
-      {{- range site.Menus.main }}
-      {{- /* devOnly items (an upcoming section, say) show on the dev server but are
-             dropped from every production build — see the entry in the site config. */ -}}
-      {{- if and .Params.devOnly hugo.IsProduction }}{{ continue }}{{ end }}
-      <a href="{{ .URL }}"{{ if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} class="on"{{ end }}>{{ .Name }}{{ with .Params.badge }}<sup class="beta">{{ . }}</sup>{{ end }}</a>
-      {{- end }}
-    </nav>
+    {{- if $nav }}
+    {{- /* Rubric nav plus the disclosure that carries it on a narrow screen.
+           Above the header breakpoint .nav-wrap and .nav-pop are display:contents
+           and the button is display:none, so .nav stays a direct flex child of
+           .head-in and the desktop row is the layout it always was; below it the
+           wrap collapses to the burger and the panel drops out of the header.
+           The button precedes the panel in source order, so Tab walks from the
+           burger straight into the links and then out of the menu — a disclosure,
+           not a modal, which is why there is no focus trap (modules/navmenu.js). */ -}}
+    <div class="nav-wrap">
+      <button class="nav-btn" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="{{ i18n "nav_menu" }}">
+        {{- /* three strokes that fold into a cross when open: the top and bottom
+               slide onto the middle line and rotate about the viewBox centre,
+               the middle one thins out. Transforms live in the CSS so the whole
+               morph can be dropped under prefers-reduced-motion. */ -}}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+          <line class="nb-t" x1="4" y1="7" x2="20" y2="7"/>
+          <line class="nb-m" x1="4" y1="12" x2="20" y2="12"/>
+          <line class="nb-b" x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
+      <div class="nav-pop" id="navMenu">
+        <nav class="nav" aria-label="{{ i18n "nav_rubrics" }}">
+          {{- range $nav }}
+          <a href="{{ .URL }}"{{ if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }} class="on"{{ end }}>{{ .Name }}{{ with .Params.badge }}<sup class="beta">{{ . }}</sup>{{ end }}</a>
+          {{- end }}
+        </nav>
+        {{- with $gh }}
+        {{- /* Phone width only: the source icon leaves the header row and
+               reappears here as a labelled row — a 360px row cannot hold the
+               burger and every round button, and this is the one a reader
+               needs least in one tap, as well as the one whose icon says least
+               on its own. The feed icon does NOT move here: it stays in the row
+               beside the palette, where a reader looks for it. */ -}}
+        <div class="nav-extra">
+          <a class="nav-x" href="{{ . }}" target="_blank" rel="noopener">{{ $ghIcon }}<span>{{ i18n "repo_link" }}</span></a>
+        </div>
+        {{- end }}
+      </div>
+    </div>
+    {{- end }}
     <span class="head-sp"></span>
     {{ partial "lang-switch.html" . }}
     <button class="search-btn" id="searchBtn" type="button" aria-label="{{ i18n "search" }}">
@@ -31,20 +83,16 @@
     {{- /* Source link — an icon to the repo, rendered only when a site sets
            params.social.github. Off by default, so the theme stays subject- and
            host-agnostic; a site that lives elsewhere just leaves it unset. */ -}}
-    {{- with site.Params.social.github }}
-    <a class="gh-link" href="{{ . }}" target="_blank" rel="noopener" aria-label="{{ i18n "repo_link" }}">
-      <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-    </a>
+    {{- with $gh }}
+    <a class="gh-link" href="{{ . }}" target="_blank" rel="noopener" aria-label="{{ i18n "repo_link" }}">{{ $ghIcon }}</a>
     {{- end }}
     <span id="tp-mount"></span>
     {{- /* RSS — an icon link to the site feed, sitting to the right of the palette
            switcher. Rendered only when the home page emits an rss output (the
            feed exists), so a site without one shows nothing. Same icon-button
            shape as .gh-link / .tp-btn, so the right-hand controls read as one set. */ -}}
-    {{- with site.Home.OutputFormats.Get "rss" }}
-    <a class="rss-link" href="{{ .RelPermalink }}" target="_blank" aria-label="RSS" title="RSS">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
-    </a>
+    {{- with $rss }}
+    <a class="rss-link" href="{{ .RelPermalink }}" target="_blank" aria-label="RSS" title="RSS">{{ $rssIcon }}</a>
     {{- end }}
   </div>
 </header>

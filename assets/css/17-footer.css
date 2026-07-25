@@ -5,9 +5,52 @@
    against the brand. A shared line-height keeps wrapped rows (narrow screens)
    on one rhythm; the row gap there is matched with .foot-links' own wrap gap. */
 .site-foot{border-top:1px solid var(--border)}
-.foot-in{max-width:var(--shell); margin:0 auto; padding:26px 24px 36px; display:flex; align-items:baseline; gap:12px 20px; flex-wrap:wrap; font-size:13px; line-height:1.5; color:var(--text-muted)}
+.foot-in{max-width:var(--shell); margin:0 auto; padding:30px 24px 44px; display:flex; align-items:baseline; gap:12px 20px; flex-wrap:wrap; font-size:13px; line-height:1.5; color:var(--text-muted)}
 .foot-in .brand{font-size:13px; color:var(--text-secondary)}
-.foot-tag{font-size:12.5px}
+/* the strapline belongs to the mark, not to the links: one ramp step up binds
+   the two into a single signature and leaves the muted tone to the navigation */
+.foot-tag{font-size:12.5px; color:var(--text-secondary)}
 .foot-links{display:flex; align-items:baseline; gap:12px 16px; margin-left:auto; flex-wrap:wrap}
-.foot-links a{color:var(--text-muted); border:0; font-size:12.5px; transition:color var(--dur) var(--ease)}
+/* The links are set in the mono face the rest of the theme reserves for
+   service rows (feed meta, rubric counters, the home kicker). Sharing the
+   signature's sans made the footer one undifferentiated grey block: three
+   lines, same voice, no telling which of them you could click. Two voices —
+   the name in text, the navigation in mono — separate them without a rule,
+   a box or a colour, none of which this footer has room for. */
+.foot-links a{font-family:var(--font-mono); font-size:12px; letter-spacing:.02em;
+  color:var(--text-muted); border:0; transition:color var(--dur) var(--ease)}
 .foot-links a:hover{color:var(--text-secondary)}
+/* ---- narrow screens: the row becomes a signature and a nav ----
+   Brand plus tagline already fill a 390px line on their own, so the link row
+   always wrapped — and margin-left:auto then parked it hard against the right
+   edge, under empty space. Two ragged rows with nothing lining up read as
+   broken markup rather than as a two-line footer.
+
+   Stacking them is only the first half of the fix. Three lines of near-equal
+   weight, evenly spaced, are not a footer — they are a list of leftovers, and
+   that is what the first pass produced. So the column is composed instead:
+
+   - the mark leads at 15px. It is the only thing here that is a NAME, and at
+     the shared 13px it read as one more grey line; a footer's job is to sign
+     the page, and a signature is legible or it is decoration.
+   - mark and tagline sit 5px apart — close enough to bind into one block, the
+     way a logotype binds to its strapline. All the air (24px) goes BETWEEN
+     that block and the links, so the eye gets two groups instead of three
+     lines. Same trick the feed meta uses: group, then space the groups.
+   - the links become touch targets. 12.5px text has a ~19px box; a finger
+     needs ~44px, so each link is padded 12px top and bottom and the padding is
+     pulled back out with a negative margin, leaving the ink where the rhythm
+     wants it while the tappable box is 43px tall. Their own gap widens to 22px
+     for the same reason: neighbouring targets must not overlap under a thumb.
+   - and the whole thing gets 52px of floor. The old 32px let the last line sit
+     almost on the edge of the screen, which is what made the footer feel stuck
+     to the bottom rather than closing the page.
+   The left edge is shared with the header brand and with the content above, so
+   the three groups hang off one vertical. */
+@media(max-width:560px){
+  .foot-in{flex-direction:column; align-items:flex-start; gap:5px; padding:32px 24px 52px}
+  .foot-in .brand{font-size:15px}
+  .foot-tag{font-size:13px}
+  .foot-links{margin-left:0; margin-top:19px; gap:0 22px}
+  .foot-links a{padding:12px 0; margin:-12px 0; font-size:12.5px}
+}

@@ -3,7 +3,10 @@
 
 /* ---- header (static by default: scrolls away with the page) ---- */
 .site-head{border-bottom:1px solid var(--border)}
-.head-in{max-width:var(--shell); margin:0 auto; padding:12px 24px; display:flex; align-items:center; gap:18px}
+/* --head-pad is the row's side gutter as a variable because the narrow-screen
+   menu panel is positioned against .head-in and has to sit on exactly the same
+   two edges; changing the padding in one place must move both. */
+.head-in{--head-pad:24px; max-width:var(--shell); margin:0 auto; padding:12px var(--head-pad); display:flex; align-items:center; gap:18px}
 /* NB: no flex gap here — the wordmark is a bare text node + .tld span, a gap
    would split the brand name and its .tld apart; the svg carries the spacing */
 .brand{display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:14.5px; font-weight:600; letter-spacing:.02em; color:var(--text-primary); border:0}
@@ -43,7 +46,10 @@ kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); bo
 /* command-trigger button: magnifier · label · ⌘K keycap, on a fixed 32px row so
    the three optically center; asymmetric padding (11 left / 8 right) balances the
    bare icon against the boxed keycap */
-.search-btn{display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 8px 0 11px; font-family:var(--font-mono); font-size:12.5px; line-height:1; color:var(--text-muted); background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-sm); cursor:pointer; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease)}
+/* flex:none for the same reason .lang-sw has it: the button is a fixed control,
+   not slack. Without it a cramped row squeezed it down to a sliver of its icon
+   instead of letting the nav give way. */
+.search-btn{display:inline-flex; flex:none; align-items:center; gap:7px; height:32px; padding:0 8px 0 11px; font-family:var(--font-mono); font-size:12.5px; line-height:1; color:var(--text-muted); background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-sm); cursor:pointer; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease)}
 .search-btn svg{flex:0 0 auto; width:14px; height:14px; transition:color var(--dur) var(--ease)}
 .search-btn:hover{color:var(--text-secondary); border-color:var(--accent-dim); background:var(--bg-raised)}
 .search-btn:hover svg{color:var(--accent)}
@@ -54,7 +60,8 @@ kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); bo
    heavier bottom border) so the ⌘K sits dead-centre against the label */
 .search-btn .kb{display:inline-flex; align-items:center; justify-content:center; margin-left:3px; height:16px; padding:0 5px; font-size:10.5px; border-bottom-width:1px; box-shadow:0 1px 0 var(--border); transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
 /* narrow: the search button drops to its icon, and the row tightens to buy back
-   the width the language switcher takes (the nav still scrolls under the rest) */
+   the width the language switcher takes (by here the rubric links have already
+   moved into the disclosure menu at the foot of this file) */
 @media(max-width:720px){.search-btn{width:36px; padding:0; gap:0; justify-content:center} .search-btn .s-lab, .search-btn .kb{display:none} .search-btn svg{width:16px; height:16px} .head-in{gap:12px}}
 @media(prefers-reduced-motion:reduce){.search-btn{transition:none} .search-btn:active{transform:none}}
 /* header sticks, hides on scroll-down, slides back on scroll-up */
@@ -68,3 +75,86 @@ kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); bo
   background:color-mix(in srgb, var(--bg-deep) 88%, transparent);
   -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
 html.head-hidden .site-head{transform:translateY(-100%)}
+
+/* ---- narrow screens: the rubric nav folds into a disclosure menu ------------
+   Full width, the row wants ~845px (~900 on an article, where the focus toggle
+   joins the cluster) — the Russian rubric labels alone measure ~430. Below that
+   the nav's overflow-x:auto did keep the row from breaking, but the price was a
+   label sheared mid-word against the buttons, which reads as broken layout
+   rather than as a scroller nobody thinks to swipe. So under 900px the links
+   move into a panel and the nav is represented by a burger standing where it
+   used to start. 900 rather than a rounder 768 because that is where the row
+   actually stops fitting; a tablet in portrait gets the menu, and every laptop
+   keeps the full row.
+   Above the breakpoint every piece of that machinery is inert: .nav-wrap and
+   .nav-pop are display:contents, so .nav is still a direct flex child of
+   .head-in and the desktop row is unchanged down to the pixel. */
+.nav-wrap, .nav-pop{display:contents}
+.nav-btn, .nav-extra{display:none}
+/* labelled rows for the controls that leave the row at phone width — quieter
+   than the rubric links above them, since they are the menu's second tier */
+.nav-x{display:flex; align-items:center; gap:9px; padding:8px 10px; border:0; border-radius:8px; font-size:13px; color:var(--text-muted); transition:color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.nav-x:hover{border:0; color:var(--text-primary); background:var(--bg-surface)}
+.nav-x:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.nav-x svg{flex:none; width:14px; height:14px; opacity:.8}
+@media(max-width:900px){
+  /* The panel hangs off .head-in, not off .nav-wrap: anchored to a 34px button
+     its right edge would run past a 360px viewport and hand the page a
+     horizontal scrollbar. Sharing the row's own --head-pad puts it on the same
+     two edges as the brand and the page content below. */
+  .head-in{position:relative}
+  .nav-wrap{display:flex; flex:none; align-items:center}
+  /* same chrome as .tp-btn / .gh-link — on a phone this button and the control
+     cluster opposite it are all the reader sees, and they should read as one set */
+  .nav-btn{width:34px; height:34px; flex:none; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--border); border-radius:9px; background:var(--bg-surface); color:var(--text-secondary); cursor:pointer; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease)}
+  .nav-btn:hover{color:var(--accent); border-color:var(--accent-dim); background:var(--bg-raised)}
+  .nav-btn[aria-expanded="true"]{color:var(--accent); border-color:var(--accent)}
+  .nav-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .nav-btn svg{width:19px; height:19px}
+  /* view-box, not fill-box: a horizontal <line> has a zero-height bounding box,
+     so its own box is a shaky origin — rotate about the viewBox centre instead,
+     which is exactly where the three strokes have to meet. */
+  .nav-btn svg line{transform-box:view-box; transform-origin:12px 12px; transition:transform .2s var(--ease), opacity .12s var(--ease)}
+  .nav-wrap.open .nav-btn .nb-t{transform:translateY(5px) rotate(45deg)}
+  .nav-wrap.open .nav-btn .nb-b{transform:translateY(-5px) rotate(-45deg)}
+  .nav-wrap.open .nav-btn .nb-m{opacity:0; transform:scaleX(.4)}
+  /* Same frosted card as the palette popover — the two drop out of the same row
+     and would look like two different products otherwise. */
+  .nav-pop{
+    display:block; position:absolute; z-index:150;
+    top:calc(100% + 6px); left:var(--head-pad); right:var(--head-pad); max-width:320px; padding:7px;
+    background:color-mix(in srgb, var(--bg-surface) 93%, transparent);
+    -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3);
+    border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 18px 44px -14px rgba(0,0,0,.6), 0 0 0 1px var(--accent-dim);
+    /* a site is free to ship more rubrics than fit a phone in landscape */
+    max-height:calc(100vh - 80px); overflow-y:auto; overscroll-behavior:contain;
+    /* visibility, not display: it keeps the panel out of the tab order and out
+       of the a11y tree while still leaving something to fade. Its own switch is
+       delayed by the fade on the way out and instant on the way in. */
+    opacity:0; visibility:hidden; transform:translateY(-6px);
+    transition:opacity .16s var(--ease), transform .18s var(--ease), visibility 0s linear .18s;
+  }
+  .nav-wrap.open .nav-pop{opacity:1; visibility:visible; transform:none;
+    transition:opacity .16s var(--ease), transform .18s var(--ease), visibility 0s}
+  .nav-pop .nav{display:flex; flex-direction:column; align-items:stretch; gap:1px; overflow:visible}
+  .nav-pop .nav a{padding:9px 10px; font-size:14.5px; white-space:normal}
+  .nav-pop .nav a.on{background:var(--accent-dim)}
+}
+@media(max-width:560px){
+  /* Phone: the source icon hands its place to a labelled row in the menu — of
+     the right-hand set it is the one a reader reaches for least, and the one
+     whose icon says least on its own, so a labelled row is a straight upgrade.
+     The feed icon stays in the row (right of the palette, as on desktop): it
+     is what a reader of a guides site actually subscribes with, and the room
+     for it comes from the focus toggle, which a phone drops entirely — see
+     12-article-layout.css. Gated on .has-nav: with no menu to move it into,
+     the source icon stays in the row too. */
+  .head-in.has-nav>.gh-link{display:none}
+  .nav-extra{display:flex; flex-direction:column; gap:1px; margin-top:5px; padding-top:5px; border-top:1px solid var(--border)}
+}
+/* .nav-wrap.open .nav-pop has to be named as well as .nav-pop: it carries its own
+   transition at a higher specificity, so dropping the closed state alone would
+   still animate the panel open. With both gone the visibility switch is instant,
+   which is what a reader who asked for less motion wants anyway. */
+@media(prefers-reduced-motion:reduce){.nav-pop, .nav-wrap.open .nav-pop, .nav-btn svg line{transition:none}}

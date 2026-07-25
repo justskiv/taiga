@@ -157,6 +157,14 @@ html.focus .site-head, html.focus .rail{display:none !important}
 .focus-btn:hover{color:var(--accent); border-color:var(--accent-dim)}
 .focus-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .focus-btn svg{width:16px; height:16px}
+/* Focus mode is a desktop affordance: it hides the header and both rails to
+   leave the text alone on a wide canvas. A phone has no rails, its header is
+   one row, and there is no F key to toggle it back — so the button would cost
+   a slot in a row that has none to spare while doing nothing a reader wants.
+   display:none also takes it out of the tab order and the a11y tree, which is
+   the point: an inert control is worse than a missing one. The room it frees
+   is what lets the feed icon stay in the row (10-header.css). */
+@media(max-width:560px){.focus-btn{display:none}}
 .focus-exit[hidden]{display:none}
 /* icon-only "shrink back": mirrors .focus-btn at top-right (the header, hidden
    in focus mode, is where enter lived). Enters visible, melts to a whisper,

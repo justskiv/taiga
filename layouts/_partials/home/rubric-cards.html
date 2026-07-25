@@ -27,14 +27,21 @@
     {{- range $sec.Sections }}{{ if not .Params.standalone }}{{ $nSeries = add $nSeries 1 }}{{ end }}{{ end -}}
     {{- $logo := printf "home/logos/%s.html" $id -}}
     {{- $logoPartial := cond (templates.Exists (printf "_partials/%s" $logo)) $logo "home/logos/default.html" -}}
+  {{/* .r-txt groups the three text lines so a phone can lay the card out as a
+       ROW — glyph beside the words — without the glyph having to span an
+       unknown number of grid rows (a rubric may or may not carry card_line).
+       On every wider screen the wrapper is `display:contents`, so the desktop
+       column is byte-for-byte the previous one. */}}
   <a class="rub2" href="{{ $sec.RelPermalink }}">
     <span class="r-logo" data-logo="{{ $id }}">{{ partial $logoPartial $sec }}</span>
-    <span class="r-t">{{ $sec.Title }}</span>
-    {{ with $sec.Params.card_line }}<span class="r-d">{{ . }}</span>{{ end }}
-    {{/* Count line only when the rubric has guides (with series → "N guides · M
-         series", else "N deep dives"); an empty rubric shows a muted "in the
-         works" rather than a meaningless "0 deep dives". */}}
-    {{ if gt $nGuides 0 }}<span class="r-n">{{ if gt $nSeries 0 }}{{ i18n "guides_count" $nGuides }} · {{ i18n "series_count" $nSeries }}{{ else }}{{ i18n "reviews_count" $nGuides }}{{ end }}</span>{{ else }}<span class="r-n r-n-empty">{{ i18n "rubric_empty" }}</span>{{ end }}
+    <span class="r-txt">
+      <span class="r-t">{{ $sec.Title }}</span>
+      {{ with $sec.Params.card_line }}<span class="r-d">{{ . }}</span>{{ end }}
+      {{/* Count line only when the rubric has guides (with series → "N guides · M
+           series", else "N deep dives"); an empty rubric shows a muted "in the
+           works" rather than a meaningless "0 deep dives". */}}
+      {{ if gt $nGuides 0 }}<span class="r-n">{{ if gt $nSeries 0 }}{{ i18n "guides_count" $nGuides }} · {{ i18n "series_count" $nSeries }}{{ else }}{{ i18n "reviews_count" $nGuides }}{{ end }}</span>{{ else }}<span class="r-n r-n-empty">{{ i18n "rubric_empty" }}</span>{{ end }}
+    </span>
   </a>
   {{- end }}
 {{- end }}

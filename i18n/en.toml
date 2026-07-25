@@ -5,6 +5,9 @@
 other = "home"
 [nav_rubrics]
 other = "Rubrics"
+# accessible name of the burger that carries the rubric nav on a narrow screen
+[nav_menu]
+other = "Sections menu"
 [search]
 other = "Search"
 [repo_link]

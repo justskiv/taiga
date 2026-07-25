@@ -23,8 +23,14 @@
   -webkit-tap-highlight-color:transparent;
   /* the row is a control, not prose: never let a click turn into a text
      selection (or a double-click into a word-select) — that is what silently
-     eats the toggle and makes it "sometimes not open". */
-  user-select:none; -webkit-user-select:none;
+     eats the toggle and makes it "sometimes not open". Touch has the same
+     problem one level down: a browser holds every tap on a normal element for
+     ~300ms to see whether a second one follows, and treats that pair as
+     zoom-to-fit — so opening and closing the panel twice in a row zooms the
+     page instead. `manipulation` opts this row out of double-tap zoom (and of
+     the delay with it); panning and pinch-zoom, which belong to the page, are
+     untouched. */
+  user-select:none; -webkit-user-select:none; touch-action:manipulation;
   transition:background var(--dur) var(--ease)}
 .fold summary::-webkit-details-marker{display:none}
 /* comfort hover over the whole hit zone — a faint, theme-adaptive tint (the
@@ -67,4 +73,42 @@
 }
 @media (max-width:640px){
   .fold-body{padding-left:27px}
+}
+
+/* phone — the summary stops being a line and becomes a paragraph ------------
+   Everything above assumes the summary is ONE line: with align-items:center a
+   single line puts icon, text and toggle on the same optical axis for free. As
+   soon as the title wraps that assumption inverts and the row falls apart —
+   the icon drifts to the vertical middle of the paragraph although its job is
+   to mark where the text STARTS, and the toggle floats beside that same
+   midpoint with nothing to relate to. On top of that the toggle keeps
+   reserving its ~100px on the right whatever the viewport, so the measure is
+   dictated by a label rather than by the screen (at 390px: 227px of text in a
+   358px column — three words per line, four lines deep).
+
+   So on a phone the row is re-laid as a two-row grid: the icon keeps company
+   with the first line, the title owns the full width, and the toggle moves
+   under the text. The 9px column gap is not arbitrary — 18px icon + 9px lands
+   the text column on 27px, which is exactly the .fold-body indent above, so
+   title, toggle and the revealed body all share one left edge. Deliberately
+   unconditional rather than a flex-wrap that drops the toggle only when it
+   stops fitting: at these widths a title of any substance wraps anyway, and a
+   fixed geometry cannot flip between two layouts on a one-word edit. */
+@media (max-width:560px){
+  .fold summary{display:grid; grid-template-columns:auto 1fr;
+    column-gap:9px; row-gap:3px; align-items:start}
+  /* optical, not geometric: the grid would sit the 18px glyph on the TOP edge
+     of the 22.5px first line box; half the 4.5px difference centres it on that
+     line, which is what the eye reads as "aligned with the first line" */
+  .fold-ic{margin-top:2px}
+  .fold-title, .fold-toggle{grid-column:2}
+  /* a grid item stretches by default, so the toggle box would silently span the
+     whole column — invisible today (it has no background), a trap the moment
+     anyone gives it one, or a focus ring */
+  .fold-toggle{justify-self:start}
+  /* icon="none": no first column to reserve, so the text column starts at 0
+     and the body indent follows it (see below) */
+  .fold summary:not(:has(.fold-ic)){grid-template-columns:1fr}
+  .fold summary:not(:has(.fold-ic)) :is(.fold-title, .fold-toggle){grid-column:1}
+  .fold:not(:has(.fold-ic)) .fold-body{padding-left:0}
 }

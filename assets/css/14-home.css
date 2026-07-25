@@ -16,6 +16,9 @@
   font-family:var(--font-mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted)}
 .hero-line .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent-glow); flex:0 0 auto}
 .hero-line .sat{color:var(--text-secondary)}
+/* the separator carries its own space: it was lifted out of the param's text
+   (see home.html), so the space that used to follow it in the string is gone */
+.hero-line .sat-sep{margin-right:.5ch}
 
 /* ---- home: hero zone background markup (params.home.grid) ----
    A full-bleed layer confined to the hero zone (heading + kicker + cards,
@@ -72,8 +75,9 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
 .hh-mascot svg{display:block; height:96px; width:auto}
 .hero-head + .hero-line{justify-content:center; padding:18px 0 4px}
 .hero-head ~ .rubs2{margin-top:38px}
-/* narrow screens: the mark and the mascot shrink together so the heading row
-   never overflows a 390px viewport */
+/* Narrow screens keep the same scene at a smaller size; the rest of the phone
+   layout — kicker, rubric rows, rhythm — lives in one block at the end of this
+   file, so the whole small-screen composition can be read in one place. */
 @media(max-width:560px){
   .hh-inner{gap:14px}
   .hh-mark{font-size:clamp(30px, 9.6vw, 42px)}
@@ -88,6 +92,10 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
   background:var(--bg-surface);
   color:var(--text-primary); overflow:hidden;
   transition:border-color var(--dur) var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease)}
+/* The text wrapper is inert here: the three lines stay direct children of the
+   card's own column. It only becomes a box on a phone, where the card turns
+   into a row (see the phone block at the end of this file). */
+.rub2 .r-txt{display:contents}
 /* hover lifts the SIGN, not the card — attention lands where the meaning is */
 .rub2:hover{border-color:color-mix(in srgb, var(--accent) 45%, var(--border));
   box-shadow:0 20px 44px -20px rgba(0,0,0,.6)}
@@ -158,10 +166,18 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
 .post{padding:26px 2px 28px; border-bottom:1px solid var(--border)}
 .post:last-child{border-bottom:0}
 .post .p-m{display:flex; flex-wrap:wrap; align-items:center; row-gap:9px; column-gap:11px; font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted); margin-bottom:15px}
-.post .p-m > *{display:inline-flex; align-items:center; line-height:1}
+/* every leaf of the row, whether it sits in the row itself or in a group — the
+   cut below is a flex item of the thing it trails, and on an inline box it has
+   no box to be sized in */
+.post .p-m > *, .post .p-m .p-g > *{display:inline-flex; align-items:center; line-height:1}
 /* the cut sits INSIDE the item it follows, offset by the column gap, so the
    space reads the same on both of its sides */
 .post .p-m .p-cut::after{content:""; flex:0 0 auto; width:1px; height:11px; margin-left:11px; background:var(--border)}
+/* a group (post.html) carries the same gap the row does, so an item inside one
+   is spaced exactly like an item that is not — the grouping is a wrapping
+   instruction, not a look. It may still wrap inside itself if a rubric and a
+   series name together outrun the card; that is a soft landing, not a layout. */
+.post .p-m .p-g{flex-wrap:wrap; column-gap:11px; row-gap:9px}
 .post .p-m a{border:0; transition:color var(--dur) var(--ease)}
 .post .p-m a.pr{color:var(--accent)}
 .post .p-m a.pr:hover{color:var(--accent-gold)}
@@ -171,7 +187,20 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
    the gap has to be drawn, not typed */
 .post .p-tags{margin-left:auto; letter-spacing:.02em}
 .post .p-tags a + a{margin-left:7px}
-@media(max-width:640px){ .post .p-tags{margin-left:0; width:100%} }
+/* On a phone the row cannot hold five items, so it is not asked to pretend:
+   each group takes a line of its own, and the tags — which lost their
+   margin-left:auto with the row that justified them — take a third. Rows the
+   width decides are ragged; rows the meaning decides are not.
+   A trailing cut that ends a line is a separator with nothing on its far side,
+   so the last item of a group drops it. It is safe to drop unconditionally
+   here: the groups are full-width, so that item always ends the line. The tags
+   sit a little further down than the two lines sit from each other — they
+   answer a different question than "what is this, and how long". */
+@media(max-width:640px){
+  .post .p-m > .p-g{flex-basis:100%}
+  .post .p-m .p-g > :last-child::after{display:none}
+  .post .p-tags{margin-left:0; width:100%; margin-top:4px}
+}
 .post .p-tags a{color:var(--text-muted); border:0; transition:color var(--dur) var(--ease)}
 .post .p-tags a:hover{color:var(--accent)}
 .post .p-t{margin:0; padding:0; border:0; font-size:18.5px; font-weight:650; letter-spacing:-.01em; line-height:1.3}
@@ -244,7 +273,11 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
   .post .p-cover img{transition:none}
   .post .p-cover:hover img{transform:none}
 }
-@media (max-width:640px){ :root{--feed-cover-ratio:2.2 / 1} }
+/* One ratio at every width, and no narrow-screen override. A taller band there
+   (it was 2.2/1) is taller RELATIVE TO ITS WIDTH, so object-fit paid for the
+   extra height by eating ~13% off each side of a 3:1 drawing — on the phone,
+   where the picture is already smallest, it lost the labels sitting at its
+   edges. Keeping 3/1 shows the whole cover and takes ~45px off the card. */
 /* The tail link is a link, not a button: no frame, no fill. It only grew a
    size (12 → 13.5px) so it stops reading as one more meta chip. At rest it
    carries no rule — the underline belongs to hover, and to the WORD: it is set
@@ -283,3 +316,70 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
 [data-scheme="light"] .sec-h a{color:var(--text-secondary)}
 [data-scheme="light"] .post .p-m{color:var(--text-secondary)}
 [data-scheme="light"] .post .p-tags a{color:var(--text-secondary)}
+
+/* ---- home on one column (<=880px): rubrics become rows, not towers ----
+   The showcase is a three-column composition, and its vertical budget is
+   generous BECAUSE the three cards spend it side by side: scene, kicker and
+   all three rubrics land on one screen, with the feed right under them. Below
+   880px the grid drops to a single column (see .rubs2 above) and that same
+   budget turns into ~290px per rubric — three full-height glyph towers the
+   reader has to thumb past before the first guide title appears. That is what
+   made the page read as broken on a phone rather than as spacious.
+
+   The fix is a different composition, not a smaller copy of the wide one: the
+   glyph keeps being the card's hero but moves to the LEFT of its words, and
+   the three text lines stack beside it. Same information, ~110px per rubric
+   instead of ~290px, and the whole row is one comfortable tap target. The
+   text also returns to the reading edge — centred text beside a left-hand
+   glyph has no axis to sit on. */
+@media(max-width:880px){
+  .rubs2{gap:4px}
+  .rub2{display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center;
+    column-gap:20px; row-gap:0; text-align:left; padding:16px 6px}
+  .rub2 .r-txt{display:flex; flex-direction:column; gap:3px; min-width:0}
+  .rubs2-naked .rub2 .r-logo,
+  .rub2 .r-logo{width:72px; height:72px; margin-bottom:0; flex:0 0 auto}
+  /* the counter is the row's caption, not a call to action of its own: the
+     wide card's 14px lift would break the text column's tight rhythm */
+  .rub2 .r-n{margin-top:5px}
+  /* a row is wide and short — the column lift reads as a twitch on it, and a
+     touch screen has no hover state to undo it with */
+  .rubs2-naked .rub2:hover{transform:none}
+}
+
+/* ---- home on a phone (<=560px): tighten the scene's own rhythm ----
+   The rows above already bought back most of the screen; what is left is the
+   air the wide scene is built on. 56px of nothing under a 60px sticky header
+   is a lot of empty phone, the glyph can lose a step, and the kicker needs to
+   own its second line. */
+@media(max-width:560px){
+  .hero-head{padding-top:30px}
+  .hh-inner{gap:12px}
+  .hh-mascot svg{height:60px}
+  /* The kicker becomes two lines on purpose instead of two lines by accident.
+     A wrapped flex row would centre each line on its own, and the first line
+     carries the accent dot — so the two phrases would sit on two different
+     axes, off by the dot's width. A two-column grid instead HANGS the dot in
+     its own column and lets both phrases share the second one: they start on
+     the same vertical, the pair is centred as a block, and the dot marks the
+     kicker without pushing it around. The middle text node of .hero-line is an
+     anonymous grid item, which is why only the dot and .sat are placed by hand.
+     The leading "·" of the clause goes: at the head of a line it divides
+     nothing. */
+  .hero-head + .hero-line{display:grid; grid-template-columns:auto auto;
+    justify-content:center; align-items:center; column-gap:9px; row-gap:5px;
+    padding:16px 0 0}
+  .hero-head + .hero-line .dot{grid-column:1; grid-row:1}
+  .hero-head + .hero-line .sat{grid-column:2; grid-row:2; justify-self:start}
+  .hero-line .sat-sep{display:none}
+  .hero-head ~ .rubs2{margin-top:26px}
+  /* every pixel the row does not spend on padding or on the gutter goes to the
+     text column: at 360px the subtopics line ("memory · scheduler · GC") is
+     within a few characters of wrapping, and a wrap there leaves a separator
+     dangling at the end of the line */
+  .rub2{padding:14px 2px; column-gap:16px}
+  .rubs2-naked .rub2 .r-logo,
+  .rub2 .r-logo{width:64px; height:64px}
+  .rub2 .r-t{font-size:18px}
+  .rub2 .r-d{font-size:11px}
+}

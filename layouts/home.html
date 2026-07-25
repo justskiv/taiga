@@ -16,10 +16,23 @@
   {{ partial "home/hero.html" . }}
   {{- end }}
 
+  {{- /* heroSat is authored WITH its leading separator ("· and so on") — that
+         is the documented shape of the param and it stays that way. The
+         separator is only lifted out of the string into its own span so CSS
+         can reach it: once the line wraps (a phone always wraps it), a "·"
+         sitting at the head of the second line is a divider with nothing left
+         to divide, and it has to go. A heroSat written without a separator
+         falls through untouched. */ -}}
+  {{- $sep := "" -}}
+  {{- $sat := site.Params.heroSat -}}
+  {{- with findRESubmatch `^\s*([·•‧∙|/—–-])\s*(.*)$` $sat -}}
+    {{- $sep = index (index . 0) 1 -}}
+    {{- $sat = index (index . 0) 2 -}}
+  {{- end }}
   <div class="hero-line">
     <span class="dot"></span>
     {{ site.Params.heroLine }}
-    <span class="sat">{{ site.Params.heroSat }}</span>
+    <span class="sat">{{ with $sep }}<span class="sat-sep" aria-hidden="true">{{ . }}</span>{{ end }}{{ $sat }}</span>
   </div>
 
   {{ partial "home/rubric-cards.html" . }}

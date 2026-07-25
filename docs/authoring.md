@@ -195,6 +195,10 @@ for an aside the reader can take or skip: a video version, a caveat, a full
 listing. The body is Markdown, and `title=` is inline Markdown — a link in
 the summary works, and clicking it does not toggle the panel.
 
+On a phone (≤560px) that single line becomes two: the title takes the whole
+width and the toggle moves under it, so a long summary is not squeezed into
+three-word lines by a label standing next to it.
+
 ```md
 {{</* fold icon="video" title="There is also a [video version](https://youtu.be/…)." */>}}
 Watch first, then read to cement it — some things land better on screen,

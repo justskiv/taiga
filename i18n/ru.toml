@@ -5,6 +5,9 @@
 other = "на главную"
 [nav_rubrics]
 other = "Рубрики"
+# accessible name of the burger that carries the rubric nav on a narrow screen
+[nav_menu]
+other = "Меню разделов"
 [search]
 other = "Поиск"
 [repo_link]

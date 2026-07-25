@@ -7,8 +7,44 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ## [Unreleased]
 
+### Added
+
+- **The header collapses into a disclosure menu below 900px.** The rubric links
+  and the round buttons stopped fitting one row at ~845px (~897px on an article,
+  which adds the focus toggle), so the links were being cut off rather than
+  wrapped. They now live behind a burger that keeps its place in the row, right
+  after the brand. Above the breakpoint the whole mechanism is inert —
+  `display:contents` on the wrapper — so a wide header renders exactly as
+  before. Esc, an outside click, focus leaving the panel, a >24px scroll and a
+  resize past the breakpoint all close it; `aria-expanded`/`aria-controls` and
+  the new `nav_menu` string carry it to assistive tech. Below 560px the source
+  link joins the menu as a labelled row; the feed icon stays in the row, where
+  a reader of a guides site looks for it.
+
 ### Changed
 
+- **The home page is composed for a phone, not merely stacked onto one.** The
+  rubric showcase spends its vertical budget freely because it spends it in
+  three columns; dropped to one column that budget became ~290px per rubric, so
+  a reader thumbed past three full-height glyph towers before the first guide
+  title. Below 880px — the width where the grid collapses anyway — each rubric
+  is a ROW instead: the glyph keeps being the card's hero but moves left of its
+  words, and the three text lines stack beside it. Same information, ~110px per
+  rubric, and the whole row is one tap target. The hero scene loses the desktop
+  air above it, and the kicker's trailing clause takes a line of its own with
+  its leading separator dropped — a "·" at the head of a line divides nothing.
+- **The footer becomes a signature and a navigation instead of three grey
+  lines.** Stacked into a column, brand, tagline and links all read at the same
+  weight, so nothing said which of them could be clicked. The mark now leads at
+  15px with the tagline bound to it, the links are set in the mono face the
+  theme reserves for service rows, and all the air goes between the two groups.
+  Each link is padded to a 43px touch target, and the plank gained a floor —
+  the old 32px left the last line sitting on the edge of the screen.
+- **The focus toggle is dropped below 560px.** It hides the header and both
+  rails to leave the text alone on a wide canvas: a phone has neither rails nor
+  an F key to toggle it back, so the button spent a slot in a row that has none
+  to spare. `display:none` takes it out of the tab order too — an inert control
+  is worse than a missing one.
 - **The Light palette is rebuilt.** Four accents — `--accent-green`,
   `--accent-blue`, `--accent-gold`, `--accent-copper` — had been the dark
   palettes' values byte for byte, and lost 63-82% of their presence on a white
@@ -61,6 +97,26 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **A feed card's cover was cropped on a phone.** The banner ratio tightened to
+  `2.2 / 1` below 640px, and since covers are drawn at 3:1 `object-fit: cover`
+  then ate 26.6% of the picture off its sides. The mobile override is gone: one
+  ratio everywhere shows the whole cover and makes the card 41px shorter.
+- **The feed meta row left a hairline cut dangling at the end of a wrapped
+  line.** The row now breaks at a seam rather than wherever it runs out of
+  width: rubric with series, then reading time with date, each group taking a
+  full basis on a narrow screen, so the separator of a group's last item can be
+  dropped unconditionally.
+- **A fold's icon sat against the middle of a multi-line summary.** On a narrow
+  screen the row is a two-row grid now, so the icon catches the FIRST line of
+  the title, the title takes the full width, and the toggle drops to the body's
+  own left edge instead of squeezing the text into a third of the panel.
+- **A double tap on a fold's summary zoomed the page.** A tap on an ordinary
+  element is held ~300ms in case a second one follows, and the pair means
+  zoom-to-fit — so opening and closing a panel twice ran the gesture. The row
+  is `touch-action: manipulation`; panning and pinch-zoom are untouched.
+- **The series bridge advertised "~0 min left".** When everything ahead is an
+  announced part it carries no reading time, and the sum was printed anyway.
+  The clause is dropped in that case, the same guard the next-part chip has.
 - **The `.byte-box` value swatches went unreadable on light palettes.** Their
   ink is a fixed near-black, which assumes a light mid-tone fill — true of every
   dark palette, but not of a light one whose accents must be dark to work as

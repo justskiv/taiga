@@ -52,12 +52,19 @@
        the cover above. `p-cut` asks for the hairline that separates an item
        from the next one; it is a trailing pseudo-element, so on a wrapped row
        it stays with the item that ends the line instead of opening the next
-       one. The last item before the tags does not carry it. */ -}}
-<div class="p-m"><a class="pr p-cut" href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
+       one. The last item before the tags does not carry it.
+
+       The two `p-g` wrappers are what the row wraps AT. Left flat, the five
+       items break wherever they happen to run out of width, which strands one
+       of them — usually the date — alone on a line of its own. Grouped, the
+       break can only fall between "what this is" and "how big / when", the
+       same seam the reader already sees; on a wide card the groups sit in one
+       row and nothing about it changes. */ -}}
+<div class="p-m"><span class="p-g"><a class="pr p-cut" href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
 {{- if $s.isSeries }}<a class="ps p-cut" href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>
-{{- else }}<span class="p-cut">{{ i18n "kicker_standalone" }}</span>{{ end }}
-{{- "" -}}<span class="p-cut">{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</span>
-{{- "" -}}<span>{{ partial "date.html" .Date }}</span>
+{{- else }}<span class="p-cut">{{ i18n "kicker_standalone" }}</span>{{ end }}</span>
+{{- "" -}}<span class="p-g"><span class="p-cut">{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</span>
+{{- "" -}}<span>{{ partial "date.html" .Date }}</span></span>
 {{- with $tags }}<span class="p-tags">{{ $tagsURL := "tags/" | relLangURL }}{{ range $i, $t := . }}{{ if $i }} {{ end }}<a href="{{ $tagsURL }}#{{ $t }}">#{{ $t }}</a>{{ end }}</span>{{ end -}}
 </div>
 <h3 class="p-t"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>

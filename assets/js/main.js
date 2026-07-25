@@ -6,6 +6,7 @@
 import { buildPopover } from './modules/popover.js';
 import { mountFocusBtn } from './modules/focus.js';
 import { bindHeader } from './modules/header.js';
+import { bindNavMenu } from './modules/navmenu.js';
 import { markVisited } from './modules/visited.js';
 import { buildToc } from './modules/toc.js';
 import { bindRails } from './modules/rails.js';
@@ -46,6 +47,7 @@ onReady(function () {
   if (mount) buildPopover(mount);
   mountFocusBtn();
   bindHeader();
+  bindNavMenu();   /* narrow screens only: self-guards on .nav-wrap/.nav-btn */
   markVisited();   /* before the minimaps: dots read .is-visited/.cur */
   buildToc();
   bindRails();
