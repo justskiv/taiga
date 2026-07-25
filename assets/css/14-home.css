@@ -178,6 +178,78 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
 .post .p-t a{color:var(--text-primary); border:0; transition:color var(--dur) var(--ease)}
 .post .p-t a:hover{color:var(--accent)}
 .post .p-s{display:block; margin:5px 0 0; font-size:14px; color:var(--text-secondary); line-height:1.6; max-width:72ch}
+/* ---- feed: long previews (params.home.feedPreview = "summary") ----
+   .p-lead is the article's own lead (rendered .Summary, see post.html) with a
+   quiet "read →" tail. .feed-long narrows the column so the 15px lead holds a
+   ~75-char measure; the title gains 2px to keep dominating the bigger mass.
+   The narrowed column is CENTRED: left in the flow it flushes to the shell's
+   left edge and leaves ~360px of dead space on the right, which reads as a
+   broken layout rather than as margin — the more so under a centred hero. The
+   heading above it (a sibling, hence :has) takes the same measure so the two
+   share their edges. */
+:root{--feed-measure:740px}
+/* the feed opens on a rule, not a heading — centred, fading out at both ends.
+   It also carries the vertical break the heading used to hold: without it the
+   tiles above would sit straight on the first card. */
+/* the margins look lopsided if taken literally: the tiles end on 24px of card
+   padding, so the same number reads bigger above the rule than below it. These
+   two are tuned to the INK — from the counter line above, to the meta line
+   below — not to the boxes. */
+.feed-sep{height:1px; margin:30px auto 34px;
+  background:linear-gradient(90deg, transparent, var(--border) 16%, var(--border) 84%, transparent)}
+.feed-sep:has(+ .feed-long){max-width:var(--feed-measure)}
+.feed-long{max-width:var(--feed-measure); margin-inline:auto}
+.sec-h:has(+ .feed-long){max-width:var(--feed-measure); margin-inline:auto}
+.feed-long .p-t{font-size:20px}
+.p-lead p{margin:7px 0 0; font-size:15px; line-height:1.66; color:var(--text-secondary); max-width:74ch}
+.p-lead code{font-family:var(--font-mono); font-size:.84em; padding:1px 5px; border-radius:5px;
+  background:color-mix(in srgb, var(--text-primary) 9%, transparent)}
+/* An article that opens with a cover brings it into the feed. The image hook
+   stamps intrinsic width/height, so it must be fitted to the column here or it
+   blows the layout open. Same for anything else a lead can carry. */
+.p-lead img, .p-lead svg{display:block; max-width:100%; height:auto; margin:11px 0 4px;
+  border-radius:10px; border:1px solid var(--border)}
+.p-lead .figure{display:block}
+.p-lead .figcaption{display:block; margin:2px 0 0; font-size:12px; color:var(--text-muted)}
+.p-lead pre, .p-lead table{display:block; max-width:100%; overflow-x:auto}
+/* ---- feed: banner cover (params.home.feedCover = "banner") ----
+   A card that has a picture wears it as a band across the top, above the meta
+   line — the card's roof, not an illustration wedged into the prose. The frame
+   owns the shape: `aspect-ratio` reserves the box before the file arrives (no
+   layout shift on a lazy image), and the image fills it with object-fit, so a
+   portrait screenshot and a wide diagram produce the SAME band. A site that
+   wants a different band retunes one variable, and the templates never learn
+   about it — which is why the crop is here and not baked into the file.
+   On hover the image scales INSIDE the frame: overflow is hidden and only the
+   <img> transforms, so the card's edges — and the text below them — never
+   move. Touch devices have no hover to undo, so (hover:hover) gates the zoom
+   the same way it gates the dimming in 03-typography.css. */
+:root{--feed-cover-ratio:3 / 1}
+.post .p-cover{display:block; overflow:hidden; border:1px solid var(--border); border-radius:var(--radius);
+  aspect-ratio:var(--feed-cover-ratio); margin:0 0 18px; background:var(--bg-surface)}
+.post .p-cover img{display:block; width:100%; height:100%; object-fit:cover; margin:0; border:0; border-radius:0;
+  transition:transform .32s var(--ease), filter .32s ease-out}
+@media (hover:hover){ .post .p-cover:hover img{transform:scale(1.04)} }
+@media (prefers-reduced-motion:reduce){
+  .post .p-cover img{transition:none}
+  .post .p-cover:hover img{transform:none}
+}
+@media (max-width:640px){ :root{--feed-cover-ratio:2.2 / 1} }
+/* The tail link is a link, not a button: no frame, no fill. It only grew a
+   size (12 → 13.5px) so it stops reading as one more meta chip. At rest it
+   carries no rule — the underline belongs to hover, and to the WORD: it is set
+   on the inner span because a decoration on the <a> propagates to the arrow
+   too. The arrow is the one moving part. */
+.p-more-w{margin:16px 0 0}
+.p-more{display:inline-flex; align-items:baseline; gap:7px; font-family:var(--font-mono);
+  font-size:13.5px; color:var(--accent); border:0}
+.p-more .tx{text-decoration-line:underline; text-decoration-thickness:1px;
+  text-decoration-color:transparent; text-underline-offset:4px;
+  transition:text-decoration-color var(--dur) var(--ease)}
+.p-more:hover .tx{text-decoration-color:var(--accent)}
+.p-more .ar{display:inline-block; transition:transform .18s var(--ease)}
+.p-more:hover .ar{transform:translateX(3px)}
+@media (prefers-reduced-motion:reduce){ .p-more:hover .ar{transform:none} }
 .feed-more[hidden]{display:none}
 .feed-btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
   margin:6px 0 0; padding:12px; background:none; border:0; border-radius:10px;
