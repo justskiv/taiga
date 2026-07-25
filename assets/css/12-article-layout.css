@@ -181,7 +181,13 @@ html.focus .site-head, html.focus .rail{display:none !important}
 .focus-exit-tip .kb{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--border))}
 .focus-exit:hover .focus-exit-tip, .focus-exit:focus-visible .focus-exit-tip{opacity:1; transform:translateY(-50%) translateX(0)}
 @media(max-width:1365.9px){
-  .layout{display:block; max-width:none; padding:0}
+  /* max-width:100% (not none): body is a flex column, so .layout is a flex item.
+     Left uncapped, its cross-size resolves to min-content — and one wide,
+     incompressible descendant (a data table, a fixed diagram) then stretches the
+     item past the viewport, giving the whole page a horizontal scroll on phones.
+     Capping at 100% pins it to the viewport; wide children stay contained and
+     scroll inside their own box (.tbl-wrap) or scale to fit. */
+  .layout{display:block; max-width:100%; padding:0}
   .layout > .wrap{max-width:var(--content); margin:0 auto; padding:48px 24px 96px}
 }
 @media(max-width:640px){ .layout > .wrap{padding:32px 16px 64px} }
