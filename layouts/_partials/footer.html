@@ -7,6 +7,9 @@
     <span class="foot-tag">{{ site.Params.footerTag }}</span>
     <span class="foot-links">
       {{- range site.Menus.footer }}
+      {{- /* devOnly items (a dev-only section) show on the dev server but are
+             dropped from every production build — same convention as the header. */ -}}
+      {{- if and .Params.devOnly hugo.IsProduction }}{{ continue }}{{ end }}
       <a href="{{ .URL }}">{{ .Name }}</a>
       {{- end }}
       <a href="{{ "index.xml" | relLangURL }}">{{ i18n "foot_rss" }}</a>
