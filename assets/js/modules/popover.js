@@ -1,6 +1,6 @@
-/* Theme + view popover, mounted into #tp-mount in the header. The theme list
-   comes from the JSON the palettes partial emits (#dg-themes) — JS knows only
-   names and swatch colors, never palette values. */
+/* Palette popover, mounted into #tp-mount in the header. The list comes from
+   the JSON the palettes partial emits (#dg-themes) — JS knows only ids, names,
+   group labels and four swatch colors, never palette values. */
 import { I18N } from './i18n.js';
 import { curTheme, setTheme } from './view.js';
 
@@ -8,6 +8,15 @@ function themes() {
   const el = document.getElementById('dg-themes');
   if (!el) return [];
   try { return JSON.parse(el.textContent) || []; } catch (e) { return []; }
+}
+
+/* A swatch is the palette drawn as a tiny page: the canvas, a card on it, and
+   two lines of text over the card. Colors ride in as custom properties so the
+   CSS owns every dimension — the JSON stays a list of four hex values. */
+function swatch(sw) {
+  return '<span class="tp-sw" aria-hidden="true" style="--sw-bg:' + sw[0] +
+    ';--sw-card:' + sw[1] + ';--sw-tx:' + sw[2] + ';--sw-mu:' + sw[3] + '">' +
+    '<i class="tp-sw-h"></i><i class="tp-sw-t"></i><i class="tp-sw-s"></i></span>';
 }
 
 export function buildPopover(mount) {
@@ -26,20 +35,32 @@ export function buildPopover(mount) {
   pop.appendChild(head);
   const listEl = document.createElement('div'); listEl.className = 'tp-list'; pop.appendChild(listEl);
 
+  /* Groups come out of the data as labels, not ids: a new block opens whenever
+     the label changes down the (weight-sorted) list. Palettes without a group
+     collect in an unlabelled block, which is what a site that never sets the
+     key gets — the old flat list. */
   const itemEls = [];
+  let box = null, boxLabel = null, gid = 0;
   list.forEach(function (t) {
-    const sw = t.sw || [];
+    const label = t.group || '';
+    if (!box || label !== boxLabel) {
+      boxLabel = label;
+      box = document.createElement('div'); box.className = 'tp-grp';
+      if (label) {
+        const lab = document.createElement('div');
+        lab.className = 'tp-glab'; lab.id = 'tp-g' + (gid++); lab.textContent = label;
+        box.setAttribute('role', 'group'); box.setAttribute('aria-labelledby', lab.id);
+        box.appendChild(lab);
+      }
+      listEl.appendChild(box);
+    }
     const it = document.createElement('button');
     it.type = 'button'; it.className = 'tp-item'; it.setAttribute('role', 'menuitemradio');
-    it.innerHTML = '<span class="tp-sw" style="background:' + sw[0] + '">' +
-        '<i style="background:' + sw[1] + '"></i>' +
-        '<i style="background:' + sw[2] + '"></i>' +
-        '<i style="background:' + sw[3] + '"></i>' +
-        '<i class="tp-acc"></i></span>' +
+    it.innerHTML = swatch(t.sw || []) +
       '<span class="tp-name">' + t.name + '</span>' +
       '<span class="tp-check" aria-hidden="true">✓</span>';
     it.addEventListener('click', function () { setTheme(t.id); mark(); });
-    it._id = t.id; listEl.appendChild(it); itemEls.push(it);
+    it._id = t.id; box.appendChild(it); itemEls.push(it);
   });
   function mark() {
     const cur = curTheme();

@@ -78,6 +78,7 @@ variables (keys = CSS variable names without the `--`):
 # data/themes/mine.toml
 name = "Mine"        # label in the picker
 weight = 25          # position in the picker
+group = "Originals"  # optional: the picker block it lands in
 "bg-base" = "#101418"
 "accent"  = "#7aa2f7"
 # … the rest of the keys as in data/themes/amber.toml
@@ -93,8 +94,23 @@ by language: `name = { en = "Mine", ru = "Моя" }`. The picker shows the curre
 language's entry and falls back to `en`. It lives in the palette file, not in
 `i18n/`, so a palette stays one self-contained file.
 
-The metadata keys — `name`, `weight`, `light`, `disabled` — are never emitted as
-CSS variables. Everything else in the file is.
+`group` is the block the palette lands in — the same shape as `name` (a plain
+string or a table of translations), and optional. The picker walks the
+weight-sorted list and opens a new labelled block whenever the label changes,
+so a group is nothing but "these palettes say the same thing" — there is no
+registry to declare and no order to keep in sync beyond the weights. Palettes
+without a `group` collect in an unlabelled block, which is what a site that
+never touches the key sees: one flat list, as before. The shipped palettes use
+three — *Originals*, *Classics*, *Light*.
+
+The metadata keys — `name`, `weight`, `group`, `light`, `disabled` — are never
+emitted as CSS variables. Everything else in the file is.
+
+The swatch in the picker is drawn from four keys — `bg-deep`, `bg-surface`,
+`text-primary`, `text-muted` — laid out as a miniature page: the reading
+canvas, a card on it, and the two text tones over the card. The accent is
+deliberately absent, because [`params.accent`](#recolour) paints it the same in
+every palette and a swatch carrying it would show one identical dot per row.
 
 `light = true` also stamps the root element with `data-scheme="light"` (any
 other palette yields `data-scheme="dark"`), so CSS can target all light
@@ -272,7 +288,7 @@ The JS names are **not** the i18n key names. The full contract:
 
 | JS key | i18n key | Where it shows |
 |---|---|---|
-| `themeHead` | `js_theme_head` | Popover: "Theme" heading |
+| `themeHead` | `js_theme_head` | Popover: "Palette" heading |
 | `viewHead` | `js_view_head` | Popover: "View" heading |
 | `railLeft` | `js_rail_left` | Popover: left rail toggle |
 | `railRight` | `js_rail_right` | Popover: right rail toggle |

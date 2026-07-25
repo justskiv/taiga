@@ -221,9 +221,9 @@ other = "Dec"
 # `js_` prefix marks exactly which keys leave the server.
 
 [js_theme_head]
-other = "Theme"
+other = "Palette"
 [js_popover_aria]
-other = "Theme and view"
+other = "Site palette"
 [js_pin_panel]
 other = "pin panel"
 [js_key_or]

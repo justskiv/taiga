@@ -1,5 +1,6 @@
 name = { en = "Lamp", ru = "Лампа" }
 weight = 20
+group = { en = "Originals", ru = "Свои" }
 
 # surface / text ramp (swapped per theme)
 "bg-deep" = "#16140f"

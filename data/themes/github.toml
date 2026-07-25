@@ -1,5 +1,6 @@
 name = "GitHub Dark"
 weight = 40
+group = { en = "Classics", ru = "Классика" }
 
 # surface / text ramp (swapped per theme)
 "bg-deep" = "#010409"

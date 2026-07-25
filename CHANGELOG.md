@@ -144,6 +144,29 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **The palette picker reads as a list of palettes again.** Three things had
+  quietly stopped working. The swatch was four 5px dots — three near-black
+  greys and an accent that `params.accent` paints identically in every palette,
+  so twelve rows looked like one row twelve times; it is a miniature page now
+  (canvas, a card on it, a heading and a body line over the card, from
+  `bg-deep` / `bg-surface` / `text-primary` / `text-muted`, no accent), and the
+  hue cast that actually separates Gruvbox from Nord has room to show. Every
+  dark canvas sits within a few points of `#141414`, so the temperature rides
+  almost entirely on the text tones — they get the area, and the frame is
+  tinted with the row's own text rather than the current palette's, which puts
+  a warm outline around a warm palette instead of two 2px lines. The flat
+  twelve-item list is grouped — new optional `group` key in a palette file,
+  same string-or-translations shape as `name`, shipped palettes split into
+  *Originals* / *Classics* / *Light*; a palette without one lands in an
+  unlabelled block, so a site that ignores the key keeps the old flat list.
+  The popover heading is "Palette", not "Theme" — `theme` in a Hugo project
+  already means the thing in `themes/`. `light = true` now carries the light
+  palette's badge on its own: the `☀` was dropped from the shipped palette's
+  name, where it was a label doing a flag's job. The popover also scrolls
+  instead of running off a short screen. "Coal" is **Onyx** now — a stone, like
+  its neighbour Graphite, instead of a fuel; the id stays `coal`, so a saved
+  preference and a site's `defaultTheme` keep pointing at it.
+
 - **The feed card's meta line got a hierarchy.** Five items at one size and one
   colour, split by a flat gap, read as a single grey smear — and the loudest of
   them (the tags) mattered least. The row is grouped now: rubric first as the
@@ -197,6 +220,21 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   search is always on and degrades to a hint when the index is missing.
 
 ### Fixed
+
+- **The header's frost cancelled every blur inside it.** `backdrop-filter` on
+  `.site-head` turns that box into a *backdrop root*, so the palette popover —
+  a child of the header — filtered an empty backdrop: its own `blur(14px)` did
+  nothing and the page showed through its 7% transparency perfectly sharp,
+  headlines and all. The header's frost moved to `.site-head::before`, which
+  leaves the header itself an ordinary box; as a bonus it is the arrangement
+  Firefox needs to stop rasterizing the header buttons together with the blur.
+
+- **The picker ticked the wrong palette on a first visit.** Nothing stamps
+  `data-theme` on `<html>` until the reader picks one, and with no saved
+  preference `curTheme()` fell back to a hardcoded `'amber'` — correct only for
+  a site whose `defaultTheme` happened to be amber, and silently wrong for
+  every other one. The default id now travels with the palette list
+  (`data-default` on the `#dg-themes` script).
 
 - **`partialCached` ignored the language.** The header was cached per section and
   the footer had no cache variant at all, so on a multilingual site `/howto/` and

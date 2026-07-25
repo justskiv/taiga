@@ -1,5 +1,6 @@
 name = "Tokyo Night"
 weight = 55
+group = { en = "Classics", ru = "Классика" }
 
 # surface / text ramp — popular blue-violet dark, comfortable (#1a1b26 / #a9b1d6
 # = ~8.1:1). The theme's very-dim comment grey (#565f89, 2.8:1) is too faint for a

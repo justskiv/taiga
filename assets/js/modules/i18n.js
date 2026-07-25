@@ -5,8 +5,8 @@
    site that replaced scripts.html). They are English because a fallback should
    read as a fallback, not as one particular site's language. */
 const DEFAULTS = {
-  themeHead: 'Theme',
-  popoverAria: 'Theme',
+  themeHead: 'Palette',
+  popoverAria: 'Site palette',
   pinPanel: 'pin panel',
   keyOr: 'or',
   focusEnter: '<kbd class="kb">F</kbd> leave focus',

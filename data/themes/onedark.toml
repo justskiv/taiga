@@ -1,5 +1,6 @@
 name = "One Dark"
 weight = 50
+group = { en = "Classics", ru = "Классика" }
 
 # surface / text ramp (swapped per theme)
 "bg-deep" = "#1a1e23"

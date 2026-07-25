@@ -1,5 +1,6 @@
 name = "Gruvbox"
 weight = 58
+group = { en = "Classics", ru = "Классика" }
 
 # surface / text ramp — warm retro classic; cream text on warm-grey (#282828 /
 # #ebdbb2 = ~10.8:1). Body is painted on --bg-deep = Gruvbox bg0 #282828.

@@ -1,5 +1,6 @@
 name = "Nord"
 weight = 60
+group = { en = "Classics", ru = "Классика" }
 
 # surface / text ramp (swapped per theme)
 "bg-deep" = "#292f3a"

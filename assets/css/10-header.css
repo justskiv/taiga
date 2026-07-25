@@ -51,8 +51,13 @@ kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); bo
 @media(max-width:720px){.search-btn{width:36px; padding:0; gap:0; justify-content:center} .search-btn .s-lab, .search-btn .kb{display:none} .search-btn svg{width:16px; height:16px} .head-in{gap:12px}}
 @media(prefers-reduced-motion:reduce){.search-btn{transition:none} .search-btn:active{transform:none}}
 /* header sticks, hides on scroll-down, slides back on scroll-up */
-.site-head{position:sticky; top:0; z-index:110;
+.site-head{position:sticky; top:0; z-index:110; transition:transform .24s var(--ease)}
+/* The frost lives on a pseudo-element, not on .site-head itself: backdrop-filter
+   turns its box into a backdrop root, and everything inside — the palette
+   popover — then filters an empty backdrop, i.e. shows the page through its own
+   transparency unblurred. Behind the content it also keeps Firefox from
+   rasterizing the header buttons together with the blur. */
+.site-head::before{content:''; position:absolute; inset:0; z-index:-1;
   background:color-mix(in srgb, var(--bg-deep) 88%, transparent);
-  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
-  transition:transform .24s var(--ease)}
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
 html.head-hidden .site-head{transform:translateY(-100%)}

@@ -1,5 +1,6 @@
 name = "GitHub Dimmed"
 weight = 42
+group = { en = "Classics", ru = "Классика" }
 
 # surface / text ramp — the COMFORTABLE GitHub (Primer "dark dimmed"): lifted off
 # the near-black default so long-form reading lands ~7.6:1 instead of the default

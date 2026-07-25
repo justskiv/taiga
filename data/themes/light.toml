@@ -1,6 +1,7 @@
-name = { en = "Light ☀", ru = "Белая ☀" }
+name = { en = "Light", ru = "Белая" }
 weight = 70
 light = true
+group = { en = "Light", ru = "Светлые" }
 
 # surface / text ramp (swapped per theme)
 "bg-deep" = "#f6f8fa"

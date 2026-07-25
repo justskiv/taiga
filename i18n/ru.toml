@@ -262,11 +262,11 @@ other = "дек"
 # window.THEME_I18N; modules/i18n.js merges it over its English defaults. The
 # `js_` prefix marks exactly which keys leave the server.
 
-# theme / view popover
+# palette popover
 [js_theme_head]
-other = "Тема"
+other = "Палитра"
 [js_popover_aria]
-other = "Тема и вид"
+other = "Палитра сайта"
 [js_pin_panel]
 other = "закрепить панель"
 [js_key_or]

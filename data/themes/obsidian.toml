@@ -1,5 +1,6 @@
 name = { en = "Graphite", ru = "Графит" }   # was "Obsidian"
 weight = 30
+group = { en = "Originals", ru = "Свои" }
 
 # surface / text ramp — neutral graphite reading theme, set to the AUTHENTIC
 # Obsidian "Minimal" (dark) default: canvas #262626 (Minimal --base-l 15%), body

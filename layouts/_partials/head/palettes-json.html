@@ -7,22 +7,42 @@
        shows the current language's entry and falls back to `en`. Kept in the
        data file, not i18n/: a palette stays one self-contained file, and a
        site's custom palette can't trip --printI18nWarnings over a key it never
-       declared. */ -}}
-{{- $skip := slice "name" "weight" "light" "disabled" -}}
+       declared. `group` has the same shape and the same reasoning: the picker
+       opens a new labelled block whenever the label changes down the sorted
+       list, so a group is just "these palettes say the same thing" — no
+       registry to keep in sync. A palette without a `group` lands in an
+       unlabelled block.
+
+       The four swatch colors describe the palette as a page: the canvas the
+       body is painted on, the surface a card sits on, and the two text tones
+       written over them — the axes that actually differ between palettes. The
+       accent stays out on purpose: params.accent repaints it identically
+       across every palette, so a swatch carrying it would show the reader the
+       same dot twelve times.
+
+       data-default carries the id of the palette rendered as `:root`. Nothing
+       stamps data-theme on <html> until the reader picks one, so this is how
+       the picker knows which row to check on a first visit. */ -}}
+{{- $lang := site.Language.Lang -}}
 {{- $list := slice -}}
 {{- range $id, $t := site.Data.themes -}}
   {{- if not $t.disabled -}}
     {{- $name := $t.name -}}
     {{- if reflect.IsMap $name -}}
-      {{- $name = index $name site.Language.Lang | default (index $name "en") -}}
+      {{- $name = index $name $lang | default (index $name "en") -}}
+    {{- end -}}
+    {{- $group := $t.group | default "" -}}
+    {{- if reflect.IsMap $group -}}
+      {{- $group = index $group $lang | default (index $group "en") -}}
     {{- end -}}
     {{- $list = $list | append (dict
         "id" $id
         "name" $name
+        "group" $group
         "weight" (or $t.weight 100)
         "light" ($t.light | default false)
-        "sw" (slice (index $t "bg-base") (index $t "bg-surface") (index $t "bg-raised") (index $t "text-primary"))) -}}
+        "sw" (slice (index $t "bg-deep") (index $t "bg-surface") (index $t "text-primary") (index $t "text-muted"))) -}}
   {{- end -}}
 {{- end -}}
 {{- $list = sort $list "weight" -}}
-<script type="application/json" id="dg-themes">{{ $list | jsonify | safeJS }}</script>
+<script type="application/json" id="dg-themes" data-default="{{ site.Params.defaultTheme | default "taiga" }}">{{ $list | jsonify | safeJS }}</script>

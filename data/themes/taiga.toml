@@ -1,5 +1,6 @@
 name = { en = "Taiga", ru = "Тайга" }
 weight = 5
+group = { en = "Originals", ru = "Свои" }
 
 # surface / text ramp (swapped per theme)
 # The theme's namesake palette: the cold blue-grey slate of a boreal forest in

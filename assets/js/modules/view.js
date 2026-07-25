@@ -7,7 +7,16 @@ import { store, read } from './store.js';
 const root = document.documentElement;
 const THEME_KEY = 'taiga.theme';
 
-export function curTheme() { return root.getAttribute('data-theme') || read(THEME_KEY) || 'amber'; }
+/* Nothing stamps data-theme until the reader picks a palette, so on a first
+   visit the current palette is the site's default — the id palettes-json.html
+   parks on the #dg-themes script. Guessing it wrongly here is not cosmetic:
+   the picker would tick a row the reader is not looking at. */
+export function curTheme() {
+  const stored = root.getAttribute('data-theme') || read(THEME_KEY);
+  if (stored) return stored;
+  const el = document.getElementById('dg-themes');
+  return (el && el.getAttribute('data-default')) || 'taiga';
+}
 
 /* light-palette ids come from the #dg-themes JSON (palettes-json.html emits a
    `light` flag per palette); lazily cached — the element exists by the time

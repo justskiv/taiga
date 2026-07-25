@@ -46,7 +46,7 @@ In the theme's prototype the palettes lived as a JS table: the "View" popover he
 
 ## The picker and its JSON {#picker-json}
 
-Where does the picker learn which palettes exist? From the same data: the partial puts a `<script type="application/json" id="dg-themes">` on the page with a list of `{id, name, weight, swatch colors}` — the swatches are taken from four fixed keys of the palette, so the thumbnail in the picker honestly shows the surfaces and the text to come. The popover in the header reads that list and draws the buttons. The widget below reads **the very same** list — and on a click sets the very same attribute:
+Where does the picker learn which palettes exist? From the same data: the partial puts a `<script type="application/json" id="dg-themes">` on the page with a list of `{id, name, group, weight, swatch colors}` — the swatches are taken from four fixed keys of the palette (`bg-deep`, `bg-surface`, `text-primary`, `text-muted`), so the thumbnail in the picker honestly shows the canvas, the card and the text to come. The popover in the header reads that list and draws the buttons. The widget below reads **the very same** list — and on a click sets the very same attribute:
 
 {{< widget id="w-palette" note="— repaint the page; the picker in the header does exactly the same, only it also remembers the choice" >}}
 <div class="w-cap">The swatches of every palette in the theme go here — clickable, with real switching. Turn JS on to repaint the page.</div>

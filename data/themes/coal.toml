@@ -1,5 +1,6 @@
-name = { en = "Coal", ru = "Уголь" }
-weight = 32
+name = { en = "Onyx", ru = "Оникс" }   # was "Coal"
+weight = 1
+group = { en = "Originals", ru = "Свои" }
 
 # surface / text ramp — the DEEP neutral, companion to Graphite (#262626).
 # Intentionally near-black for readers who want it darker; text is softened off
