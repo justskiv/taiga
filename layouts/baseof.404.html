@@ -1,0 +1,29 @@
+{{- /* Kind-specific base for the 404. Without it the 404 (a kind with no
+       [outputs] entry, so no strong output-format binding) resolves its base to
+       the more-specific baseof.preview.html — the bare, chrome-less shell of the
+       `preview` output format — and renders with no <head> and no CSS. A base
+       carrying the 404's own kind identifier outranks that format base and pulls
+       the 404 back onto the full page shell. Mirrors baseof.html; the body-class
+       logic there is a no-op for the 404, so this keeps only what the page needs
+       (and the same coming-soon gate, so stub builds still answer 404 with the
+       card). */ -}}
+{{- if site.Params.comingSoon.enable -}}
+{{- partial "coming-soon.html" . -}}
+{{- else -}}
+<!DOCTYPE html>
+{{- /* data-scheme as in baseof.html: CSS keyed on the palette's lightness must
+       find the flag here too, or the 404 renders as a light page in a dark
+       palette's clothes. */ -}}
+{{- $dt := site.Params.defaultTheme | default "taiga" -}}
+<html lang="{{ .Language.LanguageCode }}" data-theme="{{ $dt }}" data-scheme="{{ if (index site.Data.themes $dt).light }}light{{ else }}dark{{ end }}">
+<head>
+{{- partial "head.html" . -}}
+</head>
+<body>
+{{ partialCached "header.html" . .Language.Lang (or .Section .RelPermalink) (cond (gt (len site.Languages) 1) .RelPermalink "") }}
+{{ block "main" . }}{{ end }}
+{{ partialCached "footer.html" . .Language.Lang }}
+{{ partial "scripts.html" . }}
+</body>
+</html>
+{{- end -}}
