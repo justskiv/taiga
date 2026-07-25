@@ -64,6 +64,7 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `sub` | optional | Overrides the automatic `title` split. |
 | `intro` | optional | Markdown rendered between the meta chips and the TOC. |
 | `foot` | optional | Markdown rendered at the very bottom, below the series bridge. |
+| `mascot` | standalone only | Renders the site's `_partials/page/mascot.html` at the top of the page, with this value as the partial's context. No such partial on the site ⇒ nothing renders. |
 | `toc_labels` | optional | Map of heading id → short label, to shorten a long `h2` in the TOC: `toc_labels: {two-fields: "Two fields"}`. |
 | `draft` | optional | Standard Hugo. The archetype sets `draft: true`. |
 

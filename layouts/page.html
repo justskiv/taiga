@@ -64,7 +64,21 @@
   {{ partial "article/rail-right.html" . }}
 </div>
 {{- else -}}
-<main class="wrap">
+{{- /* Mascot slot for a standalone page: a site may ship _partials/page/mascot.html
+       (inline SVG artwork) and a page opts in with `mascot:` in front matter,
+       whose value reaches the partial as its context — so one drawing can serve
+       several pages, or several drawings one lookup. Same site-side pattern as
+       home/mascot.html and home/logos/<section>.html: the theme stays
+       subject-agnostic and owns no artwork.
+
+       BOTH conditions are checked. Without the templates.Exists guard a page
+       naming a mascot on a site that ships no partial fails the build, and the
+       .has-mascot hook — a site's handle for making .wrap a positioning context
+       — would be stamped for a mascot that never renders. No partial, or no
+       front-matter opt-in ⇒ no slot, and about/roadmap/lab stay plain. */ -}}
+{{- $mascot := and .Params.mascot (templates.Exists "_partials/page/mascot.html") -}}
+<main class="wrap{{ if $mascot }} has-mascot{{ end }}">
+  {{ if $mascot }}{{ partial "page/mascot.html" .Params.mascot }}{{ end }}
   {{ with .Params.kicker }}<div class="kicker"><span class="dot"></span>{{ . }}</div>{{ end }}
   <h1 data-pagefind-meta="title">{{ .Params.headline | default $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
   {{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
