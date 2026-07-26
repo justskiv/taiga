@@ -57,7 +57,7 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `interactive_label` | optional | Label for that chip; defaults to the i18n `meta_interactive`. |
 | `rail_title` | optional | Short label for the left rail, the minimap and the series bridge. Defaults to the title up to the first `:`. |
 | `linkTitle` | optional | Short title for the rubric page's series list. Doesn't touch the `<h1>` or `<title>`. |
-| `related` | standalone only | 3–5 **content paths** (`inside/anatomy/palette-is-a-file`, not a URL) for the "related" rail. Ignored on a series guide, which shows its parts instead. |
+| `related` | standalone only | 3–5 **content paths** (`inside/anatomy/palette-is-a-file`, not a URL) for the "related" rail. With none listed — or none that resolves — the left rail is not rendered at all. Ignored on a series guide, which shows its parts instead. |
 | `placeholder` | optional | See [Placeholders](#placeholders). |
 | `og_image`, `og_style` | optional | See [Covers (OG images)](#covers-og-images). |
 | `cover` | optional | The page's own picture — the feed banner and the share card. See [Covers (OG images)](#covers-og-images). |

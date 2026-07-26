@@ -112,6 +112,12 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **A standalone guide with no `related:` still got a left rail.** The panel
+  drew its "related" heading over an empty list, and collapsed into a minimap
+  with no marks — chrome around nothing. The rail is now skipped altogether
+  when there is nothing to list: no series parts, and no `related:` path that
+  resolves to a page. The prose does not move — it is pinned to the middle
+  grid track, so the left track simply stays empty.
 - **A feed card's cover was cropped on a phone.** The banner ratio tightened to
   `2.2 / 1` below 640px, and since covers are drawn at 3:1 `object-fit: cover`
   then ate 26.6% of the picture off its sides. The mobile override is gone: one
