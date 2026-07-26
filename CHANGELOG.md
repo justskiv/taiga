@@ -9,6 +9,48 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **`{short="…"}` on a heading names it for the tables of contents.** A section
+  title carries a colon and a clause; the same string in a rail is three wrapped
+  lines. The short name now rides in the markdown, right after the words it
+  shortens — `## Runtime: allocations, traceback labels, timers {short="Runtime:
+  allocations and timers"}` — and both lists read it, the boxed block and the
+  rail, `h2` and `h3` alike. The heading, its id and its anchor are untouched.
+
+  This replaces `toc_labels`, which asked for a map keyed by heading **id** —
+  ids the author had to reconstruct by hand from a Cyrillic title with slashes
+  and brackets in it, kept in a different file from the heading, and silently
+  stale the moment the heading was reworded. It is still read, after the
+  attribute and before the heading's own text, so nothing written against it
+  breaks. It is a Goldmark heading attribute, the mechanism `{#custom-id}`
+  already uses; `render-heading.html` files it into the page store for the Hugo
+  side and leaves `data-short` on the element for the browser side.
+- **`lead_deck: true` sets the standfirst as a display deck.** An article's lead
+  is prose by default — the piece's opening sentence, at the size of what
+  follows. A survey or a release write-up opens differently: the paragraph says
+  what this is before the article starts, and it wants to read as an
+  introduction. The flag restores the deck (19px, quieter tone) the plain `.lead`
+  has on rubric and taxonomy pages, and keeps the light-scheme correction, so a
+  lead never looks weaker on white than the prose under it.
+- **`toc_inline: true` keeps the boxed TOC on wide screens.** A wide screen gets
+  the live right rail and the block in the prose is hidden, which is right for a
+  guide — the two would list the same sections twice. A long survey wants both:
+  the block is a map read BEFORE the article (h2 only, two columns, the whole
+  shape at a glance), the rail answers "where am I" during it, h3s included. The
+  page opts in and the block stays; nothing changes anywhere else.
+
+  They do not, however, share the screen. While the block is in view the rail is
+  hidden outright — not folded to its minimap, which beside a full table of
+  contents reads as debris — and fades back in once the block has scrolled under
+  the header. The rail ships hidden from the server on such a page, so it never
+  flashes in beside the block; with JS off it stays hidden, which is the right
+  degradation for a page that carries its contents in the prose.
+- **The right rail honours `toc_labels`.** The map of heading id → short label
+  was read by the inline TOC alone, so one page listed its own sections two
+  different ways — "Generic methods" in the block, "Generic methods: Go reversed
+  its own «never»" wrapped over three lines in the rail. The rail is built in the
+  browser and simply had no way to see front matter; `rail-right.html` now hands
+  it the map on `#tocRail`. A heading with no label keeps its own text, and the
+  minimap's tooltips name entries the way the panel does.
 - **The footer is pinned to the bottom of the viewport on short pages.** The
   page is a full-height flex column and the content block takes the slack, so
   an empty rubric or the 404 no longer leaves the footer floating mid-screen.
@@ -38,6 +80,16 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **The TOC rail is wider, quieter and wraps better.** Above 1500px the right
+  rail alone goes to 264px (~230px of text against ~202px): its track has slack
+  to spare, while the left one already fills its own to the pixel at 1728px — and
+  a rail wider than its track would not spill into the page margins but narrow
+  the reading column, since `1fr` is `minmax(auto,1fr)` and the middle track is
+  the one that gives way. The scrollbar is gone from both rails (the scroll
+  stays): a bar running down beside the entries read as a second border on a
+  panel that has none, and the scroll-spy is what keeps the current entry in
+  view. Entries wrap with `text-wrap: balance`, so a two-line one no longer
+  leaves a word stranded on its second line.
 - **The home page is composed for a phone, not merely stacked onto one.** The
   rubric showcase spends its vertical budget freely because it spends it in
   three columns; dropped to one column that budget became ~290px per rubric, so

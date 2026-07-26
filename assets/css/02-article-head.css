@@ -14,6 +14,16 @@ h1 .sub{color:var(--accent)}
    own and the child <p>s take the ordinary prose rules. .layout scopes this to
    real articles; rubric/taxonomy/404 leads keep the plain deck above. */
 .layout .lead{font-size:inherit; line-height:inherit; color:inherit; margin:0}
+/* …unless the page asks for the deck back with `lead_deck: true`. A survey or a
+   release write-up opens by SAYING WHAT THIS IS before the piece starts, and
+   that paragraph wants to look like an introduction rather than a first
+   paragraph. Opt-in, because for an ordinary guide — where the standfirst IS the
+   opening sentence — the step in size reads as an accident. The light-scheme
+   line above is restated at this weight for the same reason it exists: secondary
+   on white reads as greyed-out, and a lead must not look weaker than the prose
+   it introduces. */
+.layout .lead.deck{font-size:19px; line-height:1.6; color:var(--text-secondary)}
+[data-scheme="light"] .layout .lead.deck{color:var(--text-primary)}
 /* meta line: quiet metadata between the title and the lead — muted label +
    emphasized value, borderless (editorial, not a tag cloud), items split by a
    hairline. -2 top collapses with h1's 18px to a snug 16px (binds it to the

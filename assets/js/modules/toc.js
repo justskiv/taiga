@@ -13,15 +13,23 @@ export function buildToc() {
   const hs = Array.prototype.slice.call(document.querySelectorAll('.wrap h2[id], .wrap h3[id]'));
   if (!hs.length) { const rr = document.querySelector('.rail-r'); if (rr) rr.style.display = 'none'; return; }
 
+  /* Entry names, in order: `{short="…"}` on the heading, which render-heading.html
+     leaves on the element as data-short; then the older `toc_labels` map, handed
+     over by rail-right.html; then the heading's own text. Same order as the
+     inline TOC, so one page names its sections the same way twice. */
+  let labels = {};
+  if (host.dataset.labels) { try { labels = JSON.parse(host.dataset.labels); } catch (e) { /* keep the rail */ } }
+
   const items = [];            // {h, li, ln, grp}
   const groups = [];           // {h2li, sub}  — one per h2 (+ leading orphan h3s)
   let curOl = null, curGrp = -1;
 
   hs.forEach(function (h) {
     const isH3 = h.tagName === 'H3';
+    const label = h.dataset.short || labels[h.id] || h.textContent.replace(/^#+\s*/, '').trim();
     const li = document.createElement('li');
     const a = document.createElement('a'); a.href = '#' + h.id;
-    a.textContent = h.textContent.replace(/^#+\s*/, '').trim();
+    a.textContent = label;
     li.appendChild(a);
 
     if (isH3) {
@@ -41,7 +49,7 @@ export function buildToc() {
       host.appendChild(wrap);
       groups.push({ h2li: li, sub: wrap }); curGrp = groups.length - 1;
     }
-    items.push({ h: h, li: li, grp: curGrp });
+    items.push({ h: h, li: li, grp: curGrp, label: label });
   });
 
   // right-rail minimap: one dash per heading (built once, stays flat)
@@ -53,9 +61,26 @@ export function buildToc() {
       const ln = document.createElement('a');
       ln.className = 'mini-ln' + (it.li.className === 'lv3' ? ' lv3' : '');
       ln.href = '#' + it.h.id;
-      ln.title = it.h.textContent.replace(/^#+\s*/, '').trim();
+      ln.title = it.label;   // the dash's tooltip names the entry the panel does
       mini.appendChild(ln); it.ln = ln;
     });
+  }
+
+  /* `toc_inline` pages keep the boxed contents in the prose, and the rail is
+     server-rendered hidden (.rail-guard.is-off) so it never flashes in beside it.
+     Hand it the screen the moment the block scrolls out from under the header, and
+     take it back when the reader returns to the top. The header's own height is
+     the margin: a block half-tucked behind it is gone as far as reading goes.
+     No IntersectionObserver (old Safari) → the rail is simply shown. */
+  const boxed = document.querySelector('.toc.keep');
+  if (railR && railR.classList.contains('rail-guard')) {
+    if (boxed && 'IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) {
+        railR.classList.toggle('is-off', es[0].isIntersecting);
+      }, { rootMargin: '-64px 0px 0px 0px' }).observe(boxed);
+    } else {
+      railR.classList.remove('is-off');
+    }
   }
 
   let accordion = false, grpTimer = null;

@@ -1,15 +1,26 @@
 {{- /* Right rail: an empty #tocRail shell, exactly like the mock's static HTML.
        toc.js fills it from the page's h2/h3 and builds the dash minimap + scrollspy
        on load — keeping it empty here means the server render matches the mock byte
-       for byte (nothing invisible added to the prose diff). */ -}}
-<aside class="rail rail-r" aria-label="{{ i18n "rail_r_aria" }}">
+       for byte (nothing invisible added to the prose diff).
+
+       The one thing the browser cannot work out on its own rides along as
+       `data-labels`: front matter's `toc_labels` (heading id → short label), which
+       the inline TOC has always honoured while the rail spelled out the whole
+       heading — the same page listing its own sections two different ways, one of
+       them three lines per entry. Only rendered when the page sets it. */ -}}
+{{- /* On a `toc_inline` page the rail starts HIDDEN and toc.js hands it the screen
+       once the boxed contents scroll away (see .rail-guard, 12-article-layout.css).
+       Stamped server-side rather than by the JS, so the rail never flashes in
+       beside the block it duplicates. With JS off it simply stays hidden — which
+       is the right degradation: the page has its contents in the prose. */ -}}
+<aside class="rail rail-r{{ if .Params.toc_inline }} rail-guard is-off{{ end }}" aria-label="{{ i18n "rail_r_aria" }}">
   <div class="rail-dock">
   <div class="rail-in">
     <div class="rail-h">
       <span class="rail-k">{{ i18n "rail_r_head" }}</span>
       <button class="rail-x" data-rail="r" type="button" aria-label="{{ i18n "rail_hide_r" }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 7l5 5-5 5"/></svg><span class="rail-tip" aria-hidden="true">{{ i18n "rail_hide_r" }} <kbd class="kb">]</kbd></span></button>
     </div>
-    <ol class="tocr" id="tocRail"></ol>
+    <ol class="tocr" id="tocRail"{{ with .Params.toc_labels }} data-labels="{{ . | jsonify }}"{{ end }}></ol>
   </div>
   </div>
 </aside>

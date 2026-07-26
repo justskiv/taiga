@@ -3,12 +3,21 @@
        Explicit markdown ids ({#s1}) are honoured via .Anchor so the mock anchors
        survive; other heading attributes pass through. The href fragment is
        percent-encoded for non-ASCII by html/template — harmless, browsers decode
-       it back to the raw id (see reference/features-recipes.md §1a). */ -}}
+       it back to the raw id (see reference/features-recipes.md §1a).
+
+       `{short="…"}` names the heading for the two tables of contents, where a
+       full section title wraps to three lines. It rides along in the markdown,
+       next to the words it shortens — the id never has to be spelled out. Both
+       readers are served from here: the inline TOC is a Hugo template and takes
+       it from the page store (keyed by anchor), the right rail is built in the
+       browser and takes it off `data-short`. */ -}}
 {{- $level := .Level -}}
 {{- $anchor := .Anchor -}}
 {{- $hash := cond (eq $level 3) "##" "#" -}}
 {{- $aria := cond (eq $level 3) (i18n "anchor_sub") (i18n "anchor_sec") -}}
-<h{{ $level }} id="{{ $anchor }}"{{ range $k, $v := .Attributes }}{{ if ne $k "id" }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+{{- $short := index .Attributes "short" -}}
+{{- with $short }}{{ $.Page.Store.Set (printf "toc-short-%s" $anchor) . }}{{ end -}}
+<h{{ $level }} id="{{ $anchor }}"{{ with $short }} data-short="{{ . }}"{{ end }}{{ range $k, $v := .Attributes }}{{ if not (in (slice "id" "short") $k) }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
 {{- if or (eq $level 2) (eq $level 3) }}<a class="hash" href="#{{ $anchor }}" aria-label="{{ $aria }}">{{ $hash }}</a>{{ end -}}
 {{- .Text -}}
 </h{{ $level }}>

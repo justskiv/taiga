@@ -2,17 +2,22 @@
        Content starts at ## (h1 comes from the template), so .Fragments.Headings has
        a single synthetic node with an empty title whose children are the real h2s
        (reference/hugo-core.md §9) — descend into it. Wide screens hide this block
-       via CSS; the right rail (JS) replaces it. */ -}}
+       via CSS; the right rail (JS) replaces it — unless the page sets
+       `toc_inline: true`, which marks it `.keep` and lets both stand. */ -}}
+{{- /* Entry names, in order: `{short="…"}` on the heading itself (filed into the
+       page store by render-heading.html — page.html renders the body first so the
+       store is filled by now), then the older `toc_labels` map, then the heading
+       as written. */ -}}
 {{- $labels := .Params.toc_labels -}}
 {{- $top := .Fragments.Headings -}}
 {{- if and (eq (len $top) 1) (not (index $top 0).Title) }}{{ $top = (index $top 0).Headings }}{{ end -}}
 {{- $h2 := where $top "Level" 2 -}}
 {{- with $h2 }}
-<div class="toc">
+<div class="toc{{ if $.Params.toc_inline }} keep{{ end }}">
 <div class="toc-h">{{ i18n "toc_heading" }}</div>
 <ol>
 {{- range . }}
-<li><a href="#{{ .ID }}">{{ (index $labels .ID) | default (.Title | plainify) }}</a></li>
+<li><a href="#{{ .ID }}">{{ ($.Store.Get (printf "toc-short-%s" .ID)) | default (index $labels .ID) | default (.Title | plainify) }}</a></li>
 {{- end }}
 </ol>
 </div>

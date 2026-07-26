@@ -65,7 +65,9 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `intro` | optional | Markdown rendered between the meta chips and the TOC. |
 | `foot` | optional | Markdown rendered at the very bottom, below the series bridge. |
 | `mascot` | standalone only | Renders the site's `_partials/page/mascot.html` at the top of the page, with this value as the partial's context. No such partial on the site ⇒ nothing renders. |
-| `toc_labels` | optional | Map of heading id → short label, to shorten a long `h2` in the TOC: `toc_labels: {two-fields: "Two fields"}`. |
+| `toc_labels` | deprecated | Map of heading id → short label for both TOCs: `toc_labels: {two-fields: "Two fields"}`. It makes you spell out heading ids, so write `{short="…"}` on the heading instead (see [Short TOC entries](#short-toc-entries)). Still read, so pages already using it keep working. |
+| `toc_inline` | optional | Keeps the boxed TOC in the prose on wide screens, where the right rail otherwise replaces it. The rail then stays hidden — minimap included — while the block is on screen, and fades in once it scrolls past. For a long survey, where the block is a map read before the article; an ordinary guide does not need both. |
+| `lead_deck` | optional | Sets the standfirst as a display deck (19px, quieter) instead of ordinary prose. For an opening that introduces the piece; on a guide whose standfirst simply starts it, leave it off. |
 | `draft` | optional | Standard Hugo. The archetype sets `draft: true`. |
 
 `kicker:` and `headline:` are read only on **non-guide** pages (about, roadmap,
@@ -90,6 +92,27 @@ feed it becomes the preview, if the site set `params.home.feedPreview =
 "summary"`; a guide **without** the divider keeps showing its `description`
 instead, because Hugo would otherwise synthesise a summary that cuts
 mid-sentence. So end the lead on a hook, not in the middle of an example.
+
+### Short TOC entries {#short-toc-entries}
+
+A section title can afford a colon and a clause; a table of contents cannot —
+at rail width it wraps to three lines. Give the heading a short name for the
+lists with `{short="…"}`:
+
+```markdown
+## Runtime: allocations, traceback labels, timers {short="Runtime: allocations and timers"}
+
+### A subsection whose name is longer than the rail {short="Subsections"}
+```
+
+It applies to `h2` and `h3`, and both tables of contents read it: the boxed
+block in the prose and the right rail. The heading itself, its `id` and the
+anchor link are untouched — the short name lives only in the lists — so you
+never have to know what Hugo made of the title. A heading without it is listed
+as written.
+
+It is a Goldmark heading attribute, the same mechanism as `{#custom-id}`, and
+sits in the same braces: `## Title {#custom-id short="Short"}`.
 
 ### Series {#series-and-weight}
 

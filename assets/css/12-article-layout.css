@@ -33,18 +33,52 @@
    the drift. Below 1366px the rails are display:none, so the margins are inert. */
 .rail-l{grid-column:1; justify-self:end; margin-right:clamp(0px, (100vw - 1366px) / 3, 116px)}
 .rail-r{grid-column:3; justify-self:start; margin-left:clamp(0px, (100vw - 1366px) / 5, 68px)}
-.rail-in{position:sticky; top:36px; width:var(--rail); max-height:calc(100vh - 72px); overflow:auto; padding:14px 4px 24px; scrollbar-width:thin}
+/* Scrolls when the list outruns the viewport, but without a bar: a rail is bare
+   marks in the margin, and a track running down beside the entries reads as a
+   second border on a panel that has none. The list is not a place a reader hunts
+   through by dragging — the scroll-spy keeps the current entry in view — so the
+   bar carried no information it was worth the ink for. Same handling as .nav
+   (10-header.css); wheel, trackpad, keys and the spy's own scrolling stay. */
+.rail-in{position:sticky; top:36px; width:var(--rail); max-height:calc(100vh - 72px); overflow:auto; padding:14px 4px 24px; scrollbar-width:none}
+.rail-in::-webkit-scrollbar{display:none}
 /* transparent while the rail is open (rail-in stays sticky, as above); turns
    into a viewport-tall frame when collapsed so marks + peek centre in the margin */
 .rail-dock{display:contents}
 @media(min-width:1366px){
   .rail{display:block}
   body.article .toc{display:none} /* the live right rail replaces the inline toc */
+  /* …unless the page asks for both with `toc_inline: true`. On a long survey the
+     boxed block is a map read BEFORE the article — h2 only, two columns, the
+     whole shape at a glance — while the rail answers "where am I" during it, h3s
+     included. Off by default: on an ordinary guide the two would say the same
+     thing twice. */
+  body.article .toc.keep{display:block}
 }
+/* Two contents on one screen is one too many: while the boxed block is in view the
+   rail is not a second opinion, it is the same list twice. So it yields — wholly,
+   not down to its minimap, which beside a full table of contents reads as debris —
+   and comes back once the block has scrolled past (toc.js drives .is-off). Fading
+   rather than display:none so the return is a fade-in and not a jump, and
+   visibility takes it out of the tab order while it is gone. */
+.rail-guard{transition:opacity .22s var(--ease), visibility .22s var(--ease)}
+.rail-guard.is-off{opacity:0; visibility:hidden; pointer-events:none}
+@media (prefers-reduced-motion:reduce){ .rail-guard{transition:none} }
 /* the tight band just past the breakpoint has no slack to spend on the gap;
    narrow the rails a touch so the prose still gets some breathing room there */
 @media(min-width:1366px) and (max-width:1499.98px){
   :root{--rail:200px}
+}
+/* The TOC carries whole headings and wraps them to two or three lines at 236px;
+   the right track has room to spare, so it gets a wider panel — ~230px of text
+   instead of ~202px. Only the RIGHT one: the left rail drifts out by (100vw -
+   1366)/3 and at 1728px (a 14" Mac in "More Space") it already fills its track
+   to the pixel. Widening past that would not spill into the page margins —
+   `1fr` is `minmax(auto,1fr)`, so a rail wider than its track raises the track's
+   minimum and the middle one, `minmax(0,var(--content))`, is what gives way:
+   the reading column would narrow. Held to >=1500px, where the base 236px
+   applies — the band above only has slack for 200px. */
+@media(min-width:1500px){
+  .rail-r{--rail:264px}
 }
 /* collapsed rail: the panel folds into a bare minimap — naked marks floating
    in the margin, no box, no chrome. Left: one dot per series part
@@ -250,7 +284,12 @@ a.rail-k:hover{color:var(--accent); border:0}
 /* toc (right rail, built by js) */
 .tocr{list-style:none; margin:0; padding:0; border-left:1px solid var(--border)}
 .tocr li{margin:0}
-.tocr a{display:block; padding:5px 12px; margin-left:-1px; border:0; border-left:2px solid transparent; color:var(--text-muted); line-height:1.45; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
+/* text-wrap:balance, not the prose default: an entry is 1-3 lines, and greedy
+   wrapping leaves the last one holding a word or two ("Как Go говорил «нет» — /
+   десять лет"). Balanced lines make the list read as a column of blocks rather
+   than a ragged edge. Cheap here — the browser only balances short runs (Chrome
+   caps it at 6 lines) and a TOC entry is far under that. */
+.tocr a{display:block; padding:5px 12px; margin-left:-1px; border:0; border-left:2px solid transparent; color:var(--text-muted); line-height:1.45; text-wrap:balance; transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease)}
 .tocr a:hover{color:var(--text-primary)}
 .tocr li.lv3 a{padding-left:26px; font-size:12px}
 /* current section: neutral bright text so the scroll-spy mark doesn't flare

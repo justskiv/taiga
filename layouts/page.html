@@ -37,10 +37,20 @@
        true for Hugo's auto-summary, which would wrongly split an intro off any
        long article that never had a lead. Falls back to the legacy `lead:` param
        when there's no divider, so articles migrate one file at a time. */ -}}
+{{- /* `lead_deck: true` opts back into the display deck an article's standfirst
+       otherwise gives up (bigger, quieter, set apart from the prose) — for an
+       opening that introduces the piece rather than starting it. */ -}}
 {{- $cut := strings.Contains .RawContent "<!--more-->" -}}
-{{ if $cut }}<div class="lead">{{ .Summary }}</div>
-{{ else }}{{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}{{ end }}
+{{- $leadCls := printf "lead%s" (cond (not .Params.lead_deck) "" " deck") -}}
+{{ if $cut }}<div class="{{ $leadCls }}">{{ .Summary }}</div>
+{{ else }}{{ with .Params.lead }}<p class="{{ $leadCls }}">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}{{ end }}
 {{ with .Params.intro }}{{ $.RenderString (dict "display" "block") . }}{{ end }}
+{{- /* The body is rendered HERE, above the TOC that lists it: render-heading.html
+       files each `{short="…"}` into the page store as the prose goes through, and
+       the TOC below reads them by anchor. Hugo renders a page's content once and
+       hands out the same result afterwards, so naming it early costs nothing —
+       the markup is still printed where it belongs, further down. */ -}}
+{{- $_ := .Content -}}
 {{ partial "article/toc.html" . }}
 {{- /* Pagefind: index the prose only. A placeholder has nothing to find, so it
        stays out of the index (keeps search results to real guides). crumb/mins
