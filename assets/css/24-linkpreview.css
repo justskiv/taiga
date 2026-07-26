@@ -69,9 +69,12 @@ a[data-link="wiki"]::after{
   font-family:'Linux Libertine', Georgia, 'Times New Roman', serif;
   font-weight:700; font-size:.6em; line-height:1;
 }
-/* Go — the official blog: an italic "Go" wordmark nod, again type not a mask
-   (a gopher is illegible at 10px). Same alpha grammar as the others. */
-a[data-link="gob"]::after{
+/* Go — the official blog and the documentation (/doc/, /ref/, /wiki/, /security/):
+   an italic "Go" wordmark nod, again type not a mask (a gopher is illegible at
+   10px). Same alpha grammar as the others. One mark for both: to a reader they
+   are the same destination — go.dev — and the card that opens says which shelf. */
+a[data-link="gob"]::after,
+a[data-link="gdoc"]::after{
   -webkit-mask:none; mask:none; background:none;
   content:"Go"; width:auto; height:auto; vertical-align:baseline;
   font-weight:700; font-style:italic; font-size:.58em; line-height:1;

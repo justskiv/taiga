@@ -39,6 +39,12 @@
            to its go.dev home (the redirect lands there anyway) so the card fetches
            and the JS matches the canonical URL. */ -}}
     {{- $regHref := $d -}}
+    {{- /* what the CARD is fetched and keyed by, when that is not the href itself.
+           A docs link usually points into a section — /ref/spec#Method_declarations
+           — and the card is of the whole page: keeping the fragment would fetch the
+           same page once per anchor and hand the JS a key it cannot match. Empty
+           means "same as the href". */ -}}
+    {{- $cardHref := "" -}}
     {{- if or (eq $host "t.me") (eq $host "telegram.me") -}}
       {{- $kind = "tg" -}}
       {{- $seg := split (strings.TrimPrefix "/" $u.Path) "/" -}}
@@ -55,6 +61,23 @@
     {{- else if eq $host "go.dev" -}}
       {{- if and (hasPrefix $u.Path "/blog/") (gt (len (strings.TrimPrefix "/blog/" $u.Path)) 0) -}}
         {{- $kind = "gob" -}}{{ if $lp }}{{ $reg = "gob" }}{{ end -}}
+      {{- else -}}
+        {{- /* the documentation shelves, all built from the same page template:
+               /doc/ (release notes, Effective Go, the FAQ, tutorials, the GC and
+               PGO guides), /ref/ (spec, modules, memory model), /wiki/ and
+               /security/. Marketing pages (/learn/, /solutions/) and the tour
+               (a JS app with no prose to scrape) stay plain external links. */ -}}
+        {{- $sect := "" -}}
+        {{- range (slice "/doc/" "/ref/" "/wiki/" "/security/") -}}
+          {{- if hasPrefix $u.Path . -}}{{ $sect = . }}{{- end -}}
+        {{- end -}}
+        {{- if and $sect (gt (len (strings.TrimPrefix $sect $u.Path)) 0) -}}
+          {{- $kind = "gdoc" -}}
+          {{- if $lp -}}
+            {{- $reg = "gdoc" -}}
+            {{- $cardHref = printf "https://go.dev%s" $u.Path -}}
+          {{- end -}}
+        {{- end -}}
       {{- end -}}
     {{- else if eq $host "blog.golang.org" -}}
       {{- with (strings.TrimPrefix "/" $u.Path) -}}
@@ -63,13 +86,14 @@
         {{- if $lp }}{{ $reg = "gob" }}{{ end -}}
       {{- end -}}
     {{- end -}}
+    {{- $card := $cardHref | default $regHref -}}
     {{- if $reg -}}
       {{- $store := .Page.Store -}}
       {{- $skey := printf "lp%s" (strings.Title $reg) -}}
       {{- $list := $store.Get $skey | default slice -}}
-      {{- if not (in $list $regHref) -}}{{ $store.Set $skey ($list | append $regHref) }}{{- end -}}
+      {{- if not (in $list $card) -}}{{ $store.Set $skey ($list | append $card) }}{{- end -}}
     {{- end -}}
-    <a href="{{ $regHref }}" target="_blank" rel="noopener"{{ if $lp }} data-link="{{ $kind }}"{{ with $reg }} data-{{ . }}="{{ $regHref }}"{{ end }}{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+    <a href="{{ $regHref }}" target="_blank" rel="noopener"{{ if $lp }} data-link="{{ $kind }}"{{ with $reg }} data-{{ . }}="{{ $card }}"{{ end }}{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
     {{- end -}}
   {{- else -}}
     <a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>

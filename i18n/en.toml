@@ -313,3 +313,5 @@ other = "Wikipedia"
 other = "Read on Wikipedia"
 [lp_read_gob]
 other = "Read on the Go blog"
+[lp_read_gdoc]
+other = "Read on go.dev"

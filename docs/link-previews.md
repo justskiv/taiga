@@ -3,7 +3,7 @@
 # Link previews
 
 On a fine pointer, a prose link grows a floating **preview card** on hover — the
-term card's physics, one popover per page. Five genres, one family:
+term card's physics, one popover per page. Six genres, one family:
 
 - **Internal** links (to a guide or a series) open a window into the target page:
   the article's header in miniature, its opening plus whole H2 sections up to a
@@ -20,10 +20,17 @@ term card's physics, one popover per page. Five genres, one family:
 - **Go blog** links (`go.dev/blog/<slug>`, and legacy `blog.golang.org/<slug>`
   normalised to it) open a card with the italic *Go* mark, the post title, its
   byline (the date localised) and its opening.
+- **go.dev documentation** — `/doc/`, `/ref/`, `/wiki/`, `/security/` — opens the
+  same-family card: the shelf as a kicker (GO DOCS / GO REFERENCE / GO WIKI / GO
+  SECURITY), the page title, the subtitle where the page has one (the spec and the
+  memory model date themselves there) and its first paragraphs. A link into a
+  section (`/ref/spec#Method_declarations`) shows the page's card, and every
+  anchor into the same page shares one fetch. Marketing pages (`/learn/`,
+  `/solutions/`) and the tour are left as plain external links.
 
 Every outbound link also gets a small classifier mark: ↗ elsewhere on the web,
-✈ your Telegram, ▶ your YouTube, W Wikipedia, *Go* the Go blog. Internal links
-carry no mark. The
+✈ your Telegram, ▶ your YouTube, W Wikipedia, *Go* go.dev (blog and docs alike).
+Internal links carry no mark. The
 mark is suppressed in component chrome (a fold summary, a callout label, a CTA
 card) so it never doubles up with a component's own icon — the hover card still
 works there, only the little mark is muted.
@@ -97,6 +104,13 @@ anyway). The build:
   top-level blocks before the first `<h2>`, or, when the post opens straight with
   an `<h2>`, the blocks after it. No `<h1>` (or a failed fetch) → no card, the link
   stays external with the *Go* mark.
+- scrapes a **go.dev documentation** page: the first `<h1>` inside
+  `<main id="main-content">`, an `<h2 class="subtitle">` if there is one, and the
+  first three paragraphs after the heading — paragraphs, not "everything before
+  the first `<h2>`", because half these pages open straight with an
+  `<h2>Introduction</h2>` and the blog's rule would come back empty. Paragraphs
+  under 40 characters are skipped (that is what backlinks like "Back to Go
+  Security" measure). Same degradation: no `<h1>` → no card.
 
 Fetches are `partialCached` by URL, so each post/video is fetched **once** per
 build, and Hugo caches the responses on disk between builds.
@@ -140,7 +154,7 @@ bridge and the rails are excluded. A link to the current page is not previewed.
 ## Files
 
 - `assets/css/24-linkpreview.css` — the cards, both palettes, reduced-motion.
-- `assets/js/modules/linkpreview.js` — the hover physics and the five providers.
+- `assets/js/modules/linkpreview.js` — the hover physics and the six providers.
 - `layouts/_markup/render-link.html` — classifies links at build time.
 - `layouts/page.preview.html`, `section.preview.html`, `baseof.preview.html` —
   the preview output fragments.

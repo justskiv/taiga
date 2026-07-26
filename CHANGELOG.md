@@ -9,6 +9,22 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **go.dev documentation links get a hover card.** The Go blog had one; a link to
+  the release notes, the spec or Effective Go — the pages a Go guide cites most —
+  was a plain external link with an arrow. `/doc/`, `/ref/`, `/wiki/` and
+  `/security/` now open a card of the same family: the shelf as a kicker (GO DOCS
+  / GO REFERENCE / GO WIKI / GO SECURITY), the page title, its subtitle where it
+  has one, and its first paragraphs. A link into a section
+  (`/ref/spec#Method_declarations`) shows the page's card and every anchor into
+  that page shares a single build-time fetch.
+
+  Its own scraper rather than the blog's: a docs page has no byline and no
+  `<div class='markdown'>`, and half of them open straight with an
+  `<h2>Introduction</h2>`, so "everything before the first h2" comes back empty.
+  It takes the first `<h1>` under `<main id="main-content">`, the
+  `<h2 class="subtitle">` where the spec and the memory model date themselves, and
+  the first three paragraphs of real prose. Marketing pages and the tour stay
+  plain external links, and a page that yields no `<h1>` degrades to one too.
 - **`{short="…"}` on a heading names it for the tables of contents.** A section
   title carries a colon and a clause; the same string in a rail is three wrapped
   lines. The short name now rides in the markdown, right after the words it

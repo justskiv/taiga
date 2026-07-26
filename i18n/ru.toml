@@ -370,3 +370,5 @@ other = "Википедия"
 other = "Читать в Википедии"
 [lp_read_gob]
 other = "Читать в блоге Go"
+[lp_read_gdoc]
+other = "Читать на go.dev"

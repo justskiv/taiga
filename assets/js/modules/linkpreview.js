@@ -18,7 +18,7 @@
 const GAP = 10, EDGE = 12, CLOSE_DELAY = 120, WARM_MS = 450, WARM_DWELL = 90, DWELL = 250;
 
 export function bindLinkPreviews() {
-  const marked = document.querySelector('a[data-preview], a[data-tg], a[data-yt], a[data-wiki], a[data-gob]');
+  const marked = document.querySelector('a[data-preview], a[data-tg], a[data-yt], a[data-wiki], a[data-gob], a[data-gdoc]');
   if (!marked) return;
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
   if (!fine.matches) return;   /* touch: the link is the whole interaction */
@@ -84,7 +84,18 @@ export function bindLinkPreviews() {
     render: (_a, node) => (node ? node.firstElementChild.cloneNode(true) : null),
     skeleton: () => skeleton(['30%', '72%', '40%', '100%', '94%', '88%']),
   };
-  const providers = [internal, tg, yt, wiki, gob];
+  /* go.dev documentation. Keyed off data-gdoc rather than the href: a link into a
+     section (/ref/spec#Method_declarations) shares the whole page's card, and the
+     attribute is the fragment-less URL the build filed it under. */
+  const gdoc = {
+    id: 'gdoc',
+    match: (a) => a.hasAttribute('data-gdoc'),
+    key: (a) => 'd|' + a.getAttribute('data-gdoc'),
+    fetch: (a) => Promise.resolve(storeCard('gdoc', a.getAttribute('data-gdoc'))),
+    render: (_a, node) => (node ? node.firstElementChild.cloneNode(true) : null),
+    skeleton: () => skeleton(['36%', '84%', '100%', '92%', '64%']),
+  };
+  const providers = [internal, tg, yt, wiki, gob, gdoc];
   function providerFor(a) {
     for (let i = 0; i < providers.length; i++) if (providers[i].match(a)) return providers[i];
     return null;

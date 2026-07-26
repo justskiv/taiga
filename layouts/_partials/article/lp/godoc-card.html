@@ -1,0 +1,80 @@
+{{- /* One go.dev DOCUMENTATION card — /doc/, /ref/, /wiki/, /security/ — scraped
+       at BUILD time. Context = the page URL (no fragment; the caller strips it, so
+       ten links into /ref/spec share one card). partialCached by lang|URL.
+
+       Sibling of gob-card.html, and deliberately not folded into it: the blog has
+       an author and a date in a <p class="author"> and its prose in a
+       <div class='markdown'>, while a docs page has neither and its opening lives
+       wherever the page's own shape puts it. Verified against release notes,
+       Effective Go, the FAQ, the spec, the memory model, the modules reference,
+       the wiki, tutorials and the GC guide (2026-07):
+         title    first <h1> inside <main id="main-content">
+         subtitle <h2 class="subtitle"> — the spec and the memory model date
+                  themselves there ("Language version go1.26 (Jan 12, 2026)");
+                  most pages have none
+         lead     the first paragraphs after the h1, whatever section they sit in.
+                  NOT "everything before the first h2", which is what the blog
+                  does: half these pages open straight with <h2>Introduction</h2>
+                  and would come back empty.
+       Paragraphs under 40 characters of text are skipped — that is what the "Back
+       to Go Security" backlinks and similar chrome measure. No h1 or a failed
+       fetch → no card, the link stays external with the "Go" mark. */ -}}
+{{- $url := . -}}
+{{- $ua := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" -}}
+{{- $res := partial "article/lp/get.html" (dict "url" $url "opts" (dict "headers" (dict "User-Agent" $ua))) -}}
+{{- $ok := false -}}
+{{- $title := "" -}}{{- $sub := "" -}}{{- $lead := "" -}}
+{{- with $res -}}
+  {{- $src := .Content -}}
+  {{- /* the page body: everything past the main landmark, so a title in the nav
+         drawer or the footer cannot be mistaken for the page's own */ -}}
+  {{- $parts := split $src `id="main-content"` -}}
+  {{- $main := cond (gt (len $parts) 1) (index $parts 1) $src -}}
+  {{- with (findRESubmatch `(?s)<h1[^>]*>(.*?)</h1>` $main) -}}
+    {{- $t := trim (replaceRE "<[^>]+>" "" (index (index . 0) 1)) " \n\t\r" -}}
+    {{- if $t -}}{{ $ok = true }}{{ $title = $t }}{{- end -}}
+  {{- end -}}
+  {{- if $ok -}}
+    {{- with (findRESubmatch `(?s)<h2 class="subtitle">(.*?)</h2>` $main) -}}
+      {{- $sub = trim (replaceRE "<[^>]+>" "" (index (index . 0) 1)) " \n\t\r" -}}
+    {{- end -}}
+    {{- $after := split $main "</h1>" -}}
+    {{- $rest := cond (gt (len $after) 1) (delimit (after 1 $after) "</h1>") "" -}}
+    {{- $rest = replaceRE `(?s)<(script|style)[^>]*>.*?</(script|style)>` "" $rest -}}
+    {{- $rest = replaceRE `(href|src)="/` `$1="https://go.dev/` $rest -}}
+    {{- $kept := slice -}}
+    {{- range (findRESubmatch `(?s)<p[^>]*>(.*?)</p>` $rest) -}}
+      {{- $body := index . 1 -}}
+      {{- if and (lt (len $kept) 3) (ge (len (trim (replaceRE "<[^>]+>" "" $body) " \n\t\r")) 40) -}}
+        {{- $kept = $kept | append (printf "<p>%s</p>" $body) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $lead = trim (delimit $kept "") " \n\t\r" -}}
+  {{- end -}}
+{{- end -}}
+{{- if $ok -}}
+{{- /* which shelf of go.dev this came from — the kicker the blog card spends on
+       "THE GO BLOG". Left in English: these are the section names as go.dev
+       itself prints them, not UI copy. */ -}}
+{{- $path := (urls.Parse $url).Path -}}
+{{- $kick := "GO DOCS" -}}
+{{- if hasPrefix $path "/ref/" }}{{ $kick = "GO REFERENCE" }}
+{{- else if hasPrefix $path "/wiki/" }}{{ $kick = "GO WIKI" }}
+{{- else if hasPrefix $path "/security/" }}{{ $kick = "GO SECURITY" }}{{ end -}}
+<div class="lp-gdoc-pre" data-lp-gdoc="{{ $url }}">
+  <div class="lp-card gob-card gdoc-card">
+    <div class="gob-head">
+      <span class="gob-mark">Go</span>
+      <span class="lp-kick">{{ $kick }}</span>
+    </div>
+    <div class="gob-body">
+      <h3 class="gob-title">{{ $title }}</h3>
+      {{- with $sub }}
+      <div class="gob-meta"><span>{{ . }}</span></div>
+      {{- end }}
+      {{- with $lead }}<div class="gob-lead lp-clip">{{ . | safeHTML }}</div>{{ end }}
+    </div>
+    <a class="lp-row" href="{{ $url }}" target="_blank" rel="noopener"><span>{{ i18n "lp_read_gdoc" }}</span><span class="arw" aria-hidden="true">↗</span></a>
+  </div>
+</div>
+{{- end -}}
