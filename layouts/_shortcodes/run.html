@@ -1,0 +1,118 @@
+{{- /* run — the execution block under a runnable code listing: codapi's own
+       element plus the output block the reader sees BEFORE pressing anything.
+
+         ```go
+         func main() { fmt.Println("hi") }
+         ```
+         {{< run sandbox="go1.27" >}}
+         hi
+         {{< /run >}}
+
+       The body is the output the AUTHOR recorded — plain text, kept verbatim.
+       It is the primary view, not a fallback: most readers never press Run.
+       When they do, modules/runout.js replaces it in place instead of letting
+       codapi stack a second result underneath, and offers to put the example
+       back. Written self-closing — {{< run sandbox="go1.27" />}} — the block
+       ships hidden and appears with the reader's first result.
+
+       Params:
+         sandbox=  codapi sandbox id. Required — except for a listing that has
+                   no sandbox behind it at all (output recorded on a machine the
+                   reader cannot reach: another Go version, another CPU count).
+                   Then omit it, pass cmd=, and the block renders alone: same
+                   transcript, no Run button, nothing to press.
+         command=  codapi command. Default "run".
+         editor=   "basic" (editable, the theme's own editor) · "off"
+                   (read-only listing). Default "basic".
+         cmd=      the command shown on the prompt line. Defaults to a readable
+                   stand-in for sandbox+command ("go run main.go"); set it when
+                   the sandbox runs something else. Required without sandbox=.
+         note=     a short caption for the output, set as a shell comment after
+                   the command: "stderr — 15 SCHED-строк, полная трасса". This
+                   is what a folded block shows about what is inside it.
+         open=     "false" to ship the output folded away. Default open.
+         error=    "true" when the recorded output IS an error — it then reads
+                   in the failed colour from the start.
+
+       Passed through to <codapi-snippet> when given: url, template, files, id,
+       depends-on, actions, output-mode, engine, selector, init-delay,
+       status-running, status-done, status-failed. The last three are codapi's
+       own status labels (Running… / ✓ Done / ✗ Failed), left in English by
+       default like the rest of the snippet controls — see i18n/*.toml.
+
+       Labels: run_example · run_ok · run_failed · run_restore · run_empty in
+       i18n/<lang>.toml, overridable per site (docs/i18n.md). Styling lives in
+       assets/css/26-run-output.css. */ -}}
+
+{{- $sandbox := .Get "sandbox" -}}
+{{- $command := .Get "command" | default "run" -}}
+{{- $editor := .Get "editor" | default "basic" -}}
+{{- $note := .Get "note" -}}
+{{- if and (not $sandbox) (not (.Get "cmd")) -}}
+  {{- errorf "run: needs sandbox= (a runnable snippet) or cmd= (a recorded run with no sandbox behind it) — page %s" .Page.Path -}}
+{{- end -}}
+
+{{- /* The prompt line names what the reader would type to get this output. It
+       is a readable stand-in — the sandbox decides what actually runs — so any
+       snippet whose command is not one of these should pass cmd= itself. */ -}}
+{{- $cmd := .Get "cmd" -}}
+{{- if not $cmd -}}
+  {{- if hasPrefix $sandbox "go" -}}
+    {{- $go := dict
+          "run"          "go run main.go"
+          "test"         "go test"
+          "test-verbose" "go test -v"
+          "bench"        "go test -bench=." -}}
+    {{- $cmd = index $go $command | default (printf "go %s" $command) -}}
+  {{- else -}}
+    {{- $cmd = $command -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* .Inner, not .InnerDeindent: program output owns its own leading spaces —
+       a table, a tree, an indented stack trace — and deindenting by the common
+       prefix would quietly eat them. The body is taken verbatim, so write it
+       flush left. */ -}}
+{{- $out := trim .Inner "\n" -}}
+{{- $has := ne $out "" -}}
+{{- $open := ne (.Get "open") "false" -}}
+{{- $failed := eq (.Get "error") "true" -}}
+
+{{- /* codapi's own optional attributes, written out one by one rather than
+       assembled into a string. A {{ range }} that emits attribute NAMES inside a
+       tag is something html/template refuses to reason about, and the way around
+       it — building the run and marking it safeHTMLAttr — turns the escaping off
+       for the VALUES too: a legitimate quote in template="…" would then end the
+       attribute early, and a crafted one could add an attribute of its own.
+       Spelled out like this, every value sits in a real attribute-value context
+       and Hugo escapes it. Verbose, and not clever, which is the point. */ -}}
+
+{{ if $sandbox }}<codapi-snippet sandbox="{{ $sandbox }}" command="{{ $command }}" editor="{{ $editor }}"
+  {{- with .Get "url" }} url="{{ . }}"{{ end }}
+  {{- with .Get "template" }} template="{{ . }}"{{ end }}
+  {{- with .Get "files" }} files="{{ . }}"{{ end }}
+  {{- with .Get "id" }} id="{{ . }}"{{ end }}
+  {{- with .Get "depends-on" }} depends-on="{{ . }}"{{ end }}
+  {{- with .Get "actions" }} actions="{{ . }}"{{ end }}
+  {{- with .Get "output-mode" }} output-mode="{{ . }}"{{ end }}
+  {{- with .Get "engine" }} engine="{{ . }}"{{ end }}
+  {{- with .Get "selector" }} selector="{{ . }}"{{ end }}
+  {{- with .Get "init-delay" }} init-delay="{{ . }}"{{ end }}
+  {{- with .Get "status-running" }} status-running="{{ . }}"{{ end }}
+  {{- with .Get "status-done" }} status-done="{{ . }}"{{ end }}
+  {{- with .Get "status-failed" }} status-failed="{{ . }}"{{ end -}}
+></codapi-snippet>
+{{ end }}<details class="ro"{{ if and $has $open }} open{{ end }}{{ if not $has }} hidden{{ end }} data-src="{{ if $has }}example{{ else }}none{{ end }}" data-state="{{ if and $has $failed }}failed{{ else }}idle{{ end }}">
+<summary class="ro-h">
+<span class="ro-ps" aria-hidden="true">$</span>
+<span class="ro-cmd">{{ $cmd }}</span>
+<span class="ro-caret" aria-hidden="true"></span>
+{{- with $note }}<span class="ro-note">{{ . }}</span>{{ end }}
+<span class="ro-meta">
+<button class="ro-reset" type="button" hidden>{{ i18n "run_restore" }}</button>
+<span class="ro-chip"{{ if not $has }} hidden{{ end }}>{{ i18n "run_example" }}</span>
+</span>
+<svg class="ro-chev" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>
+</summary>
+<div class="ro-b">{{ printf `<pre class="ro-pre" aria-live="polite"><code>%s</code></pre>` (htmlEscape $out) | safeHTML }}</div>
+</details>

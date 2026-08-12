@@ -319,6 +319,12 @@ Passes its inner HTML through untouched — for the hand-built diagrams below.
 Unlike a bare HTML block in Markdown, a shortcode captures its body whole, so
 blank lines inside don't cut the block short.
 
+### run — `{{</* run sandbox="go1.26.4" */>}}…{{</* /run */>}}` {#run}
+
+Turns the code block above it into a runnable one and carries the output under
+it. Documented with the rest of the machinery in
+[Runnable snippets](#runnable).
+
 ### roadmap — `{{</* roadmap */>}}` {#roadmap}
 
 Renders the roadmap blocks — "in progress" cards, the queue, the rules — from the
@@ -344,9 +350,10 @@ func mallocgc(size uintptr) unsafe.Pointer { … }
 
 ### Runnable snippets {#runnable}
 
-A code block becomes runnable — and editable — when a
-[codapi](https://github.com/nalgeon/codapi-js) element follows it. codapi is not
-bundled: load it in the guide (or from a site hook) and point it at your sandbox.
+A code block becomes runnable — and editable — when a `{{</* run */>}}` shortcode
+follows it. The runner is [codapi](https://github.com/nalgeon/codapi-js), which
+the theme does not bundle: load it in the guide (or from a site hook) and point
+it at your sandbox.
 
 ````md
 {{</* raw */>}}
@@ -358,8 +365,56 @@ bundled: load it in the guide (or from a site hook) and point it at your sandbox
 ```go
 func main() { fmt.Println("hi") }
 ```
-{{</* raw */>}}<codapi-snippet sandbox="go1.26.4" command="run" editor="basic"></codapi-snippet>{{</* /raw */>}}
+{{</* run sandbox="go1.26.4" */>}}
+hi
+{{</* /run */>}}
 ````
+
+#### The output block {#run-output}
+
+The shortcode's body is **the output the author recorded**, and it is on the page
+from the start: most readers never press Run, so this is the primary view, not a
+fallback. It renders as a terminal transcript whose first line is a prompt —
+`$ go run main.go` — and that line is also the toggle and the status readout.
+Folded, the prompt is all that is left, which reads by itself as "the command
+ran, its output is put away".
+
+Press Run and the result **replaces** the recorded output in place. codapi would
+otherwise render a second, near-identical block right under the author's one and
+leave the reader to work out which is theirs; here the page carries exactly one
+output, always. The provenance text at the end of the prompt line says whose it
+is — `example` → `run · 128 ms` (green) or `error · 89 ms` (copper) — and
+**restore example** puts the author's back. The body is taken **verbatim**, so
+write it flush left: program output owns its own indentation.
+
+| param | |
+|---|---|
+| `sandbox=` | codapi sandbox id. Required, except for a run with no sandbox behind it (see below). |
+| `command=` | codapi command. Default `run`. |
+| `editor=` | `basic` (editable) · `off` (read-only listing). Default `basic`. |
+| `cmd=` | the command shown on the prompt line. Defaults to a readable stand-in for sandbox+command (`go run main.go`, `go test`, `go test -bench=.`). |
+| `note=` | a short caption, set as a shell comment after the command: `# stderr — the full trace`. This is what a folded block says about what is inside it. |
+| `open=` | `false` ships the output folded away. Default open. |
+| `error=` | `true` when the recorded output IS an error — it then reads in the failed colour from the start. |
+
+Written self-closing — `{{</* run sandbox="go1.26.4" /*/>}}` — the block ships
+hidden and appears with the reader's first result. Written **without** `sandbox=`
+it renders alone, with no Run button and nothing to press: for output recorded on
+a machine the reader cannot reach (another Go version, another CPU count). Pass
+`cmd=` there, since there is no sandbox to derive the prompt from.
+
+Also passed through to `<codapi-snippet>` when given: `url`, `template`, `files`,
+`id`, `depends-on`, `actions`, `output-mode`, `engine`, `selector`, `init-delay`,
+`status-running`, `status-done`, `status-failed`. The last three are codapi's own
+status labels (`Running…` / `✓ Done` / `✗ Failed`), left in English by default
+like the rest of the snippet controls. The block's own labels are the `run_*`
+keys in `i18n/` — see [i18n.md](i18n.md).
+
+An `output-mode` other than text (`table`, `svg`, `iframe`…) builds DOM of its
+own, so those results stay in codapi's own box and the recorded output is left
+untouched.
+
+#### The editor {#run-editor}
 
 The theme dresses codapi's own chrome (Run, status) in the palette, and
 **replaces its editor**. With `editor="basic"` or `editor="external"` the block
@@ -378,7 +433,7 @@ gets an **Edit** button; pressing it opens a real editing mode:
   selection and type over their own closer; <kbd>⌘/Ctrl+/</kbd> toggles line
   comments; <kbd>⌘/Ctrl+Enter</kbd> runs; undo and redo are the browser's own.
 
-`editor="off"` (the default) leaves a read-only listing with a Run button. Reformatting a block
+`editor="off"` leaves a read-only listing with a Run button. Reformatting a block
 wholesale drops `hl_lines` highlighting for that session — Reset brings it back.
 The labels are `js_code_*` in `i18n/`.
 

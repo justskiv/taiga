@@ -327,6 +327,24 @@ other = "<kbd class=\"kb\">{mod} + Enter</kbd> запустить · <kbd class=
 [js_code_aria]
 other = "Редактируемый код"
 
+# run shortcode: the provenance line of the output block. run_example labels the
+# output the AUTHOR recorded, run_ok / run_failed the one the READER just got
+# (each followed by the duration), run_restore brings the author's back. These
+# ARE prose — unlike the control labels above — so they are translated. The
+# status line beside Run stays codapi's own English; a site that wants it
+# translated passes status-running / status-done / status-failed to the
+# shortcode.
+[run_example]
+other = "пример"
+[run_ok]
+other = "запуск"
+[run_failed]
+other = "ошибка"
+[run_restore]
+other = "вернуть пример"
+[run_empty]
+other = "(пусто)"
+
 # term shortcode: the definition card's footer link and its no-JS appendix.
 # term_more is the default text of the optional "read more" link (per-term
 # override with more=); the rest label the appendix that JS takes away.

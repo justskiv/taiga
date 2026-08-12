@@ -19,6 +19,7 @@ import { initFeatured } from './modules/featured.js';
 import { initFeedReveal } from './modules/reveal.js';
 import { initTagsFilter } from './modules/tags-filter.js';
 import { bindCodeEditors } from './modules/codeedit.js';
+import { bindRunOutputs } from './modules/runout.js';
 
 function onReady(fn) {
   if (document.readyState !== 'loading') fn();
@@ -61,6 +62,7 @@ onReady(function () {
   initFeedReveal(); /* home only: self-guards on .feed-more */
   initTagsFilter(); /* tags only: self-guards on #cloud/#tagFeed */
   bindCodeEditors(); /* runnable snippets only: self-guards on codapi-snippet */
+  bindRunOutputs();  /* ditto: self-guards on the .ro output block beside one */
 });
 
 if (document.readyState === 'complete') runWidgets();

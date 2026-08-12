@@ -17,6 +17,12 @@
 {{- $c = replaceRE `(?s)<style[^>]*>.*?</style>` "" $c -}}
 {{- $c = replaceRE `(?s)<iframe[^>]*>.*?</iframe>` "" $c -}}
 {{- $c = replaceRE `<iframe[^>]*/?>` "" $c -}}
+{{- /* …and <link>, which the script/style pair above used to miss. A guide that
+       loads a runnable-snippet runtime writes the pair together — a <script> and
+       the stylesheet beside it — so stripping only the script left the preview
+       card pulling a third-party stylesheet from a CDN, on hover, for a card
+       that has nothing to style with it. */ -}}
+{{- $c = replaceRE `<link[^>]*/?>` "" $c -}}
 {{- $badge := printf `<p class="lp-run-badge">▶ %s</p>` (i18n "lp_run") -}}
 {{- $c = replaceRE `(?s)<codapi-snippet[^>]*>.*?</codapi-snippet>` $badge $c -}}
 {{- $c = replaceRE `(?s)<codapi-settings[^>]*>.*?</codapi-settings>` "" $c -}}

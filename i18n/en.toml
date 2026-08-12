@@ -275,6 +275,23 @@ other = "<kbd class=\"kb\">{mod} + Enter</kbd> run · <kbd class=\"kb\">Esc</kbd
 [js_code_aria]
 other = "Editable code"
 
+# run shortcode: the provenance line of the output block. run_example labels the
+# output the AUTHOR recorded, run_ok / run_failed the one the READER just got
+# (each followed by the duration), run_restore brings the author's back. The
+# status line beside Run stays codapi's own; a site that wants it worded
+# differently passes status-running / status-done / status-failed to the
+# shortcode.
+[run_example]
+other = "example"
+[run_ok]
+other = "run"
+[run_failed]
+other = "error"
+[run_restore]
+other = "restore example"
+[run_empty]
+other = "(no output)"
+
 # term shortcode: the definition card's footer link and its no-JS appendix.
 [term_more]
 other = "read more"

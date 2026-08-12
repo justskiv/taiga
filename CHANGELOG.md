@@ -9,6 +9,32 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **`run` shortcode: one output block per runnable snippet.** A guide almost
+  always ships the output its author recorded — most readers never press Run, so
+  that output is the primary view, not a fallback — and until now it was written
+  by hand as a bare `<details>` inside a `raw` block. It came out unstyled (a UA
+  triangle, no pointer cursor on a row that toggles), and pressing Run stacked
+  codapi's own result right on top of it: two near-identical outputs, and the
+  reader left to work out which was theirs.
+
+  `{{< run sandbox="go1.26.4" >}}…{{< /run >}}` replaces both the
+  `<codapi-snippet>` element and the hand-written disclosure. The body is the
+  recorded output; a run replaces it **in place** (`modules/runout.js` listens
+  for codapi's `execute`/`result` and keeps codapi's own box hidden), so the page
+  carries exactly one output, always.
+
+  The block is a terminal transcript: the first line is a prompt — `$ go run
+  main.go` — and that line is also the toggle and the status readout, so no
+  separate "Output" caption is needed and a folded block still says what ran.
+  The `$` goes green or copper once the reader has run it themselves, the
+  provenance text at the end of the row turns from `example` into `run · 128 ms`
+  or `error · 89 ms`, and **restore example** puts the author's output back.
+  Params: `cmd=` (the prompt line), `note=` (a caption, set as a shell comment),
+  `open=`, `error=`, plus pass-through of codapi's own attributes. Written
+  without `sandbox=` it renders alone, for output recorded on a machine the
+  reader cannot reach. Labels are the `run_*` i18n keys; styling is
+  `assets/css/26-run-output.css`.
+
 - **Runnable code snippets get a real editor.** The theme already dressed
   [codapi](https://github.com/nalgeon/codapi-js) in the palette; it now replaces
   the editing half of it. codapi's `editor="basic"` makes the `<code>` element
@@ -137,6 +163,13 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   a reader of a guides site looks for it.
 
 ### Changed
+
+- **The "by codapi" tail is no longer shown** next to a finished status
+  (`codapi-ref` is hidden in `26-run-output.css`, and its colours are gone from
+  `25-code-editor.css`). codapi is MIT and asks for no attribution in the UI; a
+  permanent vendor stamp two words from the reader's own exit code read as if
+  the result belonged to someone else. The status itself — `Running…` / `✓ Done`
+  / `✗ Failed` — is untouched.
 
 - **The TOC rail is wider, quieter and wraps better.** Above 1500px the right
   rail alone goes to 264px (~230px of text against ~202px): its track has slack

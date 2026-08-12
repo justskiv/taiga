@@ -29,6 +29,12 @@ const DEFAULTS = {
   codeReset: 'Reset',
   codeHint: '<kbd class="kb">{mod} + Enter</kbd> run · <kbd class="kb">Esc</kbd> close',
   codeAria: 'Editable code',
+  /* the output block under a snippet (modules/runout.js) */
+  runExample: 'example',
+  runOk: 'run',
+  runFailed: 'error',
+  runRestore: 'restore example',
+  runEmpty: '(no output)',
   guideForms: { '1': 'guide', '2': 'guides' },
 };
 
