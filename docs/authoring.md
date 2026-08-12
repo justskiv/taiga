@@ -348,6 +348,15 @@ func mallocgc(size uintptr) unsafe.Pointer { … }
 - `{hl_lines=[2]}` — highlight lines; ranges go in as strings, `hl_lines=[2,"5-7"]`.
   Go blocks only (it is a Chroma option).
 
+Every listing carries a **copy button** — nothing to write, nothing to switch
+on. It is not there while the block is being read: it appears in the top-right
+corner when the pointer enters the listing or the keyboard reaches it, and takes
+the code with the trailing newline stripped, so a shell pasted into offers the
+command rather than running it. On a runnable snippet in editing mode it copies
+what the reader has typed, not the original. Touch screens have no hover to
+reveal it, so there it is simply always visible, a tone quieter. Labels are the
+`js_copy_*` keys in `i18n/`; styling is `assets/css/27-code-copy.css`.
+
 ### Runnable snippets {#runnable}
 
 A code block becomes runnable — and editable — when a `{{</* run */>}}` shortcode

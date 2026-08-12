@@ -9,6 +9,38 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **A copy button on every code listing.** The one thing a reader wants out of a
+  listing that the page could not give them: taking the code required selecting
+  it by hand, and in a long block that means dragging past the edge of the
+  viewport and hoping the selection did not pick up the line the scroll ran into.
+
+  The button is not there while the block is being read. It appears in the
+  top-right corner when the pointer enters the listing or focus lands inside it,
+  which is the language the rest of the theme already speaks — a prose link shows
+  its accent only under the cursor, a heading's hash anchor fades in on hover, an
+  image in a dark palette lifts out of its dimming the same way. A listing is
+  read far more often than it is copied, so at rest the affordance costs the
+  reading nothing; the alternative, an always-visible control, would have had to
+  reserve the corner of **every** block (`padding-right`) so that a line running
+  up to the button could not hide beneath it. Touch screens have no hover to
+  reveal it and get it always visible, a tone quieter, instead.
+
+  It is mounted on both kinds of listing — a plain fence and a runnable snippet —
+  because to the reader they are the same object with the same thing worth taking
+  out of it. On a snippet in editing mode it copies what the reader has typed
+  rather than the original, and the trailing newline is stripped, so a shell
+  pasted into offers the command instead of running it. Copy → check (green) or
+  cross (copper) for ~1.5 s; the outcome also goes to a live region, since
+  swapping an icon says nothing to a screen reader. Without a secure context
+  (a `hugo server` reached over plain http) it falls back to the old
+  `execCommand` path and still works.
+
+  Nothing to write and nothing to switch on — `modules/codecopy.js` finds the
+  listings the codeblock render hook emitted and wraps each in a non-scrolling
+  `.cc-wrap`, so the button holds its corner while the code scrolls sideways
+  under it. Styling is `assets/css/27-code-copy.css`; labels are the new
+  `js_copy_code` / `js_copy_done` / `js_copy_fail` i18n keys.
+
 - **`run` shortcode: one output block per runnable snippet.** A guide almost
   always ships the output its author recorded — most readers never press Run, so
   that output is the primary view, not a fallback — and until now it was written

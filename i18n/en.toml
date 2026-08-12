@@ -275,6 +275,17 @@ other = "<kbd class=\"kb\">{mod} + Enter</kbd> run · <kbd class=\"kb\">Esc</kbd
 [js_code_aria]
 other = "Editable code"
 
+# copy button on a code listing. It is icon-only, so js_copy_code is its whole
+# accessible name — the label of the control, not of the outcome. The other two
+# ARE the outcome: swapping an icon says nothing to a screen reader, so the
+# result is announced through a live region (modules/codecopy.js).
+[js_copy_code]
+other = "Copy the code"
+[js_copy_done]
+other = "The code is copied to the clipboard"
+[js_copy_fail]
+other = "Could not copy the code"
+
 # run shortcode: the provenance line of the output block. run_example labels the
 # output the AUTHOR recorded, run_ok / run_failed the one the READER just got
 # (each followed by the duration), run_restore brings the author's back. The

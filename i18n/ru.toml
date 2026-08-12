@@ -327,6 +327,18 @@ other = "<kbd class=\"kb\">{mod} + Enter</kbd> запустить · <kbd class=
 [js_code_aria]
 other = "Редактируемый код"
 
+# кнопка копирования листинга. Она без подписи, поэтому js_copy_code — всё её
+# доступное имя: название действия, а не его исхода. Остальные два и есть исход:
+# смена иконки скринридеру ничего не говорит, поэтому результат объявляется через
+# live-регион (modules/codecopy.js). Это проза — в отличие от Edit/Close/Reset
+# выше её ничто не привязывает к английскому, и она переведена.
+[js_copy_code]
+other = "Скопировать код"
+[js_copy_done]
+other = "Код скопирован в буфер обмена"
+[js_copy_fail]
+other = "Не удалось скопировать код"
+
 # run shortcode: the provenance line of the output block. run_example labels the
 # output the AUTHOR recorded, run_ok / run_failed the one the READER just got
 # (each followed by the duration), run_restore brings the author's back. These

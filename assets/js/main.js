@@ -18,6 +18,7 @@ import { mountScrollTop } from './modules/scrolltop.js';
 import { initFeatured } from './modules/featured.js';
 import { initFeedReveal } from './modules/reveal.js';
 import { initTagsFilter } from './modules/tags-filter.js';
+import { bindCodeCopy } from './modules/codecopy.js';
 import { bindCodeEditors } from './modules/codeedit.js';
 import { bindRunOutputs } from './modules/runout.js';
 
@@ -61,6 +62,7 @@ onReady(function () {
   initFeatured();   /* home only: self-guards on #hd-strip/#hd-data */
   initFeedReveal(); /* home only: self-guards on .feed-more */
   initTagsFilter(); /* tags only: self-guards on #cloud/#tagFeed */
+  bindCodeCopy();    /* every code listing; BEFORE the editor — it owns the outer wrapper */
   bindCodeEditors(); /* runnable snippets only: self-guards on codapi-snippet */
   bindRunOutputs();  /* ditto: self-guards on the .ro output block beside one */
 });

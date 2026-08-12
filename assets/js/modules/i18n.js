@@ -29,6 +29,10 @@ const DEFAULTS = {
   codeReset: 'Reset',
   codeHint: '<kbd class="kb">{mod} + Enter</kbd> run · <kbd class="kb">Esc</kbd> close',
   codeAria: 'Editable code',
+  /* copy button on a code listing (modules/codecopy.js) */
+  copyCode: 'Copy the code',
+  copyDone: 'The code is copied to the clipboard',
+  copyFail: 'Could not copy the code',
   /* the output block under a snippet (modules/runout.js) */
   runExample: 'example',
   runOk: 'run',
