@@ -9,6 +9,48 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **Runnable code snippets get a real editor.** The theme already dressed
+  [codapi](https://github.com/nalgeon/codapi-js) in the palette; it now replaces
+  the editing half of it. codapi's `editor="basic"` makes the `<code>` element
+  contenteditable and, on the first focus, runs `code.textContent =
+  code.textContent` — the Chroma markup is gone the moment a reader touches the
+  block, and never comes back. There was no editing MODE either: "Edit" is a
+  bare `focus()` call, so there was nothing to leave, no way back to the
+  original, and no signal that the block was live beyond a caret.
+
+  In its place, the overlay model: a transparent `<textarea>` lies exactly on
+  top of the highlighted `<pre>`, so caret, selection, IME, undo and the mobile
+  keyboard stay native while the colours below are real markup, re-rendered on
+  every keystroke by a small client-side Go lexer that emits the same Chroma
+  classes as the build-time pass. Editing is a state of the BLOCK — one step of
+  surface that stays put when focus moves away — with **Edit** / **Close** /
+  **Reset** as buttons rather than a dashed-underline link, and Reset restoring
+  the server-rendered listing byte for byte, `hl_lines` included. `Tab` and
+  `Shift+Tab` indent (whole lines when the selection spans several), `Enter`
+  keeps the indentation and opens a body between braces, brackets and quotes
+  auto-close and wrap a selection, `⌘/Ctrl+/` toggles comments and
+  `⌘/Ctrl+Enter` runs. Execution still belongs to codapi, which reads the same
+  `textContent` it always did.
+
+  The lexer follows Chroma's rules rather than approximating them, including
+  the one that carries meaning: a word in front of `(` is a call site, so
+  `uintptr(n)` is a conversion (builtin green) while `var a uintptr` is a type
+  (blue), and `new := 5` is a plain variable while `new(int)` is the builtin.
+  `scripts/check-gohl.py` keeps it honest — it harvests every ```go fence from
+  a content tree, runs both highlighters over it and compares character by
+  character, by the colour 20-chroma.css actually paints rather than by class
+  name. On the 600-snippet corpus this theme was developed against: 0.018% of
+  characters differ, all of them either invisible (a newline inside a comment)
+  or deliberate (the name of a generic function declaration, which Chroma
+  leaves uncoloured).
+
+  Nothing is required of a site that carries snippets already: the module
+  upgrades any `codapi-snippet` with an `editor` attribute on the page, and
+  stays inert where there are none. New tokens `--code-fs`, `--code-lh`,
+  `--code-pad` and `--code-tab` (03-typography.css) carry the listing's metrics,
+  because the editor has to match them to the pixel. Sites styling codapi in
+  their own `custom.css` can drop those rules — see `docs/authoring.md`.
+
 - **go.dev documentation links get a hover card.** The Go blog had one; a link to
   the release notes, the spec or Effective Go — the pages a Go guide cites most —
   was a plain external link with an arrow. `/doc/`, `/ref/`, `/wiki/` and

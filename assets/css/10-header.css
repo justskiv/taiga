@@ -29,7 +29,30 @@ sup.beta{font-family:var(--font-mono); font-size:9px; color:var(--accent); margi
 .lang-sw a:hover{color:var(--text-secondary); border:0}
 .lang-sw a.on{color:var(--accent)}
 .lang-sep{color:var(--text-muted); opacity:.45}
-kbd.kb{font-family:var(--font-mono); font-size:10px; color:var(--text-muted); border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 5px; background:var(--bg-base)}
+/* A modifier symbol on a key cap — ⌘ ⌥ ⇧ ⌃ — comes out visibly smaller than the
+   letters beside it, and not as a matter of taste. None of them is inside the
+   mono subsets this theme ships (head/fonts.html stops the latin range at
+   U+206F), so the browser never reaches JetBrains Mono for them; JetBrains Mono
+   and SF Mono do not carry them at all, and the first font in --font-mono that
+   does is Menlo, where ⌘ is drawn at 0.73 of cap height. Next to "Enter" at the
+   10px a cap uses, that reads as a smudge.
+
+   The correction is declared as a face rather than applied to a wrapper, so it
+   needs no markup and cannot be forgotten: unicode-range hands these code
+   points — and only these — to Menlo, size-adjust lifts them to ~0.88 of cap
+   height (matching, without the mass an equal-height ⌘ would carry), and every
+   <kbd class="kb"> on the site gets it for free. Where Menlo is absent the face
+   simply never loads and the stack falls through exactly as it did before. */
+@font-face{
+  font-family:'KeyCap';
+  /* PostScript / full name, not the family: local() matches those two and
+     silently finds nothing for a bare "Menlo" — the face then never loads and
+     the whole correction disappears without an error anywhere. */
+  src:local('Menlo-Regular'), local('Menlo Regular');
+  unicode-range:U+2318, U+2325, U+21E7, U+2303, U+21B5, U+21E5, U+232B, U+238B;
+  size-adjust:120%;
+}
+kbd.kb{font-family:'KeyCap', var(--font-mono); font-size:10px; color:var(--text-muted); border:1px solid var(--border); border-bottom-width:2px; border-radius:5px; padding:1px 5px; background:var(--bg-base)}
 /* source link: a square icon button matching the popover control (.tp-btn) so the
    header's right-hand controls read as one set. Neutral until hover, then accent. */
 .gh-link{width:34px; height:34px; flex:none; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:9px; background:var(--bg-surface); color:var(--text-secondary); transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease)}

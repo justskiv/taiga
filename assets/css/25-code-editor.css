@@ -1,0 +1,167 @@
+/* Runnable snippets — codapi's chrome, and the live editor on top of it.
+
+   Two halves, one file:
+
+   1. codapi's own widget (antonz/codapi). Its CDN stylesheet only lays the
+      parts out (flex, positioning) and never colours a single one, so the Run
+      button, the status line and the output block otherwise fall back to the UA
+      stylesheet — a raw white button and a bare <pre> in the middle of a themed
+      page. Everything below is palette vars, so it re-themes with the site and
+      needs no media query for the light scheme. Layout properties are left to
+      snippet.css, which loads from the body and would win them anyway; where a
+      layout value has to change it goes through codapi's own custom properties,
+      declared ON the element that reads them so the inherited value loses.
+
+   2. The editing surface (modules/codeedit.js): a transparent textarea laid
+      exactly over the highlighted block. Metrics come from the --code-* tokens
+      in 03-typography.css — the same ones `pre code` uses — because the two
+      layers must agree glyph for glyph. */
+
+codapi-snippet{display:block; margin:.3em 0 1.4em}
+codapi-toolbar{font-family:var(--font-sans); --toolbar-gap:10px}
+
+/* Run — the one accented control in the row. `:not(.ced-btn)` keeps our own
+   editing buttons out of it: they are quieter siblings, styled below. */
+codapi-toolbar button:not(.ced-btn){
+  font:600 13px/1 var(--font-sans);
+  color:var(--text-strong);
+  background:var(--accent-dim);
+  border:1px solid var(--accent);
+  border-radius:var(--radius-sm);
+  padding:.5em .95em;
+  cursor:pointer;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+codapi-toolbar button:not(.ced-btn):hover{background:var(--accent); color:var(--bg-base)}
+codapi-toolbar button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+codapi-toolbar button[disabled]{opacity:.6; cursor:progress}
+
+/* Any action links the author declared (actions="…"). codapi's own Edit link is
+   hidden by the editor module, which replaces it with a real button. */
+codapi-toolbar a{
+  font:500 13px/1 var(--font-sans);
+  color:var(--text-secondary);
+  text-decoration:none;
+  border-bottom:1px dashed var(--text-ghost);
+  cursor:pointer;
+}
+codapi-toolbar a:hover{color:var(--accent); border-bottom-color:var(--accent)}
+codapi-toolbar a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* Status: Running… / ✓ Done / ✗ Failed — coloured per the snippet's state attr */
+codapi-status{font:500 12.5px/1.5 var(--font-mono); color:var(--text-muted)}
+/* Before the first run there is no status at all, and a zero-width element
+   still collects the row's gap on both sides — which used to be invisible and
+   is not any more, now that the editing hint sits behind the status. */
+codapi-status:empty{display:none}
+codapi-status svg{fill:currentColor}                       /* spinner uses text colour */
+codapi-snippet[state="running"] codapi-status{color:var(--text-secondary)}
+codapi-snippet[state="succeded"] codapi-status{color:var(--accent-green)}
+codapi-snippet[state="failed"]   codapi-status{color:var(--accent-copper)}
+/* <codapi-ref> — the "by codapi" tail codapi appends to a finished status — is
+   not styled here any more; it is hidden in 26-run-output.css. */
+
+/* Live output block (appears under the snippet on Run) */
+codapi-output{margin-top:.5em}
+codapi-output pre{
+  margin:0;
+  padding:.85em 1em;
+  background:var(--bg-deep);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  overflow-x:auto;
+  font:var(--code-fs)/1.55 var(--font-mono);
+  color:var(--text-primary);
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+codapi-output a[href="#close"]{
+  color:var(--text-muted);
+  text-decoration:none;
+  background:var(--bg-raised);
+  border:1px solid var(--border);
+  border-radius:6px;
+}
+codapi-output a[href="#close"]:hover{color:var(--text-strong); border-color:var(--accent)}
+
+/* ── the editing surface ───────────────────────────────────────────────────
+   .ced wraps the <pre> so the textarea has something to be absolute against;
+   the listing keeps the block's bottom margin, the wrapper takes it over. */
+.ced{position:relative; margin:0 0 20px}
+/* The metrics are restated on the <pre> itself, not just on `pre code`, because
+   the block's own strut decides how tall a line box gets: a <pre> inherits the
+   prose size (17px), so a line of code laid out directly inside it comes out
+   ~28px tall instead of the 23px `pre code` asks for, and the caret in the
+   textarea above drifts a line further off with every row. Chroma's own markup
+   hides this — it wraps each line in a flex row that never consults the strut —
+   so the gap only appears once the editor re-renders the block itself. Scoped
+   to .ced: listings outside a runnable snippet keep their layout exactly. */
+.ced > pre{margin:0; font-size:var(--code-fs); line-height:var(--code-lh)}
+
+/* The textarea is invisible except for its caret: the colours the reader sees
+   are the real highlighted markup underneath, re-rendered on every keystroke.
+   `-webkit-text-fill-color` is not a duplicate of `color` — WebKit paints text
+   through it and would otherwise ignore the transparent colour. A transparent
+   border pins the content box to the <pre>'s, whose own 1px border sits in the
+   same place, so the first glyph of each line lands exactly on its twin. */
+.ced-input{
+  position:absolute; inset:0; z-index:1; display:none;
+  margin:0; padding:var(--code-pad);
+  border:1px solid transparent; border-radius:var(--radius);
+  background:transparent;
+  font-family:var(--font-mono); font-size:var(--code-fs); line-height:var(--code-lh);
+  color:transparent; -webkit-text-fill-color:transparent;
+  caret-color:var(--accent);
+  white-space:pre; overflow:auto; resize:none; outline:none;
+  tab-size:var(--code-tab);
+}
+.ced.is-editing .ced-input{display:block}
+
+/* Editing is a state of the BLOCK, not of a caret somewhere inside it, and it
+   says so with one step of surface: the listing lifts from the page canvas
+   (--bg-deep) to the next tone up (--bg-base) and stays there when focus goes
+   elsewhere, because the reader is still in the editor and their edits are
+   still there. No frame, no halo — the controls under the block (Close, Reset)
+   and the caret carry the state, and a ring around the code only fenced off
+   what the reader came to read. While editing, the <pre> stops scrolling on
+   its own: the textarea's scroll position drives both (codeedit.js), and two
+   independently scrollable layers would tear apart. */
+.ced.is-editing > pre{overflow:hidden; background:var(--bg-base)}
+
+/* Editing controls: real buttons, not links. The previous Edit affordance was a
+   dashed-underline anchor, which reads as a footnote rather than a control —
+   these carry a frame and a hit area, one step quieter than Run beside them. */
+.ced-btn{
+  font:500 13px/1 var(--font-sans);
+  color:var(--text-secondary);
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:.5em .85em;
+  cursor:pointer;
+  transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+             background var(--dur) var(--ease);
+}
+.ced-btn:hover{color:var(--text-strong); border-color:var(--text-ghost); background:var(--bg-surface)}
+.ced-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.ced-btn[hidden]{display:none}
+
+/* The shortcut line only exists while editing, and only where there is room for
+   it — on a phone the keys it names are not reachable anyway.
+
+   Pinned to the far end of the row rather than trailing the status. Everything
+   to its left changes width as the snippet runs — the status goes from nothing
+   to "Running…" to "✓ Done" — and a hint that follows it slides with every one
+   of those, which is exactly the kind of motion the eye chases while trying to
+   read the code. Against the right edge it has nothing in front of it to push
+   it, so pressing Run leaves it where it was. */
+.ced-hint{margin-left:auto; white-space:nowrap;
+  font:400 12px/1.4 var(--font-sans); color:var(--text-muted)}
+.ced-hint[hidden]{display:none}
+@media(max-width:640px){.ced-hint{display:none}}
+
+/* A trailing newline has no glyph to give the <pre> a last line, so the caret
+   would sit below the box. This empty inline-block restores the line height
+   without contributing a character to textContent — which is what runs. */
+.ced-eol{display:inline-block; width:0; height:calc(var(--code-fs) * var(--code-lh))}

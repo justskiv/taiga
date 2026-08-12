@@ -309,6 +309,24 @@ few = "гайда"
 many = "гайдов"
 other = "гайда"
 
+# runnable snippets: the editing controls next to codapi's Run button. The
+# labels stay in English on purpose — Run comes from codapi itself and cannot be
+# translated without forking it, and a half-translated row of controls reads
+# worse than a consistent one. The hint sentence is prose, so it is translated.
+# {mod} is filled in by the browser: ⌘ on a Mac, Ctrl everywhere else. The
+# hint is injected as HTML and carries the theme's own key caps —
+# <kbd class="kb">, the same ones the header's ⌘K wears.
+[js_code_edit]
+other = "Edit"
+[js_code_close]
+other = "Close"
+[js_code_reset]
+other = "Reset"
+[js_code_hint]
+other = "<kbd class=\"kb\">{mod} + Enter</kbd> запустить · <kbd class=\"kb\">Esc</kbd> закрыть"
+[js_code_aria]
+other = "Редактируемый код"
+
 # term shortcode: the definition card's footer link and its no-JS appendix.
 # term_more is the default text of the optional "read more" link (per-term
 # override with more=); the rest label the appendix that JS takes away.

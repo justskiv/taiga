@@ -18,6 +18,7 @@ import { mountScrollTop } from './modules/scrolltop.js';
 import { initFeatured } from './modules/featured.js';
 import { initFeedReveal } from './modules/reveal.js';
 import { initTagsFilter } from './modules/tags-filter.js';
+import { bindCodeEditors } from './modules/codeedit.js';
 
 function onReady(fn) {
   if (document.readyState !== 'loading') fn();
@@ -59,6 +60,7 @@ onReady(function () {
   initFeatured();   /* home only: self-guards on #hd-strip/#hd-data */
   initFeedReveal(); /* home only: self-guards on .feed-more */
   initTagsFilter(); /* tags only: self-guards on #cloud/#tagFeed */
+  bindCodeEditors(); /* runnable snippets only: self-guards on codapi-snippet */
 });
 
 if (document.readyState === 'complete') runWidgets();

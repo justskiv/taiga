@@ -23,6 +23,12 @@ const DEFAULTS = {
   tagFeedHead: 'feed',
   tagReset: 'reset',
   tagEmptyTail: ' — no such tag. Check the link, or pick a topic from the cloud above.',
+  /* runnable snippets (modules/codeedit.js) */
+  codeEdit: 'Edit',
+  codeClose: 'Close',
+  codeReset: 'Reset',
+  codeHint: '<kbd class="kb">{mod} + Enter</kbd> run · <kbd class="kb">Esc</kbd> close',
+  codeAria: 'Editable code',
   guideForms: { '1': 'guide', '2': 'guides' },
 };
 

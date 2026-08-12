@@ -106,11 +106,20 @@ blockquote p{margin:0}
    break rather than an underline */
 hr{border:0; height:1px; background:var(--border); margin:40px 0}
 
-/* inline + block code */
+/* inline + block code
+   The listing's metrics are tokens rather than literals because a second
+   element has to match them to the pixel: the live editor's textarea lies on
+   top of the highlighted block (25-code-editor.css), and a glyph that sits half
+   a line off its coloured twin is worse than no highlighting at all. Change
+   them here and the editor follows. */
+/* --code-tab is the browser default (8), spelled out rather than inherited:
+   Chroma keeps real tabs in the markup, so the listing and the editor's
+   textarea must agree on their width or the code shifts under the caret. */
+:root{--code-fs:13.5px; --code-lh:1.7; --code-pad:16px 18px; --code-tab:8}
 code{font-family:var(--font-mono); font-size:.86em}
 p code, li code, td code, h3 code, blockquote code{background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; padding:1px 6px; color:var(--text-strong); white-space:nowrap}
-pre{margin:0 0 20px; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; overflow-x:auto; position:relative}
-pre code{font-size:13.5px; line-height:1.7; color:var(--text-primary); white-space:pre; background:none; border:0; padding:0}
+pre{margin:0 0 20px; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius); padding:var(--code-pad); overflow-x:auto; position:relative}
+pre code{font-size:var(--code-fs); line-height:var(--code-lh); color:var(--text-primary); white-space:pre; background:none; border:0; padding:0; tab-size:var(--code-tab)}
 .gtok-kw{color:var(--accent)}
 .gtok-typ{color:var(--accent-blue)}
 .gtok-fn{color:var(--accent-green)}

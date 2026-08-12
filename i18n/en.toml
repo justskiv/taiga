@@ -260,6 +260,21 @@ other = " — no such tag. Check the link, or pick a topic from the cloud above.
 one = "guide"
 other = "guides"
 
+# runnable snippets: the editing controls next to codapi's Run button.
+# {mod} is filled in by the browser: ⌘ on a Mac, Ctrl everywhere else. The
+# hint is injected as HTML and carries the theme's own key caps —
+# <kbd class="kb">, the same ones the header's ⌘K wears.
+[js_code_edit]
+other = "Edit"
+[js_code_close]
+other = "Close"
+[js_code_reset]
+other = "Reset"
+[js_code_hint]
+other = "<kbd class=\"kb\">{mod} + Enter</kbd> run · <kbd class=\"kb\">Esc</kbd> close"
+[js_code_aria]
+other = "Editable code"
+
 # term shortcode: the definition card's footer link and its no-JS appendix.
 [term_more]
 other = "read more"

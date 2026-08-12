@@ -342,6 +342,46 @@ func mallocgc(size uintptr) unsafe.Pointer { … }
 - `{hl_lines=[2]}` — highlight lines; ranges go in as strings, `hl_lines=[2,"5-7"]`.
   Go blocks only (it is a Chroma option).
 
+### Runnable snippets {#runnable}
+
+A code block becomes runnable — and editable — when a
+[codapi](https://github.com/nalgeon/codapi-js) element follows it. codapi is not
+bundled: load it in the guide (or from a site hook) and point it at your sandbox.
+
+````md
+{{</* raw */>}}
+<script src="https://unpkg.com/@antonz/codapi@0.20.0/dist/snippet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@antonz/codapi@0.20.0/dist/snippet.css" />
+<codapi-settings url="https://run.example.com/v1"></codapi-settings>
+{{</* /raw */>}}
+
+```go
+func main() { fmt.Println("hi") }
+```
+{{</* raw */>}}<codapi-snippet sandbox="go1.26.4" command="run" editor="basic"></codapi-snippet>{{</* /raw */>}}
+````
+
+The theme dresses codapi's own chrome (Run, status) in the palette, and
+**replaces its editor**. With `editor="basic"` or `editor="external"` the block
+gets an **Edit** button; pressing it opens a real editing mode:
+
+- syntax highlighting stays live while typing — a client-side Go lexer emits the
+  same Chroma classes the build-time pass does (codapi's own editor strips the
+  highlighting on first focus, which is what this replaces);
+- the block lifts one surface tone for as long as the mode is open, and stays
+  there when focus moves away, so an edit is never lost by clicking elsewhere;
+- **Close** leaves the mode, **Esc** does the same, **Reset** appears once the
+  code differs from the original and restores it exactly, highlighting included;
+- <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> indent, and re-indent whole lines when
+  the selection spans more than one; <kbd>Enter</kbd> keeps the indentation and
+  opens a body between a `{` `}` pair; brackets and quotes auto-close, wrap a
+  selection and type over their own closer; <kbd>⌘/Ctrl+/</kbd> toggles line
+  comments; <kbd>⌘/Ctrl+Enter</kbd> runs; undo and redo are the browser's own.
+
+`editor="off"` (the default) leaves a read-only listing with a Run button. Reformatting a block
+wholesale drops `hl_lines` highlighting for that session — Reset brings it back.
+The labels are `js_code_*` in `i18n/`.
+
 ## Links {#links}
 
 Write internal links as **content paths**, not output URLs: the link render hook
