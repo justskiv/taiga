@@ -23,6 +23,17 @@
        card pulling a third-party stylesheet from a CDN, on hover, for a card
        that has nothing to style with it. */ -}}
 {{- $c = replaceRE `<link[^>]*/?>` "" $c -}}
+{{- /* …and the term links, which point at definition cards this fragment does
+       not carry: the cards are an appendix to the ARTICLE (article/term-cards.html),
+       and a hover card is no place for a "Definitions" section. Left alone they
+       are links to anchors that exist nowhere on the host page.
+
+       The whole anchor goes, not just its href: every <a> in the card body wears
+       the accent underline and the hover pill (24-linkpreview.css), href or not,
+       so a stripped anchor would still read as a live link and do nothing when
+       clicked. A <span> keeps the word and its colour class and drops the
+       promise — the same treatment the widgets and snippets above get. */ -}}
+{{- $c = replaceRE `(?s)<a class="term( [^"]*)?"[^>]*>(.*?)</a>` `<span class="term${1}">${2}</span>` $c -}}
 {{- $badge := printf `<p class="lp-run-badge">▶ %s</p>` (i18n "lp_run") -}}
 {{- $c = replaceRE `(?s)<codapi-snippet[^>]*>.*?</codapi-snippet>` $badge $c -}}
 {{- $c = replaceRE `(?s)<codapi-settings[^>]*>.*?</codapi-settings>` "" $c -}}
