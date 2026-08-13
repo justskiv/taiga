@@ -26,14 +26,26 @@
   page = ["html", "preview"]
   section = ["html", "preview"]
 
-# Neutral defaults the theme falls back on when a site omits them; a site
-# overrides these in its own hugo.toml (full registry: docs/params.md). Kept to
-# the bare minimum — only the wordmark, so a fresh install shows a name rather
-# than an empty header. Everything topic-specific lives in the site config.
+# Defaults the theme falls back on when a site omits them; a site overrides
+# these in its own hugo.toml (full registry: docs/params.md). Two kinds live
+# here and nothing else: the placeholders a fresh install needs to render at all
+# (the wordmark), and the theme's own look, which is the product and should not
+# have to be switched on to be seen. Everything topic-specific stays in the site
+# config.
 [params]
   [params.brand]
     name = "taiga"   # wordmark in header/footer — override per site
     tld = ""         # optional suffix (e.g. ".dev"); empty = just the name
+
+  # The home page as the theme means it to look: the brand at display size over
+  # a backdrop that dissolves toward the feed, and rubric tiles without boxes so
+  # that backdrop is visible between them. The three axes are independent and
+  # each is switched OFF by setting its key to an empty string — a site that
+  # wants the plain column back writes hero = "" and grid = "".
+  [params.home]
+    hero = "wordmark"      # display brand above the kicker · "" = no scene
+    grid = "fade"          # backdrop: "grid" | "fade" | "dots" · "" = plain
+    rubricCards = "naked"  # rubric tiles: "naked" | "boxed"
 
   # Coming-soon mode. OFF here so a normal install renders a normal site; the
   # key must exist, because baseof.html reads comingSoon.enable directly (same

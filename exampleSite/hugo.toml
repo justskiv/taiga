@@ -223,6 +223,12 @@ timeZone = "Europe/Moscow"
     name = "taiga"
     tld = ""
 
+  # No [params.home] here on purpose. The home look — display brand, the backdrop
+  # behind it, boxless rubric tiles — is the theme's own default (its hugo.toml),
+  # so the demo inherits it by writing nothing. That is also the point: what you
+  # see on the demo is what a fresh install renders, not a dressed-up version of
+  # it. Each axis switches off with an empty string; see docs/params.md.
+
   # NB: there is deliberately NO search toggle. The ⌘K modal is always on and
   # degrades quietly to an "index not built yet" hint when the Pagefind index is
   # missing (e.g. a bare `hugo server` with no second build step). A

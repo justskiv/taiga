@@ -69,7 +69,20 @@ html:has(.hero-zone[data-grid]){overflow-x:clip}
 .hh-mark{display:inline-flex; align-items:center; font-family:var(--font-mono); font-weight:700;
   font-size:clamp(42px, 6.4vw, 64px); letter-spacing:-.02em; line-height:1.1;
   color:var(--text-strong); white-space:nowrap}
-.hh-mark svg{width:1.4em; height:1.4em; display:block; border-radius:.27em; margin-right:.4em}
+.hh-mark svg{width:1.4em; height:1.4em; display:block; margin-right:.4em}
+/* At this size the mark drops its plate and becomes a drawing again. The plate
+   exists so the tree survives a favicon — the tiers measure ~1.6:1 against a
+   dark canvas and carry no shape on their own, so the silhouette of the rounded
+   square is what the eye actually reads. Blown up over the hero backdrop that
+   silhouette turns into a hole punched through the grid, and the tree inside it
+   is still unreadable: the worst of both.
+   Hiding the plate alone would leave nothing, so the tiers change ink with it —
+   currentColor, i.e. the same ink as the wordmark beside them, held back to a
+   fraction so the drawing sits under the word rather than beside it as an equal.
+   Taking the colour from the text is also what makes this work on all twelve
+   palettes, the light one included, where a literal grey could not. */
+.hh-mark svg .mark-plate{display:none}
+.hh-mark svg .mark-tier{fill:currentColor; opacity:.45}
 .hh-mark .tld{color:var(--accent)}
 .hh-mascot{flex:0 0 auto}
 .hh-mascot svg{display:block; height:96px; width:auto}

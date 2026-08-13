@@ -11,6 +11,16 @@
        you redraw this. (The favicon is a separate data-URI that cannot read CSS
        vars — see head/meta.html.)
 
+       Two parts carry a class so a caller can restyle them without a second copy
+       of the artwork: `mark-plate` is the rounded square, `mark-tier` the three
+       neutral masses. At mark size the plate is what makes the tree legible —
+       the tiers measure ~1.6:1 against any dark canvas and would all but vanish
+       without it. At display size that same plate becomes a hole punched in
+       whatever is behind it, so the home hero hides it and repaints the tiers in
+       currentColor instead (14-home.css). A site that redraws this mark keeps
+       the classes to keep that behaviour; without them it simply gets the plated
+       mark everywhere, as before.
+
        Pass a pixel size to set width/height; omit to let CSS size it. */ -}}
 {{- $size := . -}}
-<svg viewBox="0 0 32 32" aria-hidden="true"{{ with $size }} width="{{ . }}" height="{{ . }}"{{ end }}><rect width="32" height="32" rx="7" fill="#1d1d1c"/><path d="M10.7 12.4L21.3 12.4L25.3 16.8L6.7 16.8Z" fill="#3c3b38"/><path d="M8.5 19.6L23.5 19.6L28.5 24L3.5 24Z" fill="#3c3b38"/><rect x="14.4" y="24" width="3.2" height="4.2" fill="#3c3b38"/><path d="M16 3.4L21.6 9.4L10.4 9.4Z" fill="var(--accent)"/></svg>
+<svg viewBox="0 0 32 32" aria-hidden="true"{{ with $size }} width="{{ . }}" height="{{ . }}"{{ end }}><rect class="mark-plate" width="32" height="32" rx="7" fill="#1d1d1c"/><path class="mark-tier" d="M10.7 12.4L21.3 12.4L25.3 16.8L6.7 16.8Z" fill="#3c3b38"/><path class="mark-tier" d="M8.5 19.6L23.5 19.6L28.5 24L3.5 24Z" fill="#3c3b38"/><rect class="mark-tier" x="14.4" y="24" width="3.2" height="4.2" fill="#3c3b38"/><path d="M16 3.4L21.6 9.4L10.4 9.4Z" fill="var(--accent)"/></svg>

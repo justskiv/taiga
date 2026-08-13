@@ -7,6 +7,42 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ## [Unreleased]
 
+### Changed
+
+- **The home look ships on.** `home.hero = "wordmark"`, `home.grid = "fade"` and
+  `home.rubricCards = "naked"` move into the theme's own `hugo.toml`, so a site
+  that says nothing now gets the display brand over a dissolving backdrop with
+  boxless rubric tiles — the page the theme was designed around. They were
+  optional and off, which meant the look existed and nobody saw it: a fresh
+  install, and the demo the theme links to as its own shop window, both rendered
+  the plainest thing the templates could produce.
+
+  The three axes stay independent, and each switches off with an empty string:
+
+  ```toml
+  [params.home]
+  hero = ""    # no display brand
+  grid = ""    # no backdrop
+  ```
+
+  `rubricCards = "boxed"` brings the framed card back. Note this changes an
+  existing site's home page with no config change of its own — the snippet above
+  restores it exactly.
+
+- **The brand mark drops its plate at display size.** The mark carries a filled
+  rounded square because the tree has to survive a 16px favicon: the tiers
+  measure ~1.6:1 against a dark canvas, so the silhouette of that square is what
+  the eye reads, not the conifer inside it. At hero size the same square became a
+  hole punched through the backdrop, with an unreadable tree in the middle of it.
+
+  The plate and the tiers now carry classes (`mark-plate`, `mark-tier`), and the
+  hero hides one and repaints the other in `currentColor` — the mark is drawn in
+  the wordmark's own ink, held back so it reads as a drawing beside the word
+  rather than a second word. Taking the colour from the text is also what makes
+  it work across all twelve palettes, the light one included. A site that redraws
+  `logo.html` keeps the two classes to keep the behaviour; without them it gets
+  the plated mark everywhere, exactly as before.
+
 ### Added
 
 - **The theme carries codapi itself.** Making a snippet runnable used to mean
