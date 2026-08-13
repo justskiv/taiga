@@ -34,7 +34,7 @@
          error=    "true" when the recorded output IS an error — it then reads
                    in the failed colour from the start.
 
-       Passed through to <codapi-snippet> when given: url, template, files, id,
+       Passed through to <codapi-snippet> when given: template, files, id,
        depends-on, actions, output-mode, engine, selector, init-delay,
        status-running, status-done, status-failed. The last three are codapi's
        own status labels (Running… / ✓ Done / ✗ Failed), left in English by
@@ -50,6 +50,33 @@
 {{- $note := .Get "note" -}}
 {{- if and (not $sandbox) (not (.Get "cmd")) -}}
   {{- errorf "run: needs sandbox= (a runnable snippet) or cmd= (a recorded run with no sandbox behind it) — page %s" .Page.Path -}}
+{{- end -}}
+
+{{- /* A sandbox means codapi has to be on the page. Rather than make every
+       guide load it by hand, the shortcode raises a flag and scripts.html —
+       which renders after the content — puts the engine in the foot of exactly
+       the pages that asked for one.
+
+       Where it runs is site config, not article prose, and there is exactly one
+       place to say it: params.codapi.url. Without it the page would ship a Run
+       button wired to nothing, so the build stops here instead — a dead control
+       is worse than a failed build.
+
+       Per-snippet url= is refused rather than ignored. codapi has no such knob:
+       its client reads the endpoint from the one global <codapi-settings> at
+       request time and never looks at the snippet element, so an url= here
+       would sit in the markup looking authoritative while every run went
+       somewhere else. */ -}}
+{{- if .Get "url" -}}
+  {{- errorf "run: url= is not a codapi setting — the server is named once, as params.codapi.url in the site config — page %s" .Page.Path -}}
+{{- end -}}
+{{- if $sandbox -}}
+  {{- $url := "" -}}
+  {{- with site.Params.codapi }}{{ $url = .url }}{{ end -}}
+  {{- if not $url -}}
+    {{- errorf "run: sandbox=%q needs a codapi server — set params.codapi.url in your site config — page %s" $sandbox .Page.Path -}}
+  {{- end -}}
+  {{- .Page.Store.Set "codapi" true -}}
 {{- end -}}
 
 {{- /* The prompt line names what the reader would type to get this output. It
@@ -88,7 +115,6 @@
        and Hugo escapes it. Verbose, and not clever, which is the point. */ -}}
 
 {{ if $sandbox }}<codapi-snippet sandbox="{{ $sandbox }}" command="{{ $command }}" editor="{{ $editor }}"
-  {{- with .Get "url" }} url="{{ . }}"{{ end }}
   {{- with .Get "template" }} template="{{ . }}"{{ end }}
   {{- with .Get "files" }} files="{{ . }}"{{ end }}
   {{- with .Get "id" }} id="{{ . }}"{{ end }}

@@ -1,3 +1,48 @@
+{{- /* codapi — the engine behind a runnable snippet — on the pages that have one.
+       {{< run >}} raises a flag on .Page.Store and this reads it back: scripts.html
+       renders after the main block, so the content has already been through the
+       shortcode by the time we get here. A page with no snippet loads nothing.
+
+       Served from the theme rather than a CDN (assets/vendor/codapi/), so the
+       version is pinned in one place, the file is fingerprinted with an integrity
+       hash like the rest of the bundle, and a guide is not one third-party outage
+       away from a dead Run button. A site upgrades by dropping its own
+       assets/vendor/codapi/snippet.js over the theme's.
+
+       No stylesheet beside it: codapi's own only lays the parts out, and the
+       theme writes those rules itself (25-code-editor.css).
+
+       `defer` is safe both ways — modules/codeedit.js mounts on a snippet that is
+       already upgraded or waits for its `load` event, whichever happens first. */ -}}
+{{- if .Store.Get "codapi" -}}
+  {{- with site.Params.codapi }}{{ with .url }}
+  <codapi-settings url="{{ . }}"></codapi-settings>
+  {{- end }}{{ end -}}
+  {{- /* `with`, not a bare errorf and carry on: errorf lets the template keep
+         running, and the concat below would then fail on a nil resource with a
+         message about slices that says nothing about codapi. One error, and it
+         is the one worth reading. */ -}}
+  {{- with resources.Get "vendor/codapi/snippet.js" -}}
+    {{- /* The MIT notice rides inside the published file rather than beside it:
+           the licence asks for it in every copy, and a copy is what each visitor
+           downloads. Prepending it at build time keeps the vendored file itself
+           byte-identical to upstream, so an upgrade can be diffed against a
+           fresh download. */ -}}
+    {{- $notice := resources.FromString "vendor/codapi/notice.js"
+          "/*! codapi 0.20.0 | MIT License | Copyright (c) 2023+ Anton Zhiyanov | https://github.com/nalgeon/codapi-js */\n" -}}
+    {{- with slice $notice . | resources.Concat "js/codapi.js" -}}
+      {{- if hugo.IsProduction -}}
+        {{- with . | fingerprint "sha256" }}
+  <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous" defer></script>
+        {{- end -}}
+      {{- else }}
+  <script src="{{ .RelPermalink }}" defer></script>
+      {{- end -}}
+    {{- end -}}
+  {{- else -}}
+    {{- errorf "codapi: assets/vendor/codapi/snippet.js is missing, and a page on this site has a runnable snippet — it would ship a Run button with nothing behind it" -}}
+  {{- end -}}
+{{- end -}}
 {{- /* Main bundle (esbuild resolves the module imports into one iife), deferred
        at the end of body. prod: minify + fingerprint + integrity. A page bundle
        may ship its own widgets/ folder; it is built and attached after main. */ -}}

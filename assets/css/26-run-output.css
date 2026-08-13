@@ -188,9 +188,9 @@ codapi-ref{display:none}
 /* the snippet and its transcript are one object: the toolbar row is the action,
    the prompt line right under it is its result, and they should read as one
    group — closer to each other than the toolbar is to the listing above it.
-   Two margins stand in the way. codapi's own stylesheet puts 1em under the
-   toolbar, and since <codapi-snippet> has neither padding nor border that
-   margin collapses straight out through its bottom edge and wins over the
-   element's own — so zeroing one without the other changes nothing. */
+   Two margins stand in the way. The toolbar carries 1em under it
+   (25-code-editor.css), and since <codapi-snippet> has neither padding nor
+   border that margin collapses straight out through its bottom edge and wins
+   over the element's own — so zeroing one without the other changes nothing. */
 codapi-snippet:has(+ .ro){margin-bottom:.55em}
 codapi-snippet:has(+ .ro) codapi-toolbar{margin-bottom:0}

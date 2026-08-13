@@ -9,6 +9,43 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **The theme carries codapi itself.** Making a snippet runnable used to mean
+  pasting a `raw` block into the guide with a `<script>`, a `<link>` and a
+  `<codapi-settings>` in it — so the library version, the stylesheet and the
+  address of the sandbox all lived in prose, repeated once per guide. Bumping
+  codapi meant editing every article that had ever run anything, and a guide
+  written on a Tuesday could be a version behind one written on Monday.
+
+  Now the sandbox is named once in the site config and the guide says nothing:
+
+  ```toml
+  [params.codapi]
+  url = "https://run.example.com/v1"
+  ```
+
+  `{{< run sandbox="…" >}}` raises a flag on `.Page.Store`; `scripts.html`
+  renders after the content, reads it back and puts codapi in the foot of
+  exactly the pages that asked for one. `snippet.js` is vendored under
+  `assets/vendor/codapi/` (MIT), so the version is pinned in one place and the
+  file goes out fingerprinted, with an integrity hash, from the site's own
+  domain — a guide is no longer one CDN outage away from a dead Run button. A
+  site upgrades by dropping its own `assets/vendor/codapi/snippet.js` over the
+  theme's.
+
+  codapi's stylesheet is **not** loaded at all: all it did was lay the parts out,
+  and the theme now writes those rules itself (`25-code-editor.css`). That is one
+  less request, and it ends a quiet fight — snippet.css loaded from the body and
+  won any layout property on order, so every change had to be routed through
+  codapi's own custom properties.
+
+  A `sandbox=` without `params.codapi.url` now **fails the build**. A Run button
+  wired to nothing looks exactly like a working one until it is pressed. The
+  `url=` attribute the shortcode used to pass through is gone for the same
+  reason: codapi reads its endpoint from the one global `<codapi-settings>` at
+  request time and never looks at the snippet element, so a per-snippet `url=`
+  sat in the markup looking authoritative while every run went elsewhere.
+  Writing one is now an error rather than a silent no-op.
+
 - **A copy button on every code listing.** The one thing a reader wants out of a
   listing that the page could not give them: taking the code required selecting
   it by hand, and in a long block that means dragging past the edge of the

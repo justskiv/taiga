@@ -2,15 +2,18 @@
 
    Two halves, one file:
 
-   1. codapi's own widget (antonz/codapi). Its CDN stylesheet only lays the
-      parts out (flex, positioning) and never colours a single one, so the Run
-      button, the status line and the output block otherwise fall back to the UA
-      stylesheet — a raw white button and a bare <pre> in the middle of a themed
-      page. Everything below is palette vars, so it re-themes with the site and
-      needs no media query for the light scheme. Layout properties are left to
-      snippet.css, which loads from the body and would win them anyway; where a
-      layout value has to change it goes through codapi's own custom properties,
-      declared ON the element that reads them so the inherited value loses.
+   1. codapi's own widget (antonz/codapi). The theme dresses it whole: codapi
+      ships a stylesheet of its own, but all it does is lay the parts out (flex,
+      positioning) without colouring a single one — so those few rules are
+      written out here instead and the file is not loaded at all. That removes a
+      stylesheet from every page with a snippet, and with it a fight the theme
+      used to lose politely: snippet.css loads from the body and wins any layout
+      property on order, so changing one meant going through codapi's own custom
+      properties, redeclared on the element that reads them. Owning the rules
+      outright is both less code and less explaining. Everything is palette vars,
+      so it re-themes with the site and needs no media query for the light
+      scheme. Only `snippet.js` is vendored (assets/vendor/codapi/), and only
+      pages with a snippet load it (_partials/scripts.html).
 
    2. The editing surface (modules/codeedit.js): a transparent textarea laid
       exactly over the highlighted block. Metrics come from the --code-* tokens
@@ -18,7 +21,13 @@
       layers must agree glyph for glyph. */
 
 codapi-snippet{display:block; margin:.3em 0 1.4em}
-codapi-toolbar{font-family:var(--font-sans); --toolbar-gap:10px}
+/* the action row: Run, our editing buttons, the status, the shortcut hint. The
+   1em under it is codapi's own spacing, kept because the run-output block reads
+   against it (26-run-output.css closes the gap when one follows). */
+codapi-toolbar{
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:1em;
+  font-family:var(--font-sans);
+}
 
 /* Run — the one accented control in the row. `:not(.ced-btn)` keeps our own
    editing buttons out of it: they are quieter siblings, styled below. */
@@ -49,8 +58,10 @@ codapi-toolbar a{
 codapi-toolbar a:hover{color:var(--accent); border-bottom-color:var(--accent)}
 codapi-toolbar a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 
-/* Status: Running… / ✓ Done / ✗ Failed — coloured per the snippet's state attr */
-codapi-status{font:500 12.5px/1.5 var(--font-mono); color:var(--text-muted)}
+/* Status: Running… / ✓ Done / ✗ Failed — coloured per the snippet's state attr.
+   nowrap because the label changes width as it goes and must not fold the row. */
+codapi-status{display:block; white-space:nowrap;
+  font:500 12.5px/1.5 var(--font-mono); color:var(--text-muted)}
 /* Before the first run there is no status at all, and a zero-width element
    still collects the row's gap on both sides — which used to be invisible and
    is not any more, now that the editing hint sits behind the status. */
@@ -62,8 +73,13 @@ codapi-snippet[state="failed"]   codapi-status{color:var(--accent-copper)}
 /* <codapi-ref> — the "by codapi" tail codapi appends to a finished status — is
    not styled here any more; it is hidden in 26-run-output.css. */
 
-/* Live output block (appears under the snippet on Run) */
-codapi-output{margin-top:.5em}
+/* Live output block (appears under the snippet on Run). Positioned because the
+   close link hangs in its corner; the [hidden] rule restates the UA's own, which
+   `display:block` above would otherwise overrule — codapi toggles the attribute
+   on every run. This block is the fallback path: a snippet written with the
+   `run` shortcode gets the transcript instead (26-run-output.css). */
+codapi-output{position:relative; display:block; margin-top:.5em}
+codapi-output[hidden]{display:none}
 codapi-output pre{
   margin:0;
   padding:.85em 1em;
@@ -77,6 +93,9 @@ codapi-output pre{
   word-break:break-word;
 }
 codapi-output a[href="#close"]{
+  position:absolute; top:.25em; right:.25em;
+  display:inline-block; width:1.5em; height:1.5em; line-height:1.5em;
+  text-align:center;
   color:var(--text-muted);
   text-decoration:none;
   background:var(--bg-raised);

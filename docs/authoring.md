@@ -360,17 +360,17 @@ reveal it, so there it is simply always visible, a tone quieter. Labels are the
 ### Runnable snippets {#runnable}
 
 A code block becomes runnable — and editable — when a `{{</* run */>}}` shortcode
-follows it. The runner is [codapi](https://github.com/nalgeon/codapi-js), which
-the theme does not bundle: load it in the guide (or from a site hook) and point
-it at your sandbox.
+follows it. The runner is [codapi](https://github.com/nalgeon/codapi-js). Point
+the site at your sandbox once:
+
+```toml
+[params.codapi]
+url = "https://run.example.com/v1"
+```
+
+and the guide says nothing about it:
 
 ````md
-{{</* raw */>}}
-<script src="https://unpkg.com/@antonz/codapi@0.20.0/dist/snippet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/@antonz/codapi@0.20.0/dist/snippet.css" />
-<codapi-settings url="https://run.example.com/v1"></codapi-settings>
-{{</* /raw */>}}
-
 ```go
 func main() { fmt.Println("hi") }
 ```
@@ -378,6 +378,18 @@ func main() { fmt.Println("hi") }
 hi
 {{</* /run */>}}
 ````
+
+The theme ships codapi itself (`assets/vendor/codapi/`, MIT) and loads it only on
+pages that have a snippet — pinned, fingerprinted and served from your own domain
+like the rest of the bundle. A `sandbox=` without `params.codapi.url` **fails the
+build**: a Run button wired to nothing is worse than a broken build. To upgrade
+or downgrade codapi, drop your own `assets/vendor/codapi/snippet.js` over the
+theme's.
+
+There is no per-snippet server: codapi reads the endpoint from one global
+setting at request time and never looks at the snippet element, so a `url=` on
+the shortcode would look authoritative and change nothing. Writing one is a build
+error rather than a silent no-op.
 
 #### The output block {#run-output}
 

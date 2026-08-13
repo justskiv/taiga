@@ -34,6 +34,7 @@ fully commented — copy it and edit.
 | `linkcheck` | `"error"` \| `"warn"` | `"error"` | A broken internal link fails the build (`error`) or just logs (`warn`). |
 | `linkPreviews.enable` | bool | `false` | Hover preview cards on prose links — internal guides/series, your Telegram posts, YouTube, Wikipedia. If your site sets its own `[outputs]`, repeat the `preview` format on `page`/`section` — see [link-previews.md](link-previews.md). |
 | `linkPreviews.budgetWords` | int | `1400` | How much of an article an internal preview shows: whole H2 sections until this word budget, the rest listed as "further in the article". |
+| `codapi.url` | string (URL) | — | Your [codapi](https://github.com/nalgeon/codapi-js) server, e.g. `"https://run.example.com/v1"` — what a runnable snippet talks to. Required as soon as any guide writes `{{< run sandbox="…" >}}`; without it the build fails rather than ship a dead Run button. There is no per-snippet override — codapi has one endpoint per page. See [authoring.md](authoring.md#runnable). |
 | `telegram.channels` | list of strings | `[]` | Your OWN channel handles. A t.me post link from these earns a build-time preview card; any other t.me link gets only the ✈ mark. |
 | `ogImages.enable` | bool | `true` | Generate Open Graph share images at build time. |
 | `ogImages.style` | string (folder) | `"dots"` | Cover style = a folder name under `assets/og/` (see [customizing.md](customizing.md#og-cover-styles)). |

@@ -35,6 +35,7 @@
 | `linkcheck` | `"error"` \| `"warn"` | `"error"` | Битая внутренняя ссылка валит сборку (`error`) или просто пишет предупреждение (`warn`). |
 | `linkPreviews.enable` | bool | `false` | Карточки-превью по ховеру на ссылках в тексте — внутренние гайды/серии, твои Telegram-посты, YouTube, Wikipedia. Если сайт задаёт свои `[outputs]`, повтори формат `preview` у `page`/`section` — см. [link-previews.md](link-previews.md). |
 | `linkPreviews.budgetWords` | int | `1400` | Сколько статьи показывает внутреннее превью: целые H2-разделы до этого бюджета слов, остальное — списком «дальше в статье». |
+| `codapi.url` | string (URL) | — | Твой сервер [codapi](https://github.com/nalgeon/codapi-js), например `"https://run.example.com/v1"` — туда ходит запускаемый сниппет. Обязателен, как только в каком-нибудь гайде появился `{{< run sandbox="…" >}}`: без него сборка падает, вместо того чтобы выкатить кнопку Run, ведущую в никуда. Переопределить у отдельного сниппета нельзя — у codapi один адрес на страницу. См. [authoring.md](authoring.md#runnable). |
 | `telegram.channels` | list of strings | `[]` | Handle'ы ТВОИХ каналов. Ссылка на пост t.me из них получает билд-карточку; любой другой t.me — только значок ✈. |
 | `ogImages.enable` | bool | `true` | Генерировать обложки Open Graph во время сборки. |
 | `ogImages.style` | строка (папка) | `"dots"` | Стиль обложки = имя папки под `assets/og/` (см. [customizing.md](customizing.md#og-cover-styles)). |

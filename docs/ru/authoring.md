@@ -362,17 +362,17 @@ func mallocgc(size uintptr) unsafe.Pointer { … }
 ### Запускаемые сниппеты {#runnable}
 
 Блок кода становится запускаемым — и редактируемым, — если сразу за ним идёт
-шорткод `{{</* run */>}}`. Запускает [codapi](https://github.com/nalgeon/codapi-js);
-сам codapi тема не поставляет — подключи его в гайде (или из хука сайта) и укажи
-свою песочницу.
+шорткод `{{</* run */>}}`. Запускает [codapi](https://github.com/nalgeon/codapi-js).
+Песочница указывается один раз на весь сайт:
+
+```toml
+[params.codapi]
+url = "https://run.example.com/v1"
+```
+
+— и гайд про неё больше не знает:
 
 ````md
-{{</* raw */>}}
-<script src="https://unpkg.com/@antonz/codapi@0.20.0/dist/snippet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/@antonz/codapi@0.20.0/dist/snippet.css" />
-<codapi-settings url="https://run.example.com/v1"></codapi-settings>
-{{</* /raw */>}}
-
 ```go
 func main() { fmt.Println("hi") }
 ```
@@ -380,6 +380,18 @@ func main() { fmt.Println("hi") }
 hi
 {{</* /run */>}}
 ````
+
+Сам codapi тема везёт с собой (`assets/vendor/codapi/`, MIT) и подключает только
+на тех страницах, где есть сниппет: версия зафиксирована, файл идёт с твоего
+домена, с fingerprint и `integrity`, как и весь остальной код. `sandbox=` без
+`params.codapi.url` **роняет сборку**: кнопка Run, ведущая в никуда, хуже
+упавшей сборки. Поднять или откатить версию можно, положив свой
+`assets/vendor/codapi/snippet.js` поверх файла темы.
+
+Своего сервера у отдельного сниппета не бывает: codapi берёт адрес из
+единственной глобальной настройки в момент запроса и на сам элемент не смотрит —
+так что `url=` у шорткода выглядел бы главным, а не менял бы ничего. Поэтому он
+роняет сборку, а не молчит.
 
 #### Блок вывода {#run-output}
 
