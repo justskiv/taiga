@@ -33,6 +33,7 @@
                   than a date that drifts. Pass it explicitly to pin the sample.
        Body: the letter itself, markdown. */ -}}
 {{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if not $nl.enable }}{{ partial "newsletter/off.html" (dict "page" .Page.Path "sc" "newsletter-letter-example") }}{{ end -}}
 {{- if $nl.enable -}}
 {{- $subject := .Get "subject" -}}
 {{- if not $subject }}{{ errorf "newsletter-letter-example: missing required param subject= (page %s)" .Page.Path }}{{ end -}}

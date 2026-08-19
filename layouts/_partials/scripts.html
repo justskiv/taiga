@@ -49,8 +49,18 @@
 {{- partial "newsletter/js-config.html" . -}}
 {{- /* Main bundle (esbuild resolves the module imports into one iife), deferred
        at the end of body. prod: minify + fingerprint + integrity. A page bundle
-       may ship its own widgets/ folder; it is built and attached after main. */ -}}
-{{- $opts := dict "minify" hugo.IsProduction "target" "es2018" "format" "iife" "sourceMap" "" -}}
+       may ship its own widgets/ folder; it is built and attached after main.
+
+       `defines` carries the build-time feature flags into the bundle. esbuild
+       substitutes the literal, folds the branch that guards the call and then
+       tree-shakes the module it reached — so a site with the newsletter off
+       ships no part of modules/newsletter.js, not a disabled copy of it. Unlike
+       resources.Concat, js.Build keys its cache by the options as well, so two
+       languages disagreeing about a flag get two bundles rather than one of
+       them getting the other's. */ -}}
+{{- $opts := dict "minify" hugo.IsProduction "target" "es2018" "format" "iife" "sourceMap" ""
+      "defines" (dict
+        "TAIGA_NEWSLETTER" (cond (partialCached "newsletter/cfg.html" . .Language.Lang).enable "true" "false")) -}}
 {{- with resources.Get "js/main.js" -}}
   {{- with . | js.Build $opts -}}
     {{- if hugo.IsProduction -}}

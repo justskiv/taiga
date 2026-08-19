@@ -22,6 +22,31 @@
    error is not the kind another attempt clears. */
 import { I18N } from './i18n.js';
 
+/* The feature's own fallback strings, kept here rather than in the shared
+   catalogue in modules/i18n.js. They are ten lines only this module reads, and
+   a site with the newsletter switched off must not carry them: the module
+   itself is tree-shaken out of the bundle, and anything parked in i18n.js would
+   outlive it. Hugo's catalogue still wins key by key — js-bridge.html emits the
+   nl_* strings for a site that has the feature on — so these are the last
+   resort, in English, for the case where the bridge never ran.
+
+   The purity annotation is what lets the whole table go with the module: an
+   Object.assign call is a side effect as far as esbuild is concerned, and
+   without it a build with the feature off would keep the strings it can never
+   show. Same reason as CFG below. */
+const T = /* @__PURE__ */ Object.assign({
+  nlMsgEmpty: 'Enter an email address.',
+  nlMsgTypo: 'That address looks like a typo — please check it.',
+  nlMsgFail: "That didn't work — please try again.",
+  nlMsgFailHint: 'Keeps happening? Write to me: {email}',
+  nlMsgOk: "A confirmation letter is on its way to {email}. Follow the link in it and you're done.",
+  nlMsgOkHint: 'No letter in the inbox — have a look in the spam folder.',
+  nlAgain: 'use another address',
+  nlSubscribed: "You're subscribed — I'll write when there's something new.",
+  nlSubscribedPop: "You're subscribed.",
+  nlSubOther: 'subscribe another address',
+}, I18N);
+
 const LS_DISMISS = 'nl.dismiss.';
 /* A boolean, and deliberately only a boolean: the address never goes to
    localStorage. It is the reader's identity on a site that promises not to
@@ -37,7 +62,13 @@ const LS_SUBSCRIBED = 'nl.subscribed';
    and the worker decides (TURNSTILE_REQUIRED, default "pass"). */
 const TS_TIMEOUT = 2000;
 
-const CFG = (typeof window !== 'undefined' && window.TAIGA_NL) || {};
+/* Behind a purity annotation so the module can be dropped whole. Without it
+   esbuild keeps this one statement — a property read on `window` might hit a
+   getter, so it counts as a side effect — and a build with the feature off
+   would still ship the line that names TAIGA_NL. */
+const CFG = /* @__PURE__ */ (function () {
+  return (typeof window !== 'undefined' && window.TAIGA_NL) || {};
+})();
 
 /* localStorage throws in a few privacy configurations; nothing here is worth
    breaking the page over. */
@@ -95,7 +126,7 @@ function failHint() {
   if (!mail) return '';
   const safe = escapeHtml(mail);
   const link = '<a href="mailto:' + safe + '">' + safe + '</a>';
-  return hint(String(I18N.nlMsgFailHint).replace('{email}', link));
+  return hint(String(T.nlMsgFailHint).replace('{email}', link));
 }
 
 /* The label is swapped for the spinner rather than joined by it, and the
@@ -127,12 +158,12 @@ function succeed(unit, email) {
   /* the spam hint is unconditional, and honest: the backend sends a fresh
      confirmation letter on every attempt, so a reader who sees nothing in the
      inbox is being filtered, not ignored */
-  setMsg(unit, String(I18N.nlMsgOk).replace('{email}', '<b>' + escapeHtml(email) + '</b>')
-    + hint(I18N.nlMsgOkHint), 'ok');
+  setMsg(unit, String(T.nlMsgOk).replace('{email}', '<b>' + escapeHtml(email) + '</b>')
+    + hint(T.nlMsgOkHint), 'ok');
   const again = document.createElement('button');
   again.type = 'button';
   again.className = 'nl-again';
-  again.textContent = I18N.nlAgain;
+  again.textContent = T.nlAgain;
   again.addEventListener('click', function () { reset(unit); });
   $('.nl-msg', unit).appendChild(again);
 }
@@ -227,13 +258,13 @@ function submit(form) {
 
   if (!email) {
     field.setAttribute('aria-invalid', 'true');
-    setMsg(unit, I18N.nlMsgEmpty, 'warn');
+    setMsg(unit, T.nlMsgEmpty, 'warn');
     field.focus();
     return;
   }
   if (!validEmail(email)) {
     field.setAttribute('aria-invalid', 'true');
-    setMsg(unit, I18N.nlMsgTypo, 'warn');
+    setMsg(unit, T.nlMsgTypo, 'warn');
     field.focus();
     return;
   }
@@ -253,11 +284,11 @@ function submit(form) {
     if (outcome === 'ok') { succeed(unit, email); return; }
     if (outcome === 'invalid') {
       field.setAttribute('aria-invalid', 'true');
-      setMsg(unit, I18N.nlMsgTypo, 'warn');
+      setMsg(unit, T.nlMsgTypo, 'warn');
       field.focus();
       return;
     }
-    setMsg(unit, I18N.nlMsgFail + failHint(), 'err');
+    setMsg(unit, T.nlMsgFail + failHint(), 'err');
   });
 }
 
@@ -377,14 +408,14 @@ function subscribedLine(unit, inPop) {
   if (note) note.hidden = true;
   const line = document.createElement('p');
   line.className = 'nl-sub';
-  line.textContent = inPop ? I18N.nlSubscribedPop : I18N.nlSubscribed;
+  line.textContent = inPop ? T.nlSubscribedPop : T.nlSubscribed;
   if (inPop) {
     /* the popover is the one placement that travels with the reader, so it is
        where a second address is worth offering. The rest stay one plain line. */
     const other = document.createElement('button');
     other.type = 'button';
     other.className = 'nl-again';
-    other.textContent = I18N.nlSubOther;
+    other.textContent = T.nlSubOther;
     other.addEventListener('click', function () {
       if (form) form.hidden = false;
       if (note) note.hidden = false;

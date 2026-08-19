@@ -16,6 +16,7 @@
          title= heading of the row. Optional, i18n default.
          sub=   the line under it. Optional, i18n default. */ -}}
 {{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if not $nl.enable }}{{ partial "newsletter/off.html" (dict "page" .Page.Path "sc" "newsletter-archive") }}{{ end -}}
 {{- $url := .Get "url" -}}
 {{- if and $nl.enable (not $url) }}{{ errorf "newsletter-archive: missing required param url= (page %s)" .Page.Path }}{{ end -}}
 {{- if and $nl.enable $url -}}

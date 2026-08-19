@@ -5,10 +5,19 @@
 
        The theme's own hugo.toml carries the defaults (enable = false, the two
        chrome placements on, the two content placements off); Hugo merges a
-       site's [params.newsletter] over them key by key. The `isset` dance below
-       is belt-and-braces for the booleans whose default is TRUE: `| default`
-       cannot tell "absent" from "deliberately false", and a header button that
-       ignores `header = false` would be a bug the site owner cannot fix.
+       site's [params.newsletter] over them key by key.
+
+       `enable` is the one gate, and every caller checks it — the header, the
+       footer, the placements, the shortcodes, the js-bridge, and the two
+       bundles: head/css.html leaves 28-newsletter.css out and scripts.html
+       hands esbuild a define that tree-shakes modules/newsletter.js away. Off
+       therefore means a build with no trace of the feature in it, not a build
+       whose selectors happen to match nothing.
+
+       The `isset` dance below is belt-and-braces for the booleans whose default
+       is TRUE: `| default` cannot tell "absent" from "deliberately false", and a
+       header button that ignores `header = false` would be a bug the site owner
+       cannot fix.
 
        The keys are looked up LOWERCASED: Hugo normalises every config key to
        lower case, and `isset`/`index` — unlike `.Params.someKey` — are plain
@@ -28,11 +37,18 @@
 {{- end -}}
 {{- $enable := false -}}{{ if isset $nl "enable" }}{{ $enable = $nl.enable }}{{ end -}}
 {{- $mode := $nl.mode | default "worker" -}}
-{{- if not (in (slice "worker" "direct") $mode) -}}
-  {{- errorf "newsletter: params.newsletter.mode is %q — the only modes are \"worker\" (a proxy on your own origin) and \"direct\" (listmonk's public endpoint)" $mode -}}
-{{- end -}}
-{{- if and $enable (eq $mode "direct") (not $nl.listUUID) -}}
-  {{- errorf "newsletter: mode = \"direct\" needs params.newsletter.listUUID — the public listmonk endpoint subscribes by list UUID, and without one every submission would fail silently" -}}
+{{- /* Both checks are gated on `enable`, and that is the point of the switch:
+       off has to mean the theme does nothing at all, including complaining
+       about the settings of a feature nobody asked for. A half-written
+       [params.newsletter] block left behind after the switch was pulled is not
+       a build failure — it is a block nothing reads. */ -}}
+{{- if $enable -}}
+  {{- if not (in (slice "worker" "direct") $mode) -}}
+    {{- errorf "newsletter: params.newsletter.mode is %q — the only modes are \"worker\" (a proxy on your own origin) and \"direct\" (listmonk's public endpoint)" $mode -}}
+  {{- end -}}
+  {{- if and (eq $mode "direct") (not $nl.listUUID) -}}
+    {{- errorf "newsletter: mode = \"direct\" needs params.newsletter.listUUID — the public listmonk endpoint subscribes by list UUID, and without one every submission would fail silently" -}}
+  {{- end -}}
 {{- end -}}
 {{- /* The subscribe page is written as a site path ("/subscribe/") and has to
        survive both a subpath install and a second language. relLangURL does

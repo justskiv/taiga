@@ -23,6 +23,15 @@ import { bindCodeEditors } from './modules/codeedit.js';
 import { bindRunOutputs } from './modules/runout.js';
 import { bindNewsletter } from './modules/newsletter.js';
 
+/* Build-time feature flags. esbuild substitutes a literal `true`/`false` for
+   these (js.Build `defines` in layouts/_partials/scripts.html), so a call
+   guarded by a false one folds away and the module behind it is tree-shaken
+   out of the bundle entirely — that is what lets an optional feature promise
+   "off ⇒ not one byte shipped" rather than "off ⇒ dead code that never runs".
+   They are NOT globals: nothing reads them at run time, and a bundle built
+   without the defines would throw on the first one. */
+/* global TAIGA_NEWSLETTER */
+
 function onReady(fn) {
   if (document.readyState !== 'loading') fn();
   else document.addEventListener('DOMContentLoaded', fn);
@@ -66,7 +75,7 @@ onReady(function () {
   bindCodeCopy();    /* every code listing; BEFORE the editor — it owns the outer wrapper */
   bindCodeEditors(); /* runnable snippets only: self-guards on codapi-snippet */
   bindRunOutputs();  /* ditto: self-guards on the .ro output block beside one */
-  bindNewsletter();  /* subscription forms: self-guards on .nl-form */
+  if (TAIGA_NEWSLETTER) bindNewsletter();  /* subscription forms: self-guards on .nl-form */
 });
 
 if (document.readyState === 'complete') runWidgets();

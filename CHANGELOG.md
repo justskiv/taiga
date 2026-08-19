@@ -9,6 +9,39 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **The newsletter is off by default, and "off" now means the build carries no
+  trace of it.** The master switch already defaulted to `false`, but two things
+  never read it: `28-newsletter.css` rode into the bundle through the numbered
+  glob in `head/css.html`, and `modules/newsletter.js` was imported
+  unconditionally by `main.js` — so a site that had never heard of the feature
+  served every reader 13 KB of minified subscription CSS and 6 KB of
+  subscription JS it could not use, while the docs promised "not one `nl-`
+  class". Both bundles now read the switch: the sheet is left out (and the
+  bundle renamed with it, because `resources.Concat` is keyed by target path
+  alone and one fixed name would hand every language whichever build won the
+  race), and `scripts.html` passes esbuild a `TAIGA_NEWSLETTER` define so the
+  call folds away and the module is tree-shaken out whole. The module's ten
+  fallback strings moved from `modules/i18n.js` into `modules/newsletter.js` for
+  the same reason — anything parked in the shared catalogue outlives the module
+  that reads it. Config validation (`mode`, `listUUID`) is gated on the switch
+  too: off means the theme has no opinion about the settings of a feature nobody
+  asked for. Measured on the demo, a build with the feature off now contains no
+  `nl-`, no `TAIGA_NL` and no `nl_*` string in any HTML, CSS or JS it publishes.
+
+- **A newsletter shortcode on a site with the feature off now fails the build
+  instead of quietly rendering nothing.** Silence is how a theme earns the
+  question *"I wrote the shortcode, nothing appeared, why?"* — and it cannot be
+  answered from the page: the markup is right, the shortcode exists, and the
+  reason is a boolean in a config file the author may not even own. The error
+  names the shortcode and the page. The master switch stays a switch, though,
+  which is why it is an `erroridf` and not a plain `errorf`: pulling `enable` on
+  a live site — the endpoint is down, the engine is being replaced, a lawyer
+  asked — must not begin with editing every guide that carries a block. Such a
+  site adds one line in the same file where the switch was pulled,
+  `ignoreLogs = ['newsletter-disabled']`, and the blocks go silent again.
+  **Migration:** none for a site with the feature on; a site with it off that
+  keeps newsletter shortcodes in its content adds that line or deletes them.
+
 - **The mid-text block's collapse button was redesigned.** It used to be a 26px
   target pinned to the block's top-right corner, hidden until hover — and the
   corner is nothing to align to in a block that has no frame, so it read as a

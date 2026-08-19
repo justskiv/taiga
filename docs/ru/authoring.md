@@ -336,8 +336,12 @@ build:
 
 ### newsletter, newsletter-cta, newsletter-inline — блоки подписки {#newsletter}
 
-Только на сайте с рассылкой (`params.newsletter.enable`); на любом другом они не
-рендерят ничего, поэтому гайд спокойно переживает с ними и запуск, и откат.
+Только на сайте с рассылкой (`params.newsletter.enable`, по умолчанию
+выключена). На сайте без неё они **валят сборку**, а не молча рендерят пустоту:
+исчезнувший без единого слова шорткод — это вопрос, на который со страницы не
+ответить. Тот, кто выключил рубильник осознанно и хочет сохранить разметку,
+добавляет `ignoreLogs = ['newsletter-disabled']` — и блоки снова замолкают:
+[newsletter.md](newsletter.md#шорткоды).
 
 ```md
 {{</* newsletter label="серия · продолжение" dismiss="sched-1" */>}}
@@ -349,8 +353,8 @@ build:
 насовсем), `newsletter-cta` — карточка побольше в конце статьи,
 `newsletter-inline` — голая форма для страницы, написанной прозой. Все тексты
 твои: параметры шорткода → front matter страницы `newsletterCta` → дефолты i18n
-темы. Ещё два — `newsletter-archive` и `newsletter-letter-example` — гейтятся
-front matter самой страницы подписки. Всё это вместе с конфигом:
+темы. Ещё два — `newsletter-archive` и `newsletter-letter-example` — относятся к
+странице подписки и появляются там, где написаны. Всё это вместе с конфигом:
 [newsletter.md](newsletter.md).
 
 ## Блоки кода {#code-blocks}

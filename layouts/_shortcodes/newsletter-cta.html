@@ -15,6 +15,7 @@
 
        Params: title=, note=. Body: markdown. */ -}}
 {{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if not $nl.enable }}{{ partial "newsletter/off.html" (dict "page" .Page.Path "sc" "newsletter-cta") }}{{ end -}}
 {{- if $nl.enable -}}
 {{- .Page.Store.Set "nlForm" true -}}
 {{- .Page.Store.Set "nlCta" true -}}

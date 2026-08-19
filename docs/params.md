@@ -34,7 +34,7 @@ fully commented — copy it and edit.
 | `linkcheck` | `"error"` \| `"warn"` | `"error"` | A broken internal link fails the build (`error`) or just logs (`warn`). |
 | `linkPreviews.enable` | bool | `false` | Hover preview cards on prose links — internal guides/series, your Telegram posts, YouTube, Wikipedia. If your site sets its own `[outputs]`, repeat the `preview` format on `page`/`section` — see [link-previews.md](link-previews.md). |
 | `linkPreviews.budgetWords` | int | `1400` | How much of an article an internal preview shows: whole H2 sections until this word budget, the rest listed as "further in the article". |
-| `newsletter.enable` | bool | `false` | Email subscription UI — a header button with a popover, in-article blocks, a series CTA, a footer link. Master switch: off ⇒ a build carries not one `nl-` class. Endpoint, mode and the five placements: [newsletter.md](newsletter.md). |
+| `newsletter.enable` | bool | `false` | Email subscription UI — a header button with a popover, in-article blocks, a series CTA, a footer link. Master switch, and **off by default**: with it false the theme adds no markup, no `nl-` rule to the CSS bundle and no module to the JS one. Turning it on needs three things the theme does not provide — a sending engine, an endpoint of your own and a bot check — so read [newsletter.md](newsletter.md) before flipping it. |
 | `newsletter.placements.*` | bool | see note 4 | Where the form is offered: `header`, `footer` (both on), `articleEnd`, `seriesLanding` (both off). Each is independent — see [newsletter.md](newsletter.md). |
 | `codapi.url` | string (URL) | — | Your [codapi](https://github.com/nalgeon/codapi-js) server, e.g. `"https://run.example.com/v1"` — what a runnable snippet talks to. Required as soon as any guide writes `{{< run sandbox="…" >}}`; without it the build fails rather than ship a dead Run button. There is no per-snippet override — codapi has one endpoint per page. See [authoring.md](authoring.md#runnable). |
 | `telegram.channels` | list of strings | `[]` | Your OWN channel handles. A t.me post link from these earns a build-time preview card; any other t.me link gets only the ✈ mark. |
@@ -63,7 +63,11 @@ fully commented — copy it and edit.
    and its two CONTENT ones (`articleEnd`, `seriesLanding`) to off: a reader
    should be able to find the form as soon as the feature is on, but putting
    one inside every guide is a decision about the writing, made per site. All
-   four are ignored while `newsletter.enable` is false.
+   four are ignored while `newsletter.enable` is false — and so is every
+   `[params.newsletter]` key beside them. A newsletter *shortcode* met on a site
+   with the feature off is the one thing that is not ignored: it fails the build
+   with a message naming the page, and `ignoreLogs = ['newsletter-disabled']`
+   turns that back into silence.
 
 ## Coming-soon mode
 

@@ -15,6 +15,7 @@
        owner's mouth on the one page that is entirely about their promise to
        the reader. */ -}}
 {{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if not $nl.enable }}{{ partial "newsletter/off.html" (dict "page" .Page.Path "sc" "newsletter-inline") }}{{ end -}}
 {{- if $nl.enable -}}
 {{- .Page.Store.Set "nlForm" true -}}
 <div class="nl-prose" data-pagefind-ignore>

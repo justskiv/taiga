@@ -255,10 +255,14 @@ timeZone = "Europe/Moscow"
   [params.telegram]
     channels = ["ntuzov"]
 
-  # Newsletter — ON in the demo, with ALL FOUR placements, so every one of them
-  # can be seen: the bell in the header, the link in the footer, the card at the
-  # foot of each guide and the CTA under a series' chapter list. The mid-text
-  # block has no flag — it is a shortcode, demonstrated on the kitchen-sink page.
+  # Newsletter — OFF in the theme's own defaults, and deliberately ON here, with
+  # ALL FOUR placements, so every one of them can be seen: the bell in the
+  # header, the link in the footer, the card at the foot of each guide and the
+  # CTA under a series' chapter list. The mid-text block has no flag — it is a
+  # shortcode, demonstrated on the kitchen-sink page. A demo that hid the
+  # feature would document nothing, and this is the only place the theme can
+  # show what it looks like; copying this block into a real site is not enough
+  # on its own — see the three prerequisites in docs/newsletter.md.
   #
   # There is no endpoint behind it: the demo is a static site on GitHub Pages,
   # and /api/subscribe answers nothing. That is deliberate — submitting shows

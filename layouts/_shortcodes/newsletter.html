@@ -26,10 +26,12 @@
 
        There is no placement flag for this one — a mid-text block interrupts the
        reading, so it is always a deliberate act by the author, never something
-       a config switch sprinkles over every guide. It renders nothing at all
-       when the site has the newsletter off, so a guide keeps its shortcode
-       through a launch and a rollback alike. */ -}}
+       a config switch sprinkles over every guide. On a site with the feature
+       off it fails the build instead of vanishing quietly (newsletter/off.html);
+       a site that pulled the switch on purpose keeps its markup by adding
+       ignoreLogs = ["newsletter-disabled"]. */ -}}
 {{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if not $nl.enable }}{{ partial "newsletter/off.html" (dict "page" .Page.Path "sc" "newsletter") }}{{ end -}}
 {{- if $nl.enable -}}
 {{- .Page.Store.Set "nlForm" true -}}
 {{- $dismiss := .Get "dismiss" -}}

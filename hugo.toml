@@ -65,14 +65,21 @@
     channels = []
 
   # Email subscription. OFF by default, and `enable` is the master switch: with
-  # it false the theme renders no markup, no styles hook and no JS config — a
-  # build carries not one `nl-` class. The placement flags below only matter
-  # once it is on. The two CHROME placements (a button in the header, a link in
-  # the footer) default to ON: turning the feature on and finding no way to
-  # subscribe would be the surprising outcome. The two CONTENT placements
-  # default to OFF: dropping a form into every guide and every series landing
-  # is a decision about someone else's writing, so it is opted into.
-  # See docs/newsletter.md.
+  # it false the theme renders no markup, ships no `nl-` rule in the CSS bundle,
+  # no module in the JS bundle, no config script and no extra i18n keys. It is
+  # off because turning it on is the small half of the job — the feature needs a
+  # sending engine, an endpoint of your own to post to and a bot check in front
+  # of it, none of which a theme can provide. A newsletter SHORTCODE written on
+  # a site with the switch off fails the build rather than vanishing silently;
+  # ignoreLogs = ['newsletter-disabled'] turns that back into silence for a site
+  # that pulled the switch on purpose.
+  #
+  # The placement flags below only matter once it is on. The two CHROME
+  # placements (a button in the header, a link in the footer) default to ON:
+  # turning the feature on and finding no way to subscribe would be the
+  # surprising outcome. The two CONTENT placements default to OFF: dropping a
+  # form into every guide and every series landing is a decision about someone
+  # else's writing, so it is opted into. See docs/newsletter.md.
   [params.newsletter]
     enable = false
     mode = "worker"                 # "worker" (proxy on your origin) | "direct"

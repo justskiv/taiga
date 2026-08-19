@@ -2,18 +2,45 @@
 
 # Email subscription
 
-A small, self-contained subscription UI: a bell button in the header with a
-popover, blocks an author can place inside a guide, a CTA under a series'
-chapter list, a link in the footer, and a bare form for a page written as prose.
-One form, one state machine, one set of texts — and every one of the five places
-is an independent switch.
+**Off by default — and flipping the switch is the small half of the job.** The
+theme draws the form and nothing else: it stores no address, sends no mail and
+holds no credentials. Three things have to exist outside it first.
 
-The theme owns the interface and nothing else. It does not store addresses, does
-not send mail and knows no credentials: the form posts to an endpoint **you**
-name, and what happens after that is your infrastructure's business.
+1. **A sending engine** — whatever owns the list, sends the double opt-in letter
+   and handles unsubscribes: [listmonk](https://listmonk.app), Buttondown,
+   Mailchimp, a script of your own over a mail API. Self-hosted, it also means a
+   domain allowed to send mail: SPF, DKIM, DMARC, and a reputation to keep.
+2. **An endpoint of your own** for the form to post to — a few lines on a
+   Cloudflare Worker, a serverless function, a route in your backend. It exists
+   because a static site cannot keep a secret, and the engine's API key is one.
+3. **A bot check** in front of that endpoint —
+   [Turnstile](https://developers.cloudflare.com/turnstile/), a rate limit, or
+   both. An open subscribe endpoint is found and abused within days, and the
+   bill for the letters it sends is yours.
 
-The whole feature is **off** by default. With `newsletter.enable` unset, a build
-contains not one `nl-` class, no config script and no extra i18n keys.
+That is infrastructure with a bill and an inbox attached, not theme
+configuration. Until it exists, leave the switch alone: with `newsletter.enable`
+false the theme adds **nothing** — no markup, no `nl-` rule in the CSS bundle,
+no module in the JS bundle, no config script, no extra i18n keys. The smallest
+config that makes anything appear at all is three lines:
+
+```toml
+[params.newsletter]
+  enable = true
+  endpoint = "/api/subscribe"   # your proxy — see "The two modes" below
+```
+
+What that buys is the interface: a bell button in the header with a popover,
+blocks an author can place inside a guide, a CTA under a series' chapter list, a
+link in the footer, and a bare form for a page written as prose. One form, one
+state machine, one set of texts — and every one of the five places is an
+independent switch.
+
+The **subscribe page itself is yours**, not the theme's: it is an ordinary
+content page (`content/subscribe.md` in the demo) that the header popover and
+the footer link point at. Turning the feature off empties it of forms but does
+not unpublish it — that is a `build.render = "never"` in its front matter, or a
+deleted file.
 
 ## Turn it on
 
@@ -96,8 +123,32 @@ out of the tab order and out of the accessibility tree.
 
 ## Shortcodes
 
-Four, and all of them render nothing when the feature is off — so a guide keeps
-its shortcode through a launch and a rollback alike.
+Five. **On a site with the feature off they fail the build**, one error per
+occurrence, naming the shortcode and the page:
+
+```
+ERROR newsletter: {{</* newsletter */>}} on page "/guides/scheduler" rendered nothing,
+because params.newsletter.enable is false. …
+```
+
+The alternative — render nothing and say nothing — is how a theme earns the
+question *"I wrote the shortcode, nothing appeared, why?"*. It cannot be
+answered from the page: the markup is right, the shortcode exists, and the
+reason is a boolean in a config file the author may not even own.
+
+The switch stays a switch, though. Pulling `enable` on a live site — the
+endpoint is down, the engine is being replaced, a lawyer asked — must not turn
+into editing every guide that carries a block first, so the error is
+**suppressible by id**:
+
+```toml
+ignoreLogs = ['newsletter-disabled']
+```
+
+With that line the shortcodes go back to rendering nothing, quietly, and a guide
+keeps its markup through a launch and a rollback alike. It is the deliberate
+half of a deliberate act — one line in the same file where the switch was
+pulled.
 
 ### newsletter — the mid-text block
 
@@ -338,5 +389,6 @@ affordance most readers use, so treat it as a deliberate opt-in, not a fix.
 - `layouts/_partials/newsletter/` — `cfg.html` (resolved config), `form.html`,
   `header-btn.html`, `cta.html`, `article-end.html`, `series-cta.html`,
   `letter-example.html`, `js-config.html`.
-- `layouts/_shortcodes/newsletter*.html` — the four shortcodes.
+- `layouts/_shortcodes/newsletter*.html` — the five shortcodes;
+  `layouts/_partials/newsletter/off.html` — what they say when the feature is off.
 - `i18n/{en,ru}.toml` — the `nl_*` block.
