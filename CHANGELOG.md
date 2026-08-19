@@ -29,6 +29,19 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   subscribed state sets `hidden` on the button, which `display:inline-flex` had
   been overriding, so the control stayed reachable in a state that has no form.
 
+- **The header's right-hand controls now read as one cluster.** Search, palette,
+  feed and the newsletter bell sat in `.head-in`'s single `gap:18px` — the same
+  distance the row uses between the brand, the nav and the tools — so four 34px
+  squares stood as far apart as the header's big parts and the row looked
+  sparse. The row now carries two spacings: `--head-gap` between the controls
+  (10px, 8px under 720px, measured against the old 18/12) and `--head-block-gap`
+  for the row's blocks, which stays where it was. Only `.brand` adds the
+  difference back — every other block boundary falls on `.head-sp`, which is
+  `flex:1` and swallows any gap around it — so no markup changed and the row
+  holds with any combination of the optional controls. Verified at
+  1440/1280/900/720/430/390 in both palettes: nothing wraps, nothing overflows,
+  and the focus rings (2px + 2px offset) still clear their neighbours.
+
 - **The mid-text `newsletter` block lost its rules, its extra air and its
   default promise line.** The two hairlines above and below read as editorial
   dividers rather than as the edges of a block; an author who wants a rule there

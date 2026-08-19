@@ -6,10 +6,17 @@
 /* --head-pad is the row's side gutter as a variable because the narrow-screen
    menu panel is positioned against .head-in and has to sit on exactly the same
    two edges; changing the padding in one place must move both. */
-.head-in{--head-pad:24px; max-width:var(--shell); margin:0 auto; padding:12px var(--head-pad); display:flex; align-items:center; gap:18px}
+/* Two spacings, not one. --head-gap is what stands between the controls on the
+   right (34px squares and the search button): at the row's old 18px they read as
+   four separate objects rather than one cluster, and the row looked sparse.
+   --head-block-gap is the distance between the row's big parts — brand, nav,
+   tool cluster — and stays where it was so the header does not shift.
+   Only the brand needs the difference added back: every other "block" boundary
+   falls on .head-sp, which is flex:1 and swallows any gap around it. */
+.head-in{--head-pad:24px; --head-gap:10px; --head-block-gap:18px; max-width:var(--shell); margin:0 auto; padding:12px var(--head-pad); display:flex; align-items:center; column-gap:var(--head-gap)}
 /* NB: no flex gap here — the wordmark is a bare text node + .tld span, a gap
    would split the brand name and its .tld apart; the svg carries the spacing */
-.brand{display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:14.5px; font-weight:600; letter-spacing:.02em; color:var(--text-primary); border:0}
+.brand{margin-right:calc(var(--head-block-gap) - var(--head-gap)); display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:14.5px; font-weight:600; letter-spacing:.02em; color:var(--text-primary); border:0}
 .brand:hover{border:0; color:var(--accent)}
 .brand svg{width:22px; height:22px; display:block; border-radius:6px; margin-right:10px}
 .brand .tld{color:var(--accent)}
@@ -85,7 +92,10 @@ kbd.kb{font-family:'KeyCap', var(--font-mono); font-size:10px; color:var(--text-
 /* narrow: the search button drops to its icon, and the row tightens to buy back
    the width the language switcher takes (by here the rubric links have already
    moved into the disclosure menu at the foot of this file) */
-@media(max-width:720px){.search-btn{width:36px; padding:0; gap:0; justify-content:center} .search-btn .s-lab, .search-btn .kb{display:none} .search-btn svg{width:16px; height:16px} .head-in{gap:12px}}
+/* Narrow: the search button collapses to a square, so the right-hand side is
+   four identical squares — they can sit tighter still. The block spacing comes
+   down with it, or the brand would be the only wide gap left in the row. */
+@media(max-width:720px){.search-btn{width:36px; padding:0; gap:0; justify-content:center} .search-btn .s-lab, .search-btn .kb{display:none} .search-btn svg{width:16px; height:16px} .head-in{--head-gap:8px; --head-block-gap:16px}}
 @media(prefers-reduced-motion:reduce){.search-btn{transition:none} .search-btn:active{transform:none}}
 /* header sticks, hides on scroll-down, slides back on scroll-up */
 .site-head{position:sticky; top:0; z-index:110; transition:transform .24s var(--ease)}
