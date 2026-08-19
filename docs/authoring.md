@@ -194,7 +194,7 @@ search index**. Drop the flag and write the body when the guide is ready.
 
 ## Shortcodes {#shortcodes}
 
-Seven, and that is the whole set.
+Eleven — seven for any guide, four more for a site that runs a newsletter.
 
 ### callout — `{{</* callout type="trap" */>}}` {#callout}
 
@@ -331,6 +331,26 @@ Renders the roadmap blocks — "in progress" cards, the queue, the rules — fro
 site's roadmap data: either a flat `data/roadmap.toml` or, on a multilingual
 site, `data/roadmap/<lang>.toml` (what the demo ships). Same data feeds the "in
 progress" strip on the home page. See the demo's `roadmap.md`.
+
+### newsletter, newsletter-cta, newsletter-inline — subscription blocks {#newsletter}
+
+Only on a site that runs a newsletter (`params.newsletter.enable`); on every
+other one they render nothing at all, so a guide can carry them through a launch
+and a rollback alike.
+
+```md
+{{</* newsletter label="series · next" dismiss="sched-1" */>}}
+This is part one. Leave your address and I'll send the next one.
+{{</* /newsletter */>}}
+```
+
+`newsletter` is the quiet mid-text block (with `dismiss=` the reader can close
+it for good), `newsletter-cta` the fuller card at the foot of an article, and
+`newsletter-inline` a bare form for a page written as prose. Every text is
+yours: shortcode params → the page's `newsletterCta` front matter → the theme's
+i18n defaults. Two more — `newsletter-archive` and `newsletter-letter-example` —
+gate themselves on the subscribe page's own front matter. All of it, with the
+config: [newsletter.md](newsletter.md).
 
 ## Code blocks {#code-blocks}
 

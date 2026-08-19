@@ -43,6 +43,10 @@
     {{- errorf "codapi: assets/vendor/codapi/snippet.js is missing, and a page on this site has a runnable snippet — it would ship a Run button with nothing behind it" -}}
   {{- end -}}
 {{- end -}}
+{{- /* Newsletter: where the forms post (window.TAIGA_NL) and, where it applies,
+       the Turnstile script. Before the bundle, which reads the object at submit
+       time; renders nothing on a site with the feature off. */ -}}
+{{- partial "newsletter/js-config.html" . -}}
 {{- /* Main bundle (esbuild resolves the module imports into one iife), deferred
        at the end of body. prod: minify + fingerprint + integrity. A page bundle
        may ship its own widgets/ folder; it is built and attached after main. */ -}}

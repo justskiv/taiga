@@ -35,5 +35,10 @@
   {{- else }}
   <p class="ser-soon">{{ i18n "series_soon" }}</p>
   {{- end }}
+  {{- /* Newsletter CTA under the chapter list (placements.seriesLanding, off by
+         default): the one page where half the list is parts that do not exist
+         yet, and "I'll write when the next one is out" answers the question the
+         page just raised. */}}
+  {{ partial "newsletter/series-cta.html" . }}
   {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
 </main>

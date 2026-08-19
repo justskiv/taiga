@@ -1,0 +1,31 @@
+{{- /* newsletter-archive — a row linking to the archive of past issues.
+
+         {{< newsletter-archive url="https://news.example.com/archive/"
+              title="Архив выпусков" sub="Все письма открыты и читаются без подписки." >}}
+
+       Visibility is presence: write the shortcode and the row is there, delete
+       it and it is gone. The URL rides on the shortcode with everything else it
+       needs, so one line in the markdown is the whole feature. It used to be
+       gated by a `newsletter.archiveURL` key in the page's front matter, which
+       split one decision across two files and let a shortcode sit in the text
+       for months rendering nothing.
+
+       Params:
+         url=   the archive's address (required — it is the whole point of the
+                row, and there is no sane default for it).
+         title= heading of the row. Optional, i18n default.
+         sub=   the line under it. Optional, i18n default. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- $url := .Get "url" -}}
+{{- if and $nl.enable (not $url) }}{{ errorf "newsletter-archive: missing required param url= (page %s)" .Page.Path }}{{ end -}}
+{{- if and $nl.enable $url -}}
+<a class="nl-archive" href="{{ $url }}"{{ if strings.HasPrefix $url "http" }} target="_blank" rel="noopener"{{ end }}>
+  <span class="nl-ar-body">
+    <span class="nl-ar-t">{{ .Get "title" | default (i18n "nl_archive_title") }}</span>
+    {{- with .Get "sub" | default (i18n "nl_archive_sub") }}
+    <span class="nl-ar-s">{{ . }}</span>
+    {{- end }}
+  </span>
+  <span class="nl-ar-arw" aria-hidden="true">→</span>
+</a>
+{{- end -}}

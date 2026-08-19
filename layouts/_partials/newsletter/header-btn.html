@@ -1,0 +1,24 @@
+{{- /* Header subscription control: a bell button and the popover under it.
+       Rendered from header.html after the feed icon, so the right-hand cluster
+       reads left to right as source · palette · feed · subscribe — the two
+       ways of following the site sit next to each other.
+
+       The glyph is a classic bell in the header's own system: 24-unit viewBox,
+       currentColor stroke at 1.8, round caps, 17px inside the 34px square (see
+       10-header.css / .rss-link). It lives in ONE variable so a site that wants
+       another mark overrides this partial and edits one line.
+
+       The panel is a disclosure, not a modal: the button owns aria-expanded and
+       aria-controls, the panel carries `hidden`, Escape closes and returns the
+       focus (modules/newsletter.js). Gated by the caller on
+       newsletter.enable + placements.header. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang -}}
+{{- $nlIcon := `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 9.8a5.8 5.8 0 0 0-11.6 0c0 4.4-2 5.8-2 5.8h15.6s-2-1.4-2-5.8z"/><path d="M13.8 18a2 2 0 0 1-3.6 0"/></svg>` | safeHTML -}}
+<span class="nl-wrap">
+  <button class="nl-btn" id="nlBtn" type="button" aria-expanded="false" aria-controls="nlPop" aria-label="{{ i18n "nl_btn_aria" }}" title="{{ i18n "nl_btn_tip" }}">{{ $nlIcon }}</button>
+  <div class="nl-pop" id="nlPop" hidden>
+    <div class="nl-pop-h">{{ i18n "nl_pop_head" }}</div>
+    {{ partial "newsletter/form.html" (dict "note" (i18n "nl_note_short") "place" "hdr") }}
+    <a class="nl-pop-more" href="{{ $nl.subscribePage }}">{{ i18n "nl_pop_more" }} →</a>
+  </div>
+</span>

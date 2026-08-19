@@ -190,7 +190,7 @@ build:
 
 ## Шорткоды {#shortcodes}
 
-Их семь, и это весь набор.
+Одиннадцать: семь для любого гайда и ещё четыре — для сайта с рассылкой.
 
 ### callout — `{{</* callout type="trap" */>}}` {#callout}
 
@@ -333,6 +333,25 @@ build:
 либо плоский `data/roadmap.toml`, либо, на многоязычном сайте,
 `data/roadmap/<lang>.toml` (так сделано в демо). Те же данные питают полосу «в
 работе» на главной. Пример — `roadmap.md` в демо.
+
+### newsletter, newsletter-cta, newsletter-inline — блоки подписки {#newsletter}
+
+Только на сайте с рассылкой (`params.newsletter.enable`); на любом другом они не
+рендерят ничего, поэтому гайд спокойно переживает с ними и запуск, и откат.
+
+```md
+{{</* newsletter label="серия · продолжение" dismiss="sched-1" */>}}
+Это первая статья серии. Оставьте почту — пришлю продолжение.
+{{</* /newsletter */>}}
+```
+
+`newsletter` — тихий срединный блок (с `dismiss=` читатель закрывает его
+насовсем), `newsletter-cta` — карточка побольше в конце статьи,
+`newsletter-inline` — голая форма для страницы, написанной прозой. Все тексты
+твои: параметры шорткода → front matter страницы `newsletterCta` → дефолты i18n
+темы. Ещё два — `newsletter-archive` и `newsletter-letter-example` — гейтятся
+front matter самой страницы подписки. Всё это вместе с конфигом:
+[newsletter.md](newsletter.md).
 
 ## Блоки кода {#code-blocks}
 

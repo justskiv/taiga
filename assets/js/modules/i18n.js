@@ -40,6 +40,17 @@ const DEFAULTS = {
   runRestore: 'restore example',
   runEmpty: '(no output)',
   guideForms: { '1': 'guide', '2': 'guides' },
+  /* subscription forms (modules/newsletter.js) */
+  nlMsgEmpty: 'Enter an email address.',
+  nlMsgTypo: 'That address looks like a typo — please check it.',
+  nlMsgFail: "That didn't work — please try again.",
+  nlMsgFailHint: 'Keeps happening? Write to me: {email}',
+  nlMsgOk: "A confirmation letter is on its way to {email}. Follow the link in it and you're done.",
+  nlMsgOkHint: 'No letter in the inbox — have a look in the spam folder.',
+  nlAgain: 'use another address',
+  nlSubscribed: "You're subscribed — I'll write when there's something new.",
+  nlSubscribedPop: "You're subscribed.",
+  nlSubOther: 'subscribe another address',
 };
 
 export const I18N = Object.assign({}, DEFAULTS,

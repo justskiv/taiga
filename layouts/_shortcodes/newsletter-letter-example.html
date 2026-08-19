@@ -1,0 +1,46 @@
+{{- /* newsletter-letter-example — a sample issue inside a simplified mail
+       window, so a reader can see what they are signing up for before they do.
+
+         {{< newsletter-letter-example subject="Очереди: GRQ, LRQ и work stealing"
+              from="Николай Тузов" address="news@example.com" >}}
+         …the letter, in markdown…
+         {{< /newsletter-letter-example >}}
+
+       Visibility is presence: the block renders wherever the shortcode is
+       written, and disappears when it is deleted. It used to sit behind a
+       front-matter flag as well (newsletter.letterExample), which meant two
+       places had to agree before anything showed — and the usual outcome was a
+       sample written, reviewed and invisible, with nobody able to tell from the
+       markdown whether the page had one. The archive row keeps its flag for a
+       reason that does not apply here: its `archiveURL` carries data the
+       shortcode cannot invent.
+
+       Params:
+         subject= the Subject line (required — it is half of what the window
+                  shows).
+         from=    sender's display name. Default: the site's params.author,
+                  then the site title.
+         address= the From address. Default: params.newsletter.fromAddress.
+         wordmark= the brand text in the letter's header row, rendered after a
+                  muted "//". Default: params.brand.name + tld. Pass it when the
+                  on-screen wordmark is a site-level override the theme cannot
+                  read (this site draws a three-tone "//go:guides" pragma from
+                  its own logo.html + custom.css).
+         date=    the send date as it should read, e.g. "08.07.2026". Default:
+                  the page's own date, formatted 02.01.2006, falling back to the
+                  build date on a page with no date of its own — a subscribe
+                  page usually has none, and "01.01.0001" in the sample is worse
+                  than a date that drifts. Pass it explicitly to pin the sample.
+       Body: the letter itself, markdown. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if $nl.enable -}}
+{{- $subject := .Get "subject" -}}
+{{- if not $subject }}{{ errorf "newsletter-letter-example: missing required param subject= (page %s)" .Page.Path }}{{ end -}}
+{{ partial "newsletter/letter-example.html" (dict
+     "subject" $subject
+     "from"    (.Get "from" | default site.Params.author | default site.Title)
+     "address" (.Get "address" | default (site.Params.newsletter | default dict).fromAddress | default "")
+     "wordmark" (.Get "wordmark" | default (printf "%s%s" (site.Params.brand | default dict).name (site.Params.brand | default dict).tld) | default site.Title)
+     "date"    (.Get "date" | default (cond .Page.Date.IsZero (now.Format "02.01.2006") (.Page.Date.Format "02.01.2006")))
+     "body"    (.Page.RenderString (dict "display" "block") .InnerDeindent)) }}
+{{- end -}}

@@ -1,0 +1,32 @@
+{{- /* newsletter-cta — the end-of-article block, "next, by mail".
+
+         {{< newsletter-cta title="Дальше — по почте"
+              note="Отписка в один клик." >}}
+         This was part one. Leave your address and I'll send the rest.
+         {{< /newsletter-cta >}}
+
+       Every text is overridable per article, and the order is: shortcode
+       params → the page's `newsletterCta` front matter → the i18n default. A
+       guide that says nothing gets a restrained default; a guide with an
+       argument of its own makes it in its own words.
+
+       Writing it by hand also suppresses the automatic block for this page
+       (placements.articleEnd), so an article never carries two.
+
+       Params: title=, note=. Body: markdown. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if $nl.enable -}}
+{{- .Page.Store.Set "nlForm" true -}}
+{{- .Page.Store.Set "nlCta" true -}}
+{{- $fm := .Page.Params.newsletterCta | default dict -}}
+{{- $body := "" -}}
+{{- if strings.TrimSpace .InnerDeindent -}}
+  {{- $body = .Page.RenderString (dict "display" "block") .InnerDeindent -}}
+{{- else if $fm.body -}}
+  {{- $body = .Page.RenderString (dict "display" "block") $fm.body -}}
+{{- end -}}
+{{ partial "newsletter/cta.html" (dict
+     "title" (.Get "title" | default $fm.title | default "")
+     "body"  $body
+     "note"  (.Get "note" | default $fm.note | default "")) }}
+{{- end -}}

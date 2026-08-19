@@ -1,0 +1,26 @@
+{{- /* newsletter-inline — the bare form, no frame and no fill, for a page that
+       is prose end to end: the subscribe page and the support page.
+
+         {{< newsletter-inline id="form"
+              note="Подтверждение нужно, чтобы чужой адрес нельзя было вписать за человека." >}}
+
+       Params:
+         note= the promise line under the field. Optional; falls back to i18n.
+         id=   id for the unit. The subscribe page uses id="form", which is
+               where the header popover's footer link points (#form) and what
+               modules/newsletter.js autofocuses on arrival.
+
+       No title, no lead: those are the page's own sentences, in the page's own
+       markdown. A theme that wrote them would be putting words in the site
+       owner's mouth on the one page that is entirely about their promise to
+       the reader. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if $nl.enable -}}
+{{- .Page.Store.Set "nlForm" true -}}
+<div class="nl-prose" data-pagefind-ignore>
+  {{ partial "newsletter/form.html" (dict
+       "note"  (.Get "note" | default (i18n "nl_note_short"))
+       "id"    (.Get "id" | default "")
+       "place" (printf "prose-%d" .Ordinal)) }}
+</div>
+{{- end -}}

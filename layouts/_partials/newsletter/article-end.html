@@ -1,0 +1,27 @@
+{{- /* Automatic end-of-article block (placements.articleEnd), rendered from
+       page.html after the series bridge. Off by default: dropping a form into
+       the foot of every guide on a site is a decision its owner makes once, not
+       something a theme does on installation.
+
+       Skipped when the page already carries a hand-written {{< newsletter-cta >}}
+       — the shortcode raises a flag on the page store as the content renders,
+       and this partial runs after it. Without that check an author who wrote
+       their own CTA (the whole point of the per-article texts) would get a
+       second, generic one underneath. A mid-text {{< newsletter >}} block does
+       NOT suppress it: those two are different offers in different places, and
+       an article may carry both.
+
+       Texts: front matter `newsletterCta: {title, body, note}` overrides the
+       i18n defaults — the same three keys the shortcode takes, so a series can
+       set its wording once in the section cascade. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang -}}
+{{- if and $nl.enable $nl.placements.articleEnd (not (.Store.Get "nlCta")) -}}
+{{- .Store.Set "nlForm" true -}}
+{{- $fm := .Params.newsletterCta | default dict -}}
+{{- $body := "" -}}
+{{- with $fm.body }}{{ $body = $.RenderString (dict "display" "block") . }}{{ end -}}
+{{ partial "newsletter/cta.html" (dict
+     "title" ($fm.title | default "")
+     "body"  $body
+     "note"  ($fm.note | default "")) }}
+{{- end -}}

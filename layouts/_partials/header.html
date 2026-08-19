@@ -94,5 +94,15 @@
     {{- with $rss }}
     <a class="rss-link" href="{{ .RelPermalink }}" target="_blank" aria-label="RSS" title="RSS">{{ $rssIcon }}</a>
     {{- end }}
+    {{- /* Newsletter — the fourth square, right of the feed: the two ways of
+           following the site stand together, and the reader who just decided
+           the feed is not their format finds the other one without moving their
+           eyes. Rendered only for a site that turned the newsletter on
+           (params.newsletter.enable + placements.header — docs/newsletter.md);
+           everyone else gets the row exactly as it was. */ -}}
+    {{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang }}
+    {{- if and $nl.enable $nl.placements.header }}
+    {{ partial "newsletter/header-btn.html" . }}
+    {{- end }}
   </div>
 </header>

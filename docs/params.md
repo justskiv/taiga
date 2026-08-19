@@ -34,6 +34,8 @@ fully commented — copy it and edit.
 | `linkcheck` | `"error"` \| `"warn"` | `"error"` | A broken internal link fails the build (`error`) or just logs (`warn`). |
 | `linkPreviews.enable` | bool | `false` | Hover preview cards on prose links — internal guides/series, your Telegram posts, YouTube, Wikipedia. If your site sets its own `[outputs]`, repeat the `preview` format on `page`/`section` — see [link-previews.md](link-previews.md). |
 | `linkPreviews.budgetWords` | int | `1400` | How much of an article an internal preview shows: whole H2 sections until this word budget, the rest listed as "further in the article". |
+| `newsletter.enable` | bool | `false` | Email subscription UI — a header button with a popover, in-article blocks, a series CTA, a footer link. Master switch: off ⇒ a build carries not one `nl-` class. Endpoint, mode and the five placements: [newsletter.md](newsletter.md). |
+| `newsletter.placements.*` | bool | see note 4 | Where the form is offered: `header`, `footer` (both on), `articleEnd`, `seriesLanding` (both off). Each is independent — see [newsletter.md](newsletter.md). |
 | `codapi.url` | string (URL) | — | Your [codapi](https://github.com/nalgeon/codapi-js) server, e.g. `"https://run.example.com/v1"` — what a runnable snippet talks to. Required as soon as any guide writes `{{< run sandbox="…" >}}`; without it the build fails rather than ship a dead Run button. There is no per-snippet override — codapi has one endpoint per page. See [authoring.md](authoring.md#runnable). |
 | `telegram.channels` | list of strings | `[]` | Your OWN channel handles. A t.me post link from these earns a build-time preview card; any other t.me link gets only the ✈ mark. |
 | `ogImages.enable` | bool | `true` | Generate Open Graph share images at build time. |
@@ -57,6 +59,11 @@ fully commented — copy it and edit.
    language block restates it.
 3. `exampleSite` sets `versionDefault = "v0.0.1"` — the theme's own version,
    doubling as a live example of the free-form string.
+4. The newsletter's two CHROME placements (`header`, `footer`) default to on
+   and its two CONTENT ones (`articleEnd`, `seriesLanding`) to off: a reader
+   should be able to find the form as soon as the feature is on, but putting
+   one inside every guide is a decision about the writing, made per site. All
+   four are ignored while `newsletter.enable` is false.
 
 ## Coming-soon mode
 

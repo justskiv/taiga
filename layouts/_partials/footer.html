@@ -12,6 +12,16 @@
       {{- if and .Params.devOnly hugo.IsProduction }}{{ continue }}{{ end }}
       <a href="{{ .URL }}">{{ .Name }}</a>
       {{- end }}
+      {{- /* Newsletter link (params.newsletter.placements.footer): between the
+             site's own links and the feed, because that is the pair a reader
+             compares — mail or reader. It is a placement flag rather than a
+             menu entry so that ONE switch turns the whole feature on and off; a
+             site that wants its own label or position instead sets
+             placements.footer = false and adds a [[menus.footer]] item. */ -}}
+      {{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang }}
+      {{- if and $nl.enable $nl.placements.footer }}
+      <a class="nl-foot-link" href="{{ $nl.subscribePage }}">{{ i18n "nl_foot_link" }}</a>
+      {{- end }}
       <a href="{{ "index.xml" | relLangURL }}">{{ i18n "foot_rss" }}</a>
     </span>
   </div>

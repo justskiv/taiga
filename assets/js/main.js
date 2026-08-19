@@ -21,6 +21,7 @@ import { initTagsFilter } from './modules/tags-filter.js';
 import { bindCodeCopy } from './modules/codecopy.js';
 import { bindCodeEditors } from './modules/codeedit.js';
 import { bindRunOutputs } from './modules/runout.js';
+import { bindNewsletter } from './modules/newsletter.js';
 
 function onReady(fn) {
   if (document.readyState !== 'loading') fn();
@@ -65,6 +66,7 @@ onReady(function () {
   bindCodeCopy();    /* every code listing; BEFORE the editor — it owns the outer wrapper */
   bindCodeEditors(); /* runnable snippets only: self-guards on codapi-snippet */
   bindRunOutputs();  /* ditto: self-guards on the .ro output block beside one */
+  bindNewsletter();  /* subscription forms: self-guards on .nl-form */
 });
 
 if (document.readyState === 'complete') runWidgets();

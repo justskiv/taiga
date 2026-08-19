@@ -1,0 +1,576 @@
+/* newsletter — the subscription UI: header button + popover, the form itself and
+   the four places it can appear (mid-article, end-of-article, series landing,
+   plain prose), plus the two optional blocks of the subscribe page.
+
+   No new visual language is introduced: every recipe is copied from a neighbour
+   so the feature reads as part of the theme rather than as a bolted-on widget —
+   the header button from .rss-link (10-header.css), the popover from .tp-pop
+   (11-popover.css), the end-of-article card from .sbr-next (07-series-bridge.css),
+   the mono eyebrow from the kicker (02-article-head.css). Every colour rides the
+   palette tokens (--accent / --bg-* / --text-*), so all twelve palettes and both
+   schemes are covered without a single media query for colour.
+
+   Markup: layouts/_partials/newsletter/*.html + layouts/_shortcodes/newsletter*.html
+   Behaviour: assets/js/modules/newsletter.js */
+
+/* ---- 1. header button ------------------------------------------------------
+   Fourth square in the right-hand control cluster. Same 34px / 9px-radius
+   chrome as .gh-link / .tp-btn / .rss-link so the row stays one set; the
+   wrapper only exists to anchor the popover. */
+/* flex:none for the same reason .lang-sw and .search-btn have it: the header row
+   gives way at the nav's overflow, never at a fixed control */
+.nl-wrap{position:relative; display:inline-flex; flex:none}
+.nl-btn{
+  width:34px; height:34px; flex:none;
+  display:inline-flex; align-items:center; justify-content:center; padding:0;
+  border:1px solid var(--border); border-radius:9px;
+  background:var(--bg-surface); color:var(--text-secondary); cursor:pointer;
+  transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+             background var(--dur) var(--ease);
+}
+.nl-btn:hover{color:var(--accent); border-color:var(--accent-dim); background:var(--bg-raised)}
+.nl-btn[aria-expanded="true"]{color:var(--accent); border-color:var(--accent)}
+.nl-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.nl-btn svg{width:17px; height:17px}
+
+/* ---- 2. header popover -----------------------------------------------------
+   The same frosted card as the palette popover — the two drop out of the same
+   row and must not read as two different products.
+
+   316px, back down from the 348px it briefly grew to. The width was being spent
+   on a one-row form, and a one-row form is the wrong shape here: whatever is
+   left over after the submit label goes to the field, and what was left was a
+   ~190px input — narrow enough that a password manager's button, which sits on
+   the field's right edge by design (see .nl-field), crowded the placeholder.
+   The form below stacks inside this card instead, so the field gets the card's
+   full inner width and the extensions land in open space. A collected 316px
+   reads better under the bell than a card wide enough for a row that no longer
+   exists. The viewport guard is unchanged, so a narrow phone gets the same card.
+
+   The open animation fades and does NOT move. Bitwarden measures the field once
+   and only repositions its button on scroll and resize, so a panel that slides
+   into place after layout can leave that button parked at the field's old
+   coordinates. Nothing above the input may animate geometry — no transform, no
+   height, no margin. Opacity is safe because it changes no rect.
+
+   The fade is a transition out of @starting-style, not a keyframe animation,
+   and that choice is load-bearing. A keyframe fade puts opacity:0 in the `from`
+   frame, which is the panel's state until the animation advances — and a
+   browser that throttles animations (Firefox does, in any tab that is not the
+   foreground one) leaves the panel laid out, focusable and completely
+   invisible. Measured: opacity stayed 0 for the whole life of the panel. With a
+   transition the resting declaration is opacity:1 and @starting-style supplies
+   the 0 only as the before-change value of the very first frame, so a fade that
+   never runs — throttled, or a browser with no @starting-style — resolves to a
+   visible panel instead of a blank one. Fail-safe by construction. */
+.nl-pop{
+  position:absolute; top:44px; right:0; z-index:150;
+  width:min(316px, calc(100vw - 40px));
+  background:color-mix(in srgb, var(--bg-surface) 93%, transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3);
+  border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:0 18px 44px -14px rgba(0,0,0,.6), 0 0 0 1px var(--accent-dim);
+  padding:13px 14px 12px;
+  opacity:1; transition:opacity .15s var(--ease);
+}
+@starting-style{ .nl-pop{opacity:0} }
+.nl-pop[hidden]{display:none}
+/* The popover is the one placement whose form stacks at every width: the card
+   is the narrowest box the form lives in, and a field sharing that row with the
+   submit label ends up too tight for the extension button on its right edge. */
+.nl-pop .nl-form{flex-direction:column}
+.nl-pop .nl-go{width:100%}
+.nl-pop-h{
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;
+}
+.nl-pop .nl-note{margin-top:9px}
+.nl-pop-more{
+  display:inline-block; margin-top:11px; padding-top:10px; width:100%;
+  border-top:1px solid var(--border); border-bottom:0;
+  font-family:var(--font-mono); font-size:11px; color:var(--text-muted);
+  transition:color var(--dur) var(--ease);
+}
+.nl-pop-more:hover{color:var(--accent); border-bottom:0}
+
+/* ---- 3. form ---------------------------------------------------------------
+   One row on a wide box, a column under 420px (and inside the article block on
+   a phone). The input is deliberately quieter than the button: --bg-base sits
+   one step below the surfaces around it, so the field reads as a hole rather
+   than as another card. */
+.nl-form{display:flex; gap:8px; align-items:stretch}
+.nl-form[hidden]{display:none}
+/* The horizontal padding MUST stay symmetric. This looks like the obvious place
+   to reserve a lane for the password/relay extensions that put a button on
+   every input[type=email], and that is exactly the trap: both anchor their UI
+   to the field's CONTENT box, so each pixel of right padding pushes their
+   button further LEFT, into the text, instead of clearing it.
+
+     Firefox Relay paints its 25px icon as a background layer on this very
+     input — background-origin:content-box, positioned `right` — so the icon
+     lands padding-right px in from the border. It sizes its violet hover slab
+     and its click hit-zone to (2 * padding-right + 25)px, and that hit-zone
+     swallows clicks meant for the field.
+
+     Bitwarden puts its button at
+       left + width - min(height,40) - (paddingRight - offset + 2)
+     when padding-right > padding-left, and at the border edge otherwise.
+
+   Measured live (Firefox, Relay 2.8.1, Bitwarden 2026.7.0) against the header
+   popover's 188.63px field. With the 3em lane this used to carry: Relay's icon
+   sat 43px in from the right border — mid-field, over the tail of the
+   placeholder — and its hover slab covered 109px, 58% of the field. Symmetric
+   11px puts the icon 11px in and the slab at 47px; Bitwarden's button moves
+   from 44px in to 7px.
+
+   So: no lane. The extensions sit against the border edge the way they do on
+   every other site, and text-overflow keeps a long string from sliding out
+   from under them. Do not reintroduce padding-right here. */
+.nl-field{
+  flex:1 1 auto; min-width:0; height:36px; padding:0 11px;
+  text-overflow:ellipsis;
+  font-family:var(--font-sans); font-size:14px; color:var(--text-primary);
+  background:var(--bg-base); border:1px solid var(--border);
+  border-radius:var(--radius-sm); outline:0;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.nl-field::placeholder{color:var(--text-ghost); text-overflow:ellipsis}
+.nl-field:hover{border-color:color-mix(in srgb, var(--accent) 35%, var(--border))}
+.nl-field:focus{border-color:var(--accent); background:var(--bg-deep)}
+.nl-field:focus-visible{outline:2px solid var(--accent-dim); outline-offset:1px}
+.nl-field[aria-invalid="true"]{border-color:color-mix(in srgb, var(--accent-red) 65%, var(--border))}
+
+/* The field's label. It is hidden from sight, not from the a11y tree: password
+   managers pair a field with its `label[for]` when they decide what a form is,
+   and an aria-label alone gives them nothing to pair with. `position:absolute`
+   matters twice over — it keeps the label out of the flex row (an in-flow label
+   would become a flex item and take a column of its own), and it keeps the
+   field's own box untouched. Never swap this for display:none, which would take
+   the label back out of the a11y tree and undo the point of having it. */
+.nl-vh{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0;
+}
+
+/* honeypot: a real field, off-screen rather than display:none — a share of the
+   bots that fill forms skip anything inlined as hidden, and every one of them
+   reads the inline style before it reads the stylesheet. Kept out of the a11y
+   tree and out of the tab order by the markup (aria-hidden + tabindex=-1). */
+.nl-hp{
+  position:absolute; left:-9999px; top:auto;
+  width:1px; height:1px; overflow:hidden;
+}
+
+/* The site has no filled buttons anywhere — every CTA is text or a hairline
+   card. So the submit is an amber wash on the accent's own dim token, not a
+   solid amber slab: present enough to be the obvious next move, quiet enough
+   to belong on a page whose loudest element is a 6px progress segment. */
+.nl-go{
+  flex:none; height:36px; padding:0 15px;
+  font-family:var(--font-sans); font-size:13.5px; font-weight:600; line-height:1;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  color:var(--accent); background:var(--accent-dim);
+  border:1px solid transparent; border-radius:var(--radius-sm); cursor:pointer;
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease),
+             color var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.nl-go:hover{background:var(--accent-glow); border-color:var(--accent-dim)}
+.nl-go:active{transform:translateY(1px)}
+.nl-go:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.nl-go[disabled]{cursor:default; opacity:.62; transform:none}
+.nl-go[disabled]:hover{background:var(--accent-dim); border-color:transparent}
+
+/* submitting: a hairline ring, sized to the label's cap height */
+.nl-spin{
+  display:none; width:12px; height:12px; flex:none; border-radius:50%;
+  border:1.5px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-top-color:var(--accent); animation:nl-spin .7s linear infinite;
+}
+.nl-go.is-busy .nl-spin{display:block}
+.nl-go.is-busy .nl-go-t{display:none}
+@keyframes nl-spin{to{transform:rotate(360deg)}}
+
+/* ---- 4. supporting lines ---------------------------------------------------
+   The promise line and the status line share a size so the block does not
+   change height between states. */
+.nl-note{
+  font-size:12.5px; line-height:1.55; color:var(--text-muted); margin:0;
+}
+.nl-msg{
+  display:none; margin-top:9px; font-size:12.5px; line-height:1.55;
+  color:var(--text-secondary);
+}
+.nl-msg.on{display:block}
+.nl-msg b{color:var(--text-strong); font-weight:600}
+.nl-msg.is-ok{color:color-mix(in srgb, var(--accent-green) 82%, var(--text-primary))}
+.nl-msg.is-err{color:color-mix(in srgb, var(--accent-red) 82%, var(--text-primary))}
+.nl-msg.is-warn{color:var(--text-muted)}
+/* The second line under a status: where the letter is if the inbox looks empty,
+   who to write to when retrying cannot help. It must not compete with the
+   result it follows, so it drops the status colour for --text-muted and sits a
+   notch under the promise line's size — the same relationship .nl-again already
+   has to the message above it. Inside .nl-msg (a <p>) it is a span, made a
+   block: the whole status has to be written in one go for aria-live. */
+.nl-msg .nl-hint{
+  display:block; margin-top:5px;
+  font-size:11.5px; line-height:1.5; color:var(--text-muted);
+}
+/* the mailto is a sentence, not an offer — a link in the line's own colour with
+   a hairline under it, never the accent slab a button would be */
+.nl-msg .nl-hint a{color:inherit;
+  border-bottom:1px solid color-mix(in srgb, currentColor 45%, transparent)}
+.nl-msg .nl-hint a:hover{color:var(--accent); border-bottom-color:var(--accent)}
+.nl-msg .nl-hint a:focus-visible{outline:2px solid var(--accent); outline-offset:2px;
+  border-radius:3px}
+/* the way back to an empty field after a success — quiet, mono, never a button
+   shape: at this point the reader's job is done and this is an escape hatch */
+.nl-again{
+  display:block; margin-top:8px; padding:0; border:0; background:none;
+  font-family:var(--font-mono); font-size:11px; color:var(--text-muted);
+  cursor:pointer; transition:color var(--dur) var(--ease);
+}
+.nl-again:hover{color:var(--accent)}
+.nl-again:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+
+/* ---- 5. in-article block (mid-text) ----------------------------------------
+   The quiet one. A mono eyebrow with the site's dot marker, secondary-toned
+   prose, no fill, no frame and no rules — whitespace alone sets it off from the
+   running text. It used to carry a hairline above and below; they read as
+   editorial dividers rather than as the edges of a block, and an author who
+   wants a rule there can write one with `hr`. The padding stays: it is what
+   holds the block apart now that the lines are gone, and the collapse button is
+   positioned against it.
+
+   The vertical space is deliberately close to prose rhythm: a paragraph is
+   16px apart and an h3 opens on 34px, so ~28px of total gap reads as the next
+   paragraph rather than as an island. The hairlines used to justify a much
+   larger gap; without them that space just looked like a hole in the article.
+   The small padding that remains is headroom for the collapse button.
+
+   --nl-x is the button's box and --nl-x-lane the room the text gives up for
+   it. They are declared here, on the block, because the lane is reserved by a
+   DIFFERENT element than the one it protects against (see .nl-x below) and the
+   two must be impossible to drift apart. */
+.nl-inline{
+  position:relative; margin:22px 0; padding:6px 0 8px;
+  --nl-x:34px; --nl-x-lane:40px;
+}
+.nl-inline[hidden]{display:none}
+.nl-label{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em;
+  text-transform:uppercase; font-weight:600; color:var(--accent); margin-bottom:10px;
+}
+.nl-label::before{content:""; width:6px; height:6px; border-radius:50%;
+  background:currentColor; flex:none}
+.nl-txt{margin:0 0 14px; font-size:16px; line-height:1.66; color:var(--text-secondary)}
+.nl-txt strong{color:var(--text-strong); font-weight:600}
+.nl-txt :last-child{margin-bottom:0}
+.nl-inline .nl-form{max-width:440px}
+.nl-inline .nl-note{margin-top:10px}
+
+/* ---- 5b. the collapse button ----------------------------------------------
+   A 12px glyph in a 34px target. The two numbers are the whole design: the
+   mark has to stay quieter than the eyebrow beside it, and the target has to
+   be hittable with a thumb. 34px is the theme's control square (.nl-btn and
+   the rest of the header cluster), so the button is a size the site already
+   uses rather than a number invented here.
+
+   It sits on the OPTICAL LINE of the block's first line of text, not in the
+   block's corner. The block is frameless — no border, no fill — so a corner
+   has nothing to anchor to, and the button used to read as a mark floating
+   above the text with no relation to it (measured: its centre sat 10px above
+   the eyebrow's). The first line is the only edge the eye can pair it with.
+   top:5px is that alignment written out: 6px of block padding + ~16.5px to the
+   first line's optical middle, minus half the button.
+
+   right:-6px lets the box hang into the gutter so the GLYPH, not the padding
+   around it, lines up with the text measure. A 12px mark centred in a 34px box
+   is inset 11px; without the bleed the button reads as indented from the right
+   margin it is supposed to sit on.
+
+   The lane. Nothing above keeps prose from running under an absolutely
+   positioned button, and it did: measured, the first line of a block without
+   an eyebrow overlapped the button by 11px at 1440 and by 11px again at 390.
+   Padding on the block is the wrong fix — it would shorten every line, not the
+   one or two the button actually crosses, and the block would read as
+   narrower than the prose around it. So the first line gives the room up
+   itself:
+
+     with an eyebrow — the eyebrow is what the button shares its line with, and
+       a max-width stops it short of the lane;
+     without one — a float in .nl-txt::before, which shortens exactly the line
+       boxes it crosses and leaves the rest of the paragraph at full measure.
+
+   The float is the reason for the :has() split: reserving the lane in the text
+   when an eyebrow already owns that line would cut a notch out of a line the
+   button is nowhere near.
+
+   Visibility follows .cc-btn (27-code-copy.css), which answers the same
+   question for the copy button, with one change. There the control is fully
+   hidden until hover; here it rests at .4 instead. The code button lives in a
+   framed block that advertises where its chrome is, while this block has no
+   frame — a control that only exists on hover is a control most readers never
+   learn about, and the reader's only relief from a block that repeats through
+   a series should not be a secret. Touch gets it a shade stronger still: there
+   is no hover there to bring it up. */
+.nl-x{
+  position:absolute; top:5px; right:-6px;
+  width:var(--nl-x); height:var(--nl-x);
+  display:inline-flex; align-items:center; justify-content:center; padding:0;
+  border:1px solid transparent; border-radius:var(--radius-sm);
+  background:none; color:var(--text-ghost);
+  cursor:pointer; opacity:.4;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity var(--dur) var(--ease), color var(--dur) var(--ease),
+             background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.nl-x svg{width:12px; height:12px}
+.nl-inline:hover .nl-x{opacity:1}
+.nl-x:hover{opacity:1; color:var(--text-secondary);
+  background:var(--bg-surface); border-color:var(--border)}
+.nl-x:focus-visible{opacity:1; color:var(--text-secondary);
+  outline:2px solid var(--accent); outline-offset:2px}
+/* display:inline-flex above is an author rule and beats the UA's [hidden], so
+   without this the `hidden` the subscribed state sets in JS did nothing and the
+   button stayed reachable in a state that has no form to put away. */
+.nl-x[hidden]{display:none}
+
+/* The lane, in the element that owns the button's line — see the note above.
+   Both are keyed off a button that is actually there: a reader who has already
+   subscribed gets the button hidden (modules/newsletter.js), and a lane held
+   open for a control that is gone is a notch in the text for nothing. */
+.nl-inline:has(> .nl-x:not([hidden])) > .nl-label{
+  max-width:calc(100% - var(--nl-x-lane));
+}
+.nl-inline:has(> .nl-x:not([hidden])):not(:has(> .nl-label)) > .nl-txt::before{
+  content:""; float:right; width:var(--nl-x-lane); height:var(--nl-x);
+}
+
+/* No hover to bring it up, so it rests a shade stronger. Same answer .cc-btn
+   gives for the copy button on a touch screen. */
+@media (hover:none){
+  .nl-x{opacity:.62}
+}
+/* Paper has no pointer either, and would otherwise be answered by the rule
+   above — a collapse button stamped into a printed article. */
+@media print{
+  .nl-x{display:none}
+}
+
+/* The collapsed block: one muted line in the meta rhythm, no frame and no fill,
+   sitting exactly where the block was. Everything else in the block is taken
+   out of flow rather than out of the DOM, so unfolding is a class toggle and
+   the form keeps whatever the reader had typed. */
+.nl-inline.is-collapsed{padding:0; margin:16px 0}
+.nl-inline.is-collapsed > :not(.nl-ghost){display:none}
+.nl-ghost{
+  margin:0; font-family:var(--font-mono); font-size:11.5px;
+  line-height:1.5; color:var(--text-ghost);
+}
+.nl-ghost[hidden]{display:none}
+
+/* what a placement shows once the reader has subscribed: one muted sentence in
+   the same rhythm as the promise line it replaces. Not a success banner — the
+   success was acknowledged when it happened, and this is only the reason the
+   form is not here. In the popover it grows a "subscribe another address"
+   button, which is .nl-again and needs the line to break before it. */
+.nl-sub{
+  margin:0; font-size:13.5px; line-height:1.55; color:var(--text-muted);
+}
+.nl-sub .nl-again{display:block; margin-top:7px}
+/* a button, because it acts on this page — dressed as the quiet link it reads
+   as, which means resetting everything a button brings with it */
+.nl-ghost-a{
+  padding:0; border:0; background:none; font:inherit; color:var(--text-muted);
+  cursor:pointer; border-bottom:1px solid transparent;
+  transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.nl-ghost-a:hover{color:var(--accent); border-bottom-color:currentColor}
+.nl-ghost-a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---- 6. end-of-article block ----------------------------------------------
+   The fuller one, one notch above the mid-text block. Same card recipe as
+   .sbr-next beside it (surface fill, hairline, 12px radius) so the foot of the
+   article reads as stacked cards, not as a form bolted onto a navigation
+   block. */
+.nl-end{
+  margin:38px 0 0; padding:20px 22px 21px;
+  border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--bg-surface);
+}
+.nl-end .nl-h{
+  margin:0 0 8px; font-size:17.5px; font-weight:650; letter-spacing:-.01em;
+  color:var(--text-strong);
+}
+.nl-end .nl-txt{font-size:15px; margin-bottom:15px}
+.nl-end .nl-form{max-width:460px}
+.nl-end .nl-note{margin-top:11px}
+
+/* ---- 7. series landing CTA -------------------------------------------------
+   Sits under the chapter list, outside .series — a hairline row rather than a
+   second card, so the list stays the page's only block. */
+.nl-cta{
+  margin:26px 0 0; padding:18px 0 0; border-top:1px solid var(--border);
+}
+.nl-cta .nl-txt{font-size:15px; margin-bottom:14px}
+.nl-cta .nl-form{max-width:440px}
+.nl-cta .nl-note{margin-top:10px}
+
+/* ---- 8. bare form in prose (subscribe + support pages) ---------------------
+   A special page (subscribe/support/about) is prose end to end: its links and
+   its offers are plain sentences, not cards. So the form arrives the same way —
+   a section in the page's own voice with a bare form under it. No frame, no
+   fill, nothing that would make it the loudest thing on a quiet page. */
+.nl-prose{margin:20px 0 6px; max-width:470px}
+.nl-prose .nl-note{margin-top:11px}
+
+/* ---- 9. subscribe page: archive row ----------------------------------------
+   Rendered only when the page names an archive (front matter
+   newsletter.archiveURL) — a flat editorial row, the shape a link to a list of
+   past issues wants: no fill, no frame, a hairline above and an arrow that
+   travels on hover. */
+.nl-archive{
+  display:flex; align-items:center; gap:22px; margin-top:26px; padding:15px 2px;
+  border-top:1px solid var(--border); border-bottom:0; color:var(--text-primary);
+}
+.nl-archive .nl-ar-body{display:flex; flex-direction:column; gap:5px; flex:1 1 auto; min-width:0}
+.nl-archive .nl-ar-t{font-size:16.5px; font-weight:600; color:var(--text-strong);
+  transition:color var(--dur) var(--ease)}
+.nl-archive .nl-ar-s{font-size:13.5px; line-height:1.5; color:var(--text-muted)}
+.nl-archive .nl-ar-arw{flex:none; font-size:18px; line-height:1; color:var(--text-ghost);
+  transition:transform var(--dur) var(--ease), color var(--dur) var(--ease)}
+.nl-archive:hover .nl-ar-t{color:var(--accent)}
+.nl-archive:hover .nl-ar-arw{color:var(--accent); transform:translateX(4px)}
+.nl-archive:focus-visible{outline:2px solid var(--accent); outline-offset:3px;
+  border-radius:var(--radius-sm)}
+
+/* ---- 10. subscribe page: letter example ------------------------------------
+   A simplified mail-client window around a sample issue. The frame is the
+   theme's (a card in the palette's own tones); the letter body inside is
+   deliberately LIGHT in every palette — a mail client is not this site, and
+   showing the sample on a dark canvas would misrepresent what lands in the
+   reader's inbox. Hence the literal colours here: they are the letter's, not
+   the theme's, and must not follow the palette. */
+.nl-letter{
+  margin:26px 0 6px; border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--bg-surface); overflow:hidden;
+}
+.nl-letter-bar{
+  display:flex; align-items:center; gap:7px; padding:9px 13px;
+  border-bottom:1px solid var(--border); background:var(--bg-base);
+}
+.nl-letter-bar .nl-dot{width:9px; height:9px; border-radius:50%; flex:none;
+  background:var(--text-ghost)}
+.nl-letter-bar .nl-lt{margin-left:6px; font-family:var(--font-mono); font-size:11px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted)}
+.nl-letter-head{padding:15px 18px 14px; border-bottom:1px solid var(--border)}
+.nl-letter-subj{margin:0 0 9px; font-size:17px; font-weight:650; letter-spacing:-.01em;
+  color:var(--text-strong)}
+.nl-letter-from{display:flex; align-items:baseline; flex-wrap:wrap; gap:5px 10px;
+  font-size:13px; line-height:1.5; color:var(--text-muted)}
+.nl-letter-from b{font-weight:600; color:var(--text-secondary)}
+.nl-letter-from .nl-addr{font-family:var(--font-mono); font-size:12px; color:var(--text-ghost)}
+/* The letter itself, reproducing the campaign template the site actually sends:
+   the 3px amber rule, the wordmark-and-date row, the body, the footer. Paper
+   keeps paper's colours in every palette — a mail client is not this site, and
+   the literal values below are the letter's, never the theme's. */
+/* The canvas the sheet floats on. A letter is never edge-to-edge in a mail
+   client: the client paints its own ground and the 600px sheet sits centred on
+   it, which is most of what makes the sample read as a letter rather than as a
+   panel. Values are lifted from campaign-base.html verbatim — the <body> and
+   wrapper table background (#f2f0ec) and the centring cell's padding
+   (26px 12px) — so the two renders line up. The side gutter is usually wider
+   than 12px anyway: the frame runs past 600px and the auto margins take the
+   rest. */
+.nl-canvas{padding:26px 12px; background:#f2f0ec}
+/* the sheet itself, at the template's own width and border */
+.nl-paper{max-width:600px; margin:0 auto; background:#ffffff; border:1px solid #e7e2da}
+/* the amber rule belongs to the SHEET's top edge, not to the window's */
+.nl-paper-rule{height:3px; line-height:3px; font-size:0; background:#ea8a2e}
+.nl-paper-top{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  padding:22px 34px 0; font-family:var(--font-mono);
+}
+.nl-paper-mark{font-size:14px; letter-spacing:.02em; font-weight:700; color:#141414}
+.nl-paper-mark span{font-weight:400; color:#9a938a}
+.nl-paper-date{flex:none; font-size:11.5px; color:#a9a29a}
+.nl-paper-foot{
+  padding:20px 34px 26px; background:#faf8f4; border-top:1px solid #ece7df;
+  font-size:12.5px; line-height:1.65; color:#8b857d;
+}
+.nl-paper-foot p{margin:0 0 9px}
+.nl-paper-foot p:last-child{margin:0}
+.nl-paper-links{font-family:var(--font-mono); font-size:12px}
+/* dressed as the links they are in the real letter, inert because this one is
+   a picture of a letter: there is nothing here to unsubscribe from, and no
+   hosted copy of this sample to open */
+.nl-paper-unsub{color:#b65200; text-decoration:underline}
+.nl-paper-view{text-decoration:underline}
+/* the body, between the wordmark row and the footer */
+/* The letter's typography is NOT the theme's — it is the campaign template's,
+   lifted verbatim and rescoped by listmonk/tools/render-sample (see the note in
+   newsletter/letter-example.html). The base declarations below mirror the
+   inline typography on the template's content <td>; the rules after them are
+   generated. Hand-editing either half re-opens the drift this closed: the
+   sample link was a hairline underline where the letter sends a solid one, code
+   was a grey chip where the letter sends bare mono, and every margin was a few
+   pixels short. Regenerate, do not tune. */
+.nl-letter-body{
+  padding:26px 34px 30px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  font-size:16px; line-height:1.66; color:#33302b;
+}
+.nl-letter-body :first-child{margin-top:0}
+.nl-letter-body :last-child{margin-bottom:0}
+/* Neutralisers, and ONLY neutralisers. The email is rendered with no competing
+   stylesheet; this page has one, and the site's prose rules would otherwise
+   leak in — underlines drawn as borders, code set as a grey chip, headings
+   carrying the article's anchor padding. Everything here clears a site value.
+   Anything that sets a LETTER value belongs in the generated block below. */
+/* the site's prose links are a padded hover pill with compensating negative
+   margins (03-typography.css); a letter's links are plain text */
+.nl-letter-body a{border-bottom:0; padding:0; margin:0; background:none}
+.nl-letter-body a:hover{border-bottom:0; background:none}
+.nl-letter-body code{background:none; padding:0; border:0; border-radius:0;
+  white-space:normal; word-break:normal}
+.nl-letter-body pre{border-top:0; border-right:0; border-bottom:0; border-radius:0}
+.nl-letter-body pre code{font-size:inherit; color:inherit; background:none; padding:0}
+.nl-letter-body h2, .nl-letter-body h3{border:0; padding:0}
+.nl-letter-body em, .nl-letter-body strong{color:inherit}
+
+/* ---- generated: campaign-base.html <style>, .content -> .nl-letter-body ---- */
+.nl-letter-body h2{margin: 30px 0 12px 0; font-size: 21px; line-height: 1.3; font-weight: 700; letter-spacing: -.01em; color: #141414;}
+.nl-letter-body h3{margin: 24px 0 10px 0; font-size: 17px; line-height: 1.35; font-weight: 650; color: #141414;}
+.nl-letter-body p{margin: 0 0 16px 0;}
+.nl-letter-body ul, .nl-letter-body ol{margin: 0 0 16px 0; padding-left: 22px;}
+.nl-letter-body li{margin: 0 0 7px 0;}
+.nl-letter-body a{color: #b65200; text-decoration: underline;}
+.nl-letter-body blockquote{margin: 0 0 16px 0; padding: 2px 0 2px 16px; border-left: 3px solid #ea8a2e; color: #5f5a53;}
+.nl-letter-body code{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; font-size: 14.5px; color: #1f1d1a;}
+.nl-letter-body pre{margin: 0 0 16px 0; padding: 15px 18px; overflow-x: auto; background-color: #f7f5f1; border-left: 3px solid #ea8a2e; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; font-size: 13px; line-height: 1.62; color: #2f2c27;}
+.nl-letter-body img{max-width: 100%; height: auto;}
+.nl-letter-body hr{border: 0; border-top: 1px solid #ece7df; margin: 26px 0;}
+/* ---- end generated ---- */
+
+/* ---- 11. narrow screens ----------------------------------------------------
+   Under 420px the field and the button stop fitting side by side (the button
+   label alone wants ~110px of the ~260px available), so every form drops to a
+   column with a full-width button. */
+@media(max-width:420px){
+  .nl-form{flex-direction:column}
+  .nl-go{width:100%}
+  .nl-end{padding:18px 16px 19px}
+  .nl-letter-body{padding:22px 22px 24px}
+  .nl-paper-top{padding:18px 22px 0}
+  .nl-paper-foot{padding:18px 22px 22px}
+  .nl-canvas{padding:14px 8px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .nl-pop{transition:none}
+  .nl-spin{animation-duration:1.6s}
+  .nl-go:active{transform:none}
+  .nl-archive .nl-ar-arw{transition:color var(--dur) var(--ease)}
+  .nl-archive:hover .nl-ar-arw{transform:none}
+}

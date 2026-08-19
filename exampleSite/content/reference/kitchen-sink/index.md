@@ -195,3 +195,25 @@ each open a summary card built from Wikimedia's REST API, carrying the W mark.
 The Go blog — a [preview of loop-variable scoping](https://go.dev/blog/loopvar-preview)
 and the classic [error handling in Go](https://go.dev/blog/error-handling-and-go)
 open a card with the italic Go mark, the byline and the post's opening.
+
+## Newsletter {#newsletter}
+
+The subscription blocks, on a site that runs a newsletter
+(`params.newsletter.enable` — [newsletter.md](https://github.com/justskiv/taiga/blob/main/docs/newsletter.md)).
+This demo has no endpoint behind them, so a submission ends in the error state —
+which is itself the degradation worth seeing.
+
+The mid-text block, placed by hand, with a close button (`dismiss=`) whose
+verdict is remembered per block:
+
+{{< newsletter label="series · next" dismiss="ks-demo" note="A demo form: there is no endpoint behind it." >}}
+This is where a guide makes its own case for the letter — in its own voice, not the theme's.
+{{< /newsletter >}}
+
+The bare form for a page written as prose (`newsletter-inline`), the same
+component the subscribe page uses:
+
+{{< newsletter-inline note="A demo form: there is no endpoint behind it." >}}
+
+The card at the foot of this page is the third one — `newsletter-cta`, inserted
+automatically here by `placements.articleEnd`.

@@ -9,6 +9,125 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **The mid-text block's collapse button was redesigned.** It used to be a 26px
+  target pinned to the block's top-right corner, hidden until hover — and the
+  corner is nothing to align to in a block that has no frame, so it read as a
+  mark floating above the text: measured, its centre sat 10px above the
+  eyebrow's, and where the block carries no eyebrow the first line of prose ran
+  *under* it (11px of overlap at 1440px, 11px again at 390px). It is now a 12px
+  glyph in a 34px target — the theme's control square — sitting on the optical
+  line of the block's first line, and that line reserves 40px for it so text can
+  never reach it at any width (`max-width` on the eyebrow, a float in
+  `.nl-txt::before` without one; the rest of the paragraph keeps the full
+  measure). It rests at `opacity:.4` instead of being invisible: the block has no
+  frame to advertise where its chrome is, and on a touch screen there is no
+  hover to reveal it — that case now rests a shade stronger, and print drops the
+  button, both following `.cc-btn`. The button also moved to **last** in the
+  block's markup, so a keyboard meets the field and the submit before "put this
+  away"; it is still `<button type="button">` with an i18n label, and focus
+  brings it up with the theme's accent ring. Fixes a latent bug on the way: the
+  subscribed state sets `hidden` on the button, which `display:inline-flex` had
+  been overriding, so the control stayed reachable in a state that has no form.
+
+- **The mid-text `newsletter` block lost its rules, its extra air and its
+  default promise line.** The two hairlines above and below read as editorial
+  dividers rather than as the edges of a block; an author who wants a rule there
+  writes `hr`. Without them the old 54px gap looked like a hole in the article,
+  so the block now sits ~28px from its neighbours — prose rhythm, not an island.
+  `note=` on this shortcode is now **optional with no fallback**: omit it and
+  there is no promise line at all. A mid-text block speaks in the article's
+  voice, and the theme's generic sentence bolted underneath read as boilerplate
+  the author never wrote. Every other placement keeps its i18n default. A guide
+  that relied on the fallback and wants the line back passes `note="…"`.
+
+- **A reader who has subscribed stops being pitched to.** A successful
+  subscription writes one boolean to `localStorage` (`nl.subscribed`, never the
+  address), and every later placement folds into a single muted line. The header
+  bell and the subscribe page are untouched — the first is navigation, the
+  second is the canonical way in and may be visited to add a second address. The
+  popover's line offers "subscribe another address", because the flag only knows
+  about *this browser* and cannot hear an unsubscribe made from a letter. Where a
+  block would also be collapsed, subscribed wins. New i18n keys: `nl_subscribed`,
+  `nl_subscribed_pop`, `nl_sub_other`; `newsletter/js-config.html` now also
+  publishes `subscribePage`.
+
+- **The letter example is generated from the sending template, not imitated.**
+  Its typography used to be hand-written CSS approximating the email, and it
+  drifted: links were a hairline underline where the letter sends a solid one,
+  inline code was a grey chip where the letter sends bare mono, and every margin
+  and size was a few pixels off. The rules under `.nl-letter-body` are now lifted
+  verbatim from the campaign template's own `<style>` by
+  `local/mocks/newsletter/listmonk/tools/render-sample`, which also renders the
+  reference letter to diff against; a small neutraliser block above them cancels
+  the site's prose styles, which an email never has to fight. Verified 1:1
+  against the reference render on every compared property.
+
+  The sample also sits on a canvas now — the template's own `#f2f0ec` ground with
+  the 600px sheet centred on it — instead of being stretched edge to edge inside
+  the window. That float is most of what makes it read as a letter.
+
+- **The letter example shows the letter that actually sends.** The sample used to
+  sit in a simplified frame of the theme's own invention, which made the one
+  place a reader can inspect the product a rough impression of it. It now
+  reproduces the campaign template: the 3px amber rule, the wordmark-and-date
+  row, and the full footer — why they are getting this, one-click unsubscribe,
+  the sender line, and the note that there are no tracking pixels. Every link in
+  it is an inert `<span>`: this is a picture of a letter. The mail-client window
+  around it is unchanged. New params `wordmark=` and `date=`, new i18n keys
+  `nl_letter_why`, `nl_letter_unsub`, `nl_letter_notrack`.
+
+- **`newsletter-letter-example` and `newsletter-archive` are no longer gated by
+  front matter.** Visibility is presence: write the shortcode and the block is
+  there, delete it and it is gone. Both used to need a second agreement in the
+  page's `newsletter:` params, which split one decision across two files and let
+  a shortcode sit in the markdown for months rendering nothing. The archive's URL
+  moves onto the shortcode as a required `url=`, so the whole feature is one
+  line. **Migration:** delete `newsletter.letterExample` from front matter, and
+  move `newsletter.archiveURL` onto the shortcode as `url="…"`.
+
+- **The mid-text block's close button collapses it instead of deleting it.**
+  Dismissing used to remove the block with no undo anywhere in the interface —
+  a one-way door a reader could walk through by accident. It now folds into a
+  single muted line where the block was ("Subscription form collapsed — bring it
+  back"), and the link unfolds it. Both directions persist, so an unfolded block
+  stays unfolded on the next page as well.
+
+  The `localStorage` value is deliberately unchanged: `nl.dismiss.<key> = '1'`
+  used to mean "removed" and now means "collapsed", so a reader who dismissed a
+  block under the old behaviour meets the ghost line rather than an empty spot —
+  the offer comes back within reach instead of silently reappearing in full.
+  `'0'` is new and records an explicit unfold. Nothing to migrate by hand.
+
+  New i18n keys: `nl_ghost`, `nl_ghost_restore`, `nl_ghost_aria`,
+  `nl_restore_tip`; `nl_dismiss_tip` now reads "Collapse this block".
+
+- **Subscription fields carry a real `label[for]` and a per-instance `id`.**
+  Password managers pair a field with its label to work out what a form is, and
+  the `aria-label` this replaces gave them nothing to pair with. `form.html`
+  takes a `place` slug and builds `id="nl-email-<place>"`; the two shortcodes mix
+  in their `.Ordinal`, since a page can carry the form up to six times and a
+  duplicated id makes every copy after the first ambiguous. The label is
+  visually hidden, not `display:none` — it stays in the a11y tree.
+
+- **The header popover stacks, narrows to 316px, and fades without moving.**
+  The field and the submit button no longer share a row, which takes the input
+  from ~190px to 286px: password-manager and masked-email buttons sit on a
+  field's right edge, and a cramped field put them on top of the placeholder.
+  The open animation is now an opacity transition out of `@starting-style`
+  instead of a keyframe slide — Bitwarden measures the field once and only
+  repositions on scroll and resize, so a panel that moves after layout strands
+  its button at stale coordinates. The transition also fixes a panel that could
+  render fully invisible: the old keyframe held `opacity:0` until it advanced,
+  and a throttled tab never advanced it.
+
+- **`.nl-field` horizontal padding is symmetric and must stay that way.**
+  The `padding-right` lane meant to reserve room for extension buttons did the
+  opposite: both Bitwarden and Firefox Relay anchor to the field's *content*
+  box, so the reserved space pushed their button left into the text, and Relay
+  sized its hover slab and click hit-zone to `2 × padding-right + 25`px — 109px
+  of a 189px field, most of it swallowing clicks meant for the input. The
+  formulas and the measurements are in the comment above `.nl-field`.
+
 - **The home look ships on.** `home.hero = "wordmark"`, `home.grid = "fade"` and
   `home.rubricCards = "naked"` move into the theme's own `hugo.toml`, so a site
   that says nothing now gets the display brand over a dissolving backdrop with
@@ -44,6 +163,66 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   the plated mark everywhere, exactly as before.
 
 ### Added
+
+- **Email subscription.** A reader who liked a guide had exactly one way back to
+  the site: remembering it. The theme now ships the whole front end of a
+  newsletter — a bell button in the header with a popover, a quiet block an
+  author drops into a guide, a card at the foot of an article, a CTA under a
+  series' chapter list, a link in the footer, and a bare form for a page written
+  as prose. One form, one state machine, one set of texts.
+
+  It owns the interface and nothing else: no addresses, no sending, no
+  credentials. The form posts to an endpoint the site names — a proxy on its own
+  origin (`mode = "worker"`) or listmonk's public endpoint for local development
+  (`mode = "direct"`) — so the provider is a detail the pages never learn.
+
+  ```toml
+  [params.newsletter]
+  enable = true                  # master switch; off ⇒ not one nl- class ships
+  endpoint = "/api/subscribe"
+  [params.newsletter.placements]
+  header = true                  # bell beside the feed icon      (default on)
+  footer = true                  # link in the footer row         (default on)
+  articleEnd = false             # card at the foot of a guide     (default off)
+  seriesLanding = false          # CTA under a series' chapters    (default off)
+  ```
+
+  Four shortcodes come with it — `newsletter` (mid-text, dismissible per block),
+  `newsletter-cta` (end of article, every text overridable per guide),
+  `newsletter-inline` (bare form) and the subscribe page's two self-gating
+  blocks, `newsletter-archive` and `newsletter-letter-example`. Turnstile is
+  optional, invisible and never blocking: no token in two seconds and the
+  request goes without one, because a reader who blocks challenges must still be
+  able to subscribe. Full documentation: `docs/newsletter.md`; every placement is
+  live on the demo.
+
+  Two of the form's three results carry a quieter second line, added after
+  watching a live backend answer real addresses. A success now says where the
+  letter is if the inbox looks empty — it is sent again on every attempt, so an
+  invisible one is being filtered, not lost. A failure offers a way out of the
+  one dead end retrying cannot clear: an address the list blocked after a bounce
+  is refused on every try, and only a human on the other end can unblock it. The
+  address that line offers is the site's to name, and without one the line is
+  not rendered at all:
+
+  ```toml
+  [params.newsletter]
+  contactEmail = "news@example.com"   # default: fromAddress; empty ⇒ no line
+  ```
+
+  Both lines live inside the existing `aria-live` region and are written with
+  the status in one go, so a screen reader announces one message, not two.
+
+  The field keeps a reserved lane on its right (`padding-right: 3em`) because
+  password and relay extensions — Bitwarden, 1Password, Firefox Relay, DDG Email
+  Protection — inject their own button into the right edge of every
+  `input[type=email]`, and no page can opt out of it. Without the lane that
+  button sat on the tail of the placeholder. The width is sized against the
+  worst case seen in the wild, a 28px button held 12px off the border, and
+  `text-overflow: ellipsis` catches whatever a longer translation or a fallback
+  font might still overflow. Two knock-on changes: the header popover grew from
+  316px to 348px, because it holds the one form on the site with no room to
+  spare, and `nl_placeholder` is now the shorter `your@mail.com`.
 
 - **The theme carries codapi itself.** Making a snippet runnable used to mean
   pasting a `raw` block into the guide with a `<script>`, a `<link>` and a

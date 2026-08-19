@@ -1,0 +1,72 @@
+{{- /* "What a letter looks like": a simplified mail-client window around a
+       sample issue. The FRAME is the theme's — a card in the palette's tones,
+       a title bar, the From/Subject header; the LETTER inside it is the site's
+       content, handed over as rendered HTML by the shortcode.
+
+       The split is deliberate. A frame is reusable and belongs to a theme; the
+       issue shown in it is one particular letter from one particular
+       newsletter, and lives in the site's markdown where its author can edit
+       it without touching a template.
+
+       The body sits on white in every palette (28-newsletter.css): the reader
+       is being shown what lands in their inbox, and mail clients are not this
+       site. A dark sample would be a lie about the product.
+
+       Inside the window the sample is not a sketch of a letter — it is the
+       letter. The amber rule, the wordmark-and-date row and the whole footer
+       are the same furniture the campaign template sends (the site's listmonk
+       base template), so a reader who signs up gets what they were shown. Keep
+       the two in step: if the sending template's footer changes, this changes.
+
+       The paper's TYPOGRAPHY is generated, not written: the rules under
+       .nl-letter-body in 28-newsletter.css are lifted verbatim from the sending
+       template's own <style> and rescoped, by
+
+         cd local/mocks/newsletter/listmonk/tools/render-sample && go run .
+
+       which also writes out/letter-full.html — the reference render to compare
+       against. Touch the campaign template and you regenerate; do not tune the
+       CSS by hand, that is exactly how the sample drifted from the letter (a
+       hairline underline where the letter sends a solid one, code as a grey
+       chip where the letter sends bare mono).
+
+       Every link in here is INERT — a span, not an anchor. This is a picture of
+       a letter on a web page; an unsubscribe link that unsubscribes nobody is
+       worse than no link, and a live one would be a lie about where it goes.
+
+       Context: a dict
+         subject — the Subject line.
+         from    — display name of the sender.
+         address — the From address.
+         wordmark— brand text for the letter's header row.
+         date    — send date, already formatted.
+         body    — rendered HTML of the sample letter. */ -}}
+{{- $host := (urls.Parse site.BaseURL).Host -}}
+<div class="nl-letter" data-pagefind-ignore>
+  <div class="nl-letter-bar" aria-hidden="true">
+    <span class="nl-dot"></span><span class="nl-dot"></span><span class="nl-dot"></span>
+    <span class="nl-lt">{{ i18n "nl_letter_inbox" }}</span>
+  </div>
+  <div class="nl-letter-head">
+    <p class="nl-letter-subj">{{ .subject }}</p>
+    <p class="nl-letter-from">
+      <span><b>{{ .from }}</b>{{ with .address }} <span class="nl-addr">&lt;{{ . }}&gt;</span>{{ end }}</span>
+      <span>{{ i18n "nl_letter_to" }}</span>
+    </p>
+  </div>
+  <div class="nl-canvas">
+  <div class="nl-paper">
+    <div class="nl-paper-rule" aria-hidden="true"></div>
+    <div class="nl-paper-top">
+      <span class="nl-paper-mark"><span>//</span>{{ .wordmark }}</span>
+      {{- with .date }}<span class="nl-paper-date">{{ . }}</span>{{ end }}
+    </div>
+    <div class="nl-letter-body">{{ .body }}</div>
+    <div class="nl-paper-foot">
+      <p>{{ replace (i18n "nl_letter_why") "{site}" $host }}</p>
+      <p class="nl-paper-links"><span class="nl-paper-unsub">{{ i18n "nl_letter_unsub" }}</span>&nbsp;&middot;&nbsp;<span class="nl-paper-view">{{ i18n "nl_letter_browser" }}</span></p>
+      <p>{{ replace (i18n "nl_letter_reply") "{from}" .from }}</p>
+    </div>
+  </div>
+  </div>
+</div>

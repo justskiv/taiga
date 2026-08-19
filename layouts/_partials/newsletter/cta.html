@@ -1,0 +1,22 @@
+{{- /* "Next — by mail": the fuller end-of-article block, one notch above the
+       quiet mid-text one. Same card recipe as the series bridge below it, so
+       the foot of an article reads as stacked cards rather than as a form
+       bolted onto a navigation block.
+
+       ONE component with two callers — the {{< newsletter-cta >}} shortcode an
+       author writes by hand, and the automatic insert after the series bridge
+       (placements.articleEnd). There is deliberately no second markup for the
+       automatic case: the two must never drift apart.
+
+       Context: a dict
+         title — heading. Optional; falls back to i18n.
+         body  — already-rendered HTML (the shortcode renders its markdown body).
+         note  — the promise line. Optional; falls back to i18n.
+
+       data-pagefind-ignore: a subscription block is chrome, and the search
+       index must not answer "рассылка" with every guide on the site. */ -}}
+<aside class="nl-end" aria-label="{{ i18n "nl_block_aria" }}" data-pagefind-ignore>
+  <p class="nl-h">{{ .title | default (i18n "nl_cta_title") }}</p>
+  <div class="nl-txt">{{ with .body }}{{ . }}{{ else }}<p>{{ i18n "nl_cta_body" }}</p>{{ end }}</div>
+  {{ partial "newsletter/form.html" (dict "note" (.note | default (i18n "nl_note_short")) "place" "end") }}
+</aside>

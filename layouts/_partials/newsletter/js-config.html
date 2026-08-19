@@ -1,0 +1,31 @@
+{{- /* Hugo → JS for the subscription forms: where to post and, optionally, the
+       Turnstile widget in front of it. Rendered from scripts.html, before the
+       deferred bundle, and only on a site that turned the feature on.
+
+       `endpoint` is emitted VERBATIM — it is not run through relURL. In worker
+       mode it is a path on the site's own origin that a Cloudflare route owns
+       (/api/subscribe), which has nothing to do with where Hugo publishes the
+       pages; in direct mode it is an absolute URL to listmonk. Both break if
+       the theme "helpfully" prefixes them with the site's subpath.
+
+       The Turnstile script loads only where it can be used: worker mode, a site
+       key set, and a page that actually carries a form. It is `async defer` and
+       nothing waits for it — modules/newsletter.js gives it 2 seconds at submit
+       time and sends the request without a token if it is not there (§3 of the
+       spec: readers of a privacy-minded blog block challenges more often than
+       average, and a subscription must not depend on one). */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang -}}
+{{- if $nl.enable -}}
+{{- $cfg := dict
+      "mode"             $nl.mode
+      "endpoint"         $nl.endpoint
+      "listUUID"         $nl.listUUID
+      "turnstileSiteKey" $nl.turnstileSiteKey
+      "contactEmail"     $nl.contactEmail
+      "subscribePage"    $nl.subscribePage -}}
+<script>window.TAIGA_NL={{ $cfg | jsonify | safeJS }};</script>
+{{- $hasForm := or $nl.placements.header (.Store.Get "nlForm") -}}
+{{- if and $hasForm (eq $nl.mode "worker") $nl.turnstileSiteKey }}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+{{- end }}
+{{- end -}}

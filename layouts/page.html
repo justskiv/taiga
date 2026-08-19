@@ -69,6 +69,12 @@
 {{ partial "article/term-cards.html" . }}
 {{ partial "article/link-cards.html" . }}
 {{ partial "article/series-bridge.html" . }}
+{{- /* Newsletter, automatic end-of-article block (params.newsletter.placements
+       .articleEnd, off by default). Below the series bridge on purpose: where
+       the article goes next is the reader's first question, and the offer to
+       hear about the next one only makes sense once they have seen it. Skipped
+       when the page wrote its own {{< newsletter-cta >}}. */}}
+{{ partial "newsletter/article-end.html" . }}
 {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
   </main>
   {{ partial "article/rail-right.html" . }}

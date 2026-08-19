@@ -255,6 +255,30 @@ timeZone = "Europe/Moscow"
   [params.telegram]
     channels = ["ntuzov"]
 
+  # Newsletter — ON in the demo, with ALL FOUR placements, so every one of them
+  # can be seen: the bell in the header, the link in the footer, the card at the
+  # foot of each guide and the CTA under a series' chapter list. The mid-text
+  # block has no flag — it is a shortcode, demonstrated on the kitchen-sink page.
+  #
+  # There is no endpoint behind it: the demo is a static site on GitHub Pages,
+  # and /api/subscribe answers nothing. That is deliberate — submitting shows
+  # the failure state, which is a thing worth seeing too. A real site points
+  # `endpoint` at its own proxy (mode = "worker") or, for local development, at
+  # listmonk's public endpoint (mode = "direct" + listUUID). See
+  # docs/newsletter.md.
+  [params.newsletter]
+    enable = true
+    mode = "worker"
+    endpoint = "/api/subscribe"
+    turnstileSiteKey = ""              # empty = no challenge in the browser
+    contactEmail = "hello@example.com" # the error state's way out; see the docs
+    subscribePage = "/subscribe/"
+    [params.newsletter.placements]
+      header = true
+      footer = true
+      articleEnd = true
+      seriesLanding = true
+
 # Tag TERM pages never render (tags link to /tags/#tag), but their data stays
 # available to templates (.GetTerms / term.Pages). The /tags/ list node is
 # kind=taxonomy and unaffected. Series need no such block: a series is a section

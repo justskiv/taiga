@@ -358,3 +358,109 @@ other = "Read on Wikipedia"
 other = "Read on the Go blog"
 [lp_read_gdoc]
 other = "Read on go.dev"
+
+# ── newsletter (28-newsletter.css / modules/newsletter.js) ────────────────────
+# The subscription UI: header button + popover, in-article and series-landing
+# blocks, the footer link. nl_msg_* / nl_again are JS strings — js-bridge.html
+# hands them over as window.THEME_I18N.nlMsg* (see docs/i18n.md). Long copy (the
+# subscribe page, a block's text in one particular guide) is site content and is
+# deliberately absent here.
+[nl_btn_aria]
+other = "Subscribe to new guides"
+[nl_btn_tip]
+other = "Newsletter"
+[nl_pop_head]
+other = "new guides — by mail"
+[nl_pop_more]
+other = "the subscribe page"
+# Deliberately short: the header popover's field is the narrowest place the
+# feature has, and its right edge is reserved for the button password/relay
+# extensions inject (see .nl-field in 28-newsletter.css). "you@example.com" did
+# not fit in what is left and was clipped on the tail.
+[nl_placeholder]
+other = "your@mail.com"
+[nl_field_aria]
+other = "Email address"
+[nl_go]
+other = "Subscribe"
+[nl_note_short]
+other = "New guides and big updates only. No spam, one-click unsubscribe."
+[nl_cta_title]
+other = "Next, by mail"
+[nl_cta_body]
+other = "New guides come out rarely. Leave your address and I'll write when there is something to read."
+[nl_series_body]
+other = "The series goes on. Leave your address and I'll write when the next part is out."
+[nl_block_aria]
+other = "Newsletter subscription"
+[nl_dismiss_tip]
+other = "Collapse this block"
+# The collapsed block leaves this one quiet line behind, so a reader who
+# folded the form away can still unfold it. nl_ghost_restore is the link.
+[nl_ghost]
+other = "Subscription form collapsed"
+[nl_ghost_restore]
+other = "bring it back"
+[nl_ghost_aria]
+other = "Collapsed subscription form"
+[nl_restore_tip]
+other = "Bring the subscription form back"
+# Shown in place of the form once this browser has completed a subscription.
+# The flag is a boolean in localStorage — the address itself is never stored.
+[nl_subscribed]
+other = "You're subscribed — I'll write when there's something new."
+[nl_subscribed_pop]
+other = "You're subscribed."
+[nl_sub_other]
+other = "subscribe another address"
+[nl_foot_link]
+other = "newsletter"
+[nl_archive_title]
+other = "Past issues"
+[nl_archive_sub]
+other = "Every issue is open and readable without subscribing."
+[nl_letter_inbox]
+other = "Inbox"
+# The sample letter reproduces the real campaign footer, so these four read
+# exactly as the sending template does. Change them together with it.
+# In nl_letter_reply, {from} is replaced with the sender name from the shortcode.
+#
+# nl_letter_unsub is a bare "unsubscribe", and that is NOT a drift from
+# nl_note_short above. On a form, "unsubscribe in one click" is a promise made
+# BEFORE signing up: it answers the fear of not getting out later. In the
+# letter the reader is already subscribed and wants the door, not an advert
+# for how easy it is. Do not unify the two.
+[nl_letter_why]
+other = "You are getting this because you subscribed to the {site} newsletter."
+[nl_letter_unsub]
+other = "unsubscribe"
+[nl_letter_browser]
+other = "view in browser"
+[nl_letter_reply]
+other = "{from}. You can reply to this letter — I read every one."
+[nl_letter_to]
+other = "to: you"
+# Form strings owned by JS (modules/newsletter.js). In nl_msg_ok, {email} is
+# replaced with the address the reader typed, and set in bold. The *_hint keys
+# are the second, quieter line under a status; in nl_msg_fail_hint {email} is
+# the author's own address (params.newsletter.contactEmail), turned into a
+# mailto link — without one the line is not rendered at all.
+[nl_msg_empty]
+other = "Enter an email address."
+[nl_msg_typo]
+other = "That address looks like a typo — please check it."
+[nl_msg_fail]
+other = "That didn't work — please try again."
+# Not an excuse but the only way out of a legitimate dead end: an address the
+# list blocked after a bounce gets the same error on every attempt, and "try
+# again" is advice that cannot work for it.
+[nl_msg_fail_hint]
+other = "Keeps happening? Write to me: {email}"
+[nl_msg_ok]
+other = "A confirmation letter is on its way to {email}. Follow the link in it and you're done."
+# The letter goes out on every repeat attempt, so the hint is honest: if it is
+# nowhere to be seen, it is almost certainly in the spam folder.
+[nl_msg_ok_hint]
+other = "No letter in the inbox — have a look in the spam folder."
+[nl_again]
+other = "use another address"

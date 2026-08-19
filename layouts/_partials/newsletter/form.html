@@ -1,0 +1,42 @@
+{{- /* The subscription form — the one piece of markup every placement shares.
+       Everything around it (a card, a hairline row, a popover) differs; this
+       does not, so the state machine in modules/newsletter.js can be written
+       once against .nl-unit (form + promise line + status line).
+
+       Context: a dict
+         note  — the promise line under the field. Optional: no note, no line.
+         id    — id for the unit (the subscribe page uses "form", so the
+                 popover's footer link can land the cursor in the field).
+         place — short slug naming the placement, unique within one page. It
+                 becomes the field's id, so `label[for]` has something to point
+                 at. Callers that can repeat on a page (the two shortcodes) mix
+                 their .Ordinal in; the once-per-page placements pass a bare
+                 word. Optional, but a caller that omits it on a page which
+                 already has a form will collide — pass it.
+
+       A page carries this form up to six times, and every copy is its own
+       <form> with its own labelled field. That is what password managers ask
+       for: 1Password matches a field to its label[for] and expects the id to be
+       unique, and a duplicated id makes every copy after the first ambiguous —
+       the manager then fills the wrong one or gives up. The label is visually
+       hidden (.nl-vh), NOT replaced by aria-label: an aria-label names the
+       field for a screen reader but leaves the managers nothing to pair with.
+
+       The honeypot is a real, named field, hidden by a CLASS rather than an
+       inline style — part of the bot population skips anything inlined as
+       hidden and fills everything else. It is out of the tab order and out of
+       the a11y tree, so a keyboard or a screen reader never meets it. */ -}}
+{{- $note := .note -}}
+{{- $fid := printf "nl-email-%s" (anchorize (.place | default "form")) -}}
+<div class="nl-unit"{{ with .id }} id="{{ . }}"{{ end }}>
+  <form class="nl-form" novalidate>
+    <label class="nl-vh" for="{{ $fid }}">{{ i18n "nl_field_aria" }}</label>
+    <input class="nl-field" id="{{ $fid }}" type="email" name="email" inputmode="email" autocomplete="email" spellcheck="false" placeholder="{{ i18n "nl_placeholder" }}" required>
+    <span class="nl-hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></span>
+    <button class="nl-go" type="submit"><span class="nl-spin" aria-hidden="true"></span><span class="nl-go-t">{{ i18n "nl_go" }}</span></button>
+  </form>
+  {{- with $note }}
+  <p class="nl-note">{{ . }}</p>
+  {{- end }}
+  <p class="nl-msg" role="status" aria-live="polite"></p>
+</div>

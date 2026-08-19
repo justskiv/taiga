@@ -1,0 +1,55 @@
+{{- /* newsletter — the quiet mid-text block, placed by hand inside a guide.
+
+         {{< newsletter label="серия · продолжение" dismiss="sched-1" >}}
+         This is the first part of the series. Leave your address and I'll send
+         the next one.
+         {{< /newsletter >}}
+
+       Params:
+         label=    the mono eyebrow above the text. Optional.
+         dismiss=  localStorage key suffix; with it the block grows a collapse
+                   button and the ghost line it collapses into. The key is per
+                   BLOCK, not per page: the same offer can appear in every part
+                   of a series and should stay folded once the reader folds it.
+                   Collapsing does not delete the block — it leaves one quiet
+                   line with a link that unfolds it again, and BOTH states
+                   survive a reload. A reader who hid the form and changed
+                   their mind used to have no way back.
+         note=     the promise line under the form. Optional, and with NO
+                   fallback: no note= means no line. This block alone works that
+                   way. The other placements are theme chrome and carry the
+                   theme's promise, but a mid-text block speaks in the article's
+                   voice, and a generic line bolted under it read as boilerplate
+                   the author never wrote. An author who wants the line writes
+                   the sentence they mean.
+       Body: markdown, the offer in the article's own voice.
+
+       There is no placement flag for this one — a mid-text block interrupts the
+       reading, so it is always a deliberate act by the author, never something
+       a config switch sprinkles over every guide. It renders nothing at all
+       when the site has the newsletter off, so a guide keeps its shortcode
+       through a launch and a rollback alike. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" .Page .Page.Language.Lang -}}
+{{- if $nl.enable -}}
+{{- .Page.Store.Set "nlForm" true -}}
+{{- $dismiss := .Get "dismiss" -}}
+<aside class="nl-inline" aria-label="{{ i18n "nl_block_aria" }}" data-pagefind-ignore{{ with $dismiss }} data-nl-dismiss="{{ . }}" tabindex="-1"{{ end }}>
+  {{- with .Get "label" }}
+  <div class="nl-label">{{ . }}</div>
+  {{- end }}
+  <div class="nl-txt">{{ .Page.RenderString (dict "display" "block") .InnerDeindent }}</div>
+  {{ partial "newsletter/form.html" (dict "note" (.Get "note") "place" (printf "mid-%d" .Ordinal)) }}
+  {{- with $dismiss }}
+  {{/* Last in the source although it paints in the top-right corner, and that
+       is the point: the block's offer is what a keyboard reaches first — field,
+       submit, and only then "put this away". The corner is reached by CSS
+       (position:absolute), so nothing about the visual order depends on this
+       element coming first. */}}
+  <button class="nl-x" type="button" aria-label="{{ i18n "nl_dismiss_tip" }}" title="{{ i18n "nl_dismiss_tip" }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19"/></svg></button>
+  {{/* The collapsed state, shipped in the markup rather than built in JS: it
+       carries prose, so it belongs to the templates and to i18n, and rendering
+       it up front means no flash of an empty line while the module boots. */}}
+  <p class="nl-ghost" aria-label="{{ i18n "nl_ghost_aria" }}" hidden>{{ i18n "nl_ghost" }} — <button class="nl-ghost-a" type="button" title="{{ i18n "nl_restore_tip" }}">{{ i18n "nl_ghost_restore" }}</button></p>
+  {{- end }}
+</aside>
+{{- end -}}

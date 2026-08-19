@@ -1,0 +1,21 @@
+{{- /* Series landing CTA (placements.seriesLanding), rendered under the chapter
+       list. A hairline row rather than a second card: the list is the page's
+       one block, and a framed form beside it would compete with it.
+
+       This is the one placement where the offer writes itself — a reader on a
+       landing page is looking at parts that do not exist yet, and "I'll write
+       when the next one is out" is exactly what the page is for. So the text
+       comes from i18n by default and from the series' own front matter
+       (`newsletterCta: {body, note}` on the section) when a series wants its
+       own words. Off by default. */ -}}
+{{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang -}}
+{{- if and $nl.enable $nl.placements.seriesLanding -}}
+{{- .Store.Set "nlForm" true -}}
+{{- $fm := .Params.newsletterCta | default dict -}}
+{{- $body := "" -}}
+{{- with $fm.body }}{{ $body = $.RenderString (dict "display" "block") . }}{{ end -}}
+<div class="nl-cta" aria-label="{{ i18n "nl_block_aria" }}" data-pagefind-ignore>
+  <div class="nl-txt">{{ with $body }}{{ . }}{{ else }}<p>{{ i18n "nl_series_body" }}</p>{{ end }}</div>
+  {{ partial "newsletter/form.html" (dict "note" ($fm.note | default (i18n "nl_note_short")) "place" "series") }}
+</div>
+{{- end -}}

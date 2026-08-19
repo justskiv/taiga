@@ -63,3 +63,26 @@
     budgetWords = 1400
   [params.telegram]
     channels = []
+
+  # Email subscription. OFF by default, and `enable` is the master switch: with
+  # it false the theme renders no markup, no styles hook and no JS config — a
+  # build carries not one `nl-` class. The placement flags below only matter
+  # once it is on. The two CHROME placements (a button in the header, a link in
+  # the footer) default to ON: turning the feature on and finding no way to
+  # subscribe would be the surprising outcome. The two CONTENT placements
+  # default to OFF: dropping a form into every guide and every series landing
+  # is a decision about someone else's writing, so it is opted into.
+  # See docs/newsletter.md.
+  [params.newsletter]
+    enable = false
+    mode = "worker"                 # "worker" (proxy on your origin) | "direct"
+    endpoint = "/api/subscribe"     # where the form posts, verbatim
+    listUUID = ""                   # direct mode only: the listmonk list UUID
+    turnstileSiteKey = ""           # empty = no bot challenge in the browser
+    contactEmail = ""               # who a failing form offers to write to
+    subscribePage = "/subscribe/"   # what the popover and the footer link to
+    [params.newsletter.placements]
+      header = true
+      footer = true
+      articleEnd = false
+      seriesLanding = false

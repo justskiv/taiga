@@ -55,4 +55,22 @@
         "2" (i18n "js_guides_word" 2)
         "5" (i18n "js_guides_word" 5))
 -}}
+{{- /* Newsletter form strings, only for a site that has the feature on — seven
+       keys are not worth shipping to every other site, and their absence is
+       also the guarantee that a build with newsletter.enable = false carries no
+       trace of it. */ -}}
+{{- if (partialCached "newsletter/cfg.html" . .Language.Lang).enable -}}
+{{- $i18n = merge $i18n (dict
+      "nlMsgEmpty"    (i18n "nl_msg_empty")
+      "nlMsgTypo"     (i18n "nl_msg_typo")
+      "nlMsgFail"     (i18n "nl_msg_fail")
+      "nlMsgFailHint" (i18n "nl_msg_fail_hint")
+      "nlMsgOk"       (i18n "nl_msg_ok")
+      "nlMsgOkHint"   (i18n "nl_msg_ok_hint")
+      "nlAgain"       (i18n "nl_again")
+      "nlSubscribed"    (i18n "nl_subscribed")
+      "nlSubscribedPop" (i18n "nl_subscribed_pop")
+      "nlSubOther"      (i18n "nl_sub_other"))
+-}}
+{{- end -}}
 <script>window.THEME_I18N=Object.assign({{ $i18n | jsonify | safeJS }},window.THEME_I18N||{});window.TAIGA_PAGEFIND={{ "pagefind/pagefind.js" | relURL | jsonify | safeJS }};</script>
