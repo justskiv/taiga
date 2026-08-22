@@ -7,6 +7,34 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A run served from a cache reported the time of the original one.** A
+  cache went in front of the runner, and codapi's answer is replayed byte for
+  byte — `duration` among those bytes. A second Run on unchanged code came
+  back in about 100 ms and still said `run · 949 ms`, the figure from the
+  first press, and said it again on every press after that. Formally true and
+  useless: the reader waited a tenth of it, and a number that never moves
+  reads as a widget stuck on an old value rather than as a cache doing its
+  job.
+
+  The correction needs no cache header, and no list of caches to recognise. A
+  server cannot answer in less time than it says the run itself took, so an
+  answer arriving faster than its own `duration` was replayed rather than
+  computed, and the only figure left that describes something that happened is
+  the one measured in the browser. A run that really did happen keeps the
+  server's own number, which is the better one for a guide about performance:
+  there is no network in it.
+
+  It is a wrapper — `assets/js/modules/runclock.js` — rather than a fork of
+  the vendored client. codapi resolves its engine by name on every single run,
+  so the transport underneath (the health check, the five HTTP error texts,
+  the request timeout) stays exactly as shipped, and upgrading `snippet.js`
+  carries none of it into the theme to be re-checked by hand. A transport
+  failure still rejects, so a snippet fires its own `error` event as before;
+  a replayed answer also reaches the `result` event with `cached: true`, which
+  the theme does not render and a site can.
+
 ### Changed
 
 - **The newsletter is off by default, and "off" now means the build carries no

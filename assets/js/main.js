@@ -21,6 +21,7 @@ import { initTagsFilter } from './modules/tags-filter.js';
 import { bindCodeCopy } from './modules/codecopy.js';
 import { bindCodeEditors } from './modules/codeedit.js';
 import { bindRunOutputs } from './modules/runout.js';
+import { patchRunClock } from './modules/runclock.js';
 import { bindNewsletter } from './modules/newsletter.js';
 
 /* Build-time feature flags. esbuild substitutes a literal `true`/`false` for
@@ -54,6 +55,13 @@ function runWidgets() {
     try { w[1](mount); } catch (e) { console.error('widget ' + w[0] + ' failed:', e); }
   });
 }
+
+/* Before onReady, and outside it: this one is not a mount, it is a correction
+   to the number a finished run reports, and a snippet can be run from script as
+   well as from a click. codapi is loaded by the same deferred tag one line
+   above this bundle in scripts.html, so window.codapi is already there; on a
+   page without a snippet the call finds nothing and returns. */
+patchRunClock();
 
 onReady(function () {
   const mount = document.getElementById('tp-mount');

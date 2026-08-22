@@ -431,6 +431,19 @@ is — `example` → `run · 128 ms` (green) or `error · 89 ms` (copper) — an
 **restore example** puts the author's back. The body is taken **verbatim**, so
 write it flush left: program output owns its own indentation.
 
+A cache in front of the runner would otherwise make that number a lie. A
+replayed answer carries the duration of the **original** run, so a second press
+on unchanged code lands in a tenth of the time and still reports the first run's
+figure — the same number however often the reader presses, which reads as a
+stuck widget rather than as a fast cache. So the theme times the wait itself
+whenever an answer arrives faster than the duration it claims: a server cannot
+answer in less time than the run took, so that answer was replayed, and the chip
+shows what the reader actually waited for. A run that really happened keeps the
+server's own figure, which is the better number for a guide about performance —
+it has no network in it. Nothing here depends on a particular cache or on its
+headers; the snippet's own `result` event carries `cached: true` on a replayed
+answer, for a site that wants to say so out loud.
+
 | param | |
 |---|---|
 | `sandbox=` | codapi sandbox id. Required, except for a run with no sandbox behind it (see below). |
