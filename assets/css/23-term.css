@@ -140,7 +140,8 @@
 .term-card.c-violet{--cl:var(--accent-violet)}
 /* the content decides the width: a definition carrying a code block or a figure
    needs more room than one carrying a sentence. */
-.term-card:has(pre), .term-card:has(img), .term-card:has(table){
+.term-card:has(pre), .term-card:has(img), .term-card:has(table),
+.term-card:has(ul), .term-card:has(ol){
   max-width:min(460px, calc(100vw - 32px));
 }
 /* a pinned card firms its edge — the reader chose it, the card answers */
@@ -182,7 +183,7 @@
    fill the secondary tone read greyer still. */
 .term-card-b{
   padding:9px 18px 15px;
-  max-height:min(46vh, 340px); overflow-y:auto; overscroll-behavior:contain;
+  max-height:min(68vh, 520px); overflow-y:auto; overscroll-behavior:contain;
   font-size:14px; line-height:1.6; color:var(--text-primary);
   scrollbar-width:thin;
   scrollbar-color:color-mix(in srgb, var(--cl) 18%, var(--border)) transparent;
@@ -274,7 +275,7 @@
     transform:translateY(14px);
   }
   .term-cards.is-live .term-card.is-open{transform:translateY(0)}
-  .term-card-b{max-height:min(52vh, 380px)}
+  .term-card-b{max-height:min(64vh, 460px)}
   /* the scrim only appears with the sheet. A plain rgba(0,0,0,.5) is nearly
      invisible on this theme's dark palettes — black over near-black — so the
      separation comes from a blur, with the wash only deepening it. */
