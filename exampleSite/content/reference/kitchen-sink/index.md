@@ -35,7 +35,25 @@ func mallocgc(size uintptr) unsafe.Pointer {
 }
 ```
 
-Non-Go — flat `.nohl` (fence `text` or no language):
+Other lit languages wear the same roles — blue for a structural name, copper
+for a number, one tone for strings, muted italic for a comment:
+
+```json
+{
+  "items": [
+    {"price": 123, "shipped": true},
+    {"price": 101}  // a trailing comment is fine
+  ]
+}
+```
+
+```bash
+export GODEBUG=schedtrace=1000
+go build ./... && ./app --addr "$HOST:8080"   # both, or nothing
+```
+
+A bare fence, `text` or `txt` is the plain form — flat `.nohl`, which is what a
+transcript wants:
 
 ```text
 $ go build ./...
@@ -122,6 +140,24 @@ func writePointer(slot *unsafe.Pointer, ptr unsafe.Pointer) {
 
 Hence the invariant: a pointer written while the GC runs can never be lost.
 {{< /term >}} — which is why a pointer write costs more than an `int` write.
+
+A definition renders through the same pipeline as the article, so a listing
+inside a card is lit exactly as it would be in the prose:
+the path is a {{< term word="JSON Pointer" kind="definition" color="blue" href="https://www.rfc-editor.org/rfc/rfc6901" more="RFC 6901" >}}
+A standard for addressing one value inside a JSON document — a string of
+slash-separated tokens:
+
+```json
+{
+  "items": [
+    {"price": 123},
+    {"price": 101}  // this one is /items/1/price
+  ]
+}
+```
+
+Left to right: field `items`, element `1`, field `price`.
+{{< /term >}}, not a dotted path.
 
 When the word reads differently in the sentence than it should in the card's
 heading, `title=` splits the two:

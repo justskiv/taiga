@@ -357,9 +357,27 @@ with the config: [newsletter.md](newsletter.md).
 
 ## Code blocks {#code-blocks}
 
-Fenced code as usual. **Only Go is highlighted** (server-side Chroma, recoloured
-to the theme palette); every other language, ` ```text `, and bare fences render
-as plain `<code class="nohl">`. Two fence attributes:
+Fenced code as usual, highlighted server-side by Chroma and recoloured to the
+theme palette. The lit languages are
+
+```
+go  json  yaml/yml  bash/sh/shell/zsh  c  css  html  xml
+javascript/js  typescript/ts  sql  diff  python/py
+```
+
+and a **bare fence**, ` ```text ` or ` ```txt ` is the plain form — it renders
+as `<code class="nohl">`, which is what a shell transcript, a trace or a gc log
+wants. Anything else falls through to plain as well; the list is an allowlist
+rather than "whatever Chroma can lex", because a language whose central tokens
+have no colour in this palette reads worse half-lit than flat. `toml` and `asm`
+were tried and rejected on that test — see the note in
+`layouts/_markup/render-codeblock.html` before adding one.
+
+Colours mean the same thing in every language: amber a keyword, blue a type or
+a structural name (a JSON key, an HTML tag), green a callable, copper a number,
+one tone for strings, muted italic for comments.
+
+Two fence attributes:
 
 ````md
 ```go {label="runtime/malloc.go (simplified)" hl_lines=[2]}
@@ -369,7 +387,7 @@ func mallocgc(size uintptr) unsafe.Pointer { … }
 
 - `{label="…"}` — a file caption above the block. Works on any language.
 - `{hl_lines=[2]}` — highlight lines; ranges go in as strings, `hl_lines=[2,"5-7"]`.
-  Go blocks only (it is a Chroma option).
+  Lit blocks only (it is a Chroma option, so a plain fence has nothing to mark).
 
 Every listing carries a **copy button** — nothing to write, nothing to switch
 on. It is not there while the block is being read: it appears in the top-right

@@ -1,10 +1,18 @@
-/* Chroma syntax highlighting — server-side Go highlighting replaces the mock's
+/* Chroma syntax highlighting — server-side highlighting replaces the mock's
    runtime regex highlighter (SPEC §8.2). Class-mode (markup.highlight.noClasses =
    false): Hugo emits .chroma token classes; here they map to the SAME palette
    variables the mock's .gtok-* used, so Go reads identically and re-themes with
-   every palette. Only Go is highlighted; other fences render as plain .nohl
-   (render-codeblock.html). Token→colour map recovered empirically from Chroma's
-   Go output; see notes below. */
+   every palette. render-codeblock.html lights an allowlist of languages; bare
+   fences and ```text stay plain .nohl.
+
+   The map is by ROLE, not by language: a colour means the same thing in every
+   listing on the site — amber is a keyword, blue a type or a structural name,
+   green a callable, copper a literal number, --gtok-str a string, muted italic
+   a comment. The Go groups came first and were recovered empirically from
+   Chroma's Go output; the groups below them extend the same six roles to the
+   tokens Go never emits (JSON keys, HTML attributes, shell variables …). A
+   token class that appears in NEITHER list renders at the body colour — see the
+   note at the foot of the file for which ones do so on purpose. */
 
 /* Wrapper: let the mock's `pre` box (bg/border/radius/padding) show through and
    the text colour come from `pre code`. Chroma's own bg/colour are dropped. */
@@ -63,6 +71,54 @@
 .chroma .c1,
 .chroma .cs { color: var(--text-muted); font-style: italic; }
 
+/* ── beyond Go ──────────────────────────────────────────────────────────────
+   Same six roles, applied to the token classes the other lit languages emit.
+   Grouped by role rather than by language so a reader who learned the palette
+   on a Go listing can read a JSON or a shell one without relearning it. */
+
+/* Structural names → blue, the slot Go's built-in types hold. The thing being
+   named rather than the value: JSON/YAML keys, HTML/XML tags, CSS selectors
+   (.nt); classes, namespaces and exception types (.nc .nn .ne); variables —
+   shell $VAR, CSS custom properties, GAS registers (.nv .vc .vg .vi .vm). */
+.chroma .nt,
+.chroma .nc,
+.chroma .nn,
+.chroma .ne,
+.chroma .nv,
+.chroma .vc,
+.chroma .vg,
+.chroma .vi,
+.chroma .vm { color: var(--accent-blue); }
+
+/* Second name tier → green, beside functions and builtins: HTML attributes,
+   CSS pseudo-elements, Python decorators (.na .nd) and the builtin pseudonyms
+   self/cls (.bp). Reads as "attached to the blue thing above it". */
+.chroma .na,
+.chroma .nd,
+.chroma .bp { color: var(--accent-green); }
+
+/* Literals that are not numbers but behave like them → copper: HTML entities
+   (.ni), assembler constants (.no), YAML/TOML bare literals and dates (.l .ld).
+   Kept with the numbers so they follow them into violet on the light scheme. */
+.chroma .ni,
+.chroma .no,
+.chroma .l,
+.chroma .ld { color: var(--accent-copper); }
+
+/* Word operators (Python and/or/not, SQL) are keywords wearing letters → amber
+   with the other keywords, not left with the symbol operators. */
+.chroma .ow { color: var(--accent); }
+
+/* Generic tokens — diff only. Red and green carry the sign, and nothing else
+   in a diff is coloured: the marker column is the whole message, so lighting
+   the code inside a hunk as well would bury it. Hunk headers recede. */
+.chroma .gd { color: var(--accent-red); }
+.chroma .gi { color: var(--accent-green); }
+.chroma .gh,
+.chroma .gu { color: var(--text-muted); }
+.chroma .gs { font-weight: 600; }
+.chroma .ge { font-style: italic; }
+
 /* ── light-scheme carve-outs (dark palettes keep the mapping above) ──────────
    Numbers move copper → violet: on a light canvas the warm arc is the poorest
    region for chroma and violet among the richest, and the light palette already
@@ -79,6 +135,10 @@
 [data-scheme="light"] .chroma .mi,
 [data-scheme="light"] .chroma .il,
 [data-scheme="light"] .chroma .mo,
+[data-scheme="light"] .chroma .ni,
+[data-scheme="light"] .chroma .no,
+[data-scheme="light"] .chroma .l,
+[data-scheme="light"] .chroma .ld,
 [data-scheme="light"] .gtok-num { color: var(--accent-violet); }
 [data-scheme="light"] .chroma .c,
 [data-scheme="light"] .chroma .ch,
@@ -89,6 +149,8 @@
 [data-scheme="light"] .chroma .cs,
 [data-scheme="light"] .gtok-com { color: var(--text-ghost); }
 
-/* Left at the base text colour, matching the mock: identifiers/variables and
-   user-type names (.nx — Chroma can't tell `Point` the type from `p` the var),
-   operators (.o .ow), punctuation (.p), labels, attributes, whitespace. */
+/* Left at the base text colour, matching the mock: identifiers and user-type
+   names (.n .nx — Chroma can't tell `Point` the type from `p` the var), symbol
+   operators (.o), punctuation (.p), jump labels (.nl — in C and in assembler
+   they are the line's own name, and colouring them competes with the
+   instruction), whitespace (.w), and Chroma's fallbacks (.x .g). */

@@ -238,6 +238,35 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **Syntax highlighting is no longer Go-only.** A definition card in a guide
+  carried a ` ```json ` block and rendered it flat, and so did the same block in
+  the prose: the code-block hook lit Go and dropped everything else into a
+  plain `<code class="nohl">`. That was right when the theme had one language
+  to show and wrong the moment a guide quoted a config, a shell line or a
+  wire format — the reader sees a listing that looks like program output and
+  has to parse it as code anyway.
+
+  Now an allowlist is lit — `go json yaml/yml bash/sh/shell/zsh c css html
+  xml javascript/js typescript/ts sql diff python/py` — and `hl_lines` works
+  in all of them, not just Go. A **bare fence**, ` ```text ` and ` ```txt `
+  stay plain on purpose: that is the form a transcript, a trace or a gc log
+  wants, and it is the overwhelming majority of the fences on the site.
+
+  It is an allowlist rather than "whatever Chroma can lex" because the token
+  map in `20-chroma.css` is a map of ROLES — amber a keyword, blue a type or
+  a structural name, green a callable, copper a number — and a language whose
+  central tokens have no role reads worse half-lit than flat. `toml` (keys
+  arrive as the same class as an ordinary Go identifier, which is
+  deliberately uncoloured) and `asm` (the GAS lexer files every Plan 9
+  register under numbers) were tried and left out on that test; the hook
+  carries the note.
+
+  The map grew the classes the new lexers emit — JSON/YAML keys, HTML tags
+  and attributes, shell and CSS variables, decorators, entities, diff
+  markers — all onto existing palette variables, so every one of the twelve
+  palettes re-themes them for free and no palette file changed. Nothing about
+  a Go listing moved.
+
 - **Email subscription.** A reader who liked a guide had exactly one way back to
   the site: remembering it. The theme now ships the whole front end of a
   newsletter — a bell button in the header with a popover, a quiet block an

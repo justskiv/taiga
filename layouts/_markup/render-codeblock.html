@@ -1,18 +1,42 @@
 {{- /* Code blocks. An optional fence attribute {label="runtime/malloc.go"} renders
-       a <span class="code-label"> above the block (the mock's file caption). Only
-       Go is highlighted — server-side Chroma with classes recoloured to the mock's
-       .gtok-* palette (chroma.css); every other language, ```text, and bare fences
-       fall through to a plain <code class="nohl">, matching the mock's non-Go code.
-       transform.Highlight (not HighlightCodeBlock) keeps the wrapper clean and still
-       honours hl_lines from .Options (reference/features-recipes.md §1e, §4). */ -}}
+       a <span class="code-label"> above the block (the mock's file caption).
+
+       WHAT GETS COLOUR. An allowlist, not "everything Chroma can lex". A bare
+       fence is the site's plain-output form — a shell transcript, a trace, a
+       gc log — and 90% of the fences here are exactly that; ```text and ```txt
+       say the same thing out loud. Those stay a flat <code class="nohl">, which
+       is also the marker codecopy.js looks for. Everything named below goes
+       through server-side Chroma with classes recoloured to the mock's .gtok-*
+       palette (chroma.css).
+
+       ADDING A LANGUAGE is not free. Chroma emits token classes per lexer, and
+       one this palette does not name renders at the body colour; a language
+       whose CENTRAL tokens land there looks half-lit, which reads worse than
+       the honest flat block. Two were tried and left out on exactly that test:
+       ```toml, whose keys come out as NameOther — the same class Go's ordinary
+       identifiers use, and deliberately uncoloured — so a config would light
+       its values and nothing else; and ```asm, which resolves to the GAS lexer
+       and reads Plan 9 assembly with the wrong roles, putting every register
+       and symbol in the number slot. So before extending the list, render a
+       real sample and check which classes come out.
+
+       transform.Highlight (not HighlightCodeBlock) keeps the wrapper clean and
+       still honours hl_lines from .Options (reference/features-recipes.md §1e,
+       §4) — for every highlighted language, not just Go. Aliases (js, ts, py,
+       yml, sh) are passed through as written: Chroma resolves them itself. */ -}}
 {{- with .Attributes.label }}<span class="code-label">{{ . }}</span>
 {{ end -}}
+{{- $lang := lower .Type -}}
+{{- $lit := slice
+      "go" "json" "yaml" "yml" "bash" "sh" "shell" "zsh" "c" "css"
+      "html" "xml" "javascript" "js" "typescript" "ts" "sql" "diff"
+      "python" "py" -}}
 {{- /* data-pagefind-weight="0.5": code is indexed but de-weighted, so prose about
-       a term outranks code that merely mentions it. The Go branch's wrapper is a
+       a term outranks code that merely mentions it. The lit branch's wrapper is a
        styleless block (the mock's box lives on `pre`), so it changes nothing but
        the search weight. */ -}}
-{{- if eq .Type "go" -}}
-<div data-pagefind-weight="0.5">{{ transform.Highlight (trim .Inner "\n") "go" .Options }}</div>
+{{- if in $lit $lang -}}
+<div data-pagefind-weight="0.5">{{ transform.Highlight (trim .Inner "\n") $lang .Options }}</div>
 {{- else -}}
 <pre data-pagefind-weight="0.5"><code class="nohl">{{ trim .Inner "\n" }}</code></pre>
 {{- end -}}

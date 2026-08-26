@@ -33,8 +33,10 @@ THEME = HERE.parent
 GOHL = THEME / "assets/js/modules/gohl.js"
 FENCE = re.compile(r"```go[^\n]*\n(.*?)```", re.S)
 
-# Colour groups exactly as 20-chroma.css paints them; anything unlisted is left
-# at the body colour and counts as "plain".
+# The GO SUBSET of 20-chroma.css: the groups a Go listing can actually land in.
+# The stylesheet paints more classes than these (JSON keys, HTML attributes and
+# so on), but the Go lexer never emits them, and this check only ever compares
+# Go. Anything unlisted is left at the body colour and counts as "plain".
 GROUPS = {
     "kw": "k kd kn kp kr kc",
     "typ": "kt",

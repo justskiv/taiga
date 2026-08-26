@@ -135,9 +135,10 @@ the numbers.
 
 **Do not copy the dark accents, and do not simply darken them either.** Copying
 is the obvious mistake — a mid-tone drawn to glow on black loses most of its
-presence on white; three of the accents feed syntax highlighting
-(`--accent-blue` = built-in types, `--accent-green` = functions,
-`--accent-copper` = numbers), so leaving them bright makes Go listings
+presence on white; most of the accents feed syntax highlighting
+(`--accent-blue` = types and structural names, `--accent-green` = callables,
+`--accent-copper` = numbers and literals, `--accent-red` = a deleted diff line,
+plus `--accent` itself on keywords), so leaving them bright makes listings
 illegible, not merely pale. But darkening them until they clear a contrast
 target is the *second* mistake, and it reads as no highlighting at all. How much
 chroma a hue can carry at a given contrast varies about **3×** by hue on a light
