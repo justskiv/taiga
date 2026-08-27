@@ -20,6 +20,11 @@ other = "Language"
 # footer feed link (the other footer labels are the site's menus.footer entries)
 [foot_rss]
 other = "rss"
+# Accessible name of the footer's link row. A <nav> is a landmark, and a
+# reader jumping between landmarks hears only the name — "footer" is where
+# it is, not what is in it.
+[foot_nav_aria]
+other = "Site links"
 
 [nf_kicker]
 other = "404 · page not found"
