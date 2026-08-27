@@ -1,0 +1,794 @@
+/* comments — the Comentario block at the foot of an article: our own button,
+   plus the translation that makes the engine's widget look like part of this
+   theme rather than a component dropped onto it.
+
+   No new visual language is introduced: the button is the series bridge's card
+   (.sbr-next, 07-series-bridge.css), the thread's service line is the article
+   kicker's mono eyebrow (02-article-head.css), and every colour rides a palette
+   token — so all twelve palettes and both schemes are covered without a single
+   media query for colour.
+
+   Markup:    layouts/_partials/comments/block.html
+   Behaviour: assets/js/modules/comments.js
+   Docs:      docs/comments.md
+
+   Comentario is MIT — Copyright 2023 Dmitry Kann, Copyright 2018 Commento, Inc.
+   (https://gitlab.com/comentario/comentario). The engine's own "powered by"
+   line is hidden further down; the licence asks for its notice to travel with
+   COPIES of the software, and this site distributes none — the bundle is served
+   by the instance itself and never vendored here. */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PART A — our chrome
+   ───────────────────────────────────────────────────────────────────────── */
+
+.cmnt{margin:38px 0 0}
+
+/* No heading above the button. The block already ends the page, the button
+   says what it opens, and a third heading in a foot that already carries the
+   series bridge and the newsletter card was one label too many. The section is
+   named for assistive tech with aria-label instead. */
+
+/* ---- the button ------------------------------------------------------- */
+
+/* The card recipe, copied from .sbr-next: the foot of an article then reads as
+   a stack of three equal cards — where the series goes next, the letter, the
+   discussion — instead of three unrelated widgets. Full width, because a
+   quieter treatment loses the reader on their way to the footer. */
+.cmnt-open{
+  display:flex; align-items:center; gap:9px; width:100%;
+  padding:19px 22px; text-align:left;
+  border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--bg-surface); color:var(--text-primary);
+  font-family:inherit; font-size:15.5px; cursor:pointer;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             transform .16s var(--ease), box-shadow .16s var(--ease);
+}
+.cmnt-open:hover{
+  border-color:color-mix(in srgb, var(--accent) 55%, var(--border));
+  background:color-mix(in srgb, var(--accent) 5%, var(--bg-surface));
+  transform:translateY(-1px); box-shadow:0 12px 26px -20px rgba(0,0,0,.55);
+}
+.cmnt-open:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.cmnt-open[disabled]{cursor:default; opacity:.55; transform:none; box-shadow:none}
+.cmnt-open[disabled]:hover{
+  border-color:var(--border); background:var(--bg-surface); transform:none; box-shadow:none;
+}
+/* `hidden` alone loses to the display above it — the attribute only carries a
+   UA-level rule. Spelled out here so hiding the button actually hides it. */
+.cmnt-open[hidden]{display:none}
+
+/* The count never moves the label: it sits in its own slot, present and empty
+   before the number lands, so the button does not jump when the fetch answers. */
+.cmnt-n{min-width:1.4em; font-variant-numeric:tabular-nums; color:var(--text-muted)}
+.cmnt-n:empty::before{content:"·"; color:var(--text-ghost)}
+
+/* the arrow is the only moving part — same device as .sbr-next .arr */
+.cmnt-arr{
+  margin-left:auto; flex:0 0 auto; display:inline-flex; color:var(--accent);
+  transition:transform .18s var(--ease);
+}
+.cmnt-open:hover .cmnt-arr{transform:translateY(2px)}
+/* Open, the button is no longer an invitation — it is the way back. It gives up
+   the card entirely and becomes a quiet line above the thread, so nothing
+   frames the discussion: a box drawn around a thread that can run for screens
+   turns the page into a window inside a window. */
+.cmnt.is-open .cmnt-arr{transform:rotate(180deg)}
+.cmnt.is-open .cmnt-open:hover .cmnt-arr{transform:rotate(180deg) translateY(-2px)}
+.cmnt.is-open .cmnt-open{
+  width:auto; padding:0; border:0; background:none;
+  font-size:13.5px; color:var(--text-muted);
+}
+.cmnt.is-open .cmnt-open:hover{
+  background:none; transform:none; box-shadow:none; color:var(--text-primary);
+}
+.cmnt.is-open .cmnt-arr{margin-left:8px}
+/* the count is already spelled out by the thread's own heading below */
+.cmnt.is-open .cmnt-n{display:none}
+
+/* ---- status line (loading / error) ------------------------------------ */
+
+.cmnt-status{margin:14px 0 0; font-size:13.5px; color:var(--text-muted)}
+.cmnt-status:empty{display:none}
+.cmnt-status[data-tone="error"]{color:var(--accent-red)}
+.cmnt-retry{
+  margin-left:10px; padding:0; border:0; background:none; cursor:pointer;
+  font:inherit; color:var(--accent); text-decoration:underline; text-underline-offset:3px;
+}
+
+/* the widget host: no chrome of its own — the widget draws its own cards */
+.cmnt-body{margin-top:18px}
+.cmnt-body[hidden]{display:none}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   PART B — the Comentario widget
+
+   The engine declares its ~41 vars on three selectors: `comentario-comments`
+   (0,0,1), and `comentario-comments:not([theme])` inside a
+   prefers-color-scheme block plus `comentario-comments[theme=dark]` — both
+   (0,1,1). `:root[data-theme] comentario-comments` is (0,2,1) and therefore
+   wins over all three, in both directions, without !important.
+
+   `data-theme` is stamped on <html> by the server on every page (baseof.html),
+   so the anchor is always there.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root[data-theme] comentario-comments{
+  /* surfaces — the widget sits ON the page, so its own background is the
+     page's: a second surface here would box the thread inside the article */
+  --cmntr-bg:                 transparent;
+  --cmntr-bg-shade:           var(--bg-surface);
+  --cmntr-dlg-header-bg:      var(--bg-raised);
+  --cmntr-spoiler-bg:         var(--bg-raised);
+  --cmntr-deleted-bg:         var(--bg-raised);
+
+  /* the deep-link highlight: the engine flashes a comment when arrived at by
+     #comentario-<uuid>. Accent tints, so the flash reads as ours */
+  --cmntr-bg-highlight:       var(--accent-dim);
+  --cmntr-bg-blink:           var(--accent-glow);
+
+  /* ink */
+  --cmntr-color:              var(--text-primary);
+  --cmntr-muted-color:        var(--text-muted);
+  --cmntr-label-color:        var(--text-secondary);
+  --cmntr-link-color:         var(--accent);
+  --cmntr-link-hover-color:   color-mix(in srgb, var(--accent) 72%, var(--text-strong));
+
+  /* borders */
+  --cmntr-card-border:        var(--border);
+  --cmntr-table-border:       var(--border);
+  --cmntr-dlg-border:         var(--border);
+
+  /* the editor */
+  --cmntr-input-bg:           var(--bg-base);
+  --cmntr-input-color:        var(--text-primary);
+  --cmntr-input-ph-color:     var(--text-ghost);
+  --cmntr-input-disabled-color:var(--text-ghost);
+
+  /* secondary buttons (tools, sort, RSS) */
+  --cmntr-btn-bg:             transparent;
+  --cmntr-btn-color:          var(--text-muted);
+  --cmntr-btn-border-color:   transparent;
+  --cmntr-btn-hover-bg:       var(--bg-raised);
+  --cmntr-btn-hover-color:    var(--text-primary);
+  --cmntr-btn-active-bg:      var(--bg-raised);
+  --cmntr-btn-active-color:   var(--accent);
+
+  /* votes */
+  --cmntr-score-color:        var(--text-ghost);
+  --cmntr-score-up-color:     var(--accent-green);
+  --cmntr-score-down-color:   var(--accent-red);
+
+  /* states. Moderation is OFF today and switches on later from the admin UI —
+     these are painted now so that flipping it needs no CSS work */
+  --cmntr-pending-bg:         color-mix(in srgb, var(--accent-gold) 12%, transparent);
+  --cmntr-pending-border:     color-mix(in srgb, var(--accent-gold) 55%, var(--border));
+  --cmntr-rejected-bg:        color-mix(in srgb, var(--accent-red) 12%, transparent);
+  --cmntr-sticky-color:       var(--accent-gold);
+
+  --cmntr-danger-bg:          color-mix(in srgb, var(--accent-red) 12%, transparent);
+  --cmntr-danger-color:       var(--accent-red);
+  --cmntr-success-bg:         color-mix(in srgb, var(--accent-green) 12%, transparent);
+  --cmntr-success-color:      var(--accent-green);
+  --cmntr-warning-bg:         color-mix(in srgb, var(--accent-gold) 12%, transparent);
+  --cmntr-warning-color:      var(--accent-gold);
+
+  /* loading skeleton */
+  --cmntr-placeholder-bg:     var(--bg-surface);
+  --cmntr-placeholder-mask:   var(--bg-raised);
+}
+
+/* Typography: the widget hardcodes 15px/1.5 on .comentario-root and, with
+   no-fonts, inherits the page family. Nudge it onto the article's own scale. */
+:root[data-theme] comentario-comments .comentario-root{
+  font-size:15px; line-height:1.65;
+}
+
+/* ---- the three things the vars cannot reach ---------------------------- */
+
+/* 0. Undoing the engine's own control layer.
+
+      Four defects, all invisible until measured, all of them fighting the
+      theme rather than merely differing from it:
+
+        · a bootstrap box-shadow on every non-link button, hung on
+          `.comentario-root .comentario-btn:not(…):not(…):not(…)` — FIVE
+          classes. The plain host anchor (0,2,1) loses to it, which is why the
+          submit button kept a bluish shadow under every article. Hence the
+          extra `.comentario-root` here: (0,5,1) beats (0,5,0).
+        · `:focus` painted the same as `:hover`, so a button stayed lit after a
+          mouse click until focus moved elsewhere.
+        · `transition: … .4s` — nearly three times the site's own --dur.
+        · a 2.4px radius, and a 5px margin on each button.
+
+      What replaces them is one movement shared by every role — a 1px press —
+      so three differently coloured buttons still read as one set. */
+:root[data-theme] comentario-comments .comentario-root .comentario-btn:not(.comentario-btn-tool){
+  box-shadow:none;
+  border-radius:var(--radius-sm);
+  margin:0;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease), transform var(--dur) var(--ease),
+             opacity var(--dur) var(--ease);
+}
+:root[data-theme] comentario-comments .comentario-root .comentario-btn:not(:disabled):active{
+  transform:translateY(1px);
+}
+/* a mouse click leaves focus behind; only keyboard focus should show */
+:root[data-theme] comentario-comments .comentario-root .comentario-btn:not(:disabled):focus:not(:focus-visible){
+  background:var(--cmntr-btn-bg); color:var(--cmntr-btn-color);
+}
+@media (prefers-reduced-motion:reduce){
+  :root[data-theme] comentario-comments .comentario-btn{transition:none}
+  :root[data-theme] comentario-comments .comentario-btn:active{transform:none}
+}
+
+/* 1. The QUIET role — the sort switch, "Отмена", the vote arrows, the feed
+      mark. The engine gives every .comentario-btn
+      `--cmntr-btn-color: var(--cmntr-link-color)` ON THE BUTTON, so they all
+      came out accent: four orange controls in a row under an article that has
+      one accent of its own. Quiet at rest, accent on hover. */
+:root[data-theme] comentario-comments .comentario-btn{
+  --cmntr-btn-color:        var(--text-muted);
+  --cmntr-btn-bg:           transparent;
+  --cmntr-btn-hover-color:  var(--accent);
+  --cmntr-btn-hover-bg:     transparent;
+  --cmntr-btn-active-color: var(--text-primary);
+  --cmntr-btn-active-bg:    transparent;
+  box-shadow:none;
+}
+:root[data-theme] comentario-comments .comentario-btn:hover,
+:root[data-theme] comentario-comments .comentario-btn-active{box-shadow:none}
+:root[data-theme] comentario-comments .comentario-btn-active{color:var(--text-primary)}
+/* a text link underlines on hover; an icon button gets a cushion instead */
+:root[data-theme] comentario-comments .comentario-comment-editor-footer .comentario-btn-link:hover{
+  text-decoration:underline; text-underline-offset:3px;
+  text-decoration-thickness:1px; text-decoration-color:var(--accent-dim);
+}
+:root[data-theme] comentario-comments .comentario-thread-buttons .comentario-btn-link:hover{
+  background:var(--bg-hover); border-radius:var(--radius-sm);
+}
+
+/* 2. The MAIN role — the submit button. Recipe copied from .nl-go
+      (28-newsletter.css): the neighbouring form on the same screen, in the
+      same role. The theme has no solid-filled buttons anywhere except the home
+      CTA — an accent WASH with accent ink is how it says "primary". A solid
+      amber block under every article was the second exception, and it was ours.
+
+      disabled at .62, not the engine's .3: this is the button that carries the
+      price of entry in its label, and an unreadable price is worse than none. */
+:root[data-theme] comentario-comments .comentario-root .comentario-btn-primary{
+  --cmntr-btn-color:        var(--accent);
+  --cmntr-btn-bg:           var(--accent-dim);
+  --cmntr-btn-border-color: transparent;
+  --cmntr-btn-hover-color:  var(--accent);
+  --cmntr-btn-hover-bg:     var(--accent-glow);
+  --cmntr-btn-active-color: var(--accent);
+  --cmntr-btn-active-bg:    var(--accent-glow);
+  min-height:36px; padding:0 15px; font-weight:600; font-size:13.5px;
+  border:1px solid transparent;
+}
+:root[data-theme] comentario-comments .comentario-root .comentario-btn-primary:hover:not(:disabled){
+  border-color:var(--accent-dim);
+}
+:root[data-theme] comentario-comments .comentario-root .comentario-btn:disabled{
+  opacity:.62 !important; cursor:default !important; transform:none;
+}
+
+/* 3. The SECONDARY role — "Предпросмотр". Recipe from .w-btn
+      (09-widgets.css), the theme's base control. Its ON state differs by
+      COLOUR, not by the engine's inset shadow: nothing else on the site is
+      drawn as pressed-in. */
+:root[data-theme] comentario-comments .comentario-root .comentario-btn-secondary{
+  --cmntr-btn-color:        var(--text-secondary);
+  --cmntr-btn-bg:           var(--bg-surface);
+  --cmntr-btn-border-color: var(--border);
+  --cmntr-btn-hover-color:  var(--text-primary);
+  --cmntr-btn-hover-bg:     var(--bg-raised);
+  --cmntr-btn-active-color: var(--accent);
+  --cmntr-btn-active-bg:    var(--accent-dim);
+  min-height:36px; padding:0 13px; font-weight:500; font-size:13.5px;
+  border:1px solid var(--cmntr-btn-border-color);
+}
+:root[data-theme] comentario-comments .comentario-root .comentario-btn-secondary:hover:not(:disabled){
+  border-color:var(--text-muted);
+}
+/* The hover direction survives all twelve palettes without a colour literal:
+   --bg-raised is defined as the hover step — lighter than the surface in the
+   dark palettes, darker in the light one. */
+
+/* 4. The markdown toolbar. The engine dims all eight glyphs to opacity:.5, so
+      the row a writer's mouse lives in looks switched off. */
+:root[data-theme] comentario-comments .comentario-comment-editor .comentario-btn-tool{
+  opacity:1; color:var(--text-ghost); border-radius:var(--radius-sm);
+}
+:root[data-theme] comentario-comments .comentario-comment-editor .comentario-btn-tool:hover{
+  color:var(--text-secondary); background:var(--bg-hover);
+}
+
+/* 5. The footer of the editor. */
+:root[data-theme] comentario-comments .comentario-comment-editor-footer{
+  display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:14px;
+}
+
+/* ---- the thread toolbar -------------------------------------------------
+   The engine lays it out as three far-apart groups: the feed link pinned left,
+   the count floated to the CENTRE by flex-grow, the sort switch right. The
+   count ends up in the middle of nowhere — and with the block carrying no
+   heading of its own, it IS the heading of the thread. So it goes to the left
+   edge, where a heading belongs, set in the theme's own voice for service
+   lines: the mono, spaced, uppercase eyebrow of .sbr-head and the article
+   kicker. That is also the answer to "don't say it so plainly" — «4 КОММЕНТАРИЯ»
+   in eyebrow type reads as a label on the thread, not as a sentence addressed
+   to the reader. */
+:root[data-theme] comentario-comments .comentario-thread-toolbar{
+  /* was baseline. Neither an empty inline-block nor a button at font-size:0
+     has a useful baseline, so anything with an icon dragged the whole group's
+     baseline with it. Once a row carries icons, the only predictable anchor is
+     the centre. */
+  align-items:center;
+  /* the engine sets nowrap, and this row holds roughly 350px of content inside
+     the ~320px a 360px phone gives the column */
+  flex-wrap:wrap; row-gap:8px; column-gap:12px;
+  margin:22px 0 4px;
+  padding-bottom:9px;
+  border-bottom:1px solid var(--border);
+}
+:root[data-theme] comentario-comments .comentario-comment-count{
+  order:1; flex:0 0 auto; margin:0 auto 0 0; text-align:left;
+  font-family:var(--font-mono); font-size:10.5px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted);
+}
+/* The feed mark rides with the heading — a feed OF THIS THREAD belongs beside
+   the thread's name. The auto margin is on the COUNT above, not here: with the
+   feed switched off on the domain this div is empty, and a spacer that lives
+   on an element which may not exist is a spacer that fails silently. */
+:root[data-theme] comentario-comments .comentario-thread-buttons{
+  order:2; flex:0 0 auto; align-self:center;
+}
+:root[data-theme] comentario-comments .comentario-sort-buttons{
+  order:3; flex:0 0 auto; display:flex; align-items:center; gap:10px;
+}
+
+/* Hierarchy inside the sort group: the inactive orders drop a step below the
+   engine's muted, so the row reads "4 КОММЕНТАРИЯ … Лучшие" at a glance and
+   the alternatives are present without asking for attention. */
+:root[data-theme] comentario-comments .comentario-sort-buttons .comentario-btn{
+  --cmntr-btn-color:var(--text-ghost);
+  padding:2px 4px; margin:0;
+}
+:root[data-theme] comentario-comments .comentario-sort-buttons .comentario-btn-active{
+  color:var(--text-primary);
+}
+/* The engine's caret is a filled triangle on a 16 grid — a different language
+   from the theme's stroke icons, and 8px of it carries no meaning anyway. The
+   order that needs explaining says so in words instead (modules/comments.js);
+   this rule is the fallback for a language the theme has no strings for. */
+:root[data-theme] comentario-comments .comentario-sort-buttons .comentario-icon{display:none}
+
+/* A mark for the group, ahead of the words. Not the "sort" glyph with graded
+   rungs — at this size its 4-unit steps collapse into a smear — but lucide's
+   `arrow-up-down` (ISC): four long strokes, no rungs, and direction-neutral,
+   which is right for a group that has no single direction.
+
+   Sized in em off the button text and laid out by flex, deliberately: this is
+   a flex container, so `vertical-align` on the pseudo-element would be ignored
+   outright. currentColor with opacity rather than the ghost token — a hairline
+   stroke in the dimmest colour is a grey smudge. */
+:root[data-theme] comentario-comments .comentario-sort-buttons::before{
+  content:""; flex:0 0 auto; width:1.15em; height:1.15em; margin-right:2px;
+  background-color:currentColor; color:var(--text-ghost); opacity:.75;
+  -webkit-mask:var(--cmnt-sort-icon) center/contain no-repeat;
+          mask:var(--cmnt-sort-icon) center/contain no-repeat;
+}
+:root[data-theme] comentario-comments{
+  --cmnt-sort-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21 16-4 4-4-4'/%3E%3Cpath d='M17 20V4'/%3E%3Cpath d='m3 8 4-4 4 4'/%3E%3Cpath d='M7 4v16'/%3E%3C/svg%3E");
+}
+
+/* The first card sits right under that rule and brings its own border-top —
+   two hairlines a few pixels apart. Drop the card's. */
+:root[data-theme] comentario-comments .comentario-comments > li.comentario-card:first-child{
+  border-top:0; margin-top:4px;
+}
+
+/* An empty thread: the engine hides both the count and the list with
+   .comentario-hidden, leaving a rule that underlines nothing. */
+:root[data-theme] comentario-comments
+  .comentario-thread-toolbar:has(.comentario-comment-count.comentario-hidden){
+  border-bottom:0; padding-bottom:0; margin-bottom:0;
+}
+
+/* 6. The profile bar, in its two lives.
+
+      SIGNED OUT it held one thing — a "Войти" button — and had no work to do
+      on that screen: a fragment of a state machine (avatar / name / settings /
+      sign-out) leaking into the state where it has a single element. It hung
+      above the editor attached to nothing. It goes away.
+
+      The button is only HIDDEN, never removed: the engine keeps a reference to
+      it and Popper anchors the login dialog on it, so taking it out of the DOM
+      breaks signing in. Reading which state we are in costs no JavaScript —
+      signed out the bar's own child is a primary button, signed in it is a
+      toolbar section.
+
+      The door does not disappear with it. It moves to where intent actually
+      begins: onto the submit button of every editor, including the ones that
+      open under a comment three screens down, where this bar was never
+      present anyway. modules/comments.js writes that label.
+
+      SIGNED IN the bar finally has work — it answers "who am I here, and how
+      do I leave" — and its presence is itself the signal that you are in. */
+:root[data-theme] comentario-comments .comentario-profile-bar:has(> .comentario-btn-primary){
+  display:none;
+}
+:root[data-theme] comentario-comments .comentario-profile-bar{
+  display:flex; align-items:center; gap:10px; padding:0 0 12px;
+}
+/* the engine draws a 32px avatar and a bold-but-muted name — a weight and a
+   colour saying opposite things */
+:root[data-theme] comentario-comments .comentario-profile-bar .comentario-avatar,
+:root[data-theme] comentario-comments .comentario-profile-bar .comentario-avatar-img{
+  width:24px; height:24px; margin-right:8px; font-size:14px;
+}
+:root[data-theme] comentario-comments .comentario-profile-bar .comentario-name{
+  font-size:13px; font-weight:400 !important;   /* .fw-bold carries !important */
+  color:var(--text-secondary);
+}
+:root[data-theme] comentario-comments .comentario-toolbar .comentario-btn-tool{
+  width:30px; height:30px; opacity:1;
+  color:var(--text-ghost); border-radius:var(--radius-sm);
+}
+:root[data-theme] comentario-comments .comentario-toolbar .comentario-btn-tool:hover{
+  color:var(--accent); background:var(--bg-hover);
+}
+:root[data-theme] comentario-comments .comentario-toolbar .comentario-btn-tool .comentario-icon{
+  width:15px; height:15px;
+}
+
+/* 2. Badges ("Модератор", "На модерации"): hard-coded #51cf66 / #fab005 with
+      white text. Repainted onto the palette's own roles. */
+:root[data-theme] comentario-comments .comentario-badge{
+  background:color-mix(in srgb, var(--accent-green) 18%, transparent);
+  color:var(--accent-green);
+  font-family:var(--font-mono); font-size:9px; letter-spacing:.06em; font-weight:600;
+}
+:root[data-theme] comentario-comments .comentario-badge-pending,
+:root[data-theme] comentario-comments .comentario-badge-moderator + .comentario-badge{
+  background:color-mix(in srgb, var(--accent-gold) 18%, transparent);
+  color:var(--accent-gold);
+}
+
+/* 3. Avatars and thread rules. The engine ships SIXTY hard-coded colours
+      (.comentario-bg-0 … -59 / .comentario-border-0 … -59, all !important),
+      picked from a hash of the user. They are the one part of the widget that
+      ignores the palette entirely — hence the switch below.
+
+      They are folded into the palette here: the avatar becomes a quiet chip,
+      the thread rule a hairline. Nothing competes with the prose, and
+      commenters are told apart by name and initial — which is how a reader
+      tells them apart anyway. The hover state below deliberately outranks
+      this, so the branch control still lights up. */
+:root[data-theme] comentario-comments [class*="comentario-bg-"]{
+  background-color:var(--bg-raised) !important;
+  color:var(--text-secondary);
+  box-shadow:inset 0 0 0 1px var(--border);
+}
+:root[data-theme] comentario-comments [class*="comentario-border-"]{
+  border-color:var(--border) !important;
+}
+
+/* ---- geometry and type the vars don't cover ---------------------------- */
+
+/* The closed editor is a 130px empty frame with a HARD-CODED #e9ecef border
+   and a 3px radius — a light-grey rectangle that survives into every dark
+   palette. Shrunk to a single inviting row, on the palette's own border and
+   radius. */
+:root[data-theme] comentario-comments .comentario-add-comment-host{
+  min-height:0; padding:13px 16px;
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--bg-surface);
+}
+/* …but once the editor is open it is no longer a placeholder: drop the frame
+   so the textarea's own border is the only one. */
+:root[data-theme] comentario-comments .comentario-add-comment-host.comentario-editor-inserted{
+  padding:0; border:0; background:none;
+}
+
+/* The closed editor's prompt is centred like a banner. It is a text field: the
+   caret will appear on the left, so the invitation belongs there too. */
+:root[data-theme] comentario-comments .comentario-add-comment-host{
+  justify-content:flex-start;
+}
+:root[data-theme] comentario-comments .comentario-add-comment-placeholder{
+  justify-content:flex-start; text-align:left;
+}
+
+/* 03-typography.css paints every li::marker with the site accent. That is right
+   for the prose — the article's own lists — and wrong inside a comment, where a
+   reader's bullet list would come out in the brand colour and outshout the text
+   it belongs to. Markers in the thread stay structural. */
+:root[data-theme] comentario-comments li::marker{color:var(--text-ghost)}
+
+/* Comment bodies use `monospace` for code; the site has a face for that. */
+:root[data-theme] comentario-comments code,
+:root[data-theme] comentario-comments pre{
+  font-family:var(--font-mono); font-size:.88em;
+}
+:root[data-theme] comentario-comments pre{
+  border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px;
+}
+
+/* The profile bar holds the sign-in button and, with anonymous commenting off,
+   it is the reader's only way in. Left-aligned with the thread rather than
+   floated off to the right corner. */
+:root[data-theme] comentario-comments .comentario-profile-bar{
+  justify-content:flex-start;
+}
+
+/* The engine's own footer line ("Работает на Comentario"). Hidden: the site
+   carries no other badge of the tools it runs on, and this one lands directly
+   under the article. Comentario is MIT (Copyright 2023 Dmitry Kann,
+   Copyright 2018 Commento, Inc.) — the licence asks for the notice to travel
+   with COPIES of the software, and we distribute none: the bundle is served
+   by our own instance, never vendored into this repo. The attribution lives
+   here and in docs/comments.md instead of under every guide. */
+:root[data-theme] comentario-comments .comentario-footer{display:none}
+
+/* ---- the thread rule: collapsing a branch ------------------------------
+   The vertical line left of a comment folds its replies away. Three problems
+   with the engine's defaults, all felt rather than seen:
+
+     · the fold plays a 250ms ease-in-out slide. At the foot of an article that
+       reads as lag, not as motion — the reader already knows what they clicked;
+     · the only hover feedback is the line growing from 1px to 4px, over .1s
+       linear. Nothing says "this is a control" until you are on it;
+     · the hit area is the line itself — 12px wide, and the visible part is a
+       hairline inside it.
+
+   So: fold almost instantly, tell the reader early, and give the pointer
+   something to actually land on. */
+
+/* Four animation classes, not one. Folding a branch does NOT use
+   .comentario-collapse — measured on the live widget, it fades the replies out
+   with .comentario-fade-out and only then hides them, and the engine waits for
+   that animation to end before it does. So the 250ms is felt twice: once as the
+   fade, once as the delay before the layout actually closes.
+
+   All four are cut to a blink — long enough to take the hard edge off, short
+   enough that the reader's click and the result read as one event. */
+:root[data-theme] comentario-comments .comentario-collapse,
+:root[data-theme] comentario-comments .comentario-expand,
+:root[data-theme] comentario-comments .comentario-fade-in,
+:root[data-theme] comentario-comments .comentario-fade-out{
+  animation-duration:70ms;
+  animation-timing-function:var(--ease);
+}
+
+:root[data-theme] comentario-comments .comentario-card-expand-toggler{
+  position:relative;
+  transition:border-left-color .08s var(--ease), border-left-width .08s var(--ease);
+}
+
+/* A wider target than the line it draws: the pointer catches the branch from
+   ~8px either side, while the geometry of the thread stays exactly as it was.
+   Nothing above sets overflow, so the overhang is safe. */
+:root[data-theme] comentario-comments .comentario-card-expand-toggler::before{
+  content:""; position:absolute; top:0; bottom:0; left:-8px; right:-6px;
+}
+
+/* Hover: the line takes the accent and thickens. Colour is what carries the
+   message — the width alone was too quiet to notice before landing on it.
+   !important is not a shortcut here: the engine paints these borders with
+   sixty !important colour classes, and the muted-avatar variant overrides
+   them again, so a hover state has to outrank both. */
+:root[data-theme] comentario-comments .comentario-card-expand-toggler:hover:not(.comentario-collapsed),
+:root[data-theme] comentario-comments .comentario-card-expand-toggler:hover.comentario-collapsed{
+  border-left-color:var(--accent) !important;
+  border-left-width:3px !important;
+}
+
+/* ---- the sign-in dialog -------------------------------------------------
+   With anonymous commenting off, this is the main entrance to the site's
+   discussion — and nobody had designed it.
+
+   The engine hangs it off the login button with Popper: `position:absolute`,
+   `width:90%; max-width:500px`, centred on a button at the left edge of the
+   column. A 500px panel centred on a 60px button swings out of the text and
+   lands on the series rail, because Popper only keeps it inside the VIEWPORT,
+   which is far wider than the prose. A dialog asking for credentials is a
+   modal and belongs in the middle of the screen. `!important` throughout,
+   because Popper writes `position` and `transform` inline and rewrites them
+   on scroll.
+
+   The frame follows the search modal (13-search.css) — the site's only other
+   modal: body on --bg-base, sections parted by a hairline rather than by a
+   filled header strip. The title drops to the mono eyebrow the theme uses for
+   service labels, so the weight of the panel sits on the buttons, which is
+   what the reader opened it for. */
+:root[data-theme] comentario-comments .comentario-dialog{
+  position:fixed !important;
+  inset:auto !important;
+  left:50% !important;
+  top:50% !important;
+  transform:translate(-50%, -50%) !important;
+  z-index:210 !important;
+  width:min(400px, calc(100vw - 32px)) !important;
+  max-width:none !important;
+  max-height:min(78vh, 640px); overflow:auto;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:var(--bg-base);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.7), 0 0 0 1px var(--accent-dim);
+}
+:root[data-theme] comentario-comments .comentario-dialog-arrow{display:none !important}
+
+:root[data-theme] comentario-comments .comentario-dialog .comentario-dialog-header{
+  display:flex; align-items:center; gap:10px;
+  padding:12px 16px;
+  background:none; border-bottom:1px solid var(--border);
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-dialog-header .comentario-dialog-title{
+  font-family:var(--font-mono); font-size:10.5px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted);
+}
+/* the close button was absolutely positioned into the corner at 24px */
+:root[data-theme] comentario-comments .comentario-dialog .comentario-dialog-header .comentario-dialog-btn-close{
+  position:static; margin-left:auto; padding:0;
+  width:30px; height:30px; border-radius:var(--radius-sm);
+  color:var(--text-ghost); background:none;
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-dialog-header .comentario-dialog-btn-close:hover{
+  color:var(--accent); background:var(--bg-hover);
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-dialog-header .comentario-dialog-btn-close .comentario-icon{
+  width:15px; height:15px;
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-dialog-body{
+  padding:18px 16px; overflow:visible;
+}
+:root[data-theme] comentario-comments .comentario-dialog hr{
+  background:var(--border); margin:16px 0;
+}
+
+/* The engine's backdrop is `position:absolute` inside the widget, so it dims
+   the thread and nothing else — the article above stays bright while a modal
+   is open. And its colour cannot work at all: `rgba(var(--cmntr-bg),60%)`
+   expects three comma-separated channels in that variable, which no theme puts
+   there. Repainted and lifted to cover the page. */
+:root[data-theme] comentario-comments .comentario-backdrop{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:209 !important;
+  background:color-mix(in srgb, var(--bg-deep) 72%, transparent) !important;
+}
+
+/* ---- the provider buttons ----------------------------------------------
+   What a reader actually meets on production: no fields, no "forgot password",
+   no sign-up — those branches are not built when local login is off. Two
+   buttons, and that is the whole screen.
+
+   The engine draws them as TEXT ON BRAND FILL: #000 for GitHub, #4285f4 for
+   Google, no logos at all (v3.18.0 ships none — `m.button(idp.name, …)`). A
+   black button on the Onyx palette all but vanishes, and the blue is the only
+   blue on the page. So the brand moves out of the fill and into the logo, and
+   the buttons become the same control as everything else on the site.
+
+   Specificity: the engine hangs its own button rules on five classes
+   (three :not() count), so these need to be deeper — hence the full chain. */
+:root[data-theme] comentario-comments .comentario-dialog .comentario-dialog-centered{
+  margin:0; text-align:left; color:var(--text-secondary); font-size:13.5px;
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-oauth-buttons{
+  display:flex; flex-direction:column; gap:8px; margin-top:12px;
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-oauth-buttons .comentario-btn{
+  --cmntr-btn-color:        var(--text-primary);
+  --cmntr-btn-bg:           var(--bg-surface);
+  --cmntr-btn-border-color: var(--border);
+  --cmntr-btn-hover-color:  var(--text-primary);
+  --cmntr-btn-hover-bg:     var(--bg-hover);
+  width:100%; min-height:44px; margin:0; padding:0 16px; gap:10px;
+  justify-content:center; font-size:14.5px; font-weight:500;
+  border:1px solid var(--cmntr-btn-border-color);
+  border-radius:var(--radius-sm); box-shadow:none;
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-oauth-buttons .comentario-btn:hover{
+  border-color:var(--text-muted);
+}
+/* the order comes from the server; if GitHub ever lands second, this fixes it
+   without a line of JavaScript */
+:root[data-theme] comentario-comments .comentario-dialog .comentario-btn-github{order:-1}
+
+/* GitHub's mark is licensed for use in a single colour, black or white.
+   --text-strong is very nearly one or the other in every palette, so painting
+   it with a mask stays inside that rule rather than beside it. */
+:root[data-theme] comentario-comments .comentario-dialog .comentario-btn-github::before{
+  content:""; flex:0 0 auto; width:18px; height:18px;
+  background-color:var(--text-strong);
+  -webkit-mask:var(--cmnt-gh) center/contain no-repeat;
+          mask:var(--cmnt-gh) center/contain no-repeat;
+}
+/* Google's "G" is the one mark that may NOT be recoloured, masked, reshaped or
+   put on a coloured ground — so it is an image, not a mask, on a white chip.
+   On light palettes the chip melts into the button; on dark ones it gives the
+   logo exactly the white ground the guidelines assume. The word "Google" comes
+   from the server and is left alone: it is part of the same requirement. */
+:root[data-theme] comentario-comments .comentario-dialog .comentario-btn-google::before{
+  content:""; flex:0 0 auto; width:20px; height:20px;
+  border-radius:4px;
+  background:#fff var(--cmnt-g) center/13px no-repeat;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+}
+:root[data-theme] comentario-comments{
+  --cmnt-gh:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1.1.9 2.3v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3'/%3E%3C/svg%3E");
+  --cmnt-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/%3E%3Cpath fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/%3E%3Cpath fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/%3E%3Cpath fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/%3E%3C/svg%3E");
+}
+
+/* ---- fields and checkboxes inside a dialog ------------------------------
+   The next dialog a signed-in reader meets is Settings (the gear), and it is
+   still drawn in the engine's own light theme: checkboxes hard-coded white,
+   inputs with no border and a box-shadow instead — a second language for
+   fields inside a widget whose editor already has a proper one. Brought onto
+   the .nl-field recipe. */
+:root[data-theme] comentario-comments .comentario-dialog .comentario-input-group{
+  margin:0 0 10px; box-shadow:none;
+  background:var(--bg-base);
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  transition:border-color var(--dur) var(--ease);
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-input-group:focus-within{
+  border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-dim);
+}
+:root[data-theme] comentario-comments .comentario-dialog .comentario-input-group .comentario-input{
+  height:36px; padding:0 11px; background:none; color:var(--text-primary);
+}
+/* the submit glued to a field stops being an accent square and becomes part
+   of the field — which also answers "which of the two fields is it for" */
+:root[data-theme] comentario-comments .comentario-dialog .comentario-input-group .comentario-btn-primary{
+  --cmntr-btn-bg:transparent; --cmntr-btn-color:var(--text-muted);
+  --cmntr-btn-hover-bg:var(--bg-hover); --cmntr-btn-hover-color:var(--accent);
+  width:38px; min-height:36px; padding:0; border:0;
+  border-left:1px solid var(--border); border-radius:0;
+}
+:root[data-theme] comentario-comments .comentario-checkbox-container input{
+  background-color:var(--bg-base); border-color:var(--border);
+}
+:root[data-theme] comentario-comments .comentario-checkbox-container input:checked{
+  background-color:var(--accent); border-color:var(--accent);
+}
+
+/* ---- the feed mark -----------------------------------------------------
+   The thread's feed link sat in the toolbar as the bare word "RSS". It is a
+   mark, not a sentence: lucide's `rss` (ISC), drawn as a mask so it takes the
+   palette like everything else.
+
+   Redrawn for its size rather than scaled down to it. At 14/24 lucide's dot
+   (`r="1"`) comes out 1.17px across and effectively disappears, so the box is
+   15px, the stroke 2.1 and the dot r=1.2 — hand-fitting a glyph to its target
+   size is ordinary practice, not a hack.
+
+   font-size:0 hides the label visually while leaving it in the accessibility
+   tree — the button keeps "RSS" as its accessible name, which is what a screen
+   reader should announce. The sighted reader gets the theme's tooltip instead;
+   modules/comments.js sets data-tip, and tooltip.js picks it up by delegation. */
+:root[data-theme] comentario-comments .comentario-thread-buttons .comentario-btn-link{
+  display:inline-flex; align-items:center;   /* font-size:0 wrecks the line box */
+  font-size:0; padding:3px 5px;
+}
+:root[data-theme] comentario-comments .comentario-thread-buttons .comentario-btn-link::before{
+  content:""; display:block; width:15px; height:15px;
+  background-color:currentColor;
+  -webkit-mask:var(--cmnt-rss-icon) center/contain no-repeat;
+          mask:var(--cmnt-rss-icon) center/contain no-repeat;
+}
+:root[data-theme] comentario-comments{
+  --cmnt-rss-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 11a9 9 0 0 1 9 9'/%3E%3Cpath d='M4 4a16 16 0 0 1 16 16'/%3E%3Ccircle cx='5' cy='19' r='1.2'/%3E%3C/svg%3E");
+}
+
+/* Keyboard focus. The engine leaves it to the browser, so the dialog's close
+   button — which takes focus the moment the dialog opens — came up ringed in
+   the UA's blue, the one colour on the page that belongs to no palette. Same
+   ring the rest of the theme uses. */
+:root[data-theme] comentario-comments :focus-visible{
+  outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--radius-sm);
+}

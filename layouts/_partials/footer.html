@@ -1,28 +1,79 @@
-{{- /* Site footer: brand, tagline, the site's link row (menus.footer) and a live
-       feed link. Which links and what labels are the site's config, not the
-       theme's. The mock's "rss soon" is now a live feed link. */ -}}
-<footer class="site-foot">
-  <div class="foot-in">
-    <a class="brand" href="{{ "" | relLangURL }}">{{ site.Params.brand.name }}<span class="tld">{{ site.Params.brand.tld }}</span></a>
-    <span class="foot-tag">{{ site.Params.footerTag }}</span>
-    <span class="foot-links">
-      {{- range site.Menus.footer }}
-      {{- /* devOnly items (a dev-only section) show on the dev server but are
-             dropped from every production build — same convention as the header. */ -}}
-      {{- if and .Params.devOnly hugo.IsProduction }}{{ continue }}{{ end }}
-      <a href="{{ .URL }}">{{ .Name }}</a>
-      {{- end }}
-      {{- /* Newsletter link (params.newsletter.placements.footer): between the
-             site's own links and the feed, because that is the pair a reader
-             compares — mail or reader. It is a placement flag rather than a
-             menu entry so that ONE switch turns the whole feature on and off; a
-             site that wants its own label or position instead sets
-             placements.footer = false and adds a [[menus.footer]] item. */ -}}
-      {{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang }}
-      {{- if and $nl.enable $nl.placements.footer }}
-      <a class="nl-foot-link" href="{{ $nl.subscribePage }}">{{ i18n "nl_foot_link" }}</a>
-      {{- end }}
-      <a href="{{ "index.xml" | relLangURL }}">{{ i18n "foot_rss" }}</a>
-    </span>
+{{- /* Site footer — two tiers, split by KIND of link rather than by importance:
+
+         1. identity ←→ navigation. The brand with its strapline beside it hard
+            left, the links a reader might want next hard right — the same
+            bracket the header makes, so head and foot read as a pair around
+            the page. Tier 1 is ONE LINE (.ft-id lays mark and strapline on a
+            shared baseline): the header's counterpart is a row, and a two-line
+            left block against a one-line right one leaves the lower right
+            corner empty.
+         2. a closing line, set as a source comment — the site's legal pages
+            live inside it, opened by a literal `//`. A comment is the line the
+            eye is trained to skip and the line you read when you are actually
+            looking for something: findable without pulling attention off the
+            navigation above. Rendered only for a site that fills menus.legal.
+
+       ONE WRAPPING ROW of links, never columns. Entries disappear on their own
+       terms — a devOnly item in production, the newsletter link with its
+       feature — and a wrapping row only gets shorter, while columns rebalance
+       and shift. That is the whole reason for the shape.
+
+       Type: three voices and no more, and peer elements never differ in voice.
+       The size ramp is 22 / 15 / 13.5 / 11.5, and its MIDDLE belongs to the
+       navigation: those links are what a footer is for.
+
+       Which tier an entry lands in is decided in config (menus.footer vs
+       menus.legal), not by a class here. Styles: assets/css/17-footer.css. */ -}}
+<footer class="ft">
+  <div class="ft-in">
+
+    <div class="ft-top">
+      <div class="ft-id">
+        <a class="brand" href="{{ "" | relLangURL }}" aria-label="{{ site.Params.brand.name }}{{ site.Params.brand.tld }} — {{ i18n "to_home" }}">
+          {{- partial "logo.html" -}}
+          {{ site.Params.brand.name }}<span class="tld">{{ site.Params.brand.tld }}</span>
+        </a>
+        {{- with site.Params.footerTag }}<p class="ft-slogan">{{ . }}</p>{{ end }}
+      </div>
+
+      <nav class="ft-nav" aria-label="{{ i18n "foot_nav_aria" }}">
+        {{- range site.Menus.footer }}
+        {{- /* devOnly items (a dev-only section) show on the dev server and are
+               dropped from every production build — same convention as the
+               header. The row is one wrapping flex line with no fixed slots, so
+               losing an item shortens it and moves nothing else. */ -}}
+        {{- if and .Params.devOnly hugo.IsProduction }}{{ continue }}{{ end }}
+        <a href="{{ .URL }}">{{ .Name }}</a>
+        {{- end }}
+        {{- /* Newsletter link (params.newsletter.placements.footer): between the
+               site's own links and the feed, because that is the pair a reader
+               compares — mail or reader. It is a placement flag rather than a
+               menu entry so that ONE switch turns the whole feature on and off;
+               a site that wants its own label or position sets
+               placements.footer = false and adds a [[menus.footer]] item. */ -}}
+        {{- $nl := partialCached "newsletter/cfg.html" . .Language.Lang }}
+        {{- if and $nl.enable $nl.placements.footer }}
+        <a href="{{ $nl.subscribePage }}">{{ i18n "nl_foot_link" }}</a>
+        {{- end }}
+        <a href="{{ "index.xml" | relLangURL }}">{{ i18n "foot_rss" }}</a>
+      </nav>
+    </div>
+
+    {{- /* `with`, so a site that lists no legal pages gets no empty tier and no
+           stray row of air above it. The copyright rides along because it is
+           the same kind of line — a fact, not a link; `footerCopy` names it,
+           falling back to the brand. */ -}}
+    {{- with site.Menus.legal }}
+    <div class="ft-meta">
+      <p class="ft-legal"><span class="ft-com" aria-hidden="true">//</span>
+        {{- range $i, $e := . }}
+        {{- if $i }}<span class="ft-sep" aria-hidden="true">·</span>{{ end }}
+        <a href="{{ $e.URL }}">{{ $e.Name }}</a>
+        {{- end }}
+      </p>
+      <p class="ft-copy">&copy; {{ now.Year }} {{ site.Params.footerCopy | default (printf "%s%s" site.Params.brand.name site.Params.brand.tld) }}</p>
+    </div>
+    {{- end }}
+
   </div>
 </footer>

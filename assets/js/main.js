@@ -23,6 +23,7 @@ import { bindCodeEditors } from './modules/codeedit.js';
 import { bindRunOutputs } from './modules/runout.js';
 import { patchRunClock } from './modules/runclock.js';
 import { bindNewsletter } from './modules/newsletter.js';
+import { bindComments } from './modules/comments.js';
 
 /* Build-time feature flags. esbuild substitutes a literal `true`/`false` for
    these (js.Build `defines` in layouts/_partials/scripts.html), so a call
@@ -31,7 +32,7 @@ import { bindNewsletter } from './modules/newsletter.js';
    "off ⇒ not one byte shipped" rather than "off ⇒ dead code that never runs".
    They are NOT globals: nothing reads them at run time, and a bundle built
    without the defines would throw on the first one. */
-/* global TAIGA_NEWSLETTER */
+/* global TAIGA_NEWSLETTER, TAIGA_COMMENTS */
 
 function onReady(fn) {
   if (document.readyState !== 'loading') fn();
@@ -84,6 +85,7 @@ onReady(function () {
   bindCodeEditors(); /* runnable snippets only: self-guards on codapi-snippet */
   bindRunOutputs();  /* ditto: self-guards on the .ro output block beside one */
   if (TAIGA_NEWSLETTER) bindNewsletter();  /* subscription forms: self-guards on .nl-form */
+  if (TAIGA_COMMENTS) bindComments();      /* comments block: self-guards on .cmnt */
 });
 
 if (document.readyState === 'complete') runWidgets();

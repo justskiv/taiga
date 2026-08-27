@@ -19,6 +19,10 @@
   {{- $skip = $skip | append "28-newsletter.css" -}}
   {{- $tag = printf "%s-no-newsletter" $tag -}}
 {{- end -}}
+{{- if not (partialCached "comments/cfg.html" . .Language.Lang).enable -}}
+  {{- $skip = $skip | append "29-comments.css" -}}
+  {{- $tag = printf "%s-no-comments" $tag -}}
+{{- end -}}
 {{- range sort (resources.Match "css/[0-9]*.css") "Name" -}}
   {{- if in $skip (path.Base .Name) }}{{ continue }}{{ end -}}
   {{- $bundle = $bundle | append . -}}

@@ -1,0 +1,43 @@
+{{- /* Comments config, resolved once and read by everything else — the block,
+       the js-config and the two bundles. Returns a dict, never nil, so a caller
+       can say `$c.enable` without guarding for a site that never heard of the
+       feature.
+
+       The theme's own hugo.toml carries the defaults (enable = false, no
+       origin); Hugo merges a site's [params.comments] over them key by key.
+
+       `enable` is the one gate, and every caller checks it — the block, the
+       js-config, head/css.html (which leaves 29-comments.css out of the
+       bundle) and scripts.html (which hands esbuild a define that tree-shakes
+       modules/comments.js away). Off therefore means a build with no trace of
+       the feature in it, not a build whose selectors happen to match nothing.
+
+       The `isset` dance is the same belt-and-braces as newsletter/cfg.html:
+       `| default` cannot tell "absent" from "deliberately false". Keys are
+       looked up LOWERCASED — Hugo normalises config keys, and `isset` is a
+       plain map lookup.
+
+       Usage:  {{ $c := partialCached "comments/cfg.html" . .Language.Lang }}
+
+       NOTE: site-level values only. A page's own `comments: false` must NOT be
+       resolved here — this partial is cached per language, and a single page's
+       setting would leak into every other one. That check lives in block.html. */ -}}
+{{- $c := site.Params.comments | default dict -}}
+{{- $enable := false -}}{{ if isset $c "enable" }}{{ $enable = $c.enable }}{{ end -}}
+{{- /* Trailing slashes are normalised away rather than rejected: a self-hosted
+       instance's own BASE_URL is written WITH one, the embed snippet without,
+       and both spellings mean the same host. Everything downstream then
+       concatenates a path onto a known-clean base. */ -}}
+{{- $origin := strings.TrimRight "/" ($c.origin | default "") -}}
+{{- if $enable -}}
+  {{- if not $origin -}}
+    {{- errorf "comments: params.comments.enable is true but params.comments.origin is empty — the block would render a button with nothing behind it. Set it to your Comentario instance, e.g. \"https://comments.example.com\"" -}}
+  {{- end -}}
+  {{- /* http is allowed for a local instance and nowhere else: the site is
+         served over https, and a mixed-content script tag is silently dropped
+         by the browser — a failure that looks like "comments just don't work". */ -}}
+  {{- if not (or (hasPrefix $origin "https://") (hasPrefix $origin "http://localhost") (hasPrefix $origin "http://127.0.0.1")) -}}
+    {{- errorf "comments: params.comments.origin is %q — it must be an https:// URL (http:// is accepted only for localhost during development). A page served over https drops an http script without a word" $origin -}}
+  {{- end -}}
+{{- end -}}
+{{- return (dict "enable" $enable "origin" $origin) -}}

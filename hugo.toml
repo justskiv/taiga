@@ -93,3 +93,22 @@
       footer = true
       articleEnd = false
       seriesLanding = false
+
+  # Comments (29-comments.css / modules/comments.js / _partials/comments/).
+  # OFF by default, and `enable` is the master switch: with it false the theme
+  # renders no markup, ships no `cmnt-` rule in the CSS bundle, no module in the
+  # JS bundle and no config script. It is off because the small half of the job
+  # is the switch — the feature needs a Comentario instance of your own, and a
+  # theme cannot provide one.
+  #
+  # `origin` is that instance's base URL, WITHOUT a trailing slash (one is
+  # trimmed if you leave it). It must be https, except for a localhost instance
+  # during development; turning the feature on without it fails the build rather
+  # than shipping a button with nothing behind it.
+  #
+  # The engine's bundle is deliberately NOT loaded with the page: it arrives
+  # when the reader presses "show comments". A single guide opts out with
+  # `comments: false` in its front matter. See docs/comments.md.
+  [params.comments]
+    enable = false
+    origin = ""      # e.g. "https://comments.example.com"

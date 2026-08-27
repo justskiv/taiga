@@ -7,6 +7,58 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ## [Unreleased]
 
+### Changed
+
+- **The footer is two tiers instead of one flat row.** Identity and strapline
+  on one baseline hard left, navigation hard right — the bracket the header
+  already makes — and, for a site that fills `menus.legal`, a closing line set
+  as a source comment (`// privacy · terms`) with the copyright at its far end.
+  Legal links have to be findable without pulling attention off the navigation,
+  and a flat row of six links at one size and tone could not say that these are
+  different kinds of link.
+
+  The row of links still wraps rather than splitting into columns: entries
+  disappear on their own terms — a `devOnly` item in production, the newsletter
+  link with its feature — and a wrapping row only gets shorter, while columns
+  rebalance. The size ramp's middle now belongs to the navigation (15px, up
+  from 12): those links are what a footer is for, and they had been the
+  smallest text on the page. New `footerCopy` param names the copyright line;
+  `menus.legal` fills the closing tier. Both optional — a site that sets
+  neither gets tier 1 alone.
+
+  Fixed with it: on a wrapped row `margin-left:auto` parked the navigation hard
+  against the right edge under empty space, which reads as broken markup rather
+  than as a two-line footer.
+
+### Added
+
+- **Comments.** An optional comment thread at the foot of every article, served
+  by a self-hosted [Comentario](https://comentario.app) instance
+  (`params.comments`, off by default — see `docs/comments.md`). The engine's
+  bundle is not loaded with the page: until the reader presses the button the
+  block is a button and one small request that fills in the number on it, so a
+  guide that is read and left costs a reader nothing and the instance one
+  cheap POST. The widget renders into the page's own DOM, so the sheet
+  translates its ~41 `--cmntr-*` variables onto palette tokens and every
+  palette is covered without a media query for colour; the four places those
+  variables cannot reach — the primary button, the badges, sixty hard-coded
+  avatar colours and a `#e9ecef` frame around the closed editor — are repainted
+  by name. A single guide opts out with `comments: false`.
+
+  The widget's own UI is designed rather than inherited: with anonymous
+  commenting off, the engine's profile bar (one lone "sign in" button attached
+  to nothing) is hidden, and the door moves onto the submit button of every
+  editor — "Sign in and submit", stated when the editor opens rather than after
+  the reader has finished writing, and present in the editors that open deep in
+  a thread where that bar never was. The login dialog becomes a real modal
+  (the engine hung a 500px panel off a 60px button with Popper, kept inside the
+  viewport rather than the column, so it landed on the rail), and its provider
+  buttons move the brand out of the fill and into the logo. Buttons get three
+  roles and one shared 1px press; four engine defects go with them — a
+  five-class bootstrap shadow a plain anchor loses to, `:focus` painted as
+  `:hover`, a `.4s` transition, and `disabled` at `opacity:.3` on the button
+  that carries the price of entry in its label.
+
 ### Fixed
 
 - **A run served from a cache reported the time of the original one.** A

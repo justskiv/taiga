@@ -76,6 +76,12 @@
        when the page wrote its own {{< newsletter-cta >}}. */}}
 {{ partial "newsletter/article-end.html" . }}
 {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
+{{- /* Comments, last of all (params.comments.enable; `comments: false` in front
+       matter opts a single guide out). Below the author's own closing note on
+       purpose: everything above is the article finishing itself, and this is
+       the one block that can grow to several screens. Nothing of the engine
+       loads until the reader presses the button — see modules/comments.js. */}}
+{{ partial "comments/block.html" . }}
   </main>
   {{ partial "article/rail-right.html" . }}
 </div>
@@ -93,18 +99,49 @@
        — would be stamped for a mascot that never renders. No partial, or no
        front-matter opt-in ⇒ no slot, and about/roadmap/lab stay plain. */ -}}
 {{- $mascot := and .Params.mascot (templates.Exists "_partials/page/mascot.html") -}}
+{{- /* `toc: true` gives a plain page the article's RIGHT RAIL — the same
+       partial an article gets, filled by the same toc.js from the same h2/h3
+       and honouring the same `toc_labels`. Deliberately the rail alone and not
+       the inline block: on a plain page the block would sit between the lead
+       and the first line of text, i.e. across the reader's path, to list
+       sections they can already see. The rail stands beside the prose instead
+       and costs the page nothing.
+
+       A long page that is READ THROUGH (about, a roadmap) does not need it; a
+       page people arrive at with one question and leave with one answer does.
+       Off by default, because contents above a three-paragraph page is
+       furniture.
+
+       The grid is the article's: three columns, the prose in the middle. With
+       no left rail the first column simply stays empty and the column stays
+       centred — nothing here assumes a pair. */ -}}
+{{- $toc := .Params.toc -}}
+{{- if $toc }}<div class="layout">{{ end }}
 <main class="wrap{{ if $mascot }} has-mascot{{ end }}">
   {{ if $mascot }}{{ partial "page/mascot.html" .Params.mascot }}{{ end }}
   {{ with .Params.kicker }}<div class="kicker"><span class="dot"></span>{{ . }}</div>{{ end }}
   <h1 data-pagefind-meta="title">{{ .Params.headline | default $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
-  {{ with .Params.lead }}<p class="lead">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}
+  {{- /* The standfirst, on the same terms an article gets it: prose before the
+         <!--more--> divider is the lead, everything after is the body; a page
+         with no divider falls back to the `lead:` param. `lead_deck: true`
+         opts into the display deck — bigger, quieter, set apart from the prose
+         — for an opening that introduces the page rather than starting it.
+
+         Gated on the divider being present in the raw markdown, NOT on
+         .Truncated: that is also true for Hugo's auto-summary, which would
+         wrongly split an intro off any long page that never had one. */ -}}
+  {{- $cut := strings.Contains .RawContent "<!--more-->" -}}
+  {{- $leadCls := printf "lead%s" (cond (not .Params.lead_deck) "" " deck") -}}
+  {{ if $cut }}<div class="{{ $leadCls }}">{{ .Summary }}</div>
+  {{ else }}{{ with .Params.lead }}<p class="{{ $leadCls }}">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}{{ end }}
   <div data-pagefind-body>
   {{ with .Params.kicker }}<span data-pagefind-meta="crumb:{{ . }}"></span>{{ end }}
-  {{ .Content }}
+  {{ if $cut }}{{ .ContentWithoutSummary }}{{ else }}{{ .Content }}{{ end }}
   </div>
   {{ partial "article/term-cards.html" . }}
   {{ partial "article/link-cards.html" . }}
   {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
 </main>
+{{- if $toc }}{{ partial "article/rail-right.html" . }}</div>{{ end }}
 {{- end -}}
 {{ end }}

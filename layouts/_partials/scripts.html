@@ -47,6 +47,11 @@
        the Turnstile script. Before the bundle, which reads the object at submit
        time; renders nothing on a site with the feature off. */ -}}
 {{- partial "newsletter/js-config.html" . -}}
+{{- /* Comments: where the Comentario instance lives (window.TAIGA_CMNT). The
+       engine's own bundle is NOT loaded here — modules/comments.js injects it
+       when the reader presses the button, so a guide that is read and left
+       costs nothing but this one line. Renders nothing with the feature off. */ -}}
+{{- partial "comments/js-config.html" . -}}
 {{- /* Main bundle (esbuild resolves the module imports into one iife), deferred
        at the end of body. prod: minify + fingerprint + integrity. A page bundle
        may ship its own widgets/ folder; it is built and attached after main.
@@ -60,7 +65,8 @@
        them getting the other's. */ -}}
 {{- $opts := dict "minify" hugo.IsProduction "target" "es2018" "format" "iife" "sourceMap" ""
       "defines" (dict
-        "TAIGA_NEWSLETTER" (cond (partialCached "newsletter/cfg.html" . .Language.Lang).enable "true" "false")) -}}
+        "TAIGA_NEWSLETTER" (cond (partialCached "newsletter/cfg.html" . .Language.Lang).enable "true" "false")
+        "TAIGA_COMMENTS"   (cond (partialCached "comments/cfg.html"   . .Language.Lang).enable "true" "false")) -}}
 {{- with resources.Get "js/main.js" -}}
   {{- with . | js.Build $opts -}}
     {{- if hugo.IsProduction -}}

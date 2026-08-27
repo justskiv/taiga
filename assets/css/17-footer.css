@@ -1,56 +1,102 @@
-/* ---- site footer ---- */
-/* One text row, three fonts/sizes (brand, tagline, links) — so the row aligns
-   on the shared baseline, not on box centers: centering boxes of unequal
-   line-height leaves the baselines to chance and the tagline visibly drifts
-   against the brand. A shared line-height keeps wrapped rows (narrow screens)
-   on one rhythm; the row gap there is matched with .foot-links' own wrap gap. */
-.site-foot{border-top:1px solid var(--border)}
-.foot-in{max-width:var(--shell); margin:0 auto; padding:30px 24px 44px; display:flex; align-items:baseline; gap:12px 20px; flex-wrap:wrap; font-size:13px; line-height:1.5; color:var(--text-muted)}
-.foot-in .brand{font-size:13px; color:var(--text-secondary)}
-/* the strapline belongs to the mark, not to the links: one ramp step up binds
-   the two into a single signature and leaves the muted tone to the navigation */
-.foot-tag{font-size:12.5px; color:var(--text-secondary)}
-.foot-links{display:flex; align-items:baseline; gap:12px 16px; margin-left:auto; flex-wrap:wrap}
-/* The links are set in the mono face the rest of the theme reserves for
-   service rows (feed meta, rubric counters, the home kicker). Sharing the
-   signature's sans made the footer one undifferentiated grey block: three
-   lines, same voice, no telling which of them you could click. Two voices —
-   the name in text, the navigation in mono — separate them without a rule,
-   a box or a colour, none of which this footer has room for. */
-.foot-links a{font-family:var(--font-mono); font-size:12px; letter-spacing:.02em;
-  color:var(--text-muted); border:0; transition:color var(--dur) var(--ease)}
-.foot-links a:hover{color:var(--text-secondary)}
-/* ---- narrow screens: the row becomes a signature and a nav ----
-   Brand plus tagline already fill a 390px line on their own, so the link row
-   always wrapped — and margin-left:auto then parked it hard against the right
-   edge, under empty space. Two ragged rows with nothing lining up read as
-   broken markup rather than as a two-line footer.
+/* ---- site footer ----------------------------------------------------------
+   Two tiers, split by KIND of link rather than by importance:
 
-   Stacking them is only the first half of the fix. Three lines of near-equal
-   weight, evenly spaced, are not a footer — they are a list of leftovers, and
-   that is what the first pass produced. So the column is composed instead:
+     1. identity ←→ navigation — the brand with its strapline beside it hard
+        left, the links hard right. The same bracket the header makes, so head
+        and foot read as a pair around the page. ONE WRAPPING ROW of links,
+        never columns: entries disappear on their own terms (a devOnly item in
+        production, the newsletter link with its feature) and a wrapping row
+        only gets shorter, while columns rebalance and shift.
+     2. a closing line set as a source comment — menus.legal lives inside it,
+        opened by a literal `//`. Findable without pulling attention off the
+        navigation. Absent entirely on a site that lists no legal pages.
 
-   - the mark leads at 15px. It is the only thing here that is a NAME, and at
-     the shared 13px it read as one more grey line; a footer's job is to sign
-     the page, and a signature is legible or it is decoration.
-   - mark and tagline sit 5px apart — close enough to bind into one block, the
-     way a logotype binds to its strapline. All the air (24px) goes BETWEEN
-     that block and the links, so the eye gets two groups instead of three
-     lines. Same trick the feed meta uses: group, then space the groups.
-   - the links become touch targets. 12.5px text has a ~19px box; a finger
-     needs ~44px, so each link is padded 12px top and bottom and the padding is
-     pulled back out with a negative margin, leaving the ink where the rhythm
-     wants it while the tappable box is 43px tall. Their own gap widens to 22px
-     for the same reason: neighbouring targets must not overlap under a thumb.
-   - and the whole thing gets 52px of floor. The old 32px let the last line sit
-     almost on the edge of the screen, which is what made the footer feel stuck
-     to the bottom rather than closing the page.
-   The left edge is shared with the header brand and with the content above, so
-   the three groups hang off one vertical. */
-@media(max-width:560px){
-  .foot-in{flex-direction:column; align-items:flex-start; gap:5px; padding:32px 24px 52px}
-  .foot-in .brand{font-size:15px}
-  .foot-tag{font-size:13px}
-  .foot-links{margin-left:0; margin-top:19px; gap:0 22px}
-  .foot-links a{padding:12px 0; margin:-12px 0; font-size:12.5px}
+   Three type voices and no more, and peer elements never differ in voice: the
+   brand, the human layer (strapline + navigation), and the mono closing line.
+   The size ramp is 22 / 15 / 13.5 / 11.5 and its MIDDLE belongs to the
+   navigation — those links are what a footer is for; at the old 13px they were
+   smaller than the caption beside them.
+
+   No ground of its own: the footer sits on the page's own colour, told apart
+   by the hairline above it.
+
+   Markup: layouts/_partials/footer.html */
+.ft{background:var(--bg-deep); border-top:1px solid var(--border)}
+.ft-in{max-width:var(--shell); margin:0 auto; padding:54px 24px 46px}
+
+/* ---- tier 1 ---- */
+.ft-top{display:flex; flex-wrap:wrap; align-items:baseline;
+  justify-content:space-between; gap:20px 56px}
+
+/* The theme draws its link underline as a BORDER, not as text-decoration:
+   `a{border-bottom:1px solid transparent}` + `a:hover{border-bottom-color:
+   var(--accent)}`. Nothing in this footer wants that line — the mark is not
+   prose, the navigation answers in colour, and the closing comment must stay a
+   comment. Killing the border once, here, covers all three. */
+.ft a, .ft a:hover{border-bottom:0}
+
+/* The signature: mark and strapline on ONE baseline, bound by a gap rather
+   than by a line break. They are told apart by texture (700 mono against 400
+   Inter) and by tone, so no separator glyph is needed between them. */
+.ft-id{display:flex; flex-wrap:wrap; align-items:baseline; gap:7px 18px}
+.ft-in .brand{display:inline-block; font-size:clamp(19px, 1rem + .55vw, 22px);
+  line-height:1.2; font-weight:650; color:var(--text-secondary);
+  transition:color var(--dur) var(--ease)}
+.ft-in .brand:hover{color:var(--text-primary)}
+.ft-in .brand .tld{color:var(--text-muted)}
+
+.ft-slogan{margin:0; font-size:13.5px; line-height:1.5; color:var(--text-muted)}
+
+/* The navigation is set in the site's text face — mono was tried here and read
+   as too technical for what these links are. It is the largest sans in the
+   footer on purpose: «поддержать» and «подписка» are the reason a footer
+   exists at all, and at 13px they were smaller than the caption beside them. */
+.ft-nav{display:flex; flex-wrap:wrap; gap:11px 24px; font-size:15px; line-height:1.4}
+.ft-nav a{color:var(--text-secondary); transition:color var(--dur) var(--ease)}
+.ft-nav a:hover{color:var(--accent)}
+
+/* ---- tier 2: the closing comment ---- */
+.ft-meta{display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 40px;
+  margin-top:32px; padding-top:22px; border-top:1px solid var(--border);
+  font-family:var(--font-mono); font-size:11.5px; line-height:1.7;
+  color:var(--text-muted)}
+.ft-meta p{margin:0}
+/* the clickable words sit a tone above their own frame — enough to read as
+   links without ever competing with the tier above */
+.ft-meta a{color:var(--text-secondary); transition:color var(--dur) var(--ease)}
+/* Hover is one step up the neutral ramp and nothing else. No underline: the row
+   is set as a source comment, and a rule under one of its words breaks that
+   reading. No accent either — amber belongs to the tier above, and the point of
+   this line is that it does not compete with it. */
+.ft-meta a:hover{color:var(--text-strong)}
+/* Comment punctuation: aria-hidden, so it may sit below the text contrast floor
+   the words above it have to clear. */
+.ft-com, .ft-sep{color:var(--text-ghost)}
+.ft-sep{padding:0 .5em}
+
+/* ---- focus ----
+   10–15px text is the smallest interactive target on the site, and the footer
+   had been living on the browser's default ring. */
+.ft a:focus{outline:none}
+.ft a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:4px}
+
+/* ---- narrow ----
+   900px, not 860: the one-line signature needs ~840px of shell before the
+   navigation has to give way, and 900 is also where the HEADER folds its own
+   nav — head and foot change shape at the same width. */
+@media (max-width:900px){
+  .ft-top{flex-direction:column; align-items:flex-start; gap:24px}
+}
+/* Phone: the links become touch targets. 15px text has a ~21px box and a
+   finger needs ~40px, so each link is padded 9px top and bottom and the padding
+   is pulled back out with a negative margin — the ink stays where the rhythm
+   wants it while the tappable box is 39px tall. The row gap widens to 21px for
+   the same reason: two wrapped rows of targets must not overlap under a thumb.
+   Same trick, same numbers as the theme's own narrow footer (17-footer.css). */
+@media (max-width:560px){
+  .ft-in{padding:40px 20px 34px}
+  .ft-id{gap:6px 14px}
+  .ft-nav{gap:21px 22px}
+  .ft-nav a{padding:9px 0; margin:-9px 0}
+  .ft-meta{margin-top:26px; padding-top:18px}
 }

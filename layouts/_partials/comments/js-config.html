@@ -1,0 +1,16 @@
+{{- /* Hugo → JS for the comments block: where the engine lives. Rendered from
+       scripts.html, before the deferred bundle, and only on a site that turned
+       the feature on.
+
+       `origin` is emitted VERBATIM — it is an absolute URL to another host and
+       has nothing to do with where Hugo publishes the pages. jsonify does the
+       escaping.
+
+       Only the origin travels this way. Everything else the module needs is on
+       the markup it finds (the page-id on the tag, the palette on <html>), and
+       a value that is already in the DOM has no business being repeated in a
+       second place that can drift from it. */ -}}
+{{- $c := partialCached "comments/cfg.html" . .Language.Lang -}}
+{{- if $c.enable -}}
+<script>window.TAIGA_CMNT={{ (dict "origin" $c.origin) | jsonify | safeJS }};</script>
+{{- end -}}

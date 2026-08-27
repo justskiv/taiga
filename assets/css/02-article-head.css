@@ -14,6 +14,13 @@ h1 .sub{color:var(--accent)}
    own and the child <p>s take the ordinary prose rules. .layout scopes this to
    real articles; rubric/taxonomy/404 leads keep the plain deck above. */
 .layout .lead{font-size:inherit; line-height:inherit; color:inherit; margin:0}
+/* …but that zero assumes the WRAPPER shape: a <div class="lead"> whose child
+   <p>s carry the prose margins. A page whose standfirst comes from the `lead:`
+   param renders as a bare <p class="lead"> with no children to inherit from, so
+   inside .layout it lost its only gap and sat flush against the first line of
+   the text. Plain pages joined .layout the moment they could ask for the right
+   rail (`toc: true`), which is where this surfaced. */
+.layout p.lead{margin:0 0 18px}
 /* …unless the page asks for the deck back with `lead_deck: true`. A survey or a
    release write-up opens by SAYING WHAT THIS IS before the piece starts, and
    that paragraph wants to look like an introduction rather than a first

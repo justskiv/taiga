@@ -464,3 +464,53 @@ other = "A confirmation letter is on its way to {email}. Follow the link in it a
 other = "No letter in the inbox — have a look in the spam folder."
 [nl_again]
 other = "use another address"
+
+# ── comments (29-comments.css / modules/comments.js) ─────────────────────────
+# The comments block at the foot of a guide (Comentario). cmnt_loading /
+# cmnt_error / cmnt_retry live in JS — js-bridge.html hands them over as
+# window.THEME_I18N.cmnt* (see docs/i18n.md).
+[cmnt_aria]
+other = "Comments"
+[cmnt_open]
+other = "Show comments"
+# JS keys: the status line under the button.
+[js_cmnt_loading]
+other = "Loading comments…"
+[js_cmnt_error]
+other = "Comments failed to load."
+[js_cmnt_retry]
+other = "Try again"
+
+# Thread sort order. The engine offers four orders through three buttons: the
+# score button becomes a toggle once chosen, and the only sign of its second
+# state was an 8px caret flipping over — which nobody notices. These labels
+# replace the engine's own ("Score · Oldest · Newest" mixes a criterion with two
+# values, where three values of one thing are wanted), and the flipped order
+# names itself.
+[js_cmnt_sort_best]
+other = "Best"
+[js_cmnt_sort_worst]
+other = "Worst"
+[js_cmnt_sort_oldest]
+other = "Oldest"
+[js_cmnt_sort_newest]
+other = "Newest"
+
+# The word "comment" for the line above the thread. The engine ships a single
+# form per language, which reads wrong for any count but one in English too.
+[js_cmnt_word]
+one = "comment"
+other = "comments"
+
+# The comment form. Anonymous commenting is off; the cost of entry is stated
+# when the editor opens rather than after the reader has finished writing. The
+# submit label describes the code: the engine publishes the comment with the
+# same call that completes the login, and the draft survives the round trip.
+[js_cmnt_write]
+other = "Write a comment…"
+[js_cmnt_submit]
+other = "Submit"
+[js_cmnt_submit_in]
+other = "Sign in and submit"
+[js_cmnt_close]
+other = "Hide comments"
