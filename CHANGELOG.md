@@ -32,32 +32,47 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
-- **Comments.** An optional comment thread at the foot of every article, served
-  by a self-hosted [Comentario](https://comentario.app) instance
-  (`params.comments`, off by default — see `docs/comments.md`). The engine's
-  bundle is not loaded with the page: until the reader presses the button the
-  block is a button and one small request that fills in the number on it, so a
-  guide that is read and left costs a reader nothing and the instance one
-  cheap POST. The widget renders into the page's own DOM, so the sheet
-  translates its ~41 `--cmntr-*` variables onto palette tokens and every
-  palette is covered without a media query for colour; the four places those
-  variables cannot reach — the primary button, the badges, sixty hard-coded
-  avatar colours and a `#e9ecef` frame around the closed editor — are repainted
-  by name. A single guide opts out with `comments: false`.
+- **Comments.** An optional comment thread at the foot of every article,
+  served by a self-hosted [Comentario](https://comentario.app) instance
+  (`params.comments`, off by default — see `docs/comments.md`). The thread is
+  open: comments are part of the guide, and hiding them behind a press buys
+  nothing. What is withheld is the engine's bundle — 95 KB of script and 51 KB
+  of stylesheet, with fonts of its own — fetched once the reader comes within
+  900 px of the block, by a plain distance check rather than an
+  IntersectionObserver, which in a tab that has never been painted can stay
+  silent until the tab is focused. A guide that is read and left costs the
+  instance nothing at all: not a script, not a socket, not one request. A
+  single guide opts out with `comments: false`.
 
-  The widget's own UI is designed rather than inherited: with anonymous
-  commenting off, the engine's profile bar (one lone "sign in" button attached
-  to nothing) is hidden, and the door moves onto the submit button of every
-  editor — "Sign in and submit", stated when the editor opens rather than after
+  The widget renders into the page's own DOM, so the sheet translates its ~41
+  `--cmntr-*` variables onto palette tokens and every palette is covered
+  without a media query for colour. Every rule hangs off the section's own id,
+  which beats the engine's (0,5,0) selectors without a specificity war. What
+  the variables cannot reach is repainted by name: the primary button, the
+  badges, sixty hard-coded avatar colours, a `#e9ecef` frame around the closed
+  editor.
+
+  The widget's own UI is designed rather than inherited. With anonymous
+  commenting off, the engine's profile bar — one lone "sign in" button attached
+  to nothing — is hidden, and the door moves onto the submit button of every
+  editor: "Sign in and submit", stated when the editor opens rather than after
   the reader has finished writing, and present in the editors that open deep in
-  a thread where that bar never was. The login dialog becomes a real modal
-  (the engine hung a 500px panel off a 60px button with Popper, kept inside the
-  viewport rather than the column, so it landed on the rail), and its provider
-  buttons move the brand out of the fill and into the logo. Buttons get three
-  roles and one shared 1px press; four engine defects go with them — a
-  five-class bootstrap shadow a plain anchor loses to, `:focus` painted as
-  `:hover`, a `.4s` transition, and `disabled` at `opacity:.3` on the button
-  that carries the price of entry in its label.
+  a thread where that bar never was. The login dialog becomes a real modal (the
+  engine anchors every dialog on that missing button with Popper, so they
+  landed in the corner), and its provider buttons move the brand out of the
+  fill and into the logo. Sorting names which of its four orders is in force
+  instead of flipping an 8px caret nobody sees; reply gets a word; the owner's
+  badge reads "Author" rather than "Moderator".
+
+  Engine defects undone along the way: three rings on one empty textarea — a
+  `required` border reported before anything could be wrong, a focus border,
+  and a focus shadow that survived `border:0` and showed as a bright line under
+  the toolbar; a name stacked over a timestamp in a column narrower than the
+  timestamp's own text; collapsed replies faded to zero opacity while still
+  holding half a screen; a new-comment highlight with no padding, stopping
+  flush against the first letter; a five-class bootstrap shadow a plain anchor
+  loses to; `:focus` painted as `:hover`; a `.4s` transition; and `disabled` at
+  `opacity:.3` on the button that carries the price of entry in its label.
 
 ### Fixed
 
