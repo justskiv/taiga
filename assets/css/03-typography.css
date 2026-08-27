@@ -65,9 +65,14 @@ blockquote p{margin:0}
    row-links wrap meta spans the underline would run under. Also excluded:
    .hash heading anchors, .btn, and footnote marks — a superscript digit is
    too small to carry an underline, and at that size the accent fill never
-   disturbs reading. */
+   disturbs reading. And .p-more: the feed's read-more tail sits in a <p>
+   inside .p-lead, so it fell into this scope by accident. It already owns a
+   quieter version of the same idea (14-home.css) — a rest state with no rule
+   at all, an underline that belongs to hover and to the word only. The prose
+   treatment overrode it with a rest underline plus a hover pill around a
+   two-word link, which read as a button. */
 :is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot)
-  a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .footnote-ref, .footnote-backref)){
+  a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .p-more, .footnote-ref, .footnote-backref)){
   color:inherit;
   border-bottom:0;              /* the base a:hover border must never resurface */
   text-decoration:underline;
@@ -85,7 +90,7 @@ blockquote p{margin:0}
              text-decoration-color var(--dur) var(--ease);
 }
 :is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot)
-  a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .footnote-ref, .footnote-backref)):hover{
+  a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .p-more, .footnote-ref, .footnote-backref)):hover{
   color:var(--accent);
   /* the underline is deliberately NOT restyled here: it holds its rest state
      so hover changes as little as possible — the word warms, the pill fades
