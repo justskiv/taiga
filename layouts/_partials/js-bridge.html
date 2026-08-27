@@ -38,22 +38,6 @@
       "tagReset"          (i18n "js_tag_reset")
       "tagEmptyTail"      (i18n "js_tag_empty_tail")
       "codeEdit"          (i18n "js_code_edit")
-      "cmntLoading"       (i18n "js_cmnt_loading")
-      "cmntError"         (i18n "js_cmnt_error")
-      "cmntRetry"         (i18n "js_cmnt_retry")
-      "cmntOpen"          (i18n "cmnt_open")
-      "cmntClose"         (i18n "js_cmnt_close")
-      "cmntSortBest"      (i18n "js_cmnt_sort_best")
-      "cmntSortWorst"     (i18n "js_cmnt_sort_worst")
-      "cmntSortOldest"    (i18n "js_cmnt_sort_oldest")
-      "cmntSortNewest"    (i18n "js_cmnt_sort_newest")
-      "cmntWrite"         (i18n "js_cmnt_write")
-      "cmntSubmit"        (i18n "js_cmnt_submit")
-      "cmntSubmitIn"      (i18n "js_cmnt_submit_in")
-      "cmntForms"         (dict
-        "1" (i18n "js_cmnt_word" 1)
-        "2" (i18n "js_cmnt_word" 2)
-        "5" (i18n "js_cmnt_word" 5))
       "codeClose"         (i18n "js_code_close")
       "codeReset"         (i18n "js_code_reset")
       "codeHint"          (i18n "js_code_hint")
@@ -87,6 +71,45 @@
       "nlSubscribed"    (i18n "nl_subscribed")
       "nlSubscribedPop" (i18n "nl_subscribed_pop")
       "nlSubOther"      (i18n "nl_sub_other"))
+-}}
+{{- end -}}
+{{- /* Comment block strings, only for a site that has the feature on — the
+       same rule the newsletter follows above, and for the same reason: sixteen
+       keys on every page of every other site, and their absence here is what
+       makes `comments.enable = false` mean the build carries no trace of it.
+
+       cmntForms / cmntReplyForms are plural PROBES, not words: Hugo owns the
+       CLDR catalogue, so it renders one word per probe count and
+       modules/i18n.js asks Intl.PluralRules which probe shares a category with
+       the real number. Neither side has to know that 5 is "many" in Russian
+       and plain "other" in English. */ -}}
+{{- if (partialCached "comments/cfg.html" . .Language.Lang).enable -}}
+{{- $i18n = merge $i18n (dict
+      "cmntNone"       (i18n "js_cmnt_none")
+      "cmntError"      (i18n "js_cmnt_error")
+      "cmntRetry"      (i18n "js_cmnt_retry")
+      "cmntSortBest"   (i18n "js_cmnt_sort_best")
+      "cmntSortWorst"  (i18n "js_cmnt_sort_worst")
+      "cmntSortOldest" (i18n "js_cmnt_sort_oldest")
+      "cmntSortNewest" (i18n "js_cmnt_sort_newest")
+      "cmntWrite"      (i18n "js_cmnt_write")
+      "cmntSubmit"     (i18n "js_cmnt_submit")
+      "cmntSubmitIn"   (i18n "js_cmnt_submit_in")
+      "cmntReply"      (i18n "js_cmnt_reply")
+      "cmntAuthor"     (i18n "js_cmnt_author")
+      "cmntShow"       (i18n "js_cmnt_show")
+      "cmntLoginTitle" (i18n "js_cmnt_login_title")
+      "cmntLoginWhy"   (i18n "js_cmnt_login_why")
+      "cmntPending"    (i18n "js_cmnt_pending")
+      "cmntRejected"   (i18n "js_cmnt_rejected")
+      "cmntForms"      (dict
+        "1" (i18n "js_cmnt_word" 1)
+        "2" (i18n "js_cmnt_word" 2)
+        "5" (i18n "js_cmnt_word" 5))
+      "cmntReplyForms" (dict
+        "1" (i18n "js_cmnt_reply_word" 1)
+        "2" (i18n "js_cmnt_reply_word" 2)
+        "5" (i18n "js_cmnt_reply_word" 5)))
 -}}
 {{- end -}}
 <script>window.THEME_I18N=Object.assign({{ $i18n | jsonify | safeJS }},window.THEME_I18N||{});window.TAIGA_PAGEFIND={{ "pagefind/pagefind.js" | relURL | jsonify | safeJS }};</script>

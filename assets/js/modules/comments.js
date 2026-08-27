@@ -1,31 +1,51 @@
-/* comments — the Comentario block at the foot of an article.
+/* comments — the Comentario thread at the foot of an article.
    Markup: layouts/_partials/comments/block.html · Styles: 29-comments.css
 
-   The engine's bundle is NOT on the page. Nothing of it loads — no script, no
-   stylesheet, no WebSocket — until the reader asks for comments. What the block
-   ships until then is a button and, once it scrolls into view, one small POST
-   that fills in the number on it.
+   The thread is open: comments are part of the guide, and hiding them behind a
+   press buys nothing. What IS withheld is the engine's bundle — 95 KB of
+   JavaScript and 51 KB of CSS, with fonts of its own. It arrives only once the
+   reader gets within 900 px of the block, so a guide that is read and left
+   costs the reader nothing and the instance NOTHING AT ALL: not a script, not
+   a stylesheet, not a socket, not one request.
 
-   Self-guards on .cmnt, so it stays quiet on every page without the block. */
+   An earlier draft also asked the instance for the comment count on the way
+   in, to fill the header before the bundle landed. That was worth a request
+   when the thread was behind a button and the number was the whole invitation.
+   It is not worth one now: the bundle arrives before the block does, and
+   brings a count of its own.
+
+   The engine announces nothing when it renders — no event, no global, no
+   promise — so a MutationObserver is the only hook there is. It is detached
+   while we work, or our own writes would feed it back into itself.
+
+   Self-guards on #comments, so it stays quiet on every page without a thread.
+
+   The design work lives in the stylesheet. This file does only what CSS
+   cannot: the plural forms, the lazy load, a handful of labels, and putting
+   back what the engine's own collapse leaves broken. */
 
 import { plural } from './i18n.js';
 
 const ORIGIN = (window.TAIGA_CMNT || {}).origin || '';
 
+/* How close the reader has to get before the bundle is fetched. A plain
+   distance check rather than IntersectionObserver: an observer in a tab that
+   has never been painted can stay silent until the tab is focused, and a
+   thread that only exists in a focused tab is a trap — the reader who opened
+   five guides in background tabs finds four of them without comments. */
+const REACH = 900;
+
 export function bindComments() {
   const root = document.documentElement;
-  const box = document.querySelector('.cmnt');
+  const box = document.getElementById('comments');
   if (!box || !ORIGIN) return;
 
-  const btn = box.querySelector('.cmnt-open');
-  const lbl = box.querySelector('.cmnt-lbl');
-  const nSlot = box.querySelector('.cmnt-n');
-  const status = box.querySelector('.cmnt-status');
-  const body = box.querySelector('.cmnt-body');
   const widget = box.querySelector('comentario-comments');
-  if (!btn || !widget) return;
+  const headN = box.querySelector('.cmnt-n');
+  const status = box.querySelector('.cmnt-status');
+  if (!widget) return;
 
-  const t = (window.THEME_I18N || {});
+  const t = window.THEME_I18N || {};
 
   /* ---- palette ----------------------------------------------------------
      The initial sync is not a nicety. prefs.js restores the reader's saved
@@ -45,65 +65,40 @@ export function bindComments() {
     attributes: true, attributeFilter: ['data-scheme'],
   });
 
-  /* ---- the count --------------------------------------------------------
-     Fired when the block comes into view, not on load: a reader who leaves
-     from the first screen costs the instance nothing. The request is shaped
-     for batches (paths[], up to 32 per call) even though it asks about one
-     page — a count in the feed would reuse it unchanged.
+  /* ---- label rewrites ---------------------------------------------------- */
 
-     A path with no page behind it yet is ABSENT from the answer rather than
-     zero, so read it with `in`, not with a falsy check. */
-  function fetchCount() {
-    const path = widget.getAttribute('page-id') || location.pathname;
-    fetch(ORIGIN + '/api/embed/comments/counts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ host: location.host, paths: [path] }),
-    })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) {
-        const m = d && d.commentCounts;
-        const n = m && (path in m) ? m[path] : 0;
-        if (n > 0) nSlot.textContent = String(n);
-      })
-      .catch(function () { /* a missing count is not worth telling anyone about */ });
-  }
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(function (entries) {
-      if (entries.some(function (e) { return e.isIntersecting; })) {
-        io.disconnect();
-        fetchCount();
-      }
-    }, { rootMargin: '400px' });
-    io.observe(btn);
-  } else {
-    fetchCount();
+  function setText(el, s) {
+    if (el && s && el.textContent !== s) el.textContent = s;
   }
 
-  /* ---- the sort switch ---------------------------------------------------
-     The engine offers four orders through three buttons: "Оценка" is a radio
-     that turns into a toggle once chosen, and the only sign of its second
-     state is an 8px caret flipping over. Nobody discovers that, and nobody
-     wants the state it leads to — "worst first" exists because the author
-     saved a button, not because a reader asked.
+  /* Appends a word to a button the engine drew as a bare glyph. The icon is
+     hidden in CSS; the word carries the accessible name with it, so voice
+     control says what is written — a ::before with `content` would leave the
+     two disagreeing (WCAG 2.5.3). */
+  function addLabel(btn, text, cls) {
+    if (!btn || !text || btn.querySelector('.' + cls)) return;
+    const s = document.createElement('span');
+    s.className = cls;
+    s.textContent = text;
+    btn.appendChild(s);
+  }
 
-     The behaviour stays as it is; what changes is that the state says its own
-     name. The score button reports which of its two orders is in force, so the
-     toggle announces itself by changing a word. The other two are renamed to
-     match: "Оценка · Старые · Новые" mixes a criterion with two values, while
-     "Лучшие · Старые · Новые" is three values of one thing.
+  /* ---- the sort rail ------------------------------------------------------
+     The engine offers four orders through three buttons: the score button is a
+     radio that turns into a toggle once chosen, and the only sign of its second
+     state is an 8px caret flipping over. Nobody discovers that.
 
-     textContent, not a ::before with content: this rewrites the accessible
-     name along with the visible label, so voice control hears what is written.
-     A CSS text swap would leave the two disagreeing — WCAG 2.5.3.
+     The behaviour stays; what changes is that the state says its own name. The
+     score button reports which of its two orders is in force, so the toggle
+     announces itself by changing a word. The other two are renamed to match:
+     «Оценка · Старые · Новые» mixes a criterion with two values, where three
+     values of one thing are wanted.
 
      Falls back to the engine's own wording when the theme has no strings for
      this language: it ships fourteen translations, the theme has two. */
   function dressSortBar() {
     const bar = widget.querySelector('.comentario-sort-buttons');
-    if (!bar || bar.dataset.cmntDressed) return;
-
-    if (!t.cmntSortBest) return;
+    if (!bar || bar.dataset.cmntDressed || !t.cmntSortBest) return;
 
     const btns = Array.prototype.slice.call(bar.querySelectorAll('.comentario-btn'));
     /* The score button is the only one the engine gives an icon, and it is
@@ -111,13 +106,13 @@ export function bindComments() {
        are found by elimination, never by position. */
     const score = btns.filter(function (b) { return !!b.querySelector('.comentario-icon'); })[0];
     const rest = btns.filter(function (b) { return b !== score; });
-    if (rest[0]) rest[0].textContent = t.cmntSortOldest;
-    if (rest[1]) rest[1].textContent = t.cmntSortNewest;
+    if (rest[0]) setText(rest[0], t.cmntSortOldest);
+    if (rest[1]) setText(rest[1], t.cmntSortNewest);
 
     if (score) {
       const paint = function () {
-        const asc = score.classList.contains('comentario-sort-asc');
-        score.textContent = asc ? t.cmntSortWorst : t.cmntSortBest;
+        setText(score, score.classList.contains('comentario-sort-asc')
+          ? t.cmntSortWorst : t.cmntSortBest);
       };
       paint();
       new MutationObserver(paint).observe(score, {
@@ -129,208 +124,239 @@ export function bindComments() {
 
   /* ---- the editor: say the price before the first keystroke ---------------
      Signing in is not a surprise sprung on someone who has already written —
-     the engine keeps the draft through the OAuth round trip, and publishes the
+     the engine keeps the draft through the OAuth round trip and publishes the
      comment with the same call that finishes the login (`submitNewComment`
      retries `commentNew` itself once a principal exists). So the label is not
-     a promise we invented: after signing in the comment really does go.
+     a promise we invented: after signing in, the comment really does go.
 
-     What was wrong is WHEN the cost was stated. It has to be stated at the
-     moment the editor opens, before a single character is typed — and it has
-     to be stated in every editor, including the one that opens under a comment
-     three screens down, where the profile bar was never present.
-
-     Two more texts change here:
-       · the closed field said "Добавить комментарий" — the SAME string the
-         submit button uses, so a field and the button under it carried one
-         label twice. A field is named by what you do in it;
-       · the hint under the editor names who the door leads through, which the
-         button's own label has no room for.
-
-     textContent, not a ::before — the accessible name has to change with the
-     visible one, or voice control ends up saying something else (WCAG 2.5.3). */
+     What matters is WHEN the cost is stated: at the moment the editor opens,
+     before a character is typed, and in every editor — including the one that
+     opens under a comment three screens down, where the profile bar never
+     was. */
   function signedOut() {
     return !!widget.querySelector('.comentario-profile-bar > .comentario-btn-primary');
   }
 
   function dressEditor(ed) {
-    if (!ed || ed.dataset.cmntDressed || !t.cmntSubmitIn) return;
+    if (!ed || !t.cmntSubmitIn) return;
     const submit = ed.querySelector('button[type="submit"]');
-    if (!submit) return;
-    const out = signedOut();
-    submit.textContent = out ? t.cmntSubmitIn : t.cmntSubmit;
-    /* No hint line beside it, and no tooltip on it. The label already says
-       what the press costs; naming the providers here would repeat what the
-       dialog shows a moment later, and a tooltip on the one button the reader
-       is aiming at is a card thrown over their target. */
-    ed.dataset.cmntDressed = '1';
+    setText(submit, signedOut() ? t.cmntSubmitIn : t.cmntSubmit);
   }
 
-  function dressPlaceholder() {
-    const ph = widget.querySelector('.comentario-add-comment-placeholder');
-    if (ph && t.cmntWrite && ph.textContent !== t.cmntWrite) ph.textContent = t.cmntWrite;
+  /* ---- collapsed replies --------------------------------------------------
+     Collapsing is an engine feature that leaves the replies in place at zero
+     opacity: they keep their height and leave half a screen of hole. The
+     stylesheet folds them for real; this puts the way back where the hole was,
+     and says how much is behind it. */
+  function foldedNotes(r) {
+    r.querySelectorAll('.comentario-card > .comentario-card-expand-body').forEach(function (body) {
+      const tog = body.previousElementSibling;
+      const off = tog && tog.classList.contains('comentario-collapsed');
+      let note = body.querySelector(':scope > .cmnt-folded');
+
+      if (!off) { if (note) note.remove(); return; }
+      if (!note) {
+        note = document.createElement('button');
+        note.type = 'button';
+        note.className = 'cmnt-folded';
+        note.addEventListener('click', function () { tog.click(); });
+        body.appendChild(note);
+      }
+      const n = body.querySelectorAll('.comentario-card-children .comentario-card').length;
+      setText(note, n + ' ' + plural(n, t.cmntReplyForms || {}) + ' — ' + (t.cmntShow || ''));
+    });
   }
 
-  /* ---- the count line -----------------------------------------------------
-     The engine carries ONE form of the word per language — Russian gets
-     «комментариев», so it writes «1 комментариев» and «4 комментариев», and
-     English is no better past one. Hugo owns the CLDR catalogue and rendered
-     one word per probe count into cmntForms; i18n.js asks Intl.PluralRules
-     which probe shares a category with the real number. Same machinery the
-     tags filter uses.
+  /* ---- the login dialog ---------------------------------------------------
+     Two changes only. The engine titles it «Войти» and heads the provider list
+     with «Вход через», which says nothing the two buttons below do not — while
+     the reader, who landed here by pressing reply or a vote arrow, has not been
+     told why a dialog appeared at all. That sentence takes its place.
 
-     Rewritten on a watcher rather than once: the engine's setter clears and
-     refills this node on every sort change and every live update, so anything
-     we put there is gone by the next one. The guard is the comparison — we
-     only write when the text differs, otherwise our own write would wake the
-     observer again. */
-  function dressCount() {
-    const el = widget.querySelector('.comentario-comment-count');
-    if (!el || !t.cmntForms) return;
-    const n = parseInt(el.textContent, 10);
-    if (isNaN(n)) return;                    /* not the "N word" shape — leave it */
-    const want = n + ' ' + plural(n, t.cmntForms);
-    if (el.textContent.trim() !== want) el.textContent = want;
-  }
+     The engine also focuses the CLOSE button when the dialog opens, which is
+     the wrong target: the reader opened this to sign in, not to leave. */
+  function dressDialog(dlg) {
+    if (!dlg) return;
+    setText(dlg.querySelector('.comentario-dialog-title'), t.cmntLoginTitle);
 
-  /* The engine focuses the dialog's CLOSE button when it opens — which is both
-     the source of the browser's blue ring (now replaced by the theme's) and
-     the wrong target: the reader opened this to sign in, not to leave. Move
-     the first focus to the first provider button when there is one.
+    /* The engine builds the provider block as
+           div.dialog-centered( "Вход через", div.oauth-buttons( … ) )
+       so the sentence to replace is the one CARRYING the buttons — found by
+       the buttons, not by position or by matching the engine's own wording in
+       one of its fourteen languages.
 
-     The dialog is appended straight into .comentario-root, so childList
-     without subtree catches it. */
-  function watchDialog() {
-    const rootEl = widget.querySelector('.comentario-root');
-    if (!rootEl) return;
-    new MutationObserver(function () {
-      const b = widget.querySelector('.comentario-dialog .comentario-oauth-buttons .comentario-btn');
-      if (b && !b.dataset.cmntFocused) { b.dataset.cmntFocused = '1'; b.focus(); }
-    }).observe(rootEl, { childList: true });
-  }
-
-  /* Changing the sort does NOT rebuild the toolbar — it re-renders the list and
-     the count text, one level below. The toolbar is rebuilt only by the
-     engine's reload(): init, sign-in, sign-out, locking a page. That is exactly
-     a childList change on .comentario-main-area, so no subtree here. */
-  function watchToolbar() {
-    dressSortBar();
-    dressCount();
-    dressPlaceholder();
-    const area = widget.querySelector('.comentario-main-area');
-    if (area) {
-      new MutationObserver(function () {
-        dressSortBar(); dressCount(); dressPlaceholder();
-      }).observe(area, { childList: true });
-      /* An editor can be inserted anywhere in the thread — under any comment's
-         Reply — so this one needs subtree, unlike the toolbar watcher above. */
-      new MutationObserver(function () {
-        const eds = area.querySelectorAll('.comentario-comment-editor');
-        for (let i = 0; i < eds.length; i++) dressEditor(eds[i]);
-      }).observe(area, { childList: true, subtree: true });
+       A dialog can hold more than one .dialog-centered: an instance with local
+       password login also renders a sign-up block with a line of its own, and
+       rewriting every one of them printed our sentence on the page twice.
+       Production has no such block — no idps, no local login, nothing but the
+       two buttons — but a development instance does, which is exactly where a
+       bug like this is supposed to be caught. */
+    const providers = dlg.querySelector('.comentario-oauth-buttons');
+    const lead = providers && providers.closest('.comentario-dialog-centered');
+    const n = lead && lead.firstChild;
+    if (n && n.nodeType === 3 && t.cmntLoginWhy) n.nodeValue = t.cmntLoginWhy;
+    const first = dlg.querySelector('.comentario-oauth-buttons .comentario-btn');
+    if (first && !first.dataset.cmntFocused) {
+      first.dataset.cmntFocused = '1';
+      first.focus();
     }
-    const count = widget.querySelector('.comentario-comment-count');
-    if (count) new MutationObserver(dressCount).observe(count, { childList: true, characterData: true, subtree: true });
-    watchDialog();
   }
 
-  /* ---- loading ----------------------------------------------------------
-     One promise for the page: a second click must not inject a second script.
+  /* ---- one pass over whatever the engine has just rendered ---------------- */
+
+  function decorate() {
+    const r = widget.querySelector('.comentario-root');
+    if (!r) return;
+
+    setText(r.querySelector('.comentario-add-comment-placeholder'), t.cmntWrite);
+    r.querySelectorAll('.comentario-comment-editor').forEach(dressEditor);
+
+    dressSortBar();
+
+    /* Reply is button 3 of the first section (up, down, reply) — an order the
+       engine fixes in code. The two votes keep their arrows; only this one
+       gets a word, because it is the one action the thread is for. */
+    r.querySelectorAll('.comentario-card-self > .comentario-toolbar > .comentario-toolbar-section:first-child')
+     .forEach(function (sec) {
+       addLabel(sec.querySelectorAll(':scope > .comentario-btn')[2], t.cmntReply, 'cmnt-txt');
+     });
+
+    /* The badge means "this account owns the domain". On a one-author blog
+       that is the author, and «Модератор» promises a role nobody here plays. */
+    r.querySelectorAll('.comentario-badge-moderator').forEach(function (b) {
+      setText(b, t.cmntAuthor);
+    });
+
+    /* a zero score should not read as loudly as a real one */
+    r.querySelectorAll('.comentario-score').forEach(function (s) {
+      s.classList.toggle('cmnt-zero', s.textContent.trim() === '0');
+    });
+
+    /* Moderation states. Matched on the engine's own Russian because there is
+       no class to match on; if it rewords them the notice simply stays the
+       engine's, which is not a failure. */
+    r.querySelectorAll('.comentario-moderation-notice').forEach(function (n) {
+      if (n.textContent.indexOf('ожидает утверждения') >= 0) setText(n, t.cmntPending);
+      else if (n.textContent.indexOf('отклонён') >= 0) setText(n, t.cmntRejected);
+    });
+
+    /* the signed-in bar: gear and exit are bare icons, give them their words */
+    r.querySelectorAll('.comentario-profile-bar .comentario-btn-tool').forEach(function (b) {
+      addLabel(b, b.getAttribute('title'), 'cmnt-lbl');
+    });
+
+    foldedNotes(r);
+    dressDialog(r.querySelector('.comentario-dialog'));
+
+    /* The engine carries ONE form of the word per language — Russian gets
+       «комментариев», so it writes «1 комментариев». Hugo owns the CLDR
+       catalogue and rendered one word per probe count into cmntForms;
+       i18n.js asks Intl.PluralRules which probe shares a category with the
+       real number. Same machinery the tags filter uses.
+
+       Read from the engine's own counter, which is hidden in CSS: it is the
+       only number that knows about a comment posted a moment ago. The header
+       stays blank until the toolbar exists — an empty thread and an unloaded
+       one look the same from here, and «пока пусто» is a claim, not a
+       placeholder. */
+    if (headN && r.querySelector('.comentario-thread-toolbar')) {
+      const c = r.querySelector('.comentario-comment-count');
+      let n = 0;
+      if (c && !c.classList.contains('comentario-hidden')) {
+        const m = c.textContent.match(/\d+/);
+        n = m ? Number(m[0]) : 0;
+      }
+      const html = n > 0
+        ? '<b>' + n + '</b> ' + plural(n, t.cmntForms || {})
+        : (t.cmntNone || '');
+      if (headN.innerHTML !== html) headN.innerHTML = html;
+    }
+  }
+
+  /* The observer is detached for the duration of our own writes: every one of
+     them is a mutation inside the tree it watches, and it would wake itself in
+     a loop. One frame of coalescing, because the engine rebuilds in bursts. */
+  const mo = new MutationObserver(schedule);
+  let queued = false;
+
+  function watch() {
+    mo.observe(widget, {
+      childList: true, subtree: true,
+      attributes: true, attributeFilter: ['class', 'title'],
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () {
+      queued = false;
+      mo.disconnect();
+      try { decorate(); } finally { watch(); }
+    });
+  }
+
+  /* ---- loading ------------------------------------------------------------
      The bundle is loaded straight from the instance — never proxied, never
      vendored, never cache-busted. The file is served with its own origin baked
      into it, so a copy goes stale silently and a `?v=` only defeats the cache
      the instance manages itself. */
-  let loading = null;
-  let loaded = false;
-  function loadEngine() {
-    if (loading) return loading;
-    loading = new Promise(function (resolve, reject) {
-      const s = document.createElement('script');
-      s.src = ORIGIN + '/comentario.js';
-      s.defer = true;
-      s.onload = function () { loaded = true; resolve(); };
-      s.onerror = function () { loading = null; reject(new Error('comentario.js')); };
-      document.body.appendChild(s);
-    });
-    return loading;
-  }
-
-  /* The widget announces nothing when it is done — no event, no global, not a
-     promise. The one observable thing is its main area filling up. */
-  function whenRendered(timeout) {
-    return new Promise(function (resolve, reject) {
-      function done() {
-        const area = widget.querySelector('.comentario-main-area');
-        return !!area && area.children.length > 0;
-      }
-      if (done()) return resolve();
-      const mo = new MutationObserver(function () {
-        if (done()) { mo.disconnect(); clearTimeout(timer); resolve(); }
-      });
-      mo.observe(widget, { childList: true, subtree: true });
-      const timer = setTimeout(function () {
-        mo.disconnect();
-        reject(new Error('render'));
-      }, timeout || 15000);
-    });
-  }
-
-  function setStatus(text, tone) {
-    status.textContent = text || '';
-    if (tone) status.setAttribute('data-tone', tone);
-    else status.removeAttribute('data-tone');
-  }
+  let started = false;
 
   function fail() {
-    body.hidden = true;
-    btn.disabled = false;
-    btn.setAttribute('aria-expanded', 'false');
-    setStatus(t.cmntError || 'Comments failed to load.', 'error');
+    if (!status) return;
+    status.textContent = t.cmntError || 'Comments failed to load.';
+    status.setAttribute('data-tone', 'error');
     const retry = document.createElement('button');
     retry.className = 'cmnt-retry';
     retry.type = 'button';
     retry.textContent = t.cmntRetry || 'Try again';
-    retry.addEventListener('click', function () { setStatus(''); open(); });
+    retry.addEventListener('click', function () {
+      status.textContent = '';
+      status.removeAttribute('data-tone');
+      started = false;
+      load();
+    });
     status.appendChild(retry);
   }
 
-  /* Opened by a click, so it closes by one too: a reader who looked at the
-     discussion and wants the article back should not have to reload the page.
-     The engine stays loaded and its socket stays open — reopening is instant,
-     and tearing the widget down would throw away a half-written comment. */
-  function setOpen(on) {
-    /* the button was disabled while the engine loaded; it is a toggle now and
-       has to come back to life, or the first press would also be the last */
-    btn.disabled = false;
-    body.hidden = !on;
-    btn.setAttribute('aria-expanded', String(on));
-    lbl.textContent = on ? (t.cmntClose || 'Hide comments') : (t.cmntOpen || 'Show comments');
-    box.classList.toggle('is-open', on);
+  function load() {
+    if (started) return;
+    started = true;
+    removeEventListener('scroll', onScroll);
+    removeEventListener('resize', load);
+
+    watch();
+    const s = document.createElement('script');
+    s.src = ORIGIN + '/comentario.js';
+    s.defer = true;
+    s.onerror = fail;
+    document.body.appendChild(s);
   }
 
-  function open() {
-    if (loaded) { setOpen(body.hidden); return; }   /* already here — just toggle */
-    btn.disabled = true;
-    setStatus(t.cmntLoading || 'Loading comments…');
-    loadEngine()
-      .then(function () {
-        body.hidden = false;
-        btn.setAttribute('aria-expanded', 'true');
-        return whenRendered();
-      })
-      .then(function () {
-        setStatus('');
-        watchToolbar();
-        setOpen(true);
-      })
-      .catch(fail);
+  function near() {
+    return box.getBoundingClientRect().top <= innerHeight + REACH;
   }
 
-  btn.addEventListener('click', open);
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      if (near()) load();
+    });
+  }
+
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', load, { passive: true });
 
   /* Arriving from a notification mail: #comentario-<uuid> points at one
-     comment, #comentario at the block. Open without waiting for a click — the
-     engine scrolls to the comment and highlights it once it initialises, so we
-     add no scrolling of our own. It never listens for hashchange, which is why
-     this runs once, here. */
-  if (location.hash.indexOf('#comentario') === 0) open();
+     comment, #comentario at the block. Load at once rather than waiting for a
+     scroll that has already happened — the engine scrolls to the comment and
+     highlights it once it initialises, so we add no scrolling of our own. It
+     never listens for hashchange, which is why this runs here, once. */
+  if (location.hash.indexOf('#comentario') === 0) load();
+
+  if (near()) load();
 }

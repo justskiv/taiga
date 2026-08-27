@@ -6,10 +6,21 @@
        an empty value, so `default` would hand `true` straight back to the page
        that asked for silence.
 
-       The widget is NOT started here. `auto-init` is left off entirely because
-       the engine's bundle is injected by modules/comments.js on click — the
-       element upgrades and starts itself the moment the script lands, so a
-       second switch would only be one more thing to keep in step.
+       The thread is OPEN — no button in front of it. What is withheld is the
+       engine's bundle: modules/comments.js fetches it once the reader gets
+       within 900 px of this block, and until then the section is these few
+       tags and nothing else. No script, no stylesheet, no socket, no request.
+
+       `id="comments"` is not decoration. The whole stylesheet hangs off it:
+       the engine's own rules run to (0,5,0) and reach for !important, and an
+       id puts every rule here at (1,x,y), out of that fight for good. Renaming
+       it silently unstyles the widget — 29-comments.css says so too.
+
+       The header is rendered here rather than injected by the module so that
+       it is on the page in the first paint, before any of the engine exists.
+       The count beside it stays empty until the widget reports one: an empty
+       thread and an unloaded one look identical from the outside, and «пока
+       пусто» is a claim, not a placeholder.
 
        Attributes, and why each one is there:
          no-fonts   the engine otherwise pulls Source Sans Pro from its own
@@ -23,31 +34,30 @@
                     rather than left to the engine's `location.pathname`, so a
                     reader arriving at the same page without its trailing slash
                     lands in the same thread.
-       `lang` is deliberately absent: the engine reads <html lang> and ships
-       every translation in its binary.
+       `auto-init` is absent on purpose: the element upgrades and starts itself
+       the moment the injected bundle lands, so a second switch would only be
+       one more thing to keep in step. `lang` is absent too — the engine reads
+       <html lang> and ships every translation in its binary.
 
        data-pagefind-ignore: comments are not the article, and a search for a
        word someone used in a reply must not answer with the guide. */ -}}
 {{- $c := partialCached "comments/cfg.html" . .Language.Lang -}}
 {{- if and $c.enable (ne .Params.comments false) -}}
-<section class="cmnt" aria-label="{{ i18n "cmnt_aria" }}" data-pagefind-ignore>
-  <button class="cmnt-open" type="button" aria-expanded="false" aria-controls="cmnt-body">
-    <span class="cmnt-lbl">{{ i18n "cmnt_open" }}</span>
+<section id="comments" class="cmnt" aria-labelledby="cmnt-h" data-pagefind-ignore>
+  <div class="cmnt-head">
+    <h2 id="cmnt-h">{{ i18n "cmnt_head" }}</h2>
     <span class="cmnt-n"></span>
-    <span class="cmnt-arr" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-    </span>
-  </button>
-  <p class="cmnt-status" role="status" aria-live="polite"></p>
-  <div class="cmnt-body" id="cmnt-body" hidden>
-    {{- /* Same expression baseof.html uses for data-scheme: the default
-           palette's `light` flag. It is only a starting value — prefs.js may
-           restore another palette before the bundle runs, and
-           modules/comments.js re-reads the live data-scheme on start. */ -}}
-    {{- $dt := site.Params.defaultTheme | default "taiga" -}}
-    <comentario-comments no-fonts="true"
-      theme="{{ if (index site.Data.themes $dt).light }}light{{ else }}dark{{ end }}"
-      page-id="{{ .RelPermalink }}"></comentario-comments>
   </div>
+  {{- /* Empty, and hidden by CSS while it is. The one failure the engine
+         cannot report is its own bundle never arriving. */ -}}
+  <p class="cmnt-status" role="status" aria-live="polite"></p>
+  {{- /* Same expression baseof.html uses for data-scheme: the default
+         palette's `light` flag. It is only a starting value — prefs.js may
+         restore another palette before the bundle runs, and
+         modules/comments.js re-reads the live data-scheme on start. */ -}}
+  {{- $dt := site.Params.defaultTheme | default "taiga" -}}
+  <comentario-comments no-fonts="true"
+    theme="{{ if (index site.Data.themes $dt).light }}light{{ else }}dark{{ end }}"
+    page-id="{{ .RelPermalink }}"></comentario-comments>
 </section>
 {{- end -}}

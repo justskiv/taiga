@@ -471,16 +471,20 @@ other = "No letter in the inbox — have a look in the spam folder."
 other = "use another address"
 
 # ── comments (29-comments.css / modules/comments.js) ─────────────────────────
-# The comments block at the foot of a guide (Comentario). cmnt_loading /
-# cmnt_error / cmnt_retry live in JS — js-bridge.html hands them over as
-# window.THEME_I18N.cmnt* (see docs/i18n.md).
-[cmnt_aria]
-other = "Comments"
-[cmnt_open]
-other = "Show comments"
-# JS keys: the status line under the button.
-[js_cmnt_loading]
-other = "Loading comments…"
+# Strings for the comments block (Comentario). The js_cmnt_* keys reach the
+# bundle through js-bridge.html as window.THEME_I18N.cmnt* (see docs/i18n.md);
+# cmnt_head is rendered straight into the markup by Hugo.
+[cmnt_head]
+other = "Discussion"
+
+# The figure beside the heading when the thread is empty. Written only once the
+# engine has rendered: from outside, an empty thread and an unloaded one look
+# alike, and "no comments yet" is a claim rather than a placeholder.
+[js_cmnt_none]
+other = "no comments yet"
+
+# The one failure the engine cannot report: its own bundle never arriving.
+# Everything else it explains for itself.
 [js_cmnt_error]
 other = "Comments failed to load."
 [js_cmnt_retry]
@@ -501,11 +505,19 @@ other = "Oldest"
 [js_cmnt_sort_newest]
 other = "Newest"
 
-# The word "comment" for the line above the thread. The engine ships a single
+# The word "comment" for the line in the block header. The engine ships a single
 # form per language, which reads wrong for any count but one in English too.
 [js_cmnt_word]
 one = "comment"
 other = "comments"
+
+# The same for a folded branch: "2 REPLIES — SHOW". The engine only half-folds
+# one (the replies fade but keep their space), so the label is ours as well.
+[js_cmnt_reply_word]
+one = "reply"
+other = "replies"
+[js_cmnt_show]
+other = "show"
 
 # The comment form. Anonymous commenting is off; the cost of entry is stated
 # when the editor opens rather than after the reader has finished writing. The
@@ -517,5 +529,28 @@ other = "Write a comment…"
 other = "Submit"
 [js_cmnt_submit_in]
 other = "Sign in and submit"
-[js_cmnt_close]
-other = "Hide comments"
+
+# The one action the thread exists for is the one that gets a word instead of a
+# glyph. The votes stay arrows.
+[js_cmnt_reply]
+other = "Reply"
+
+# The domain owner's badge. The engine calls it "Moderator" — a role nobody
+# plays on a blog with one author.
+[js_cmnt_author]
+other = "Author"
+
+# The login dialog. The engine titles it "Sign in" and heads the provider list
+# with "Sign in with", saying the same thing twice and never saying why a dialog
+# appeared at all — which was because the reader pressed reply or a vote arrow.
+[js_cmnt_login_title]
+other = "Sign in"
+[js_cmnt_login_why]
+other = "Commenting and voting need an account"
+
+# Moderation states. Premoderation is off, but it goes on with a checkbox and no
+# restart — the day it does is the wrong day to find these were never drawn.
+[js_cmnt_pending]
+other = "awaiting moderation"
+[js_cmnt_rejected]
+other = "rejected by a moderator"
