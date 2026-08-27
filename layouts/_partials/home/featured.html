@@ -8,12 +8,16 @@
 {{- with site.Params.featured -}}
 {{- with site.GetPage . -}}
 {{- $s := partial "article/series-ctx.html" . -}}
-{{- $rubric := .FirstSection -}}
+{{- /* The rubric is optional here too (article/rubric.html): a featured guide
+       from outside the rubrics has no shelf to link to, so the kicker opens on
+       the series or the reading time. The row is a flex `gap`, with no
+       separators of its own, so nothing is left dangling. */ -}}
+{{- $rubric := partial "article/rubric.html" . -}}
 <div class="sec-h">{{ i18n "featured_head" }}</div>
 <section class="featured">
   <div class="f-body">
     <div class="f-k">
-      <a href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
+      {{ with $rubric }}<a href="{{ .RelPermalink }}">{{ .Params.label | default (lower .Title) }}</a>{{ end }}
       {{ if $s.isSeries }}<a href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>{{ end }}
       <span>{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</span>
     </div>

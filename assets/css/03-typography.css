@@ -53,16 +53,20 @@ blockquote p{margin:0}
    while the cursor is still on the visible pill.) box-decoration-break gives
    each fragment of a line-wrapped link its own rounded pill.
 
-   Scope: prose containers inside the article/rubric column (.wrap), the
-   container list wrapped in :where() so it adds no specificity and any
-   component rule still wins. Excluded as navigation, not prose: .toc, the
-   .slist series-part rows (rubric block + series landing) and the .alist
+   Scope: prose containers inside the article/rubric column (.wrap) and the
+   feed's lead (.p-lead), which is the same rendered prose shown outside that
+   column — a link had no business changing colour between the card and the
+   page it opens. Kept as :is() rather than a second :where(): the scope must
+   still outweigh the base a{} in 01-base.css, and :where() would zero the
+   selector out. The container list is wrapped in :where() so it adds no
+   specificity and any component rule still wins. Excluded as navigation, not
+   prose: .toc, the .slist series-part rows (rubric block + series landing) and the .alist
    rubric article rows — all identified by position and layout, and their
    row-links wrap meta spans the underline would run under. Also excluded:
    .hash heading anchors, .btn, and footnote marks — a superscript digit is
    too small to carry an underline, and at that size the accent fill never
    disturbs reading. */
-.wrap :where(p, li, dd, td, blockquote, .lead, .foot)
+:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot)
   a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .footnote-ref, .footnote-backref)){
   color:inherit;
   border-bottom:0;              /* the base a:hover border must never resurface */
@@ -80,7 +84,7 @@ blockquote p{margin:0}
              background-color var(--dur) var(--ease),
              text-decoration-color var(--dur) var(--ease);
 }
-.wrap :where(p, li, dd, td, blockquote, .lead, .foot)
+:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot)
   a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .footnote-ref, .footnote-backref)):hover{
   color:var(--accent);
   /* the underline is deliberately NOT restyled here: it holds its rest state
@@ -94,7 +98,7 @@ blockquote p{margin:0}
 /* focus ring for every link in these containers, the excluded navigation
    rows included — the outline is the theme's focus pattern, not part of the
    quiet-link look */
-.wrap :where(p, li, dd, td, blockquote, .lead, .foot) a:focus-visible{
+:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot) a:focus-visible{
   outline:2px solid var(--accent); outline-offset:3px; border-radius:3px;
 }
 /* a linked image must not draw the underline beneath the picture, nor grow
@@ -117,6 +121,15 @@ hr{border:0; height:1px; background:var(--border); margin:40px 0}
    textarea must agree on their width or the code shifts under the caret. */
 :root{--code-fs:13.5px; --code-lh:1.7; --code-pad:16px 18px; --code-tab:8}
 code{font-family:var(--font-mono); font-size:.86em}
+/* JetBrains Mono ships programming ligatures on by default, so `>=` reaches the
+   reader as a single ≥ glyph and `!=` as ≠ — a character that is not in the
+   source and that nobody can paste back into a compiler. Code on this site is
+   quoted Go, not typography, so every operator stays the pair of glyphs the
+   file actually contains. The editor's textarea and codapi's output are listed
+   too: the caret in .ced-input must sit over the glyph it highlights, and one
+   ligature there would shift the whole line off its coloured twin. */
+code, pre, kbd, samp, .ced-input, codapi-output, codapi-status{
+  font-variant-ligatures:none; font-feature-settings:"liga" 0,"calt" 0}
 p code, li code, td code, h3 code, blockquote code{background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; padding:1px 6px; color:var(--text-strong); white-space:nowrap}
 pre{margin:0 0 20px; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius); padding:var(--code-pad); overflow-x:auto; position:relative}
 pre code{font-size:var(--code-fs); line-height:var(--code-lh); color:var(--text-primary); white-space:pre; background:none; border:0; padding:0; tab-size:var(--code-tab)}

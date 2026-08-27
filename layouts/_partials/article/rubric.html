@@ -1,0 +1,25 @@
+{{- /* The guide's RUBRIC — the shelf a reader can actually open — or false when
+       it has none. Context = a guide page. Returns the section PAGE, so callers
+       take the label off it themselves (params.label | lower title).
+
+       Guides live in two kinds of section (guide-sections.html). A RUBRIC is one
+       of params.rubricSections: it has a landing page, a card on the home page
+       and a place in the nav, so naming it hands the reader somewhere to go. The
+       sections of params.extraGuideSections are the other kind — a catch-all
+       ("misc", "разное") that carries loose pieces into the feed, search and RSS
+       without ever being a shelf; its _index.md is typically `render: never`, so
+       .RelPermalink on it is the empty string and the kicker link the templates
+       used to draw pointed at nothing at all.
+
+       Hence false rather than the section page: a name with no destination is
+       worse than no name, and the reader loses nothing — the line still says
+       what the piece is ("deep dive", or the series and part). Every call site
+       wraps it in `with`, which drops the item and its separator together. */ -}}
+{{- /* One exit, not two: Hugo rewrites only the FIRST `return` it finds in a
+       partial, so a second one further down is left as a plain function call and
+       blows up the build ("wrong number of args for return"). */ -}}
+{{- $rubric := false -}}
+{{- if in (site.Params.rubricSections | default slice) .Section -}}
+  {{- $rubric = .FirstSection -}}
+{{- end -}}
+{{- return $rubric -}}

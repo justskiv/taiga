@@ -34,10 +34,33 @@
         | replaceRE `(?s)<(figure|video|iframe)\b.*?</(figure|video|iframe)>` ""
         | replaceRE `(?s)<p>\s*</p>` "" -}}
   {{- if not (strings.Contains $lead "<p") }}{{ $lead = "" }}{{ end -}}
+  {{- /* The lead arrives with the article's own link decoration on it
+       (render-link.html): a species mark per destination — ✈ t.me, ▶ YouTube,
+       W Wikipedia, Go go.dev — plus the data-* hooks that open hover cards.
+       Neither survives the move into a card. The marks are a classifier for a
+       reader already inside a piece, choosing which reference to follow; in a
+       two-line teaser they read as a row of logos competing with the title.
+       And the cards cannot open here anyway: the pre-rendered ones are fetched
+       from the article's own store (article/link-cards.html), which no feed
+       page carries, so the hover would dwell and then show nothing.
+
+       So the lead keeps exactly one piece of that grammar — the plain "this
+       leads off the site" arrow that any unrecognised external link already
+       gets — and drops the rest: every species collapses to `ext`, and the
+       preview hooks go (data-preview for internal targets, data-tg/yt/wiki/
+       gob/gdoc for the built cards). Losing those attributes is also what
+       keeps modules/linkpreview.js from binding on the home page at all: it
+       looks for exactly them before it does anything.
+
+       This rewrites the COPY that goes into the card — Hugo hands out the
+       same rendered content to the article itself, which is untouched. */ -}}
+  {{- $lead = $lead
+        | replaceRE ` data-link="[a-z]+"` ` data-link="ext"`
+        | replaceRE ` data-(?:preview|tg|yt|wiki|gob|gdoc)="[^"]*"` "" -}}
 {{- end -}}
 {{- $cover := dict -}}
 {{- if eq ($home.feedCover | default "") "banner" }}{{ $cover = partial "page-cover.html" . }}{{ end -}}
-{{- $rubric := .FirstSection -}}
+{{- $rubric := partial "article/rubric.html" . -}}
 {{- $s := partial "article/series-ctx.html" . -}}
 {{- $tags := .Params.tags | default slice -}}
 <article class="post" data-tags="{{ delimit $tags " " }}">
@@ -59,8 +82,14 @@
        of them — usually the date — alone on a line of its own. Grouped, the
        break can only fall between "what this is" and "how big / when", the
        same seam the reader already sees; on a wide card the groups sit in one
-       row and nothing about it changes. */ -}}
-<div class="p-m"><span class="p-g"><a class="pr p-cut" href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a>
+       row and nothing about it changes.
+
+       A guide outside the rubrics (article/rubric.html) opens on what it IS
+       instead — the group then starts at the series or the standalone word. The
+       hairline is a TRAILING pseudo-element, so dropping the first item takes
+       its separator with it and the row never opens on a stray rule. */ -}}
+<div class="p-m"><span class="p-g">
+{{- with $rubric }}<a class="pr p-cut" href="{{ .RelPermalink }}">{{ .Params.label | default (lower .Title) }}</a>{{ end }}
 {{- if $s.isSeries }}<a class="ps p-cut" href="{{ $s.href }}">{{ $s.label }} · {{ i18n "part_of" (dict "N" $s.pos "M" $s.total) }}</a>
 {{- else }}<span class="p-cut">{{ i18n "kicker_standalone" }}</span>{{ end }}</span>
 {{- "" -}}<span class="p-g"><span class="p-cut">{{ .Params.mins | default (partial "article/reading-time.html" .) }} {{ i18n "mins_abbr" }}</span>

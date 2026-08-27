@@ -1,13 +1,21 @@
 {{- /* Kicker text as a plain string: "<rubric> · <series> · part N of M" for a
        series guide, "<rubric> · deep dive" for a standalone one. Shared by the
        visible kicker and the Pagefind result breadcrumb so they never drift.
-       Context = a guide page. */ -}}
-{{- $rubric := .FirstSection.Params.label | default (lower .FirstSection.Title) -}}
+       Context = a guide page.
+
+       Built tail-first, because the rubric is the optional half: a guide that
+       sits outside the rubrics (article/rubric.html — the "misc" catch-all has
+       no landing page to send anyone to) is announced by what it is alone,
+       "deep dive" or its series and part. Prepending the rubric only when there
+       is one is also what keeps the string from starting on a bare " · ". */ -}}
 {{- $s := partial "article/series-ctx.html" . -}}
-{{- $out := $rubric -}}
+{{- $out := "" -}}
 {{- if $s.isSeries -}}
-  {{- $out = printf "%s · %s · %s" $rubric $s.label (i18n "part_of" (dict "N" $s.pos "M" $s.total)) -}}
+  {{- $out = printf "%s · %s" $s.label (i18n "part_of" (dict "N" $s.pos "M" $s.total)) -}}
 {{- else -}}
-  {{- $out = printf "%s · %s" $rubric (i18n "kicker_standalone") -}}
+  {{- $out = i18n "kicker_standalone" -}}
+{{- end -}}
+{{- with partial "article/rubric.html" . -}}
+  {{- $out = printf "%s · %s" (.Params.label | default (lower .Title)) $out -}}
 {{- end -}}
 {{- return $out -}}
