@@ -1,6 +1,19 @@
 /* base */
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+/* `text-size-adjust` is an opt-out from mobile WebKit's font boosting, not a
+   nicety: with the property at its `auto` default, iOS rescales text on its
+   own inside blocks whose content runs wider than the viewport — which is
+   every code listing, since `white-space:pre` makes the longest line as wide
+   as it needs to be and the box scrolls (03-typography.css). The boost is
+   applied per text node, so a single long line came out ~1.35x larger than
+   its neighbours in the SAME <pre>, while its own leading whitespace stayed
+   at --code-fs: a listing in two sizes at once. Runnable snippets showed it
+   first because .ced puts the small size on the <pre> itself (25-code-editor
+   .css), and the heuristic hunts for small text — but any listing with a long
+   enough line can be hit. `100%` rather than `none`: an explicit percentage
+   turns the automatic boost off and leaves pinch-zoom alone. Desktop engines
+   do not implement boosting at all, which is why this is invisible there. */
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%}
 /* The page is a full-height flex column so the footer can be pinned to the
    bottom of the viewport on a short page (an empty rubric, the 404) instead of
    floating mid-screen: the content block between header and footer takes the

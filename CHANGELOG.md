@@ -76,6 +76,21 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **iOS rendered a listing in two sizes at once.** With `text-size-adjust`
+  left at its `auto` default, mobile WebKit rescales text on its own inside
+  blocks whose content runs wider than the viewport — which is every code
+  listing here, since `white-space:pre` makes the longest line as wide as it
+  needs to be and the box scrolls. The boost is applied per text node, so in
+  one `<pre>` the longest line came out about a third larger than its
+  neighbours while its own leading whitespace stayed at `--code-fs`: a block
+  out of alignment with itself, and, the moment the editor opened over it, a
+  caret a whole size away from the glyph it is meant to sit on. Runnable
+  snippets showed it first — `.ced` puts the small size on the `<pre>` itself
+  and the heuristic hunts for small text — but any listing with a long enough
+  line could be hit. `html` now states `100%`, which turns the automatic boost
+  off and leaves pinch-zoom alone; desktop engines do not implement boosting
+  at all, which is why none of this was ever visible there.
+
 - **A run served from a cache reported the time of the original one.** A
   cache went in front of the runner, and codapi's answer is replayed byte for
   byte — `duration` among those bytes. A second Run on unchanged code came
