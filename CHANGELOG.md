@@ -76,6 +76,30 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **In a runnable snippet the caret drifted further from its glyph with every
+  row.** The editing surface is a transparent textarea laid over the highlighted
+  `<pre>`, and the two agree only while they lay text out identically.
+  `--font-mono` was stated on `code` and on the textarea but never on the
+  `<pre>` itself, so the block's strut fell back to whatever the browser
+  resolves for bare `monospace` — a different face on every platform — while the
+  text ran in the JetBrains Mono the theme ships. An explicit line-height makes
+  both boxes the same height, but the baseline sits at a different depth in
+  each, and the two stack into a line box taller than the leading they were
+  given. Every row gained a fraction; a reader clicking after `func` twenty
+  rows down watched the letters land a line below the caret. Chroma's per-line
+  flex rows never consult the strut, which is why a snippet looked right until
+  the first keystroke re-rendered it through the client-side highlighter — and
+  why this reached readers at all: on the Chrome/macOS the theme is written on,
+  the default resolves to a face whose metrics agree with JetBrains Mono, so
+  nothing showed there. `.ced > pre` now names the family it was already using.
+
+  Fixed alongside it: `.ced-eol` — the empty inline-block that gives a trailing
+  newline a line of its own — stated a height. A zero-width inline-block rests
+  its bottom edge on the baseline, so all of that height counted above the line,
+  where the strut asks only for the font's ascent: the last empty row measured
+  29.89px against 22.95px for a real one. Being an atomic inline is the whole
+  job, and the strut sizes the row.
+
 - **iOS rendered a listing in two sizes at once.** With `text-size-adjust`
   left at its `auto` default, mobile WebKit rescales text on its own inside
   blocks whose content runs wider than the viewport — which is every code

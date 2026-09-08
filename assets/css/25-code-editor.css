@@ -109,14 +109,31 @@ codapi-output a[href="#close"]:hover{color:var(--text-strong); border-color:var(
    the listing keeps the block's bottom margin, the wrapper takes it over. */
 .ced{position:relative; margin:0 0 20px}
 /* The metrics are restated on the <pre> itself, not just on `pre code`, because
-   the block's own strut decides how tall a line box gets: a <pre> inherits the
-   prose size (17px), so a line of code laid out directly inside it comes out
-   ~28px tall instead of the 23px `pre code` asks for, and the caret in the
-   textarea above drifts a line further off with every row. Chroma's own markup
-   hides this — it wraps each line in a flex row that never consults the strut —
-   so the gap only appears once the editor re-renders the block itself. Scoped
-   to .ced: listings outside a runnable snippet keep their layout exactly. */
-.ced > pre{margin:0; font-size:var(--code-fs); line-height:var(--code-lh)}
+   the block's own strut decides how tall a line box gets — and it decides with
+   the font as much as with the size.
+
+   The size is the obvious half: a <pre> inherits the prose size (17px), so a
+   line of code laid out directly inside it comes out ~28px tall instead of the
+   23px `pre code` asks for, and the caret in the textarea above drifts a line
+   further off with every row.
+
+   The family hides better. With an explicit line-height every inline box comes
+   out the same height — --code-fs × --code-lh — but where the baseline sits
+   INSIDE that box follows the font's own ascent and descent, so a strut and a
+   text run in two different monospaces stack into a line box TALLER than the
+   leading both were given. Name no family here and the strut becomes whatever
+   the browser resolves for bare `monospace`, a different face per platform,
+   while the text runs in the JetBrains Mono the theme ships itself. Where the
+   two happen to agree the rows stay honest and nothing shows — which is the
+   case on the Chrome/macOS this was measured on. Where they do not, each row
+   gains a fraction: Courier New as the strut measured +1.5px a row, and by row
+   20 that is a whole line between the caret and the glyph it sits on.
+
+   Chroma's own markup hides both — it wraps each line in a flex row that never
+   consults the strut — so the gap only appears once the editor re-renders the
+   block itself. Scoped to .ced: listings outside a runnable snippet keep their
+   layout exactly. */
+.ced > pre{margin:0; font-family:var(--font-mono); font-size:var(--code-fs); line-height:var(--code-lh)}
 
 /* The textarea is invisible except for its caret: the colours the reader sees
    are the real highlighted markup underneath, re-rendered on every keystroke.
@@ -181,6 +198,14 @@ codapi-output a[href="#close"]:hover{color:var(--text-strong); border-color:var(
 @media(max-width:640px){.ced-hint{display:none}}
 
 /* A trailing newline has no glyph to give the <pre> a last line, so the caret
-   would sit below the box. This empty inline-block restores the line height
-   without contributing a character to textContent — which is what runs. */
-.ced-eol{display:inline-block; width:0; height:calc(var(--code-fs) * var(--code-lh))}
+   would sit below the box. This empty inline-block restores the line without
+   contributing a character to textContent — which is what runs.
+
+   It states no height of its own. Being an atomic inline is the whole job: that
+   alone generates the line box, and the strut then sizes it to --code-fs ×
+   --code-lh, the same as every other row. Spelling a height out instead made
+   that last row the odd one — a zero-width inline-block rests its bottom edge
+   on the baseline, so all of the height counted ABOVE the line, where the strut
+   only asks for the font's ascent. Measured before this: 29.89px for the empty
+   row against 22.95px for a real one. */
+.ced-eol{display:inline-block; width:0}
