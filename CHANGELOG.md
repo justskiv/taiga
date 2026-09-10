@@ -76,6 +76,64 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **A Wikipedia card dropped every formula from the article it was showing.**
+  The card was built from the summary API's `extract`, which is plain text, and
+  Wikimedia strips `<math>` out of it entirely rather than transcribing it —
+  «разложить число ␣ за время ␣, используя ␣ логических кубитов» reached readers
+  with a hole where each formula had been, and nothing in the pipeline could
+  notice, because a hole is valid text. The card now reads `extract_html`, whose
+  formulas survive as Wikimedia's own SVG renders, and inlines each of them
+  (`article/lp/math.html`). Inlining rather than linking the image is what makes
+  the colours work: MathJax paints those renders with `fill="currentColor"`, so
+  a formula takes the card's text colour in every palette, where the `<img>`
+  Wikipedia itself ships is black on transparent and would need a per-palette
+  invert to be visible at all. Ids inside each SVG are namespaced per formula —
+  several cards live in one page's hidden store and `<use>` resolves
+  document-wide — and renaming them again when a card is cloned out of that
+  store keeps the open card drawing from itself rather than from the hidden
+  copy it was cloned from. The TeX from the render's `<title>` becomes the
+  formula's `aria-label`. A formula that fails to fetch drops the whole card back to the
+  plain-text path rather than shipping a broken one.
+
+- **A hover card floated into the middle of the paragraph when its link had
+  wrapped.** Both `place()` and the scroll tracker anchored on
+  `getBoundingClientRect()`, which for an inline element broken across two lines
+  returns a box spanning both of them and the whole column in between — so the
+  card centred on a point the link never occupied and covered the prose instead
+  of pointing at anything. `getClientRects()` gives one rect per line box, and
+  the card now anchors on the one the pointer entered, falling back to the first
+  line when there is no pointer to ask (keyboard focus). Whether the card should
+  live at all stays a question about the whole element: a line box can scroll out
+  while the rest of the link is still being read, and a pinned term card used to
+  vanish at that moment. Link previews and term cards both had it; both are
+  fixed.
+
+- **A link's classifier mark could wrap to the next line without its link.** The
+  mark is an `::after` inline-block, an atomic inline, so the line breaker is
+  free to put it on the next line on its own — a stray "w" opening a line under
+  the "SHA-512" that ended the one above — and the same break splits a
+  hyphenated one-word link ("где-нибудь") under its mark. Nowrap now goes on the
+  link itself, and everything before its last word is handed back normal
+  wrapping, so the tail and its mark are welded while a longer phrase still
+  breaks at its own spaces. (A nowrap span around the text alone does not do it:
+  the break opportunity between that span and the pseudo-element after it
+  survives.)
+
+- **Bold and italic ignored the dimming of the block they sat in.** A fold's
+  body is set in `--text-secondary`, but `strong` and `em` state their colours
+  on the element, so a bold lead-in kept punching through a muted paragraph at
+  full `--text-strong` brightness and italics lifted themselves back to
+  `--text-primary`. `em` no longer sets a colour at all — in prose it only ever
+  restated the body colour, which is why the bug could only ever show up
+  somewhere dimmed — and `strong` reads `--strong-fg`, which a dimmed container
+  sets to say what "brighter than this text" means there. `.fold-body` and the
+  internal preview card's `.ic-body` set it to a small mix toward
+  `--text-strong`, not to the next rung of the ramp: the gap from
+  `--text-secondary` to `--text-primary` runs about three times the gap prose
+  keeps between its own text and its bold, so borrowing the rung above left the
+  lead-in still reading as white. What has to carry over from prose is the size
+  of the lift, not its position on the ramp.
+
 - **In a runnable snippet the caret drifted further from its glyph with every
   row.** The editing surface is a transparent textarea laid over the highlighted
   `<pre>`, and the two agree only while they lay text out identically.

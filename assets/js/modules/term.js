@@ -67,9 +67,29 @@ export function bindTerms() {
     }, CLOSE_DELAY);
   }
 
+  /* Which line box the card points at. A term that WRAPPED («хрупко и с
+     оговорками» broken across two lines) has a bounding box spanning both lines
+     and the column between them, and a card centred on that lands in the middle
+     of the paragraph rather than under the word. One rect per line box, pick the
+     one the pointer entered on — the first when there is no pointer (keyboard).
+     Same helper as linkpreview.js, kept local like the physics constants. */
+  let pt = null;
+  function anchorRect(el) {
+    const rs = el.getClientRects();
+    if (rs.length < 2) return el.getBoundingClientRect();
+    if (pt) {
+      for (let i = 0; i < rs.length; i++) {
+        const r = rs[i];
+        if (pt.y >= r.top - 2 && pt.y <= r.bottom + 2 &&
+            pt.x >= r.left - 2 && pt.x <= r.right + 2) return r;
+      }
+    }
+    return rs[0];
+  }
+
   function place(card, word) {
     if (sheet.matches) return;   /* bottom sheet — CSS owns the geometry */
-    const r = word.getBoundingClientRect();
+    const r = anchorRect(word);
     card.style.left = '0px'; card.style.top = '0px';
     const cw = card.offsetWidth, ch = card.offsetHeight;
     let x = r.left + r.width / 2 - cw / 2;
@@ -140,7 +160,8 @@ export function bindTerms() {
     word.setAttribute('aria-haspopup', 'dialog');
 
     if (fine.matches) {
-      word.addEventListener('mouseenter', function () {
+      word.addEventListener('mouseenter', function (e) {
+        pt = { x: e.clientX, y: e.clientY };
         clear();
         clearTimeout(openT);
         if (open === card) return;
@@ -160,11 +181,13 @@ export function bindTerms() {
        right after the word in the tab order because the browser follows the DOM
        and the block was appended at the end. Enter pins it. */
     word.addEventListener('focus', function () {
+      pt = null;
       if (word.matches(':focus-visible') && open !== card) show(word, false);
     });
 
     word.addEventListener('click', function (e) {
       e.preventDefault();
+      pt = { x: e.clientX, y: e.clientY };
       clearTimeout(openT);   /* a pin must not be undone by a pending hover */
       if (open === card && pinned) { hide(); return; }
       show(word, true);
@@ -212,8 +235,11 @@ export function bindTerms() {
     raf = requestAnimationFrame(function () {
       raf = 0;
       if (!open || !owner) return;
-      const r = owner.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > window.innerHeight) { hide(); return; }
+      /* the whole word decides whether there is still anything to annotate; a
+         wrapped term keeps one line on screen while the other scrolls off, and
+         anchorRect answers about a line, not about the word. */
+      const box = owner.getBoundingClientRect();
+      if (box.bottom < 0 || box.top > window.innerHeight) { hide(); return; }
       place(open, owner);
     });
   }

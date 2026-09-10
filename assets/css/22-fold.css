@@ -56,6 +56,12 @@
 .fold[open] .fold-more{display:none}
 .fold[open] .fold-less{display:inline}
 .fold-body{font-size:14.5px; line-height:1.65; color:var(--text-secondary);
+  /* bold dims with the text it sits in. Not --text-primary: that is the next
+     rung of the ramp, and the gap from --text-secondary up to it is about three
+     times the gap prose puts between its own text and its bold, so the lead-in
+     still read as white on a muted paragraph. A small mix toward --text-strong
+     reproduces the SIZE of the prose lift instead of its position. */
+  --strong-fg:color-mix(in srgb, var(--text-strong) 30%, var(--text-secondary));
   padding:9px 0 2px 29px}
 .fold-body p{margin:0 0 10px}
 .fold-body p:last-child{margin-bottom:0}

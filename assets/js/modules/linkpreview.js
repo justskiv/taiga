@@ -32,6 +32,35 @@ export function bindLinkPreviews() {
     const i = h.indexOf('#');
     return i < 0 ? '' : h.slice(i + 1);
   }
+  /* A card is cloned OUT of the hidden store, and the clone brings the store
+     copy's ids with it: two elements share an id, and every reference inside the
+     clone (a Wikipedia formula is <defs> plus <use>) resolves to whichever comes
+     first in the document — the copy that stays hidden. Rename the ids in the
+     clone so it draws from itself and nothing depends on resolving into a
+     display:none subtree. */
+  let cloneN = 0;
+  function cloneCard(node) {
+    const card = node.firstElementChild.cloneNode(true);
+    const ids = card.querySelectorAll('[id]');
+    if (!ids.length) return card;
+    const suffix = '-c' + ++cloneN;
+    const renamed = {};
+    for (let i = 0; i < ids.length; i++) {
+      renamed[ids[i].id] = ids[i].id + suffix;
+      ids[i].id += suffix;
+    }
+    const all = card.querySelectorAll('*');
+    for (let i = 0; i < all.length; i++) {
+      ['href', 'xlink:href'].forEach((attr) => {
+        const v = all[i].getAttribute(attr);
+        if (v && v.charAt(0) === '#' && renamed[v.slice(1)]) {
+          all[i].setAttribute(attr, '#' + renamed[v.slice(1)]);
+        }
+      });
+    }
+    return card;
+  }
+
   function storeCard(kind, href) {
     const store = document.querySelector('.lp-store');
     if (!store) return null;
@@ -57,7 +86,7 @@ export function bindLinkPreviews() {
     match: (a) => a.hasAttribute('data-tg'),
     key: (a) => 't|' + a.getAttribute('href'),
     fetch: (a) => Promise.resolve(storeCard('tg', a.getAttribute('href'))),
-    render: (_a, node) => (node ? node.firstElementChild.cloneNode(true) : null),
+    render: (_a, node) => (node ? cloneCard(node) : null),
     skeleton: () => skeleton(['50%', '92%', '99%', '68%']),
   };
   const yt = {
@@ -65,7 +94,7 @@ export function bindLinkPreviews() {
     match: (a) => a.hasAttribute('data-yt'),
     key: (a) => 'y|' + a.getAttribute('href'),
     fetch: (a) => Promise.resolve(storeCard('yt', a.getAttribute('href'))),
-    render: (_a, node) => (node ? node.firstElementChild.cloneNode(true) : null),
+    render: (_a, node) => (node ? cloneCard(node) : null),
     skeleton: () => skeleton(['100%', '62%', '48%']),
   };
   const wiki = {
@@ -73,7 +102,7 @@ export function bindLinkPreviews() {
     match: (a) => a.hasAttribute('data-wiki'),
     key: (a) => 'w|' + a.getAttribute('href'),
     fetch: (a) => Promise.resolve(storeCard('wiki', a.getAttribute('href'))),
-    render: (_a, node) => (node ? node.firstElementChild.cloneNode(true) : null),
+    render: (_a, node) => (node ? cloneCard(node) : null),
     skeleton: () => skeleton(['34%', '70%', '46%', '100%', '96%', '84%']),
   };
   const gob = {
@@ -81,7 +110,7 @@ export function bindLinkPreviews() {
     match: (a) => a.hasAttribute('data-gob'),
     key: (a) => 'g|' + a.getAttribute('href'),
     fetch: (a) => Promise.resolve(storeCard('gob', a.getAttribute('href'))),
-    render: (_a, node) => (node ? node.firstElementChild.cloneNode(true) : null),
+    render: (_a, node) => (node ? cloneCard(node) : null),
     skeleton: () => skeleton(['30%', '72%', '40%', '100%', '94%', '88%']),
   };
   /* go.dev documentation. Keyed off data-gdoc rather than the href: a link into a
@@ -92,7 +121,7 @@ export function bindLinkPreviews() {
     match: (a) => a.hasAttribute('data-gdoc'),
     key: (a) => 'd|' + a.getAttribute('data-gdoc'),
     fetch: (a) => Promise.resolve(storeCard('gdoc', a.getAttribute('data-gdoc'))),
-    render: (_a, node) => (node ? node.firstElementChild.cloneNode(true) : null),
+    render: (_a, node) => (node ? cloneCard(node) : null),
     skeleton: () => skeleton(['36%', '84%', '100%', '92%', '64%']),
   };
   const providers = [internal, tg, yt, wiki, gob, gdoc];
@@ -208,8 +237,29 @@ export function bindLinkPreviews() {
     return pop;
   }
 
+  /* The rect the card points at. A link that WRAPPED across lines has a bounding
+     box spanning both lines AND the whole column between them, so a card centred
+     on it floats off into the middle of the paragraph, covering the prose instead
+     of pointing at the link. getClientRects gives one rect per line box: use the
+     one the pointer came in on, and the first line when there is no pointer to
+     ask (keyboard focus, a scroll that moved the link under a still cursor).
+     term.js carries the same helper for the same reason. */
+  let pt = null;
+  function anchorRect(el) {
+    const rs = el.getClientRects();
+    if (rs.length < 2) return el.getBoundingClientRect();
+    if (pt) {
+      for (let i = 0; i < rs.length; i++) {
+        const r = rs[i];
+        if (pt.y >= r.top - 2 && pt.y <= r.bottom + 2 &&
+            pt.x >= r.left - 2 && pt.x <= r.right + 2) return r;
+      }
+    }
+    return rs[0];
+  }
+
   function place(node, word) {
-    const r = word.getBoundingClientRect();
+    const r = anchorRect(word);
     node.style.left = '0px'; node.style.top = '0px';
     const cw = node.offsetWidth, ch = node.offsetHeight;
     let x = r.left + r.width / 2 - cw / 2;
@@ -308,6 +358,7 @@ export function bindLinkPreviews() {
   }
 
   document.addEventListener('mouseover', (e) => {
+    pt = { x: e.clientX, y: e.clientY };   /* which line box the card belongs to */
     let a = e.target.closest && e.target.closest('a');
     if (a && !inScope(a)) a = null;
     if (a === hoverA) return;
@@ -324,6 +375,7 @@ export function bindLinkPreviews() {
 
   /* keyboard parity: focus opens without dwell, blur schedules close */
   document.addEventListener('focusin', (e) => {
+    pt = null;                             /* no pointer: anchor on the first line */
     const a = e.target.closest && e.target.closest('a');
     if (!a || !inScope(a) || !a.matches(':focus-visible')) return;
     const p = providerFor(a);
@@ -341,8 +393,11 @@ export function bindLinkPreviews() {
     raf = requestAnimationFrame(() => {
       raf = 0;
       if (!cur.a) return;
-      const r = cur.a.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > window.innerHeight) hidePop();
+      /* the card dies when the LINK leaves the viewport, so this test takes the
+         whole element: on a wrapped link one line box can scroll out while the
+         other is still being read, and anchorRect answers about a line. */
+      const box = cur.a.getBoundingClientRect();
+      if (box.bottom < 0 || box.top > window.innerHeight) hidePop();
       else { place(pop, cur.a); scheduleClose(); }
     });
   }

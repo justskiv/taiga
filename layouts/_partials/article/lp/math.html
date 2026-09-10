@@ -1,0 +1,33 @@
+{{- /* One formula, inlined as SVG. Context = the url of a wikimedia math render
+       (…/media/math/render/svg/<hash>); returns the markup, or "" on any failure
+       — the caller then falls back to the plain-text extract.
+
+       Why inline and not the <img> Wikipedia itself ships: that render is black
+       on transparent, so every dark palette would need a filter:invert and the
+       formula would still only approximate the text colour. Inlined, MathJax's
+       own fill="currentColor" takes the card's colour for free in every palette,
+       and the width/height/vertical-align the <svg> carries in ex keep it on the
+       baseline of its line. Ids are namespaced per formula: several cards live
+       in one page (the hidden .lp-store) and <use> resolves document-wide, so
+       unprefixed glyph defs would cross-reference between formulas. The <title>
+       holds the TeX source — it becomes the aria-label, because a <title> id
+       repeated per formula would collide the same way. */ -}}
+{{- $url := . -}}
+{{- $out := "" -}}
+{{- with partial "article/lp/get.html" (dict "url" $url) -}}
+  {{- $svg := .Content -}}
+  {{- if hasPrefix $svg "<svg" -}}
+    {{- $tex := "" -}}
+    {{- with (findRESubmatch `(?s)<title[^>]*>(.*?)</title>` $svg) -}}
+      {{- $tex = trim (replaceRE `^\{\\displaystyle\s*|\}$` "" (index (index . 0) 1)) " " -}}
+    {{- end -}}
+    {{- $key := printf "mx%s" (substr (sha256 $url) 0 8) -}}
+    {{- $svg = replaceRE `(?s)<title[^>]*>.*?</title>` "" $svg -}}
+    {{- $svg = replaceRE `\s+aria-labelledby="[^"]*"` "" $svg -}}
+    {{- /* ${1}, not $1: Go would read the replacement as a group named "1mx…" */ -}}
+    {{- $svg = replaceRE `((?:xlink:)?href="#|id=")` (printf "${1}%s-" $key) $svg -}}
+    {{- $svg = replace (replaceRE `\s*\n\s*` "" $svg) `xlink:href="#` `href="#` -}}
+    {{- $out = replace $svg "<svg " (printf `<svg class="wk-math" aria-label="%s" ` (htmlEscape $tex)) 1 -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

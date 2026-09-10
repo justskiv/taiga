@@ -16,7 +16,9 @@ term card's physics, one popover per page. Six genres, one family:
 - **YouTube** links open a video card — thumbnail (a link to the video), duration,
   channel, view count.
 - **Wikipedia** links (`*.wikipedia.org/wiki/*`) open a summary card — the serif W
-  mark, the article title, its short description and lead extract.
+  mark, the article title, its short description and lead extract. Formulas in the
+  extract are kept: they arrive as Wikimedia's rendered SVG and are inlined into
+  the card, so they take its text colour in every palette.
 - **Go blog** links (`go.dev/blog/<slug>`, and legacy `blog.golang.org/<slug>`
   normalised to it) open a card with the italic *Go* mark, the post title, its
   byline (the date localised) and its opening.
@@ -33,7 +35,9 @@ Every outbound link also gets a small classifier mark: ↗ elsewhere on the web,
 Internal links carry no mark. The
 mark is suppressed in component chrome (a fold summary, a callout label, a CTA
 card) so it never doubles up with a component's own icon — the hover card still
-works there, only the little mark is muted.
+works there, only the little mark is muted. A marked link never lets its last
+word — or the mark itself — wrap to the next line alone; a longer phrase still
+breaks at its own spaces.
 
 The feature is **off** on touch (a tap must follow the link) and honours
 `prefers-reduced-motion` (fade only, no shimmer).
@@ -90,7 +94,13 @@ anyway). The build:
   downloads the thumbnail (`maxresdefault`, falling back to `mqdefault`);
 - fetches Wikipedia's official REST summary JSON
   (`<lang>.wikipedia.org/api/rest_v1/page/summary/<title>?redirect=true`) — the
-  same endpoint Wikipedia's own hover previews use, so there are no regexes.
+  same endpoint Wikipedia's own hover previews use, so the card is read off ready
+  JSON. The text comes from `extract_html`, **not** the plain `extract`: the plain
+  one drops every formula and leaves holes mid-sentence. Each formula there is a
+  Wikimedia SVG render, fetched and inlined into the card — MathJax draws those
+  with `fill="currentColor"`, so a formula takes the card's text colour in every
+  palette instead of needing a per-palette invert. A formula that fails to fetch
+  drops the whole card back to the plain text.
   **Wikimedia requires a descriptive `User-Agent`** or it answers `403`; the theme
   sends one built from your `baseURL`. Cyrillic titles are percent-encoded. The
   text is **CC BY-SA** — attribution is carried by the card itself, which links

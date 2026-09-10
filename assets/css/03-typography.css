@@ -24,8 +24,13 @@ p{margin:0 0 16px}
 ul,ol{margin:0 0 16px; padding-left:22px}
 li{margin:0 0 9px}
 li::marker{color:var(--accent)}
-strong{color:var(--text-strong); font-weight:650}
-em{color:var(--text-primary); font-style:italic}
+/* Emphasis follows its surroundings. --strong-fg lets a DIMMED block (a fold's
+   body, a preview card) say what "one step brighter than this text" means there:
+   without it the global --text-strong punched a full-brightness lead-in through
+   a muted paragraph. `em` sets no colour at all — in prose it only ever repeated
+   the body colour, and everywhere else it was an unwanted highlight. */
+strong{color:var(--strong-fg, var(--text-strong)); font-weight:650}
+em{font-style:italic}
 .muted{color:var(--text-muted)}
 blockquote{margin:0 0 22px; padding:2px 0 2px 18px; border-left:3px solid var(--accent); color:var(--text-secondary); font-style:italic}
 blockquote p{margin:0}

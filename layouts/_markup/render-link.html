@@ -93,7 +93,36 @@
       {{- $list := $store.Get $skey | default slice -}}
       {{- if not (in $list $card) -}}{{ $store.Set $skey ($list | append $card) }}{{- end -}}
     {{- end -}}
-    <a href="{{ $regHref }}" target="_blank" rel="noopener"{{ if $lp }} data-link="{{ $kind }}"{{ with $reg }} data-{{ . }}="{{ $card }}"{{ end }}{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>
+    {{- /* Keep the species mark with its word. The mark is an ::after inline-block
+           — an atomic inline — so the line breaker may leave it ALONE on the next
+           line: "…SHA-512" ends one line and a bare "w" opens the next. The same
+           break also splits a hyphenated one-word text ("где-нибудь") under it.
+
+           Nowrap therefore goes on the LINK itself (.lp-nb), because the mark is
+           the link's own pseudo-element: a nowrap span around the text would
+           still leave the break opportunity between that span and the ::after
+           after it — which is exactly how the first attempt at this failed. To
+           keep a long phrase from jumping to the next line whole, everything but
+           the last word is then handed back its normal wrapping inside .lp-w, so
+           the line can still break at the phrase's own spaces; only the tail and
+           its mark are welded together. Text carrying inline markup (code,
+           emphasis) opts out — splitting it by spaces would cut through tags —
+           and the 32-rune cap keeps a URL-as-text from becoming an unbreakable
+           run wider than a phone. */ -}}
+    {{- $txt := printf "%s" .Text -}}
+    {{- $nb := "" -}}
+    {{- if and $lp (not (strings.Contains $txt "<")) -}}
+      {{- $words := split $txt " " -}}
+      {{- $tail := index $words (sub (len $words) 1) -}}
+      {{- if le (strings.RuneCount $tail) 32 -}}
+        {{- $nb = " class=\"lp-nb\"" -}}
+        {{- if gt (len $words) 1 -}}
+          {{- $head := delimit (first (sub (len $words) 1) $words) " " -}}
+          {{- $txt = printf `<span class="lp-w">%s </span>%s` $head $tail -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    <a href="{{ $regHref }}" target="_blank" rel="noopener"{{ $nb | safeHTMLAttr }}{{ if $lp }} data-link="{{ $kind }}"{{ with $reg }} data-{{ . }}="{{ $card }}"{{ end }}{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}>{{ $txt | safeHTML }}</a>
     {{- end -}}
   {{- else -}}
     <a href="{{ $d | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>

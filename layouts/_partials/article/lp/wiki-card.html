@@ -1,8 +1,15 @@
 {{- /* One Wikipedia card, built at BUILD time from Wikimedia's official REST
-       summary API — the same endpoint Wikipedia's own hover previews use, and the
-       cleanest source of all: ready JSON, no regexes.
+       summary API — the same endpoint Wikipedia's own hover previews use, so the
+       card is read off ready JSON rather than off a scraped page.
 
          https://<lang>.wikipedia.org/api/rest_v1/page/summary/<title>?redirect=true
+
+       The text comes from `extract_html`, not the plain `extract`: the plain one
+       silently DROPS every <math> and leaves holes mid-sentence ("разложить
+       число ␣ за время ␣") — which is how the Shor card shipped. The HTML
+       flavour keeps the formulas as Wikimedia's rendered SVG, inlined by
+       lp/math.html; anything short of one whole formula falls back to the plain
+       extract, holes and all, rather than showing a broken card.
 
        Context = the article URL (…/wiki/<title>). partialCached by lang|URL. Two
        requirements learned the hard way: Wikimedia returns 403 without a
@@ -38,11 +45,27 @@
              extract (and arrives cut mid-word). Keep it only when short. */ -}}
       {{- $descr := $j.description | default "" -}}
       {{- if gt (strings.RuneCount $descr) 80 -}}{{ $descr = "" }}{{- end -}}
+      {{- /* the formulas. Sanitizing mirrors tg-card.html — the source is
+             Wikimedia's own API rather than a scraped page, but the rule that
+             fetched markup is never trusted verbatim holds here too. */ -}}
+      {{- $html := "" -}}
+      {{- with $j.extract_html -}}
+        {{- $h := replaceRE `(?s)<(script|style)[^>]*>.*?</(script|style)>` "" . -}}
+        {{- $h = replaceRE `(?is)\s+on[a-z]+="[^"]*"` "" $h -}}
+        {{- $mathOk := true -}}
+        {{- range (findRESubmatch `(?s)<span class="mwe-math-element[^"]*">\s*<img\s[^>]*src="([^"]+)"[^>]*>\s*</span>` $h) -}}
+          {{- $svg := partialCached "article/lp/math.html" (index . 1) (index . 1) -}}
+          {{- if $svg -}}{{ $h = replace $h (index . 0) $svg 1 }}
+          {{- else -}}{{ $mathOk = false }}{{- end -}}
+        {{- end -}}
+        {{- if $mathOk -}}{{ $html = $h }}{{- end -}}
+      {{- end -}}
       {{- $data = dict
           "lang" (upper (string ($j.lang | default $lang)))
           "title" ($j.title | default $title)
           "descr" $descr
           "extract" $extract
+          "html" $html
           "thumb" $thumb
           "page" $page -}}
     {{- end -}}
@@ -61,7 +84,8 @@
       <h3 class="wk-title">{{ $data.title }}</h3>
       {{- with $data.descr }}<p class="wk-descr">{{ . }}</p>{{ end }}
       <div class="wk-extract lp-clip">
-        {{- range (split $data.extract "\n\n") }}{{ with (trim . " \n\t") }}<p>{{ . }}</p>{{ end }}{{ end -}}
+        {{- with $data.html }}{{ . | safeHTML }}
+        {{- else }}{{ range (split $data.extract "\n\n") }}{{ with (trim . " \n\t") }}<p>{{ . }}</p>{{ end }}{{ end }}{{ end -}}
       </div>
     </div>
     <a class="lp-row" href="{{ $data.page }}" target="_blank" rel="noopener"><span>{{ i18n "lp_read_wiki" }}</span><span class="arw" aria-hidden="true">↗</span></a>
