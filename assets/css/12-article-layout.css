@@ -23,6 +23,30 @@
 .wrap p:has(> .figure){margin-block:0}
 .wrap .figure img{display:block; box-sizing:border-box; max-width:100%; height:auto; margin-inline:auto}
 .wrap .figcaption{display:block; margin-top:.7em; font:400 13.5px/1.5 var(--font-sans); color:var(--text-muted); text-wrap:balance}
+/* A picture that supports the prose rather than interrupting it: {.img-right}
+   on the image's own paragraph sends it down the right margin and lets the text
+   run beside it. The class arrives through Markdown attributes
+   (markup.goldmark.parser.attribute.block), which put it on the <p> Goldmark
+   wraps a stand-alone image in — so the attribute line must touch the image's
+   line, with no blank line between them, or Hugo drops it without a word.
+
+   44% is the widest a float can be before the column beside it stops being a
+   column: at the theme's content width that leaves the text ~54%, which still
+   holds a readable measure. Below 620px the column has no room to share, so the
+   float is dropped and the picture goes back to full width.
+
+   A titled image keeps its caption: .figure is the element the class ends up
+   around, and its own centring margin is dropped inside the float. */
+.wrap .img-right{float:right; width:44%; margin:.2em 0 1rem 1.75rem}
+.wrap .img-right img{display:block; width:100%; height:auto}
+.wrap .img-right .figure{margin:0}
+/* Nothing that draws its own box may try to share a line with the float: a code
+   block, a table or a callout beside a floated picture reads as a broken
+   column, not as a layout. Prose is what the float is for. */
+.wrap :where(pre, table, .callout){clear:right}
+@media (max-width:620px){
+  .wrap .img-right{float:none; width:100%; margin:1.25rem 0}
+}
 .rail{display:none; grid-row:1; font-size:13px}
 /* Rails sit next to the text but the gap GROWS with the viewport instead of
    freezing at 44px and dumping the surplus into dead outer margins. The left

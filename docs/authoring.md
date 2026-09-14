@@ -533,6 +533,57 @@ through `relURL` instead. That is what keeps it alive on a site served from a
 subpath (`https://example.github.io/taiga/`), where a literal `/index.xml` would
 point at the domain root and 404.
 
+## Images {#images}
+
+A picture in the text is a plain Markdown image, and the file is found by name —
+the exact path next to the article, then the bare file name anywhere in its
+bundle, then under `assets/img/`. So the shortest form is usually enough:
+
+```md
+![A certificate form: who it was issued to, the public key, who vouched](cert-fields.png)
+```
+
+Give the image a Markdown title and it gets a caption under it, centred with the
+picture:
+
+```md
+![alt](cert-fields.png "What a certificate holds")
+```
+
+A name that resolves nowhere warns, and `hugo --panicOnWarning` turns that into
+a failed build: a typo cannot ship as a broken `<img>`.
+
+### Floating a picture beside the prose {#img-right}
+
+A supporting picture — one that illustrates the paragraph rather than
+interrupting it — can run down the right margin with the text beside it. Mark
+the image's own paragraph with `{.img-right}`:
+
+```md
+![A certificate form, filled in by a gopher](cert-fields.png)
+{.img-right}
+
+**x509.** A certificate is a strict format: who it was issued to, the public
+key, who vouched for it…
+```
+
+Three things decide whether this works, and two of them fail silently:
+
+- **The attribute line must touch the image's line.** It is a Markdown
+  attribute (`markup.goldmark.parser.attribute.block`, which the site turns on
+  in its own `hugo.toml` — a theme cannot), and Hugo hangs it on the block
+  directly above. A blank line between them and the line is dropped without a
+  word: no class, no error, no `{.img-right}` in the output either.
+- **The float needs prose to flow beside it.** Code blocks, tables and callouts
+  clear it on purpose — a boxed element sharing a line with a floated picture
+  reads as broken markup, not as a layout. Text is what the float is for, so
+  put enough of it after the image to fill the column.
+- **Below 620px there is no second column**, and the picture goes back to full
+  width. Nothing to do about it; just do not count the float when judging how
+  the section reads on a phone.
+
+The picture takes 44% of the column and keeps its caption if it has one.
+
 ## Diagrams (instead of images) {#diagrams}
 
 The theme has no images in guides — memory diagrams are hand-built HTML inside a

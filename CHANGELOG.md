@@ -32,6 +32,24 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **A picture can float beside the prose.** `{.img-right}` on a stand-alone
+  image's own paragraph sends it down the right margin at 44% of the column and
+  lets the text run past it; below 620px it goes back to full width. Written for
+  the supporting illustration — the one that belongs *to* a paragraph and does
+  not earn the full column a diagram gets. It had been living in one guide's own
+  bundle stylesheet, which meant every other guide that wanted it had to copy
+  the rule.
+
+  Boxed elements (`pre`, `table`, `.callout`) clear the float rather than share
+  a line with it: a code block set beside a floated picture reads as broken
+  markup, not as a layout. A titled image keeps its caption inside the float.
+
+  The class rides in on Markdown block attributes, which only the site can turn
+  on (`markup.goldmark.parser.attribute.block` — a theme cannot touch the
+  markup parser), and Hugo hangs them on the block directly above: the attribute
+  line has to touch the image's line, or it is dropped silently. Both facts are
+  in `docs/authoring.md`, since neither shows up as an error.
+
 - **Comments.** An optional comment thread at the foot of every article,
   served by a self-hosted [Comentario](https://comentario.app) instance
   (`params.comments`, off by default — see `docs/comments.md`). The thread is
