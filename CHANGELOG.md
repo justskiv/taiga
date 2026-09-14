@@ -76,6 +76,38 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **Opening a folded block could throw the reader past it, thousands of pixels
+  down the page.** Both Gecko and Blink keep a node in the viewport visually
+  still when content above it changes size — right for a late image, wrong for
+  a disclosure. When the node the browser had picked happened to sit BELOW a
+  `fold` or a `run` output, expanding the panel scrolled the page by the panel's
+  full height: on one guide a 2044px panel moved the page 2008px and left the
+  summary 1705px above the top of the screen. Closing it was the same jump
+  upside down. Which node gets picked is the browser's business and depends on
+  where the reader happens to be standing, so it struck at random and could not
+  be reproduced on demand.
+
+  The page now switches anchoring off for half a second around a disclosure the
+  reader opens or closes (`modules/scrollhold.js`) rather than correcting the
+  scroll afterwards — a correction has to guess how many frames the adjustment
+  takes, paints the wrong position while it waits, and cannot tell the browser's
+  adjustment apart from a scroll that was meant, such as following a link to a
+  heading inside a closed panel.
+
+  Two rules keep the suppression honest. Only when the block is ON SCREEN: a
+  block that grows off-screen is exactly what anchoring is for, and switching it
+  off there would move the paragraph the reader is actually reading — so a run
+  output landing from the network while the reader has read on below is left to
+  the browser. And always BEFORE the change: `overflow-anchor` is read when the
+  browser selects an anchor, not when it applies an adjustment, so nothing that
+  observes the DOM after the fact can help — a MutationObserver on `open` does
+  fire before the next frame and the page still moved the full height. Covered
+  are the reader's click and the keyboard (activating a `<summary>` dispatches a
+  click of its own) and the run block opening itself once codapi answers; code
+  that opens a disclosure from script arms the hold itself with
+  `window.Taiga.holdScroll(el)`, which is also the way in for a page-bundle
+  widget, built as its own iife and unable to import the module.
+
 - **A Wikipedia card dropped every formula from the article it was showing.**
   The card was built from the summary API's `extract`, which is plain text, and
   Wikimedia strips `<math>` out of it entirely rather than transcribing it —

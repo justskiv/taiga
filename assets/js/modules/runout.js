@@ -19,6 +19,7 @@
    reads. The module only ever adds the live half. */
 
 import { I18N } from './i18n.js';
+import { holdScroll } from './scrollhold.js';
 
 /* codapi can render a result as a table, an SVG, an iframe… Those modes build
    DOM of their own, which belongs in codapi's box, not in our <pre>. Only plain
@@ -95,6 +96,9 @@ class RunOutput {
   }
 
   running() {
+    /* the Run button is codapi's, not a <summary>, so the click signal in
+       modules/scrollhold.js never sees it — arm the hold by hand */
+    holdScroll(this.snip);
     this.box.hidden = false;
     this.box.open = true;   /* they pressed Run to see the output — show it */
     this.box.dataset.state = 'running';
@@ -111,6 +115,20 @@ class RunOutput {
   }
 
   put(text, state, ms) {
+    /* FIRST, before a single byte of this block changes. The answer lands long
+       after the click that asked for it, so the hold running() armed has
+       lapsed, and nothing observing the DOM afterwards can take its place (see
+       BEFORE, NOT AFTER in modules/scrollhold.js). "Before" is meant literally:
+       holdScroll reads a rect, which flushes layout, so arming it even one
+       statement below the text swap hands the browser a finished layout with
+       anchoring still on — and a taller transcript than the one it measured
+       moves the page by the difference.
+
+       The snippet, not the block: a block still `hidden` has no box to test,
+       and what decides whether suppressing is right is whether the READER is
+       looking at this snippet — if they pressed Run and read on below,
+       anchoring is doing its job. */
+    holdScroll(this.snip);
     this.code.textContent = text || I18N.runEmpty;
     this.box.hidden = false;
     this.box.open = true;

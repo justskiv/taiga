@@ -3,6 +3,7 @@
    on pages that don't have it. The Go highlighter, the series-bridge builder and
    the metadata search index of the mock are gone: highlighting is server-side
    Chroma, the bridge is server-rendered, and search is Pagefind full-text. */
+import { bindScrollHold } from './modules/scrollhold.js';
 import { buildPopover } from './modules/popover.js';
 import { mountFocusBtn } from './modules/focus.js';
 import { bindHeader } from './modules/header.js';
@@ -65,6 +66,7 @@ function runWidgets() {
 patchRunClock();
 
 onReady(function () {
+  bindScrollHold();  /* page-wide: guards on the engine, not on the DOM — the disclosures it covers may not exist yet */
   const mount = document.getElementById('tp-mount');
   if (mount) buildPopover(mount);
   mountFocusBtn();
