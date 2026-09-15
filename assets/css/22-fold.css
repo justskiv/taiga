@@ -5,6 +5,24 @@
    affordance (→ "Свернуть" when open). A link inside the summary stays
    clickable without toggling (see the once-per-page script in the shortcode).
 
+   THE QUIET BELONGS TO THE COLLAPSED STATE, NOT TO THE REVEALED ONE. The panel
+   used to be set two sizes down and one tone back (14.5px in --text-secondary
+   against 17px prose): right for a two-line aside, punishing for the ликбез
+   that runs four screens. Three things stacked up there — the glyph shrank
+   ~15%, the MEASURE grew (the column is fixed, so smaller type means more
+   characters per line, ~90 against the prose's ~80), and a reader who had
+   scrolled past the summary had nothing left telling them they were still
+   inside an inset. And the dimming is backwards as a signal: clicking
+   "Развернуть" IS the reader agreeing to read this. So the revealed body is
+   now prose — same size, same colour — and what says "inset" is structure:
+   the summary row on top, a rail down the side, a closing row at the bottom.
+
+   TWO REGISTERS, chosen by the shortcode from the body's length (data-size):
+     note    — a footnote: quiet summary, no closing row. The original use.
+     section — an optional chapter: the summary is set at prose size and
+               weight, the block gets its own air, and it ends with an explicit
+               "Свернуть" so a long inset can be closed without scrolling back.
+
    Animation follows the disclosure best-practice: the PRIMARY motion is the
    height reveal — the panel expands and pushes the following text down (a real
    slide, not a cross-fade). Asymmetric easing: open decelerates into place
@@ -42,7 +60,14 @@
 .fold-ic{flex:0 0 auto; color:var(--text-muted);
   transition:color var(--dur) var(--ease)}
 .fold summary:hover .fold-ic{color:var(--accent)}
-.fold-title{flex:1 1 auto; font-size:15px; line-height:1.5; color:var(--text-secondary)}
+/* A note stays a footnote — a step down from the prose it interrupts. A
+   section is an optional chapter, so its summary is set at reading size and
+   weight: it has to be findable when a reader skims for "can I skip this?",
+   and it is the only label a four-screen inset gets. Still short of h3
+   (20px/650), so the article's own structure stays on top. */
+.fold-title{flex:1 1 auto; font-size:16px; line-height:1.5; color:var(--text-secondary)}
+.fold[data-size="section"] .fold-title{font-size:17px; line-height:1.6;
+  font-weight:600; color:var(--text-strong)}
 /* links inside the title/body inherit the theme's link treatment (accent,
    border-bottom underline on hover — 01-base.css). Do NOT add text-decoration
    here: it stacks on the theme's border-bottom and draws a DOUBLE underline. */
@@ -55,27 +80,106 @@
 .fold-less{display:none}
 .fold[open] .fold-more{display:none}
 .fold[open] .fold-less{display:inline}
-.fold-body{font-size:14.5px; line-height:1.65; color:var(--text-secondary);
-  /* bold dims with the text it sits in. Not --text-primary: that is the next
-     rung of the ramp, and the gap from --text-secondary up to it is about three
-     times the gap prose puts between its own text and its bold, so the lead-in
-     still read as white on a muted paragraph. A small mix toward --text-strong
-     reproduces the SIZE of the prose lift instead of its position. */
-  --strong-fg:color-mix(in srgb, var(--text-strong) 30%, var(--text-secondary));
-  padding:9px 0 2px 29px}
-.fold-body p{margin:0 0 10px}
-.fold-body p:last-child{margin-bottom:0}
+
+/* the panel — prose, indented, with the rail down its left edge */
+.fold-body{position:relative; padding:12px 0 2px 29px}
+.fold-body :where(p, ul, ol, .tbl-wrap, pre, blockquote, .callout){margin-bottom:16px}
+.fold-body > :last-child{margin-bottom:0}
+/* The rail is what survives scrolling: past the first screen the summary is
+   gone and this line is the only thing saying "still inside the inset". It is
+   drawn from x=8, dead centre of the 18px icon above it, so it reads as
+   growing OUT of the icon and dying at the closing row — one bracket, top and
+   bottom. It starts 10px below the row rather than flush with it: at 2px the
+   summary's hover pill and the rail touched and read as one welded blob.
+
+   --border, never --accent: blockquote owns the accent rule (3px, solid, plus
+   italic) and callout owns the frame, so an inset that borrowed either would
+   blur three devices into one. The accent does appear here, but only as a
+   hover state — see .fold-end below. */
+.fold-body::before{content:""; position:absolute; left:8px; top:10px; bottom:0;
+  width:2px; border-radius:2px; background:var(--border);
+  transition:background var(--dur) var(--ease)}
+.fold:has(summary:hover) .fold-body::before{
+  background:color-mix(in srgb, var(--accent) 45%, var(--border))}
+
+/* The rail is also a way OUT. Once it is the thing saying "you are inside
+   this", clicking it to leave is the gesture readers try — and on a panel of
+   several screens it is the only exit that is always within reach, whatever
+   part of the inset is on screen. The button is invisible: the 2px line is
+   painted by ::before above, and this is a 20px transparent strip over it,
+   because a 2px hit target is a Fitts's-law joke. It sits left of the 29px
+   text indent, so it never steals a click from the prose.
+
+   MOUSE ONLY (hover:hover + pointer:fine). On touch the same strip is a 20px
+   band down the left margin of a scrolling page — one stray tap and four
+   screens vanish — and there is no hover state to announce it first. Touch
+   keeps the summary row and the closing row, both of which are deliberate.
+
+   Not focusable and aria-hidden on purpose: it duplicates the closing row (and
+   the summary), so giving it a third tab stop and a third announcement per
+   fold would make the keyboard and screen-reader paths worse to buy a mouse
+   affordance they do not use. */
+.fold-rail{display:none}
+@media (hover:hover) and (pointer:fine){
+  .fold-rail{display:block; position:absolute; left:0; top:10px; bottom:0;
+    width:20px; padding:0; margin:0; background:none; border:0; cursor:pointer;
+    /* a drag starting in the margin must not turn into a click that collapses
+       the panel; the script also ignores a click that ended a selection */
+    user-select:none; -webkit-user-select:none}
+  /* hovering the rail previews the exit exactly as hovering the closing row
+     does — the line warms along its whole length — and lights up the row
+     itself, so the two read as one control seen from two places */
+  .fold:has(.fold-rail:hover) .fold-body::before{
+    background:color-mix(in srgb, var(--accent) 45%, var(--border))}
+  .fold:has(.fold-rail:hover) .fold-end{color:var(--text-primary)}
+  .fold:has(.fold-rail:hover) .fold-end svg{color:var(--accent)}
+}
+
+/* the closing row — section only. A four-screen panel has to be closable from
+   where the reading ended, and the row doubles as the visible end of the
+   inset. It is the same control as the summary, so it borrows that row's
+   hover: the 6% tint, the 8px radius, side padding bled back with a negative
+   margin so the label stays on the body's left edge. Two things are its own:
+   the chevron lifts 1px (the gesture is "up", and the arrow can say so for
+   free), and the RAIL warms along its whole length, which previews what the
+   click is about to swallow and ties the two ends of the bracket together. */
+.fold-end{display:none; align-items:center; gap:7px; margin:18px 0 0 -10px;
+  padding:6px 10px; background:none; border:0; border-radius:8px;
+  font:inherit; font-size:13.5px; font-weight:500; color:var(--text-muted);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.fold[data-size="section"] .fold-end{display:inline-flex}
+.fold-end svg{transform:rotate(180deg);
+  transition:transform var(--dur) var(--ease), color var(--dur) var(--ease)}
+.fold-end:hover{color:var(--text-primary);
+  background:color-mix(in srgb, var(--text-primary) 6%, transparent)}
+.fold-end:hover svg{transform:rotate(180deg) translateY(1px); color:var(--accent)}
+.fold:has(.fold-end:hover) .fold-body::before{
+  background:color-mix(in srgb, var(--accent) 45%, var(--border))}
+/* the only way to close a long inset from the keyboard without scrolling back
+   to the summary, so it gets the theme's focus ring like any other control */
+.fold-end:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* a section gets its own air: at note spacing a four-screen panel started
+   flush against the paragraph above it, so the article read as one unbroken
+   column with a rail appearing halfway down */
+.fold[data-size="section"]{margin:28px 0}
 
 /* the reveal — height is the star, easing asymmetric (open vs close) */
 .fold::details-content{height:0; overflow:clip;
   transition:height var(--c) var(--ei), content-visibility var(--c) allow-discrete}
 .fold[open]::details-content{height:auto;
   transition:height var(--o) var(--eo), content-visibility var(--o) allow-discrete}
+/* the same 0.2s that reads as a slide on four lines is a jolt on four screens:
+   the page under the fold travels thousands of pixels in a fifth of a second.
+   Shorter durations keep it legible as one movement rather than a glitch. */
+.fold[data-size="section"]{--o:.12s; --c:.1s}
 
 @media (prefers-reduced-motion:reduce){
   .fold::details-content, .fold[open]::details-content{
     transition:content-visibility var(--o) allow-discrete}
-  .fold-chev{transition:none}
+  .fold-chev, .fold-end svg{transition:none}
+  .fold-end:hover svg{transform:rotate(180deg)}
 }
 @media (max-width:640px){
   .fold-body{padding-left:27px}
@@ -113,8 +217,11 @@
      anyone gives it one, or a focus ring */
   .fold-toggle{justify-self:start}
   /* icon="none": no first column to reserve, so the text column starts at 0
-     and the body indent follows it (see below) */
+     and the body indent follows it — rail included, since it hangs off the
+     icon that is no longer there */
   .fold summary:not(:has(.fold-ic)){grid-template-columns:1fr}
   .fold summary:not(:has(.fold-ic)) :is(.fold-title, .fold-toggle){grid-column:1}
   .fold:not(:has(.fold-ic)) .fold-body{padding-left:0}
+  .fold:not(:has(.fold-ic)) .fold-body::before,
+  .fold:not(:has(.fold-ic)) .fold-rail{display:none}
 }

@@ -113,6 +113,26 @@ func main() { println("hello") }
 ```
 {{< /fold >}}
 
+Past roughly half a screen of prose the fold switches register on its own: the
+summary is set at reading size, the block takes its own air, and the panel ends
+with an explicit toggle so a long aside can be closed from where the reading
+stopped. `size=` forces either register — here it is used to show the section
+one without pasting a wall of text.
+
+{{< fold icon="book" size="section" title="Primer: the aside that grew into a chapter" more="Expand" less="Collapse" >}}
+An aside that runs for screens is not a footnote any more, and setting it two
+sizes down punished the reader for opening it: the click *is* them agreeing to
+read this.
+
+So the revealed panel is prose — same size, same colour as the article around
+it — and what says "inset" is structure: this summary row, the rail down the
+left, and the closing row below.
+
+The rail is the part that survives scrolling. Past the first screen the summary
+is gone, and the line is the only thing left saying you are still inside
+something the article offered to skip.
+{{< /fold >}}
+
 ## Terms {#terms}
 
 Hover an underlined word and its definition opens as a card; a click pins the

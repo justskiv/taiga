@@ -218,6 +218,29 @@ for an aside the reader can take or skip: a video version, a caveat, a full
 listing. The body is Markdown, and `title=` is inline Markdown — a link in
 the summary works, and clicking it does not toggle the panel.
 
+**The quiet belongs to the collapsed state, not to the revealed one.** The
+opened panel is set in prose — the size and colour of the article around it —
+because clicking "Развернуть" *is* the reader agreeing to read this, and
+answering that with small dim type punishes the click. What says "inset" is
+structure, not typography: the summary row on top, a thin rail down the left
+(it grows out of the icon and is the only cue that survives scrolling — past
+the first screen the summary is gone), and, on long folds, a closing row.
+
+**Two registers, picked from the body's length.** A short fold (under ~900
+runes) stays a footnote: quiet summary, no closing row. A long one becomes an
+optional chapter — summary at reading size, its own air around the block, a
+quicker reveal (0.2s across four screens read as a jolt) and a "Свернуть"
+button at the end that collapses the panel *and*, if the summary has scrolled
+off the top, returns the reader to it; collapsing from the bottom otherwise
+teleports them into an unrelated paragraph. The register follows what was
+written rather than being asked of the author; `size=` overrides it.
+
+The rail is an exit too: clicking it collapses the fold, and hovering it warms
+both the line and the closing row. Wherever the reader is in a long panel, the
+way out is one move to the left. Mouse only — on touch a strip down the left
+margin of a scrolling page would catch stray taps, with no hover state to warn
+about it first.
+
 On a phone (≤560px) that single line becomes two: the title takes the whole
 width and the toggle moves under it, so a long summary is not squeezed into
 three-word lines by a label standing next to it.
@@ -236,6 +259,7 @@ others in text.
 | `more=` | collapsed toggle label (default `Подробнее`) |
 | `less=` | expanded toggle label (default `Свернуть`) |
 | `open=` | `true` to render already expanded |
+| `size=` | `note` or `section` — override the automatic register |
 
 Icons: `video` · `info` · `tip` · `book` · `code` · `terminal` · `warning` ·
 `star` · `link` · `note`.

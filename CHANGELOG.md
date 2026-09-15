@@ -9,6 +9,53 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **A fold reads as prose once it is open, and long ones get two extra parts.**
+  The panel used to be set two sizes down and one tone back (14.5px in
+  `--text-secondary` against 17px prose) — right for the two-line aside the
+  shortcode was drawn for, punishing for the ones that have since grown to
+  several screens. Three things stacked up: the glyph shrank ~15%, the measure
+  *grew* (the column is fixed, so smaller type means more characters per line),
+  and a reader past the first screen had nothing left telling them they were
+  inside an inset. The dimming is also backwards as a signal — clicking
+  "Развернуть" is the reader agreeing to read this. So the revealed body now
+  takes the article's own size and colour, and what marks the inset is
+  structure: the summary row, a 2px `--border` rail growing out of the icon
+  (never `--accent` — blockquote owns that rule, callout owns the frame), and,
+  on long folds, a closing row.
+
+  The rail is a control, not only a marker: a 20px transparent strip over it
+  collapses the fold on click, and hovering it warms the line and lights the
+  closing row, so the two read as one exit seen from two places. It is the only
+  way out that is in reach from anywhere in a multi-screen panel. Mouse only
+  (`hover:hover` + `pointer:fine`) — on touch a band down the left margin of a
+  scrolling page would collect stray taps with no hover to announce it — and
+  deliberately out of the tab order and hidden from screen readers, where it
+  would be a third duplicate path per fold.
+
+  The return scroll after a collapse is finicky in three ways, each of which was
+  a visible miss before it was fixed: position and scroll offset are read before
+  `open` changes (a clamped `scrollY` lands the page elsewhere); `scroll-behavior`
+  is forced to `auto` for the call, since `:root` is `smooth` and a smooth scroll
+  is still travelling while the panel shrinks under it, aiming at a target that
+  has already moved; and the landing subtracts the sticky header, which an
+  upward scroll brings back out right on top of the summary. Focus then moves to
+  the summary — the control that had it has just been collapsed away, and the
+  summary is the same switch in its other position.
+
+  With it the fold picks one of two registers from the body's length
+  (`data-size`, threshold 900 runes, overridable with `size=note|section`). A
+  note is the old footnote. A section sets its summary at reading size and
+  weight, gets its own air, reveals in 0.12s instead of 0.2s (that duration
+  across four screens read as a jolt, not a slide) and ends with a "Свернуть"
+  button that collapses the panel *and* scrolls back to the summary —
+  collapsing four screens from the bottom otherwise drops the reader into an
+  unrelated paragraph. The button carries the theme's focus ring: it is the
+  only way to close a long fold from the keyboard without scrolling back up.
+
+  `--strong-fg` is no longer set on the fold body — it existed so a bold
+  lead-in would not punch through a dimmed paragraph, and the body is not
+  dimmed any more. Link previews still use it.
+
 - **The footer is two tiers instead of one flat row.** Identity and strapline
   on one baseline hard left, navigation hard right — the bracket the header
   already makes — and, for a site that fills `menus.legal`, a closing line set

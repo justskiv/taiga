@@ -15,12 +15,58 @@
          more=   collapsed toggle label. Default "Подробнее".
          less=   expanded toggle label.  Default "Свернуть".
          open=   "true" to render already expanded. Default collapsed.
+         size=   "note" | "section", overriding the automatic pick below.
+
+       TWO REGISTERS. A three-line aside and an optional chapter of several
+       screens are the same component doing two different jobs, and they want
+       different weight: "note" keeps the quiet summary of the original, while
+       "section" sets the summary at reading size and closes the panel with an
+       explicit "Свернуть" so the reader is not sent back up to find the
+       toggle. The pick is made from the body's length rather than asked of the
+       author — the register follows what was written, and cannot drift when a
+       paragraph is added later. $threshold is calibrated against the folds this
+       site actually has: a one-paragraph pointer (311) and a two-paragraph
+       "there is also a video version" (711) stay notes, while an aside carrying
+       a widget (1022), a table (1574) or the four-screen ликбез (9165) becomes
+       a section. Below it a closing row is noise; above it the reader is
+       scrolling and needs one. Counted in RUNES, not bytes: len() counts
+       Cyrillic twice and would push every second Russian aside a register up.
 
        Styling + the height-reveal animation live in assets/css/22-fold.css
        (.fold …); the height animation needs interpolate-size, set on :root in
-       00-tokens.css. One tiny once-per-page script keeps a link inside the
-       summary from toggling the panel when it is clicked; without JS the only
-       cost is that such a click also toggles — the component still works. */ -}}
+       00-tokens.css. The .fold-rail button is the invisible hit strip over the
+       rail — see 22-fold.css for why it is mouse-only and out of the tab order.
+
+       One tiny once-per-page script does three things: it keeps a link inside
+       the summary from toggling the panel; it collapses the fold from the
+       closing row or from the rail; and when the summary has scrolled off the
+       top it brings the reader back to it (collapsing four screens from the
+       bottom otherwise teleports them into an unrelated paragraph — while a
+       fold that fits on screen must not be yanked to the top for no reason).
+
+       That return scroll has three things to get right, each of which was a
+       visible miss on the way here: the position and the scroll offset are BOTH
+       read before `open` changes, or a clamped scrollY lands the page somewhere
+       else; scroll-behavior is forced to `auto` for the call, because
+       01-base.css sets `smooth` on :root and a smooth scroll is still travelling
+       while the panel shrinks under it, so it aims at a target that has already
+       moved; and the landing subtracts the height of the sticky header, which
+       an upward scroll brings back out (modules/header.js) right on top of the
+       summary we just returned to. Focus then moves to the summary: the
+       control that was carrying it has just been collapsed out of the page, and
+       the summary is the same switch in its other position — the keyboard lands
+       where the reader would press next, with preventScroll so the move cannot
+       undo the scroll above.
+       Collapsing arms window.Taiga.holdScroll() first — the public entry of
+       modules/scrollhold.js — because the browser's own scroll anchoring would
+       otherwise compensate for the collapse and fight the scroll we do (the
+       module's "BEFORE, NOT AFTER" rule; neither the closing row nor the rail
+       is a <summary>, so nothing arms it for us). A click that ended a text
+       selection is ignored: the strip sits in the left margin, where a drag to
+       select a paragraph naturally starts.
+       Without JS the only cost is that such a link click also toggles and that
+       the closing row collapses without the scroll — the component still
+       works. */ -}}
 
 {{- $icons := dict
   "video"    `<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M10 8.4v7.2l6-3.6z" fill="currentColor" stroke="none"/>`
@@ -41,7 +87,16 @@
 {{- $more := .Get "more" | default "Подробнее" -}}
 {{- $less := .Get "less" | default "Свернуть" -}}
 {{- $open := eq (.Get "open") "true" -}}
-<details class="fold"{{ if $open }} open{{ end }}>
+{{- $threshold := 900 -}}
+{{- $size := .Get "size" -}}
+{{- if $size -}}
+  {{- if not (in (slice "note" "section") $size) -}}
+    {{- errorf "fold: size=%q must be note or section (page %s)" $size .Page.Path -}}
+  {{- end -}}
+{{- else -}}
+  {{- $size = cond (gt (strings.RuneCount .InnerDeindent) $threshold) "section" "note" -}}
+{{- end -}}
+<details class="fold" data-size="{{ $size }}"{{ if $open }} open{{ end }}>
 <summary>
 {{- if and (ne $name "none") (index $icons $name) -}}
 <svg class="fold-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ index $icons $name | safeHTML }}</svg>
@@ -50,10 +105,12 @@
 <span class="fold-toggle"><span class="fold-more">{{ $more }}</span><span class="fold-less">{{ $less }}</span><svg class="fold-chev" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
 </summary>
 <div class="fold-body">
+<button class="fold-rail" type="button" tabindex="-1" aria-hidden="true"></button>
 {{ .Page.RenderString (dict "display" "block") .InnerDeindent }}
+{{ if eq $size "section" }}<button class="fold-end" type="button"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>{{ $less }}</button>{{ end }}
 </div>
 </details>
 {{- if not (.Page.Store.Get "foldScriptDone") -}}
 {{- .Page.Store.Set "foldScriptDone" true -}}
-<script>addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".fold summary a").forEach(function(a){a.addEventListener("click",function(e){e.stopPropagation()})})})</script>
+<script>addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".fold summary a").forEach(function(a){a.addEventListener("click",function(e){e.stopPropagation()})});function collapse(el){var d=el.closest(".fold"),r=d.getBoundingClientRect(),y=r.top+window.scrollY,up=r.top<0;if(window.Taiga&&window.Taiga.holdScroll)window.Taiga.holdScroll();d.open=false;if(up){var h=document.querySelector(".site-head"),e=document.documentElement,b=e.style.scrollBehavior;e.style.scrollBehavior="auto";window.scrollTo(0,y-((h?h.offsetHeight:0)+16));e.style.scrollBehavior=b}d.querySelector("summary").focus({preventScroll:true})}document.querySelectorAll(".fold-end").forEach(function(b){b.addEventListener("click",function(){collapse(b)})});document.querySelectorAll(".fold-rail").forEach(function(r){r.addEventListener("click",function(){var s=window.getSelection();if(s&&!s.isCollapsed)return;collapse(r)})})})</script>
 {{- end -}}

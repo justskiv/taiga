@@ -244,7 +244,7 @@ a[data-link="gdoc"]::after{
 
 /* body prose: the article in miniature. h2 scaled + calmed, quiet prose links. */
 .ic-body{padding:1px 18px 14px; font-size:14px; line-height:1.62; color:var(--text-secondary);
-  /* as in .fold-body: bold lifts off this text by as much as prose lifts its
+  /* bold lifts off this text by as much as prose lifts its
      own bold, which is far less than a whole rung of the ramp */
   --strong-fg:color-mix(in srgb, var(--text-strong) 30%, var(--text-secondary))}
 .ic-body > :first-child{margin-top:0}

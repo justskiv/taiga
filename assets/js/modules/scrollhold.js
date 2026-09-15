@@ -49,10 +49,10 @@
    (layouts/_partials/scripts.html) and cannot import this. */
 
 /* Long enough to cover the height reveal — .2s in 22-fold.css and
-   26-run-output.css — with room for a slow frame either side, short enough that
-   anchoring is back before anything else on the page could want it. A widget
-   with a longer transition of its own calls holdScroll() again to push the
-   window back. */
+   26-run-output.css, .12s for a fold in its section register — with room for a
+   slow frame either side, short enough that anchoring is back before anything
+   else on the page could want it. A widget with a longer transition of its own
+   calls holdScroll() again to push the window back. */
 const HOLD = 500;
 
 let timer = 0;
