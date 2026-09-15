@@ -249,6 +249,19 @@ other = "Nothing found. Try «gc», «slice», «scheduler»…"
 [js_search_unbuilt]
 other = "The search index isn't built yet. Build it with pagefind --site public."
 
+# The modal's zero state — what stands there before the first keystroke. Two
+# sections: what the reader opened themselves, and what landed recently. The
+# "N in all" tail on the second one is there so the list does not read as the
+# whole catalogue: it is five rows out of N.
+[js_search_recent]
+other = "recently opened"
+[js_search_latest]
+other = "latest guides"
+[js_search_latest_total]
+other = "{{ .N }} in all"
+[js_search_hint]
+other = "searches the text of the guides — «gc», «slice», «scheduler»"
+
 [js_scrolltop]
 other = "Back to top"
 

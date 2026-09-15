@@ -317,6 +317,10 @@ window.THEME_I18N = Object.assign({ …каталог темы… }, window.THEM
 | `searchPlaceholder` | `js_search_placeholder` | Плейсхолдер поля поиска |
 | `searchEmpty` | `js_search_empty` | Строка «ничего не найдено» |
 | `searchUnbuilt` | `js_search_unbuilt` | Показывается, когда индекс Pagefind не собран |
+| `searchRecent` | `js_search_recent` | Нулевой экран: заголовок над историей читателя |
+| `searchLatest` | `js_search_latest` | Нулевой экран: заголовок над новыми гайдами |
+| `searchTotal` | `js_search_latest_total` | Нулевой экран: счётчик рядом с этим заголовком (`{{ .N }}`) |
+| `searchHint` | `js_search_hint` | Нулевой экран: строка под панелью — по чему ищет поиск |
 | `scrollTop` | `js_scrolltop` | Кнопка «наверх» |
 | `minutes` | `mins_abbr` | Единица времени чтения в выдаче поиска |
 | `tagFeedHead` | `js_tag_feed_head` | `/tags/`: заголовок над отфильтрованной лентой |

@@ -1,0 +1,38 @@
+{{- /* The search modal's zero state, as data: every published guide in feed
+       order (newest first), as a small JSON file the browser fetches the first
+       time someone opens the modal. Returns its URL; js-bridge.html hands that
+       to the bundle as window.TAIGA_SEARCH_INDEX.
+
+       A FILE and not an inline island, because the list is the whole corpus,
+       not a top-N: modules/search.js resolves the reader's own history
+       (taiga.visited holds paths, not titles) against it, and a history entry
+       from a year ago must still resolve. Inlining that on every page of the
+       site would be a few KB nobody who never presses ⌘K pays for today.
+
+       Not Pagefind's own `search(null)` either, though it could sort by date:
+       this list is the same one the feed renders — one truth, ordered by
+       guides-published.html — and it arrives whether or not the second build
+       step has run, so the modal is useful under a bare `hugo server` where
+       there is no index at all.
+
+       Fields are one letter because 100+ rows of {"url": …} is mostly key
+       names: u = URL, t = title, c = crumb (rubric · series · part — the same
+       string the result cards show), m = minutes. No description: the zero
+       state is a list of titles, not a second feed (see 13-search.css).
+
+       Call via partialCached keyed by language — it walks every guide, and the
+       json is per-language: a Russian reader's history must not resolve
+       against English titles. */ -}}
+{{- $rows := slice -}}
+{{- range partial "guides-published.html" . -}}
+  {{- $rows = $rows | append (dict
+        "u" .RelPermalink
+        "t" .Title
+        "c" (partial "article/crumb.html" .)
+        "m" (.Params.mins | default (partial "article/reading-time.html" .))) -}}
+{{- end -}}
+{{- $res := resources.FromString
+      (printf "search/guides.%s.json" .Language.Lang)
+      (jsonify $rows) -}}
+{{- if hugo.IsProduction }}{{ $res = $res | fingerprint "sha256" }}{{ end -}}
+{{- return $res.RelPermalink -}}

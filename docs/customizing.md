@@ -368,6 +368,10 @@ The JS names are **not** the i18n key names. The full contract:
 | `searchPlaceholder` | `js_search_placeholder` | Search input placeholder |
 | `searchEmpty` | `js_search_empty` | "Nothing found" line |
 | `searchUnbuilt` | `js_search_unbuilt` | Shown when the Pagefind index is missing |
+| `searchRecent` | `js_search_recent` | Zero state: heading over the reader's own history |
+| `searchLatest` | `js_search_latest` | Zero state: heading over the newest guides |
+| `searchTotal` | `js_search_latest_total` | Zero state: the count beside that heading (`{{ .N }}`) |
+| `searchHint` | `js_search_hint` | Zero state: the line under the panel saying what search reads |
 | `scrollTop` | `js_scrolltop` | "Back to top" button |
 | `minutes` | `mins_abbr` | Reading-time unit in search results |
 | `tagFeedHead` | `js_tag_feed_head` | `/tags/`: heading over the filtered feed |

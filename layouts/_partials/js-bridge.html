@@ -11,9 +11,19 @@
           /pagefind/pagefind.js 404s the moment the site lives on a subpath
           (project pages), and search dies without a sound.
 
+       3. The URL of the guide manifest behind the search modal's zero state
+          (search/manifest.html) — same reason: the path is fingerprinted in
+          production and lives under baseURL, so only Hugo knows it.
+
        Rendered LAST in scripts.html — after the foot-extra hook, still before the
        deferred bundle runs — and merged rather than assigned, so a site that sets
        window.THEME_I18N from either hook keeps winning key by key.
+
+       searchTotal carries a "{n}" placeholder rather than a number: the search
+       modal counts the guides in the browser (it fetches the manifest there),
+       so Hugo renders the phrase around the hole and modules/search.js fills
+       it. No plural probe for that one — neither "всего N" nor "N in all"
+       inflects.
 
        Plurals: the tags filter counts posts in the browser, so Hugo can't render
        the phrase. It renders one word per probe count from its own CLDR catalogue
@@ -32,6 +42,10 @@
       "searchPlaceholder" (i18n "js_search_placeholder")
       "searchEmpty"       (i18n "js_search_empty")
       "searchUnbuilt"     (i18n "js_search_unbuilt")
+      "searchRecent"      (i18n "js_search_recent")
+      "searchLatest"      (i18n "js_search_latest")
+      "searchHint"        (i18n "js_search_hint")
+      "searchTotal"       (i18n "js_search_latest_total" (dict "N" "{n}"))
       "scrollTop"         (i18n "js_scrolltop")
       "minutes"           (i18n "mins_abbr")
       "tagFeedHead"       (i18n "js_tag_feed_head")
@@ -112,4 +126,4 @@
         "5" (i18n "js_cmnt_reply_word" 5)))
 -}}
 {{- end -}}
-<script>window.THEME_I18N=Object.assign({{ $i18n | jsonify | safeJS }},window.THEME_I18N||{});window.TAIGA_PAGEFIND={{ "pagefind/pagefind.js" | relURL | jsonify | safeJS }};</script>
+<script>window.THEME_I18N=Object.assign({{ $i18n | jsonify | safeJS }},window.THEME_I18N||{});window.TAIGA_PAGEFIND={{ "pagefind/pagefind.js" | relURL | jsonify | safeJS }};window.TAIGA_SEARCH_INDEX={{ (partialCached "search/manifest.html" . .Language.Lang) | jsonify | safeJS }};</script>

@@ -53,9 +53,11 @@
 {{- $_ := .Content -}}
 {{ partial "article/toc.html" . }}
 {{- /* Pagefind: index the prose only. A placeholder has nothing to find, so it
-       stays out of the index (keeps search results to real guides). crumb/mins
+       stays out of the index (keeps search results to real guides), and so does
+       a guide that asks to be left out with `search: false` — for a piece that
+       is published but not something anyone should be sent to cold. crumb/mins
        ride along as result-card metadata (empty spans carry inline key:value). */ -}}
-{{ if .Params.placeholder }}{{ .Content }}{{ else }}
+{{ if or .Params.placeholder (eq .Params.search false) }}{{ .Content }}{{ else }}
 <div data-pagefind-body>
 <span data-pagefind-meta="crumb:{{ partial "article/crumb.html" . }}"></span>
 <span data-pagefind-meta="mins:{{ .Params.mins | default (partial "article/reading-time.html" .) }}"></span>
@@ -134,10 +136,29 @@
   {{- $leadCls := printf "lead%s" (cond (not .Params.lead_deck) "" " deck") -}}
   {{ if $cut }}<div class="{{ $leadCls }}">{{ .Summary }}</div>
   {{ else }}{{ with .Params.lead }}<p class="{{ $leadCls }}">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}{{ end }}
+  {{- /* Pagefind: a plain page stays OUT of the index unless it asks in with
+         `search: true` in its front matter. The modal is announced as a search
+         of the guides, and on a site of a dozen guides the about/support/legal
+         pages are otherwise a large share of everything indexed — and the legal
+         ones are the worst of it, being long texts built out of exactly the
+         common words a reader types ("data", "code", "comments"). They are one
+         click away in the header and the footer; a guide pushed off the first
+         screen by them is not.
+
+         The opt-in is per page rather than site-wide because the page that
+         earns a place in search is a judgement about that page — a FAQ, a
+         handbook entry — and there is no honest default for someone else's
+         site. A whole SECTION of such pages belongs in
+         params.extraGuideSections instead, which makes its pages guides
+         outright. */ -}}
+  {{ if eq .Params.search true }}
   <div data-pagefind-body>
   {{ with .Params.kicker }}<span data-pagefind-meta="crumb:{{ . }}"></span>{{ end }}
   {{ if $cut }}{{ .ContentWithoutSummary }}{{ else }}{{ .Content }}{{ end }}
   </div>
+  {{ else }}
+  {{ if $cut }}{{ .ContentWithoutSummary }}{{ else }}{{ .Content }}{{ end }}
+  {{ end }}
   {{ partial "article/term-cards.html" . }}
   {{ partial "article/link-cards.html" . }}
   {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}

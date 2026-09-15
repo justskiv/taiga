@@ -147,6 +147,25 @@ their paths (`/howto/`, `/howto/handbook/`).
   It degrades quietly to an "index not built yet" hint when the Pagefind index
   is missing (a bare `hugo server` with no second build step).
 
+  **What gets indexed** is not a param either, it is a property of the page.
+  Guides — the pages of your rubric sections and of `extraGuideSections` — are
+  indexed; every other page is not. A guide opts out with `search: false` in
+  its front matter, a plain page opts in with `search: true`. The default is
+  that way round because the modal is announced as a search of the guides, and
+  on a small site the about/support/legal pages are otherwise a large share of
+  everything in the index — the legal ones worst of all, being long texts built
+  out of exactly the common words a reader types. A whole SECTION of pages that
+  deserve to be searched belongs in `extraGuideSections`, which makes them
+  guides outright.
+
+  **The zero state** — what the modal shows before the first keystroke — is two
+  sections: the guides this reader opened before (from the `taiga.visited`
+  history that also draws the ✓ marks, so it never leaves their browser) and
+  the newest guides, at most seven rows between them. It is drawn from a small
+  JSON manifest Hugo publishes next to the site (`search/guides.<lang>.json`),
+  not from the Pagefind index, so it works under a bare `hugo server` too.
+  Nothing to configure; a site with no guides shows the old placeholder line.
+
 ## Per-page front matter
 
 Article, rubric and series front matter (`title`, `slug`, `weight`, `mins`,

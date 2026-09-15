@@ -11,7 +11,12 @@
 .sm-in svg{width:15px; height:15px; color:var(--text-muted); flex:0 0 auto}
 .sm input{flex:1; background:none; border:0; outline:0; padding:15px 0; font-family:var(--font-sans); font-size:16px; color:var(--text-primary)}
 .sm input::placeholder{color:var(--text-muted)}
-.sm-list{max-height:46vh; overflow:auto; padding:8px}
+/* 62vh, not the 46 it was: the zero state is two sections and seven rows, and
+   at 46 the panel cut a result card in half (and at 60 it still clipped the
+   last of them on a 800px-tall laptop) — a list that ends mid-row reads as
+   broken rather than scrollable. Still bounded, and still under the modal's own
+   11vh top padding plus the input, so the panel never runs off the screen. */
+.sm-list{max-height:62vh; overflow:auto; padding:8px}
 .sm-item{display:block; padding:10px 12px; border:0; border-radius:9px; color:var(--text-secondary); cursor:pointer}
 .sm-item .t{color:var(--text-primary); font-weight:600; font-size:14.5px; line-height:1.35}
 .sm-item .t mark{background:none; color:var(--accent)}
@@ -22,3 +27,20 @@
 .sm-item.sel{background:var(--bg-surface)}
 .sm-item.sel .t{color:var(--text-strong)}
 .sm-empty{padding:26px 20px; color:var(--text-muted); font-size:14px; text-align:center}
+
+/* ---- zero state (before the first keystroke) ---- */
+/* Section heads in the site's quiet lowercase mono, so the panel reads as a
+   list with labels rather than a second feed with headlines. The count tail is
+   pushed to the far edge — it is an aside about scale, not part of the label. */
+.sm-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  padding:10px 12px 5px; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.04em;
+  color:var(--text-muted); text-transform:lowercase}
+.sm-head:first-child{padding-top:4px}
+.sm-head .n{opacity:.7}
+/* What search actually looks at. Outside .sm-list, under its own hairline, so a
+   scrolled list never carries it off: it is a caption for the panel, not a row
+   in it — quieter than a result, and not clickable. Present on the zero state
+   only (modules/search.js hides it the moment there is a query). */
+.sm-foot[hidden]{display:none}
+.sm-foot{border-top:1px solid var(--border); padding:10px 20px;
+  font-size:11.5px; line-height:1.5; color:var(--text-muted); opacity:.8}

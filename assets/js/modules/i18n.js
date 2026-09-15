@@ -17,6 +17,12 @@ const DEFAULTS = {
   searchPlaceholder: 'search a guide, a series, a topic…',
   searchEmpty: 'Nothing found. Try «gc», «slice», «scheduler»…',
   searchUnbuilt: 'The search index is not built yet. Build it with pagefind --site public.',
+  /* the modal's zero state — the two section heads, the count tail ({n} is
+     filled in the browser) and the line that says what search looks at */
+  searchRecent: 'recently opened',
+  searchLatest: 'latest guides',
+  searchTotal: '{n} in all',
+  searchHint: 'searches the text of the guides — «gc», «slice», «scheduler»',
   scrollTop: 'Back to top',
   minutes: 'min',
   /* tags page (/tags/) filter */

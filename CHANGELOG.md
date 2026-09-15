@@ -9,6 +9,17 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **Only guides are indexed now.** A plain page — about, support, the legal
+  pages — is out of the Pagefind index unless it asks in with `search: true` in
+  its front matter, and a guide can ask out with `search: false`. The modal is
+  announced as a search of the guides, and on a small site the other pages were
+  a large share of everything indexed: on the theme's own demo the legal pages
+  alone are long texts assembled out of exactly the words a reader types — data,
+  code, comments — so they surfaced against real guides. They are one click away
+  in the header and the footer; a guide pushed off the first screen by them is
+  not. A whole section of pages that deserve searching still belongs in
+  `extraGuideSections`, which makes them guides outright.
+
 - **A fold reads as prose once it is open, and long ones get two extra parts.**
   The panel used to be set two sizes down and one tone back (14.5px in
   `--text-secondary` against 17px prose) — right for the two-line aside the
@@ -78,6 +89,38 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   than as a two-line footer.
 
 ### Added
+
+- **The search modal opens on something.** Before the first keystroke it now
+  shows two sections — the guides this reader opened before, then the newest
+  guides, at most seven rows between them — instead of a grey placeholder line.
+  ⌘K on a site of series is navigation as much as it is search, and the panel
+  that answered it was empty. Deleting a query back to nothing returns to the
+  same state, so it is somewhere you can arrow back to rather than a screen you
+  lose by erasing a word.
+
+  The history comes from `taiga.visited`, the same localStorage list that draws
+  the ✓ marks in a series list, and `visited.js` now moves a path to the tail
+  when it is reopened — without that, "recently opened" meant "first opened, a
+  year ago". The current page is dropped from it: offering the page you are
+  standing on is offering nothing.
+
+  The titles behind those paths, and the newest guides themselves, come from a
+  manifest Hugo publishes beside the site — `search/guides.<lang>.json`, one
+  small file per language, fetched the first time the modal opens
+  (`_partials/search/manifest.html`, bridged as `window.TAIGA_SEARCH_INDEX`).
+  Not from Pagefind, though `search(null)` could have sorted by date: the
+  manifest is the same list the feed renders, so the two cannot drift; it
+  resolves a path from any depth of history, which the reader's own list cannot
+  do on its own; and it arrives whether or not the second build step has run,
+  so the modal is useful under a bare `hugo server`, where until now search was
+  simply dead. It is a file rather than an inline island because it is the whole
+  corpus, and every reader who never presses ⌘K would otherwise pay for it on
+  every page.
+
+  Four new i18n keys (`js_search_recent`, `js_search_latest`,
+  `js_search_latest_total`, `js_search_hint`), and the result list grew from
+  46vh to 62vh — at 46 the new panel ended mid-card, which reads as broken
+  rather than scrollable.
 
 - **A picture can float beside the prose.** `{.img-right}` on a stand-alone
   image's own paragraph sends it down the right margin at 44% of the column and
