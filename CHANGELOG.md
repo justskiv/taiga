@@ -184,6 +184,38 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **A hover card could open on top of the very link that summoned it.**
+  Placement put the card below the link, flipped it above when below had no
+  room, and then clamped the result into the viewport — and a clamp knows
+  nothing about the anchor it is supposed to point at. When neither side had
+  room for the whole card, the clamp slid it up over the link, which then could
+  not be clicked at all; the reader had to scroll the page until the card
+  happened to land somewhere else. Arithmetic made that a certainty rather than
+  bad luck — "does not fit below" is exactly
+  `innerHeight - height - EDGE < link.bottom + GAP` — and on a 780px window an
+  article card covered 60% of the positions a link can hold.
+
+  There is no final clamp any more. The card climbs a ladder instead: below,
+  above, a trim of at most 80px there rather than move for the sake of a few
+  pixels, beside the link (right, then left), and finally whichever side has the
+  most room, where the body shrinks to fit while the head and the action row
+  keep their height. Every rung derives its coordinate from an edge of the link,
+  so covering the link is not something the card can do. Running off the edge of
+  the window is, and that is the better failure — the link stays clickable. A
+  card that has to hang hangs downwards, where what is lost is a repeatable
+  action row rather than the title.
+
+  The rung is decided once per card and frozen. A scroll moves the card without
+  re-deciding it, which would have reflowed the card's text under a reader
+  mid-sentence; a resize does re-decide, since it invalidates both the side that
+  fitted and the vh-based heights inside the cards. Two smaller things went with
+  it: the entry motion now leans away from the link rather than towards it (at
+  5px towards, the halo lay on the link for the opening frames), and the halo
+  itself is down from 12px to exactly the 10px gap it bridges — at 12 it had
+  been quietly eating the link's last two pixels even when the card sat
+  correctly below. Link previews and term cards share the geometry; both are
+  fixed.
+
 - **Opening a folded block could throw the reader past it, thousands of pixels
   down the page.** Both Gecko and Blink keep a node in the viewport visually
   still when content above it changes size — right for a late image, wrong for

@@ -72,35 +72,96 @@ export function bindTerms() {
      and the column between them, and a card centred on that lands in the middle
      of the paragraph rather than under the word. One rect per line box, pick the
      one the pointer entered on — the first when there is no pointer (keyboard).
-     Same helper as linkpreview.js, kept local like the physics constants. */
+     Same helper as linkpreview.js, kept local like the physics constants.
+
+     The line is picked ONCE, at open, and frozen as an index: pt holds the last
+     pointer position and a scroll does not update it, so a wrapped term under a
+     still cursor could swap lines mid-scroll and jump the card. */
   let pt = null;
-  function anchorRect(el) {
+  function lineIndex(el) {
     const rs = el.getClientRects();
-    if (rs.length < 2) return el.getBoundingClientRect();
-    if (pt) {
-      for (let i = 0; i < rs.length; i++) {
-        const r = rs[i];
-        if (pt.y >= r.top - 2 && pt.y <= r.bottom + 2 &&
-            pt.x >= r.left - 2 && pt.x <= r.right + 2) return r;
-      }
+    if (rs.length < 2 || !pt) return 0;
+    for (let i = 0; i < rs.length; i++) {
+      const r = rs[i];
+      if (pt.y >= r.top - 2 && pt.y <= r.bottom + 2 &&
+          pt.x >= r.left - 2 && pt.x <= r.right + 2) return i;
     }
-    return rs[0];
+    return 0;
+  }
+  function anchorRect(el, i) {
+    const rs = el.getClientRects();
+    if (!rs.length) return el.getBoundingClientRect();
+    return rs[i] || rs[0];
   }
 
-  function place(card, word) {
+  /* Below by default — the card is tall, and below keeps the word and the text
+     above it readable. Above when below has no room. BESIDE when neither side of
+     the word can hold the card, which used to end in a clamp into the viewport —
+     and a clamp knows nothing about the word, so the card slid over the very term
+     it annotates and swallowed its click. No final clamp on the axis any more:
+     each rung derives y from an edge of the word, so the card cannot cross it.
+     Off the edge of the window it may go; that is the better failure.
+
+     Link previews (modules/linkpreview.js) carry the same ladder plus a size-to-
+     fit rung. A term card does not need that one: .term-card-b already scrolls
+     inside its own max-height, and these cards run 200-300px.
+
+     The rung is chosen once per open and frozen — a scroll re-applies it, it does
+     not re-decide it, or the card would hop between sides under a reading eye. */
+  let plan = null;                    /* {mode, line} */
+  const AXIS = ['below', 'above'], SIDE = ['right', 'left'];
+
+  function replan(card, word) {
     if (sheet.matches) return;   /* bottom sheet — CSS owns the geometry */
-    const r = anchorRect(word);
+    const box = word.getBoundingClientRect();   /* every line box: what stays clickable */
     card.style.left = '0px'; card.style.top = '0px';
     const cw = card.offsetWidth, ch = card.offsetHeight;
-    let x = r.left + r.width / 2 - cw / 2;
-    x = Math.max(EDGE, Math.min(x, window.innerWidth - cw - EDGE));
-    /* below by default — the card is tall, and below keeps the word and the
-       text above it readable; flip up only when there is no room down there */
-    let y = r.bottom + GAP;
-    if (y + ch > window.innerHeight - EDGE && r.top - ch - GAP > EDGE) y = r.top - ch - GAP;
-    y = Math.max(EDGE, Math.min(y, window.innerHeight - ch - EDGE));
-    card.style.left = Math.round(x) + 'px';
-    card.style.top = Math.round(y) + 'px';
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const room = {
+      below: vh - EDGE - (box.bottom + GAP),
+      above: (box.top - GAP) - EDGE,
+      right: (box.right + GAP + cw <= vw - EDGE) ? vh - 2 * EDGE : 0,
+      left: (box.left - GAP - cw >= EDGE) ? vh - 2 * EDGE : 0,
+    };
+    const mode =
+      AXIS.find(function (k) { return room[k] >= ch; }) ||
+      SIDE.find(function (k) { return room[k] >= ch; }) ||
+      AXIS.concat(SIDE).reduce(function (a, b) { return room[b] > room[a] ? b : a; });
+    plan = { mode: mode, line: lineIndex(word) };
+    apply(card, word);
+    /* above is the one rung that cuts the HEAD off a card too tall for it —
+       hanging off the bottom costs the footer link instead */
+    if (plan.mode === 'above' && box.top - GAP - card.offsetHeight < EDGE - 2) {
+      plan.mode = 'below';
+      apply(card, word);
+    }
+  }
+
+  function apply(card, word) {
+    if (sheet.matches || !plan) return;
+    /* before the measurements, which force the recalc: the entry transform is per
+       side, and a transition starts from the value of the last recalc — set after,
+       the card would open with the previous side's offset, towards the word */
+    card.dataset.side = plan.mode;
+    const r = anchorRect(word, plan.line);      /* the line the card points at */
+    const box = word.getBoundingClientRect();
+    const cw = card.offsetWidth, ch = card.offsetHeight;
+    let x, y;
+    if (plan.mode === 'below' || plan.mode === 'above') {
+      x = Math.round(Math.max(EDGE, Math.min(r.left + r.width / 2 - cw / 2,
+                                             window.innerWidth - cw - EDGE)));
+      /* round AWAY from the word: at a fractional box.bottom a plain round can
+         land the card a fraction of a pixel on top of it */
+      y = plan.mode === 'below' ? Math.ceil(box.bottom + GAP)
+                                : Math.floor(box.top - GAP - ch) - 1;
+    } else {
+      x = plan.mode === 'right' ? Math.ceil(box.right + GAP)
+                                : Math.floor(box.left - GAP - cw) - 1;
+      /* clamping y is safe beside the word: the two are already apart on x */
+      y = Math.round(Math.max(EDGE, Math.min(r.top, window.innerHeight - ch - EDGE)));
+    }
+    card.style.left = x + 'px';
+    card.style.top = y + 'px';
   }
 
   /* the fade only belongs on a body that actually overflows */
@@ -123,10 +184,14 @@ export function bindTerms() {
     if (open && open !== card) hide(true);
     clear();
     open = card; owner = word; pinned = !!pin;
+    /* Placed BEFORE is-open, and the order is load-bearing: the entry transform
+       is per side (data-side, 23-term.css) and a transition takes its start
+       value from the last style recalc. Flip is-open first and the card animates
+       in from the PREVIOUS side's offset — towards the word it must not touch. */
+    replan(card, word);
     card.classList.add('is-open');
     card.classList.toggle('is-pinned', pinned);
     word.setAttribute('aria-expanded', 'true');
-    place(card, word);
     markScroll(card);
     if (sheet.matches) scrim.classList.add('is-open');
     /* focus moves in only on a deliberate pin — yanking it on a passive hover
@@ -144,7 +209,7 @@ export function bindTerms() {
     card.classList.remove('is-open', 'is-pinned');
     if (word) word.setAttribute('aria-expanded', 'false');
     scrim.classList.remove('is-open');
-    open = null; owner = null; pinned = false;
+    open = null; owner = null; pinned = false; plan = null;
     /* Escape/× must hand focus back, or the keyboard user is stranded in a
        detached subtree at the end of <body> */
     if (!silent && wasPinned && word && card.contains(document.activeElement)) {
@@ -240,9 +305,14 @@ export function bindTerms() {
          anchorRect answers about a line, not about the word. */
       const box = owner.getBoundingClientRect();
       if (box.bottom < 0 || box.top > window.innerHeight) { hide(); return; }
-      place(open, owner);
+      if (plan) apply(open, owner); else replan(open, owner);
     });
   }
   window.addEventListener('scroll', track, { passive: true });
-  window.addEventListener('resize', function () { if (open && owner) place(open, owner); }, { passive: true });
+  /* replan, not apply: a resize invalidates the rung itself — the side that
+     fitted a moment ago may now hang off the window */
+  window.addEventListener('resize', function () { if (open && owner) replan(open, owner); }, { passive: true });
+  /* leaving the sheet hands the geometry back to JS, and the coordinates it last
+     wrote were for a different layout */
+  sheet.addEventListener('change', function () { if (open && owner) replan(open, owner); });
 }

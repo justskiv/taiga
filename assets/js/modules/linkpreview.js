@@ -1,7 +1,8 @@
 /* Link previews — the hover cards behind prose links. The heavy sibling of the
    term card (modules/term.js): same physics — a 120ms close delay with :hover
-   re-checks, GAP 10 / EDGE 12, flip below→above, reposition on scroll, die when
-   the owner leaves the viewport — plus two things a term never needs:
+   re-checks, GAP 10 / EDGE 12, a placement ladder that never covers the link,
+   reposition on scroll, die when the owner leaves the viewport — plus two things
+   a term never needs:
 
    • a DWELL before opening (a page window is heavier than a word hint, so it must
      not fire on a passing cursor), softened by a WARM window (once the reader is
@@ -16,6 +17,19 @@
    Self-guards: does nothing on a page with no markable links. */
 
 const GAP = 10, EDGE = 12, CLOSE_DELAY = 120, WARM_MS = 450, WARM_DWELL = 90, DWELL = 250;
+/* A trim the reader cannot tell from a short card: ~3.5 lines of the card's own
+   prose (14px × 1.62), and the bottom 30px of it are under the fade mask anyway.
+   It buys the axis one more rung before the card moves beside the link. */
+const SOFT = 80;
+/* The floor a card shrinks to: title + meta + four lines of body + the pinned
+   action row. Not invented — it is the floor tg already carries in CSS
+   (.tg-text min-height:110 + head + meta + row ≈ 250). */
+const MIN_CARD = 240;
+/* ...and the flexible region inside it never collapses to nothing. A card whose
+   chrome alone eats the whole budget — a tg post with a photo, a wiki card with
+   a thumbnail — would otherwise open as a head, a footer and a hole where the
+   text was. ~4 lines of body; past that the card simply hangs off the edge. */
+const MIN_FLEX = 96;
 
 export function bindLinkPreviews() {
   const marked = document.querySelector('a[data-preview], a[data-tg], a[data-yt], a[data-wiki], a[data-gob], a[data-gdoc]');
@@ -231,7 +245,15 @@ export function bindLinkPreviews() {
     pop.addEventListener('mouseenter', () => clearTimeout(closeT));
     pop.addEventListener('mouseleave', () => { if (cur.a) scheduleClose(); });
     if (window.ResizeObserver) {
-      new ResizeObserver(() => { if (cur.a) place(pop, cur.a); }).observe(pop);
+      /* A size change here is either our own cap echoing back, or real growth (a
+         photo decoded, the emoji font swapped) which invalidates the frozen plan.
+         A flag cannot tell them apart — the callback lands at the end of the
+         frame either way — but the height we last produced can. */
+      new ResizeObserver((es) => {
+        if (!cur.a || !plan) return;
+        if (Math.abs(es[0].target.offsetHeight - plan.h) < 1) return;
+        replan(pop, cur.a);
+      }).observe(pop);
     }
     document.body.appendChild(pop);
     return pop;
@@ -243,32 +265,139 @@ export function bindLinkPreviews() {
      of pointing at the link. getClientRects gives one rect per line box: use the
      one the pointer came in on, and the first line when there is no pointer to
      ask (keyboard focus, a scroll that moved the link under a still cursor).
-     term.js carries the same helper for the same reason. */
+     term.js carries the same helper for the same reason.
+
+     The line is chosen ONCE, at open, and frozen as an index in plan.line: pt
+     holds the last pointer position and a scroll does not update it, so a wrapped
+     link under a still cursor could swap lines mid-scroll and jump the card. */
   let pt = null;
-  function anchorRect(el) {
+  function lineIndex(el) {
     const rs = el.getClientRects();
-    if (rs.length < 2) return el.getBoundingClientRect();
-    if (pt) {
-      for (let i = 0; i < rs.length; i++) {
-        const r = rs[i];
-        if (pt.y >= r.top - 2 && pt.y <= r.bottom + 2 &&
-            pt.x >= r.left - 2 && pt.x <= r.right + 2) return r;
-      }
+    if (rs.length < 2 || !pt) return 0;
+    for (let i = 0; i < rs.length; i++) {
+      const r = rs[i];
+      if (pt.y >= r.top - 2 && pt.y <= r.bottom + 2 &&
+          pt.x >= r.left - 2 && pt.x <= r.right + 2) return i;
     }
-    return rs[0];
+    return 0;
+  }
+  function anchorRect(el, i) {
+    const rs = el.getClientRects();
+    if (!rs.length) return el.getBoundingClientRect();
+    return rs[i] || rs[0];
   }
 
-  function place(node, word) {
-    const r = anchorRect(word);
+  /* An internal card is up to ~645px tall and the window is often shorter than
+     that with the link in the middle of it. This used to place the card below,
+     flip it above when below did not fit, and then CLAMP it into the viewport —
+     and the clamp knows nothing about the anchor, so a card that fit NEITHER side
+     slid up over its own link: the reader hovered a link and lost the ability to
+     click it. It was not bad luck but arithmetic — "does not fit below" is
+     exactly `innerHeight - ch - EDGE < r.bottom + GAP`, so the clamped top always
+     landed above the link's bottom.
+
+     There is no final clamp any more. Every rung derives its coordinate from an
+     edge of the link, so crossing the link is not something the card can do;
+     running off the edge of the window is, and that is the better failure.
+
+     The rungs, and the passes are deliberately separate: the whole card below or
+     above → a trim of at most SOFT there → the whole card beside the link →
+     whatever side has the most room. Folding the sides into the first pass would
+     send the card sideways when the axis was short by five pixels, which is the
+     very jump SOFT exists to absorb.
+
+     The rung and the cap are decided ONCE per painted card (replan) and frozen; a
+     scroll only re-applies them (apply). Recomputing per frame would reflow the
+     card's text under a reader mid-sentence, which is worse than any jump. A
+     window resize does replan: it invalidates a side that no longer fits and the
+     vh-based max-heights inside the cards. */
+  let plan = null;                      /* {mode, flex, cap, line, h} */
+  const AXIS = ['below', 'above'], SIDE = ['right', 'left'];
+
+  /* The card's natural size, and the one region that may give height back: the
+     .lp-scroll / .lp-clip markOverflow already knows. Head and action row keep
+     their height — a shrunk card still says what it is and still offers the way
+     in. (.lp-scroll then scrolls; .lp-clip is overflow:hidden, so there the trim
+     deepens the fade instead, and the footer link remains the way to the rest.) */
+  function measure(node) {
+    const flex = node.querySelector('.lp-scroll, .lp-clip');
+    if (flex) flex.style.maxHeight = '';       /* or the last link's cap sticks */
     node.style.left = '0px'; node.style.top = '0px';
-    const cw = node.offsetWidth, ch = node.offsetHeight;
-    let x = r.left + r.width / 2 - cw / 2;
-    x = Math.max(EDGE, Math.min(x, window.innerWidth - cw - EDGE));
-    let y = r.bottom + GAP;
-    if (y + ch > window.innerHeight - EDGE && r.top - ch - GAP > EDGE) y = r.top - ch - GAP;
-    y = Math.max(EDGE, Math.min(y, window.innerHeight - ch - EDGE));
-    node.style.left = Math.round(x) + 'px';
-    node.style.top = Math.round(y) + 'px';
+    const ch = node.offsetHeight;
+    /* minH: the shortest this card can HONESTLY get. A yt card has no flexible
+       region and cannot shrink at all; a tg post's text stops at its own
+       min-height. Without it the trim rung below is a promise the card cannot
+       keep, and "trimmed by 40px" silently becomes "hanging 40px off the
+       window" — while a side that fits the whole card goes untried. */
+    const shrink = flex ? Math.max(0, flex.offsetHeight - MIN_FLEX) : 0;
+    return { flex, cw: node.offsetWidth, ch, minH: ch - shrink,
+             chrome: flex ? ch - flex.offsetHeight : 0 };
+  }
+
+  function replan(node, word) {
+    const box = word.getBoundingClientRect();  /* every line box: what must stay clickable */
+    const m = measure(node);
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const room = {
+      below: vh - EDGE - (box.bottom + GAP),
+      above: (box.top - GAP) - EDGE,
+      right: (box.right + GAP + m.cw <= vw - EDGE) ? vh - 2 * EDGE : 0,
+      left: (box.left - GAP - m.cw >= EDGE) ? vh - 2 * EDGE : 0,
+    };
+    const mode =
+      AXIS.find((k) => room[k] >= m.ch) ||             /* whole card, on the axis */
+      AXIS.find((k) => room[k] >= Math.max(m.ch - SOFT, m.minH)) ||  /* a trim nobody reads
+                                                         as one — and one the card can do */
+      SIDE.find((k) => room[k] >= m.ch) ||             /* whole card, beside the link */
+      AXIS.concat(SIDE).reduce((a, b) => (room[b] > room[a] ? b : a));
+    const target = Math.max(MIN_CARD, Math.min(m.ch, room[mode]));
+    plan = { mode, flex: m.flex, line: lineIndex(word), h: 0,
+             /* a pixel under target: chrome is measured in whole offsetHeights
+                while the card lays out in fractions, and overshooting the room
+                is what trips the correction below */
+             cap: target < m.ch ? Math.max(MIN_FLEX, target - m.chrome - 1) : null };
+    apply(node, word);
+    /* The cap is a request, not a promise — .tg-text keeps a min-height, a yt card
+       has no flexible region at all — so check what actually happened, after the
+       re-measure. Only `above` cuts the HEAD off when a card refuses to shrink;
+       hanging off the bottom costs the action row, which the link itself repeats. */
+    if (plan.mode === 'above' && box.top - GAP - plan.h < EDGE - 2) {   /* 2px: rounding, not a miss */
+      plan.mode = 'below';
+      apply(node, word);
+    }
+    if (plan.cap != null) markOverflow(node);  /* .is-ovf was measured uncapped */
+  }
+
+  function apply(node, word) {
+    /* BEFORE the measurements below, and they are what forces the style recalc:
+       the entry transform is per side (24-linkpreview.css), and the transition
+       starts from whatever the computed value was at the last recalc. Set after,
+       the card would open with the PREVIOUS side's offset — towards the link. */
+    node.dataset.side = plan.mode;
+    const r = anchorRect(word, plan.line);     /* the line the card points at */
+    const box = word.getBoundingClientRect();
+    if (plan.flex) plan.flex.style.maxHeight = plan.cap == null ? '' : plan.cap + 'px';
+    const cw = node.offsetWidth, ch = node.offsetHeight;   /* a floor may have refused the cap */
+    let x, y;
+    if (plan.mode === 'below' || plan.mode === 'above') {
+      x = Math.round(Math.max(EDGE, Math.min(r.left + r.width / 2 - cw / 2,
+                                             window.innerWidth - cw - EDGE)));
+      /* round AWAY from the link, and on the far side spend one more pixel:
+         at box.bottom = 475.25 a plain round gives 485 and the 10px halo starts
+         at 475, a quarter pixel on top of the link — and above/left measure the
+         card with offsetWidth/Height, whole numbers for a box that lays out in
+         fractions, so the gap could come out a fraction short of the halo */
+      y = plan.mode === 'below' ? Math.ceil(box.bottom + GAP)
+                                : Math.floor(box.top - GAP - ch) - 1;
+    } else {
+      x = plan.mode === 'right' ? Math.ceil(box.right + GAP)
+                                : Math.floor(box.left - GAP - cw) - 1;
+      /* clamping y is safe beside the link: the two are already apart on x */
+      y = Math.round(Math.max(EDGE, Math.min(r.top, window.innerHeight - ch - EDGE)));
+    }
+    if (node.style.left !== x + 'px') node.style.left = x + 'px';
+    if (node.style.top !== y + 'px') node.style.top = y + 'px';
+    plan.h = ch;                               /* what the ResizeObserver may ignore */
   }
 
   function markOverflow(root) {
@@ -305,12 +434,12 @@ export function bindLinkPreviews() {
         c.promise.then((d) => {
           if (my !== seq || cur.a !== a) return;
           if (!paint(p, a, d)) { hide(); return; }
-          place(pop, a);
+          replan(pop, a);
         });
       } else if (!paint(p, a, data)) {   /* nothing to show (e.g. self-link) */
         cur.a = null; cur.p = null; return;
       }
-      place(pop, a);
+      replan(pop, a);
       pop.classList.add('is-open');
       pop.setAttribute('aria-hidden', 'false');
     };
@@ -323,7 +452,7 @@ export function bindLinkPreviews() {
     if (!cur.a) return;
     pop.classList.remove('is-open');
     pop.setAttribute('aria-hidden', 'true');
-    cur.a = null; cur.p = null;
+    cur.a = null; cur.p = null; plan = null;
     lastHideAt = performance.now();
     seq++;
   }
@@ -398,9 +527,12 @@ export function bindLinkPreviews() {
          other is still being read, and anchorRect answers about a line. */
       const box = cur.a.getBoundingClientRect();
       if (box.bottom < 0 || box.top > window.innerHeight) hidePop();
-      else { place(pop, cur.a); scheduleClose(); }
+      else { plan ? apply(pop, cur.a) : replan(pop, cur.a); scheduleClose(); }
     });
   }
   window.addEventListener('scroll', track, { passive: true });
-  window.addEventListener('resize', track, { passive: true });
+  /* not track(): a resize can invalidate the frozen rung itself — the side that
+     fitted a moment ago may now hang off the window, and every vh-based
+     max-height inside the cards has just changed */
+  window.addEventListener('resize', () => { if (cur.a) replan(pop, cur.a); }, { passive: true });
 }

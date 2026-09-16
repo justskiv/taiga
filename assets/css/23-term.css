@@ -252,6 +252,17 @@
   transition:opacity .16s var(--ease), transform .16s var(--ease),
              border-color .16s var(--ease), visibility 0s .16s;
 }
+/* The card grows AWAY from its word, in the direction the engine placed it
+   (modules/term.js writes data-side). The default translateY(5px) slides a card
+   placed ABOVE the word down onto it for the opening frames — enough to swallow
+   a click aimed at the word. Scoped to the non-sheet width and kept ABOVE the
+   .is-open rule: the sheet sets its own transform, and .is-open ties on
+   specificity, so file order is what lets an open card settle. */
+@media (min-width:641px){
+  .term-cards.is-live .term-card[data-side="above"]{transform:translateY(-5px) scale(.985)}
+  .term-cards.is-live .term-card[data-side="right"]{transform:translateX(5px) scale(.985)}
+  .term-cards.is-live .term-card[data-side="left"]{transform:translateX(-5px) scale(.985)}
+}
 .term-cards.is-live .term-card.is-open{
   visibility:visible; opacity:1; transform:none;
   transition:opacity .16s var(--ease), transform .16s var(--ease),
@@ -292,7 +303,9 @@
 
 @media (prefers-reduced-motion:reduce){
   .wrap .term{transition:none}
-  .term-cards.is-live .term-card{transition:opacity .01s linear; transform:none}
+  /* [data-side] outranks a bare .term-card, so it has to be named here too */
+  .term-cards.is-live .term-card,
+  .term-cards.is-live .term-card[data-side]{transition:opacity .01s linear; transform:none}
   .term-cards.is-live .term-card.is-open{transform:none}
   .term-scrim{transition:none}
 }

@@ -48,11 +48,22 @@ One shared rhythm with the term cards: a **250 ms** hover intent before a card
 opens (`OPEN_DELAY` in `term.js` uses the same value — a passing cursor opens
 nothing), a **120 ms** close grace that re-checks `:hover` before hiding, and a
 ~450 ms "warm" window after a close in which the next card opens almost at
-once. The popover also wears an invisible **12 px halo** that bridges the gap
-back to the anchor link and forgives near-miss cursor exits (term cards keep
-the temporal grace only — their `overflow:hidden` clips any halo). Cards
-reposition on scroll and resize, flip above the link when there is no room
-below, and close on Escape.
+once. The popover also wears an invisible **10 px halo** — exactly the gap it
+bridges — that carries the pointer back to the anchor link and forgives
+near-miss cursor exits (term cards keep the temporal grace only — their
+`overflow:hidden` clips any halo). Cards reposition on scroll and resize, and
+close on Escape.
+
+**A card never covers its own link.** It opens *below*; with no room there it
+flips *above*; rather than move for the sake of a few pixels it will take a trim
+of up to 80 px on that axis; past that it opens *beside* the link — right, or
+left when the right has no room. When nothing fits, it shrinks into whichever
+side has more room: the body scrolls (or the excerpt clips further), while the
+head and the action row keep their height, down to a floor of 240 px. Below that
+the card simply hangs off the edge of the window — downwards, so what is lost is
+the action row and not the title. The rung is chosen once per card and held
+until it closes, so scrolling moves the card rather than re-deciding it; a
+resize does re-decide.
 
 ## Turn it on
 

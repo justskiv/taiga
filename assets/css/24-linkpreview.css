@@ -108,19 +108,30 @@ a[data-link="gdoc"]::after{
   visibility:hidden; opacity:0; transform:translateY(5px) scale(.985);
   transition:opacity .16s var(--ease), transform .16s var(--ease), visibility 0s .16s;
 }
+/* The card grows AWAY from its link, in the direction the engine placed it.
+   Not decoration: the default translateY(5px) slides a card placed ABOVE the
+   link down ONTO it, and for the opening frames the halo covers the link — a
+   click aimed at the link lands in the card. Specificity here ties with
+   .lp-pop.is-open, so these rules must stay ABOVE it in the file, or an open
+   card keeps its entry offset forever. */
+.lp-pop[data-side="above"]{transform:translateY(-5px) scale(.985)}
+.lp-pop[data-side="right"]{transform:translateX(5px) scale(.985)}
+.lp-pop[data-side="left"]{transform:translateX(-5px) scale(.985)}
 .lp-pop.is-open{
   visibility:visible; opacity:1; transform:none;
   transition:opacity .16s var(--ease), transform .16s var(--ease), visibility 0s;
 }
-/* invisible 12px halo: bridges the 10px gap back to the anchor link and
-   forgives near-miss cursor exits at the edges — the close timer re-checks
-   :hover, and :hover honestly counts this pseudo. Kept modest on purpose:
-   wider would start stealing hover and clicks from the prose around the
-   card. (Term cards keep temporal grace only — their overflow:hidden clips
-   any halo.) */
-.lp-pop::before{content:""; position:absolute; inset:-12px}
+/* invisible halo, exactly as wide as the gap it bridges: it carries the pointer
+   back to the anchor link and forgives near-miss cursor exits at the edges — the
+   close timer re-checks :hover, and :hover honestly counts this pseudo. EXACTLY
+   GAP, not a pixel more: at 12 against a 10px gap it lay 2px ON the link and ate
+   the clicks there (beside the link, its last 2px). Kept modest on purpose:
+   wider would start stealing hover and clicks from the prose around the card.
+   (Term cards keep temporal grace only — their overflow:hidden clips any halo.) */
+.lp-pop::before{content:""; position:absolute; inset:-10px}
 @media (prefers-reduced-motion:reduce){
-  .lp-pop, .lp-pop.is-open{transition:opacity .01s linear; transform:none}
+  /* [data-side] outranks a bare .lp-pop, so it has to be named here too */
+  .lp-pop, .lp-pop[data-side], .lp-pop.is-open{transition:opacity .01s linear; transform:none}
 }
 
 /* ── card chassis ──────────────────────────────────────────────────────────
