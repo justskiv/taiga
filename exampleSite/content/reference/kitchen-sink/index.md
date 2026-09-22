@@ -192,6 +192,24 @@ A miss past L3 means a trip to main memory — hundreds of cycles, and that trip
 is exactly what the word "locality" is hiding.
 {{< /term >}}, not in RAM.
 
+A definition is block Markdown, so a drawn thing goes in as it does in the
+article — the same diagram markup, kept whole by `{{</* raw */>}}`. The card
+widens a bracket to hold it:
+a slice is a {{< term word="three-word header" title="Slice header" kind="layout" color="gold" >}}
+Three machine words, always in this order:
+
+{{< raw >}}
+<div class="header">
+  <div class="header-word ptr"><span class="wk">ptr</span><span class="wv">0x1040</span></div>
+  <div class="header-word"><span class="wk">len</span><span class="wv">4096</span></div>
+  <div class="header-word"><span class="wk">cap</span><span class="wv">8192</span></div>
+</div>
+{{< /raw >}}
+
+Re-slicing moves `len` and `cap`; only growing past `cap` moves `ptr` — which
+is why one slice can write through another.
+{{< /term >}}, not a growable array.
+
 ## Diagrams {#diagrams}
 
 A memory diagram and a byte strip — raw HTML via `{{</* raw */>}}`:

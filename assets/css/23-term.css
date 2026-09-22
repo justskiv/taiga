@@ -144,6 +144,31 @@
 .term-card:has(ul), .term-card:has(ol){
   max-width:min(460px, calc(100vw - 32px));
 }
+/* …and a DRAWN thing needs more again. A block diagram — the raw <div> an author
+   writes inside the definition, or a {{< raw >}} body, or an inline <svg> — is
+   laid out in fixed cells, so unlike prose it cannot reflow into a narrower
+   column: every pixel it is not given is a pixel it scrolls. Its own bracket
+   rather than a wider default, because widening every card would turn a
+   two-line definition into a banner. Past this the body scrolls sideways
+   (overflow-y:auto forces overflow-x to auto), which is honest but unsignalled
+   — so a diagram meant for a card is drawn to fit ~480px or built to wrap.
+
+   `:not([data-pagefind-weight])` is the whole reason this is not simply
+   `> div`: a highlighted code fence ALSO arrives as a direct div child (the
+   search-weight wrapper from _markup/render-codeblock.html), and without the
+   exclusion every card that carries code would silently move up a bracket.
+
+   The selector's SHAPE is load-bearing too. `:where()` zeroes what is inside
+   `:has()`, and `div.term-card` puts one element back, so the whole thing
+   weighs exactly as much as the 460 bracket above — one notch more than a bare
+   class, no more. A notch is needed to outrank that bracket on a card matching
+   both (a captioned picture is an `img` AND a `.figure`); anything heavier and
+   this would start outranking the two rules that hand the card the whole
+   column — the no-JS appendix and print — where a max-width has no business. */
+div.term-card:has(:where(.term-card-b > div:not([data-pagefind-weight]),
+                         .term-card-b svg, .figure)){
+  max-width:min(520px, calc(100vw - 32px));
+}
 /* a pinned card firms its edge — the reader chose it, the card answers */
 .term-card.is-pinned{
   border-color:color-mix(in srgb, var(--text-strong) 22%, var(--border));
@@ -195,6 +220,50 @@
 .term-card-b ul, .term-card-b ol{margin:0 0 9px; padding-left:18px}
 .term-card-b li{margin:0 0 5px}
 .term-card-b img, .term-card-b svg{max-width:100%; height:auto; border-radius:var(--radius-sm); display:block}
+/* ── pictures and diagrams in a definition ─────────────────────────────────
+   A picture is written as a plain Markdown image; the article's own render hook
+   (_markup/render-image.html) resolves it — bundle first, then assets/img —
+   stamps its intrinsic size and takes the alt from the Markdown. So nothing
+   here has to know about files, and a card needs no img= parameter.
+
+   What does NOT come for free is everything the prose styles scope to .wrap.
+   A LIVE card is not in .wrap: term.js moves the whole block to <body> so the
+   popover escapes the article's overflow and stacking contexts. The same card
+   in the no-JS appendix IS in .wrap. Anything left to the .wrap rules would
+   therefore look like two different cards, so the card restates it here, once,
+   at its own scale.
+
+   Centred, and at full brightness in both lives: the dark-palette dimming in
+   03-typography exists so a bright screenshot does not punch a hole in a page
+   the reader is scrolling past — a card is opened on purpose and closes again,
+   and the live card, being outside .wrap, would not dim in any case. */
+.term-card-b img{margin-inline:auto; filter:none}
+/* A captioned image (`![alt](x.png "caption")`) comes back from the render hook
+   as an inline .figure + .figcaption. Unstyled, that is body-size text glued to
+   the side of the picture — the one loud failure of a picture in a card. */
+.term-card-b p:has(> .figure){margin:0 0 9px}
+.term-card-b .figure{display:block; margin:0; text-align:center}
+.term-card-b .figcaption{
+  display:block; margin-top:6px;
+  font:400 12px/1.45 var(--font-sans); color:var(--text-muted);
+  text-wrap:balance;
+}
+/* A block an author drops in — a bare `<div class="header">`, a {{< raw >}}
+   body — usually carries no margin of its own, and with none it fuses with the
+   sentence under it. This is the card's fallback air for such a block: NOT the
+   9px paragraph rhythm, which is the gap between two runs of prose, but the
+   theme's figure rhythm, because a diagram interrupts the prose rather than
+   continuing it and its labels read as part of the sentence above when the two
+   are 9px apart. Matched to `.span-fig` (08-diagrams.css), the one figure in
+   the theme that already stated this number for itself.
+
+   ZERO SPECIFICITY, on purpose: a figure that sets its own margins — .span-fig,
+   .mem — must keep them inside a card too, or the gap ends up owned by two
+   files that quietly disagree and the next person changes the one that has no
+   effect. This rule only fills in for a block that asked for nothing. The code
+   fence's wrapper is excluded outright: its `pre` already carries the rhythm,
+   and a margin here would double it. */
+:where(.term-card-b) > :where(div:not([data-pagefind-weight])){margin:16px 0 18px}
 /* the card is filled with --bg-deep, which is also what a code block normally
    sits on — so the block would vanish into the card. Lift it a step instead:
    here the code is the inset thing, not the recess. */

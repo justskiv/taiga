@@ -302,7 +302,69 @@ Three levels — L1, L2, L3. The closer to the core, the smaller and faster.
 {{</* /term */>}}, not in RAM.
 ```
 
-Two things worth knowing:
+#### A diagram or a picture in a card
+
+The body is rendered as block Markdown — the same pipeline as the article — so
+anything legal in a guide is legal in a definition, raw block HTML included. A
+diagram is therefore the theme's own diagram markup (see [Diagrams](#diagrams)),
+written inside `{{</* raw */>}}`, and it needs no shortcode parameter:
+
+```md
+a slice is a {{</* term word="three-word header" kind="layout" */>}}
+Three machine words, always in this order:
+
+{{</* raw */>}}
+<div class="header">
+  <div class="header-word ptr"><span class="wk">ptr</span><span class="wv">0x1040</span></div>
+  <div class="header-word"><span class="wk">len</span><span class="wv">4096</span></div>
+</div>
+{{</* /raw */>}}
+
+Re-slicing moves `len`; only growing past `cap` moves `ptr`.
+{{</* /term */>}}, not a growable array.
+```
+
+A picture goes in the same way, as a plain Markdown image — there is no `img=`
+parameter and no need for one. It goes through the article's own render hook,
+which resolves the name against the page bundle first and then `assets/img/`,
+stamps the intrinsic size, and takes the `alt` from the Markdown; a quoted title
+becomes a caption, exactly as in the prose:
+
+```md
+the allocator hands out a {{</* term word="span" kind="runtime struct" */>}}
+A run of pages carved into objects of one size class.
+
+![how a span is carved](span.png "8 KiB, one size class")
+
+The class decides everything else about the object.
+{{</* /term */>}}, never a single object.
+```
+
+Four ways this goes quietly wrong:
+
+- **Raw HTML with a blank line in it gets cut in half — use `{{</* raw */>}}`.**
+  A blank line ends a Markdown HTML block, and what follows is parsed as
+  Markdown again: indented lines (the natural way to write nested `<div>`s)
+  come back as a code block full of escaped tags, and the build never says a
+  word. The `raw` shortcode captures its body whole, which is why the example
+  above uses it. Inline HTML with no blank lines needs no wrapper.
+- **The card is narrow.** Roughly 360px of content for a plain definition,
+  420px once it holds a list, a table, an image or code, and 480px once it
+  holds a diagram or a captioned picture — the card picks the bracket from what
+  is inside it. On a phone it is a bottom sheet as wide as the screen, which is
+  usually *less*. Anything wider scrolls sideways inside the card, and macOS
+  draws no scrollbar to say so. Draw for ~480px, or build the diagram out of
+  wrapping rows (`.mem-row`, `.byte-strip`) so it reflows instead.
+- **An SVG needs `width` and `height` on its root element.** The render hook
+  stamps intrinsic dimensions for raster images only, so a `viewBox`-only SVG
+  has no size to reserve: it opens the card at a fraction of the size you drew,
+  and the popover gets placed against that wrong height. A raster image is
+  safe — its dimensions are in the markup.
+- **A card is a `role="dialog"`.** A screen reader reads its whole contents, so
+  a picture carries real `alt` text (the `![alt]` part — not a filename), and a
+  decorative diagram carries `aria-hidden="true"` on its outer element.
+
+Two more things worth knowing:
 
 - **The card is not rendered where you write it.** A paragraph cannot legally
   contain a `<pre>` or a `<div>` — the HTML parser would close it and tear the

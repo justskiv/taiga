@@ -112,3 +112,165 @@
 .sc-arrows{font-size:11px; color:var(--accent); margin:4px 0}
 .sc-scatter{display:flex; gap:8px; flex-wrap:wrap}
 .sc-scatter .word{width:30px; height:34px; background:var(--accent-green-dim); border-color:var(--accent-green); color:var(--accent-green)}
+
+/* ===== span slots + alloc bitmap ===== */
+/* A span is two things at once: a strip of equal-size slots and one bit per
+   slot. Drawn as two separate figures the point is lost, so every row here —
+   the offset measure, the strip, the bitmap — is the SAME grid template, and a
+   slot always sits above its own bit. That column alignment is the
+   explanation; the rows are separate elements (not one big grid) only so that
+   collapsing the label gutter on a phone cannot re-flow the cells.
+
+   THE FIGURE IS HELD BY AIR AND ALIGNMENT, NOT BY A BOX. It did wear a panel
+   for one round, and the panel was answering the wrong question: at the time
+   this class overrode the card's own `margin:16px 0 18px` down to 2px/4px, so
+   the figure really was welded to the prose and a border was the only thing
+   loud enough to be heard over that. With the margins honest the box turned
+   out to be a frame inside the already-framed card — and, tested side by side
+   against plain air, plainly heavier for no gain.
+
+   What separates the figure instead is three things it already had: mono type
+   two steps smaller and a tone quieter than the body copy, 16/18px of air top
+   and bottom, and — the piece that was missing — ONE LEFT EDGE. While the
+   strip was centred it floated against nothing and read as misaligned; the
+   panel had been supplying the frame it was centred in. Left-aligned, the
+   caption, the row labels and the conclusion stack on the same edge as the
+   prose, and the figure reads as a block rather than as debris. Spacing then
+   does the grouping on three levels: 2px inside the picture, 11-13px between
+   its parts, 16/18px around the whole. No fill, no rule, no second frame —
+   which is also how .mem behaves in an article.
+
+   Ink rides --cl, the channel .term-card and .l1-tip already use for the
+   author's chosen colour, so the figure tones with the card it sits in and
+   falls back to --accent in plain prose where nothing sets --cl. The wash is
+   mixed from that same channel rather than taken from --accent-dim, which is
+   bound to the brand hue alone. */
+.span-fig{
+  --sp:var(--cl, var(--accent));
+  --sp-gut:44px;                 /* label gutter */
+  /* Fills the card: 482px is what a term card holding a block child offers
+     (23-term.css widens it to 520, minus 18px padding either side).
+     max-width, not width, so it shrinks to any narrower container. */
+  width:100%; max-width:482px;
+  /* NOT 2px/4px, which is what this rule used to say. 23-term.css gives a
+     block child of the card `margin:16px 0 18px` through a :where() selector
+     of zero specificity — a gift this class was silently refusing, and the
+     figure ended up welded to the paragraphs above and below it. Matching the
+     number here keeps the gift and applies it in plain prose too, where no
+     such rule exists. This is the whole separation budget now, so it is not
+     negotiable downwards. */
+  margin:16px 0 18px;
+  font-family:var(--font-mono);
+}
+.span-cap{
+  display:flex; align-items:center; flex-wrap:wrap;
+  gap:5px 14px;
+  font-size:11px; color:var(--text-secondary); letter-spacing:.02em;
+  margin-bottom:11px;            /* group gap: caption | picture */
+}
+.span-row{
+  display:grid;
+  grid-template-columns:var(--sp-gut) repeat(6, minmax(0,58px));
+  gap:0 2px; align-items:center;
+  /* start, not centre: the strip shares the prose's left edge with the caption
+     and the conclusion, and that single edge is what holds the figure together
+     now that no frame does. Centring only ever looked deliberate while the
+     panel supplied something to be centred in. */
+  justify-content:start;
+}
+/* 2px inside the picture against 11/13px around it: the three groups (what we
+   show · the picture · what follows) separate by rhythm, six to one, instead
+   of five rows marching at an even step. */
+.span-row + .span-row{margin-top:2px}
+.span-rl{ /* row label, in the gutter */
+  justify-self:end; padding-right:7px;
+  font-size:10px; color:var(--text-muted); white-space:nowrap;
+}
+/* the offset measure: a dimension line from the span start to the first free
+   slot, captioned with the multiplication that yields its address. It covers
+   the four slots that precede slot 4, so the line's length IS 4 x 24. */
+.span-measure{
+  grid-column:2 / span 4; position:relative;
+  height:15px; display:flex; align-items:center; justify-content:center;
+  font-size:9.5px; color:var(--sp);
+}
+.span-measure::before{ /* the rule */
+  content:""; position:absolute; inset:50% 0 auto 0;
+  border-top:1px dashed currentColor; opacity:.7;
+}
+.span-measure::after{ /* end ticks: the two verticals that close the rule */
+  content:""; position:absolute; inset:calc(50% - 3px) 0 auto 0; height:7px;
+  border-left:1px solid currentColor; border-right:1px solid currentColor;
+  opacity:.7;
+}
+.span-measure b{ /* the caption interrupts the rule instead of floating over it */
+  position:relative; z-index:1; font-weight:600;
+  /* the ground the figure sits on: the card's fill, and the article canvas in
+     plain prose — the same token in both places. */
+  padding:0 4px; background:var(--bg-deep);
+}
+/* A slot is told apart by three things at once, never by colour alone: fill
+   texture (hatched = taken), border style (dashed = free) and the literal bit
+   printed under it.
+
+   Occupancy is deliberately NOT drawn in the accent. The first pass inked the
+   taken slots accent and the chosen slot accent too, and the two collapsed into
+   one another — the eye could not tell "already full" from "this is where the
+   allocation lands". The accent now appears exactly three times, and all three
+   are the same fact: the measure, the chosen slot, its zero bit. Occupancy is
+   texture on a neutral ground, which is also what the ASCII sketch did with a
+   shaded block.
+
+   A free slot is transparent — the ground shows through — rather than carrying
+   a fill of its own. A named surface would have to sit on the correct side of
+   the ground in every palette, and the light ramp runs the opposite way to the
+   dark ones; an empty cell has no side to be on. */
+.span-slot{
+  height:34px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600;
+  border:1px solid var(--border); background:transparent; color:var(--text-ghost);
+}
+.span-slot.used{
+  color:var(--text-secondary);
+  background:repeating-linear-gradient(45deg,
+    color-mix(in srgb, var(--text-muted) 28%, transparent) 0 3px,
+    transparent 3px 6px);
+}
+/* a dashed rule reads weaker than a solid one of the same colour — the gaps
+   eat half of it — so a free slot lifts its edge off --border towards ghost
+   to come back level with the hatched cells beside it. */
+.span-slot.free{
+  border-style:dashed;
+  border-color:color-mix(in srgb, var(--text-ghost) 45%, var(--border));
+}
+.span-slot.pick{ /* the slot this allocation lands in */
+  border-color:var(--sp); color:var(--sp);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--sp) 26%, transparent);
+}
+.span-bit{font-size:11px; text-align:center; color:var(--text-muted)}
+.span-bit.one{color:var(--text-secondary)}
+.span-bit.pick{color:var(--sp); font-weight:700}
+/* the conclusion. Two authored lines, each a <span>, so the rule and its
+   result never share one. balance is the safety net under them: on a narrow
+   sheet a line does wrap, and without it the wrap left two characters alone on
+   a row of their own. The markup binds its quantities with NBSP as well —
+   typography and text each fixing what the other cannot. */
+.span-note{
+  margin-top:13px;               /* group gap: picture | conclusion */
+  font-size:10.5px; line-height:1.5; color:var(--text-secondary);
+  text-wrap:balance;
+}
+.span-note span{display:block}
+.span-note span + span{color:var(--text-muted)}
+/* legend: the figure has to survive being read without the paragraph above it */
+.span-key{display:flex; flex-wrap:wrap; gap:4px 12px; font-size:10px; color:var(--text-muted)}
+.span-key > span{display:inline-flex; align-items:center; gap:5px}
+.span-key .span-slot{flex:none; width:18px; height:11px; border-radius:3px}
+/* No breakpoint on purpose. The figure's room is set by the card, not by the
+   window — the term card is a shrink-wrapped popover on a desktop and a
+   full-width bottom sheet on a phone, so a viewport media query would fire at
+   the wrong moments. max-width:100% and minmax(0,58px) tracks let the strip
+   shrink against whatever container it lands in; the 58px cap keeps a cell
+   from stretching into a letterbox in the widest card, and justify-content
+   centres the leftover. */

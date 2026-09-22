@@ -192,6 +192,24 @@ func writePointer(slot *unsafe.Pointer, ptr unsafe.Pointer) {
 прячет за собой слово «локальность».
 {{< /term >}}, а не в оперативке.
 
+Определение — это блочный Markdown, поэтому схема ложится в него так же, как в
+статью: та же разметка диаграмм, целиком захваченная `{{</* raw */>}}`. Карточка
+под неё расширяется:
+слайс — это {{< term word="заголовок из трёх слов" title="Заголовок слайса" kind="раскладка" color="gold" >}}
+Три машинных слова, всегда в этом порядке:
+
+{{< raw >}}
+<div class="header">
+  <div class="header-word ptr"><span class="wk">ptr</span><span class="wv">0x1040</span></div>
+  <div class="header-word"><span class="wk">len</span><span class="wv">4096</span></div>
+  <div class="header-word"><span class="wk">cap</span><span class="wv">8192</span></div>
+</div>
+{{< /raw >}}
+
+Переслайсивание двигает `len` и `cap`; `ptr` съезжает только при росте за
+`cap` — поэтому один слайс умеет писать сквозь другой.
+{{< /term >}}, а не растущий массив.
+
 ## Диаграммы {#diagrams}
 
 Диаграмма памяти и байтовая лента — сырой HTML через `{{</* raw */>}}`:

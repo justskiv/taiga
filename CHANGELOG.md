@@ -90,6 +90,32 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **A term card carries a diagram or a picture properly now.** Block content in
+  a `{{< term >}}` body always worked — the shortcode renders the body as block
+  Markdown and the card is emitted after `.Content` precisely so a `<div>` can
+  live in it — but three things about it were left to the article's own styles,
+  which the card loses the moment `term.js` moves it out of `.wrap` and onto
+  `<body>`. So the same definition looked like two different cards depending on
+  whether JavaScript ran: a captioned image (`![alt](x.png "caption")`) came out
+  as body-size text glued to the side of the picture, the dark-palette dimming
+  applied in one life and not the other, and a block dropped in with no margins
+  of its own fused with the sentence under it. The card now states all three
+  itself — the last as a ZERO-specificity fallback carrying the theme's figure
+  rhythm (16/18px, matching `.span-fig`) rather than the 9px paragraph gap, so
+  a figure that sets its own margins keeps them and one gap is never owned by
+  two files at once. It also picks
+  a wider bracket (520px) when it holds a diagram, an `<svg>` or a captioned
+  picture — a drawn thing is laid out in fixed cells and cannot reflow into a
+  narrower column the way prose does; a card carrying a highlighted code fence
+  is explicitly *not* caught by that rule, so nothing existing moved.
+
+  No new shortcode parameter: an `img=` would only duplicate what a plain
+  Markdown image already gets from the render hook — bundle-then-`assets/img`
+  resolution, intrinsic dimensions, `alt`, and a caption. `docs/authoring.md`
+  gains the recipe and the four quiet ways it breaks (a blank line cutting a raw
+  HTML block in half, the card's real width, a `viewBox`-only SVG, and what a
+  screen reader does with a `role="dialog"`).
+
 - **The search modal opens on something.** Before the first keystroke it now
   shows two sections — the guides this reader opened before, then the newest
   guides, at most seven rows between them — instead of a grey placeholder line.
