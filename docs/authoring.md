@@ -46,7 +46,10 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 | `title` | yes | Split on the first `": "` into an `<h1>` + `.sub`; use `sub:` to override, or a title without `": "` for a single line. |
 | `slug` | yes | Freezes the pretty URL; keep it stable once published, and **identical across translations** (see [Translating a guide](#translating-a-guide)). |
 | `date` | yes | Orders the feed and RSS, and prints on the feed card. **Never appears in the article body.** |
-| `description` | yes | Feed card, search result, `og:description`, RSS `<description>`. |
+| `description` | yes | Feed card, search result, `og:description`, RSS `<description>`. Write it for the result page, not as a second title: 70–160 characters, and **no markdown** — it is a plain attribute, carried through verbatim, so a backtick prints as a backtick (the lint says so). `lead`, by contrast, IS markdown: the page renders it, and so does the description fallback. The archetype ships a `TODO` **sentinel** here, and `params.seo.lint` fails the build while it is still in place — a guide is not allowed to reach production describing itself as TODO. |
+| `lastmod` | when you revise | The date a published guide last changed, e.g. `2026-09-22`. It is what `dateModified`, `article:modified_time` and the sitemap report — a search engine has no other way to learn that the guide is not the one it indexed a year ago. Standard Hugo front matter; no `enableGitInfo` needed. |
+| `titleSuffix` | optional | Overrides whether `<title>` ends with ` — <site>`. The site name is normally appended only while the whole line fits `params.seo.titleMax`; `false` drops it from a page that fits, `true` keeps it on one that does not. |
+| `noindex` | optional | `true` keeps the page out of search: `noindex, follow` in the robots tag and no entry in `sitemap.xml`. For a page that exists for a reason other than being found. |
 | `lead` | legacy | One-paragraph opening, kept for guides written before the `<!--more-->` divider (below). Also the fallback for `og:description`. |
 | `weight` | for series parts | Part order inside the series folder. See [Series](#series-and-weight). |
 | `tags` | recommended | Chips linking to the tags page, anchored at `#<tag>`. Keep **identical across translations**. |
@@ -139,8 +142,11 @@ is a `mv`. A series with a single part renders as a standalone guide — the
 machinery only fires from two parts up.
 
 Each series renders a **landing page** (`/<rubric>/<series>/`): title, tagline,
-description, the `_index.md` body as an epigraph, the parts list and a "start
-the series" CTA. The rubric page shows the same series as an anchored block
+lead, the `_index.md` body as an epigraph, the parts list and a "start
+the series" CTA. The lead is `lead` when the series has one and `description`
+otherwise — the same split a rubric uses: `lead` is written for the page and
+may run as long as the page carries it, while `description` has a second job as
+the meta tag and the share card, where a long line is cut mid-thought. The rubric page shows the same series as an anchored block
 (`/<rubric>/#<series>`); a series announced with an `_index.md` but no parts
 yet appears there as an "in the works" teaser, and its landing renders the
 announcement. Scaffold the `_index.md` with the archetype:
@@ -151,7 +157,8 @@ hugo new content howto/handbook/_index.md --kind series
 
 ```yaml
 title: "Memory"             # series name, used in kickers, the rubric block and the landing
-description: "One line for the series block on the rubric page and the landing."
+description: "One line — the meta tag and the share card of the landing."
+lead: "The paragraph the landing shows (optional; may run longer)."
 weight: 10                  # order of series on the rubric page
 params:
   label: "memory"           # short lowercase name in kickers (else the lowercased title)

@@ -1,0 +1,39 @@
+{{- /* The site map, overridden for ONE reason: it must agree with the robots
+       tag. Hugo's built-in template lists every page it built, so a page the
+       theme marks `noindex` (seo/indexable.html — an empty rubric, a
+       placeholder, a page that asked) was both submitted for indexing and
+       refused on arrival. A crawler reports that contradiction, and rightly:
+       the site is telling it two different things about the same URL.
+
+       Everything else is Hugo's embedded template, deliberately kept feature
+       for feature — `sitemap.disable` in front matter, `changefreq` and
+       `priority` from the page's `sitemap` config, the empty-permalink guard,
+       and the hreflang alternates. A theme that overrides a built-in template
+       inherits its contract: a site that configures any of these must keep
+       getting it. (`.AllTranslations` is the one paraphrase — it is the
+       page's translations INCLUDING itself, which is what the embedded
+       template assembles in two steps.) */ -}}
+{{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  {{- range where .Pages "Sitemap.Disable" "ne" true }}
+  {{- if and .Permalink (partial "seo/indexable.html" .) }}
+  <url>
+    <loc>{{ .Permalink }}</loc>
+    {{- if not .Lastmod.IsZero }}
+    <lastmod>{{ safeHTML (.Lastmod.Format "2006-01-02T15:04:05-07:00") }}</lastmod>
+    {{- end }}
+    {{- with .Sitemap.ChangeFreq }}
+    <changefreq>{{ . }}</changefreq>
+    {{- end }}
+    {{- if ge .Sitemap.Priority 0.0 }}
+    <priority>{{ .Sitemap.Priority }}</priority>
+    {{- end }}
+    {{- if .IsTranslated }}
+    {{- range .AllTranslations }}
+    <xhtml:link rel="alternate" hreflang="{{ .Language.LanguageCode }}" href="{{ .Permalink }}"/>
+    {{- end }}
+    {{- end }}
+  </url>
+  {{- end }}
+  {{- end }}
+</urlset>

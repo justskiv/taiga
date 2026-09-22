@@ -21,7 +21,12 @@
   {{ partial "article/rail-left.html" . }}
   <main class="wrap">
 {{ partial "article/kicker.html" . }}
-<h1 data-pagefind-meta="title">{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
+{{- /* The search index gets the title as a VALUE, not as the h1's text. The
+       h1 splits on ": " into two lines, and the minifier drops the whitespace
+       around the <br> that separates them, so the extracted text read
+       "Цена одновременности:треды" — one word that matches nothing a reader
+       would type. Pagefind's `key:value` form sidesteps the markup entirely. */ -}}
+<h1 data-pagefind-meta="title:{{ .Title }}">{{ $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
 {{ partial "article/meta.html" . }}
 {{- /* Cover (params.article.cover): the picture the page names as `cover`, shown
        WHOLE — the feed crops the same file into a band, an article does not. It
@@ -122,7 +127,7 @@
 <main class="wrap{{ if $mascot }} has-mascot{{ end }}">
   {{ if $mascot }}{{ partial "page/mascot.html" .Params.mascot }}{{ end }}
   {{ with .Params.kicker }}<div class="kicker"><span class="dot"></span>{{ . }}</div>{{ end }}
-  <h1 data-pagefind-meta="title">{{ .Params.headline | default $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
+  <h1 data-pagefind-meta="title:{{ .Title }}">{{ .Params.headline | default $main }}{{ with $sub }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
   {{- /* The standfirst, on the same terms an article gets it: prose before the
          <!--more--> divider is the lead, everything after is the body; a page
          with no divider falls back to the `lead:` param. `lead_deck: true`

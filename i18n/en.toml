@@ -104,6 +104,11 @@ other = "deep dive"
 other = "series"
 [all_series]
 other = "whole series →"
+# og:title of a series landing — the only place a share card can say that the
+# link is a whole series and not one more article (head/og.html)
+[og_series_of]
+one = "a series of {{ .Count }} part"
+other = "a series of {{ .Count }} parts"
 [series_start]
 other = "start the series"
 [series_soon]

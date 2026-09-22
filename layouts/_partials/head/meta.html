@@ -1,23 +1,59 @@
 {{- /* Base metadata. Title: "<page> — <site>", but the home page reads
-       "<site> — <tagline>". Description cascades page → lead → site hero line,
-       so no tag is ever empty. Full OG/SEO/JSON-LD land in phase 03 (og.html). */ -}}
+       "<site> — <tagline>". The description is built by head/description.html —
+       one string, shared with og.html. Full OG/SEO/JSON-LD in og.html. */ -}}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{{- /* The site name is appended only while the whole line still fits a search
+       result (`params.seo.titleMax`, 60 by default, counted in CHARACTERS —
+       `len` would count bytes and halve the budget on any non-Latin title).
+       Past that it is dropped, because the alternative is worse: the engine
+       cuts the line from the right, and what it cuts is the end of the page's
+       own title — the half that says what the page is. The site name is not
+       lost with it; a result already prints the domain on its own line above
+       the title.
+
+       `titleSuffix: false` in front matter drops the suffix on a page that
+       fits, `true` keeps it on one that does not — the escape hatch, for a
+       title whose ending is decoration. */ -}}
+{{- $seo := site.Params.seo | default dict -}}
 {{- $title := "" -}}
+{{- $suffixed := false -}}
 {{- if .IsHome -}}
   {{- $title = printf "%s — %s" site.Title site.Params.footerTag -}}
 {{- else -}}
-  {{- $title = printf "%s — %s" .Title site.Title -}}
+  {{- $title = .Title -}}
+  {{- $suffix := printf " — %s" site.Title -}}
+  {{- $want := le (add (strings.RuneCount $title) (strings.RuneCount $suffix)) (int ($seo.titleMax | default 60)) -}}
+  {{- if isset .Params "titlesuffix" }}{{ $want = .Params.titleSuffix }}{{ end -}}
+  {{- if $want }}{{ $title = print $title $suffix }}{{ $suffixed = true }}{{ end -}}
 {{- end -}}
 <title>{{ $title }}</title>
-{{- $desc := .Description | default .Params.lead | default site.Params.heroLine -}}
+{{- $desc := partial "head/description.html" . -}}
 {{- /* Favicon accent square: params.accent → the default palette's accent →
        glacier teal. As a data-URI the SVG can't read CSS vars, so the colour is
        baked here. The literal is the last-resort fallback only (it is reached
        solely if the palette file is missing the key); with any shipped palette
        the value comes from data/themes/<id>.toml. */ -}}
 {{- $acc := site.Params.accent | default (index (index site.Data.themes (site.Params.defaultTheme | default "taiga")) "accent") | default "#55c0b7" -}}
-<meta name="description" content="{{ $desc }}">
+{{- /* No tag at all beats an empty one: a site that sets neither a
+       description nor heroLine used to get content="" on every system page,
+       which tells a crawler the page has been described and described as
+       nothing. */ -}}
+{{- with $desc }}
+<meta name="description" content="{{ . }}">
+{{- end }}
+{{- /* Robots. Not `index,follow` — that is the crawler's default and saying it
+       adds nothing; the tag is here for the two things that are NOT default:
+       a page the site keeps out of the index (seo/indexable.html, the same
+       answer sitemap.xml filters on), and the preview budget. Large image
+       previews are what put a guide's cover on a result card and make it
+       eligible for Discover; the snippet/video caps are removed for the same
+       reason — the defaults are conservative. */ -}}
+{{- if partial "seo/indexable.html" . }}
+<meta name="robots" content="max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+{{- else }}
+<meta name="robots" content="noindex, follow">
+{{- end }}
 <link rel="canonical" href="{{ .Permalink }}">
 {{- /* hreflang alternates. .AllTranslations includes this page, so the set is
        complete and self-referential the way search engines want it. x-default is
@@ -37,3 +73,5 @@
 <link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">
 {{- end }}
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2032%2032%22%3E%3Crect%20width=%2232%22%20height=%2232%22%20rx=%227%22%20fill=%22%231d1d1c%22/%3E%3Cpath%20d=%22M10.7%2012.4L21.3%2012.4L25.3%2016.8L6.7%2016.8Z%22%20fill=%22%233c3b38%22/%3E%3Cpath%20d=%22M8.5%2019.6L23.5%2019.6L28.5%2024L3.5%2024Z%22%20fill=%22%233c3b38%22/%3E%3Crect%20x=%2214.4%22%20y=%2224%22%20width=%223.2%22%20height=%224.2%22%20fill=%22%233c3b38%22/%3E%3Cpath%20d=%22M16%203.4L21.6%209.4L10.4%209.4Z%22%20fill=%22%23{{ strings.TrimPrefix "#" $acc }}%22/%3E%3C/svg%3E">
+{{- /* Front-matter rules, checked against the strings this file just built. */ -}}
+{{- partial "seo/lint.html" (dict "page" . "title" $title "desc" $desc "suffixed" $suffixed) -}}

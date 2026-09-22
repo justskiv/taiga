@@ -1,0 +1,98 @@
+{{- /* Front-matter rules for the tags a search engine reads, checked where the
+       tags are actually assembled — so the rule sees the FINAL string, after
+       every fallback, not what the file happens to say. `params.seo.lint`
+       picks the strictness, the same shape `linkcheck` already uses:
+
+         "off"     nothing runs
+         "warn"    everything logs (default — a theme should not break a site
+                   that has never heard of these rules)
+         "error"   the hard rules fail the build; the soft ones still log
+
+       With `--panicOnWarning` (this theme's `task check`) a warning fails the
+       build too, so "warn" + that flag is the practical strict setting.
+
+       HARD rules are facts, not taste: the archetype's TODO sentinel reaching
+       production, a published guide with no description of any kind, a
+       description that only repeats the title, two guides sharing one
+       description. SOFT rules are the lengths and the hygiene — a judgement
+       call the author may overrule.
+
+       Drafts are skipped entirely: an unfinished guide is expected to carry
+       the sentinel, and `hugo server -D` must stay usable while it does.
+
+       Called from head/meta.html with the strings it just built:
+         partial "seo/lint.html" (dict "page" . "title" $title "desc" $desc) */ -}}
+{{- $p := .page -}}
+{{- $mode := (site.Params.seo | default dict).lint | default "warn" -}}
+{{- if and (ne $mode "off") (not $p.Draft) (ne $p.Params.placeholder true) (ne $p.Kind "404") -}}
+  {{- $hard := eq $mode "error" -}}
+  {{- $isGuide := and (eq $p.Kind "page") (in (partialCached "guide-sections.html" $p) $p.Section) -}}
+  {{- $where := $p.Path -}}
+  {{- $msgs := slice -}}
+  {{- $soft := slice -}}
+
+  {{- /* the archetype's sentinel, shipped. Both fields are checked on their
+         own: filling in one and forgetting the other is the likely mistake. */ -}}
+  {{- range (slice "description" "lead") -}}
+    {{- $v := cond (eq . "description") ($p.Description | default "") ($p.Params.lead | default "") -}}
+    {{- if hasPrefix (upper (trim $v " ")) "TODO" -}}
+      {{- $msgs = $msgs | append (printf "`%s` still holds the archetype's TODO sentinel" .) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if $isGuide -}}
+    {{- /* a guide is a product; it does not get to have no description */ -}}
+    {{- if and (not $p.Description) (not $p.Params.lead) -}}
+      {{- $msgs = $msgs | append "guide has neither `description` nor `lead` — the meta tag is falling back to its own first paragraph" -}}
+    {{- end -}}
+    {{- if in (partialCached "seo/dupes.html" $p) (.desc | string) -}}
+      {{- $msgs = $msgs | append (printf "description is shared with another guide: %q" .desc) -}}
+    {{- end -}}
+    {{- if not $p.Params.tags -}}
+      {{- $soft = $soft | append "guide has no tags" -}}
+    {{- end -}}
+    {{- if $p.Lastmod.Before $p.Date -}}
+      {{- $soft = $soft | append (printf "lastmod (%s) is older than date (%s)" ($p.Lastmod.Format "2006-01-02") ($p.Date.Format "2006-01-02")) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if eq (trim .desc " ") (trim $p.Title " ") -}}
+    {{- $msgs = $msgs | append "description only repeats the title" -}}
+  {{- end -}}
+
+  {{- $dl := strings.RuneCount .desc -}}
+  {{- if and (gt $dl 0) (lt $dl 70) -}}
+    {{- $soft = $soft | append (printf "description is %d characters — too short to be used as a snippet (aim 70–160)" $dl) -}}
+  {{- end -}}
+  {{- if gt $dl 160 -}}
+    {{- $soft = $soft | append (printf "description is %d characters — a search result cuts it (aim 70–160)" $dl) -}}
+  {{- end -}}
+  {{- $tl := strings.RuneCount .title -}}
+  {{- if gt $tl 65 -}}
+    {{- /* Only suggest dropping the site name when the site name is actually
+           on the line; on a title that is already alone, that advice is noise
+           and the only real fix is a shorter title. */ -}}
+    {{- $how := cond .suffixed " (aim ≤65, or `titleSuffix: false` to drop the site name)" " (aim ≤65 — the page title alone is over budget)" -}}
+    {{- $soft = $soft | append (printf "<title> is %d characters — a search result cuts it%s" $tl $how) -}}
+  {{- end -}}
+
+  {{- /* `description` is a plain attribute, not markdown (see
+         head/description.html): a backtick in it is printed as a backtick,
+         in the search result and on the card. */ -}}
+  {{- if in ($p.Description | default "") "`" -}}
+    {{- $soft = $soft | append "description contains a backtick — it is a plain attribute, so markdown reaches the search result verbatim" -}}
+  {{- end -}}
+
+  {{- /* Soft findings log under the id `seo-hint`, hard ones under `seo` when
+         they are not fatal. An id is what makes a rule refusable: a site that
+         disagrees with a length (or with this whole file) silences it in its
+         config — `ignoreLogs = ["seo-hint"]` — instead of editing the theme.
+         That matters here because `--panicOnWarning`, which this theme's own
+         `task check` uses, turns every warning into a failed build. */ -}}
+  {{- range $msgs -}}
+    {{- if $hard }}{{ errorf "seo: %s on page %q" . $where }}{{ else }}{{ warnidf "seo" "seo: %s on page %q" . $where }}{{ end -}}
+  {{- end -}}
+  {{- range $soft -}}
+    {{- warnidf "seo-hint" "seo: %s on page %q" . $where -}}
+  {{- end -}}
+{{- end -}}

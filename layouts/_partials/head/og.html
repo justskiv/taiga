@@ -1,28 +1,58 @@
-{{- /* OpenGraph + Twitter + article meta, then JSON-LD. Description cascades
-       page → lead → site hero, so no tag is ever empty. og:image is whatever
+{{- /* OpenGraph + Twitter + article meta, then JSON-LD. og:image is whatever
        og-cover.html yields (front-matter cover, generated cover, bundle
        override, or nothing when disabled/unavailable) — resolved once, as a
        dict whose width/height/type are filled only for a picture the site owns.
        property= for og:*, name= for twitter:*. JSON-LD: TechArticle +
        BreadcrumbList on guides, WebSite on the home page.
 
-       The description is capped at 200 characters. Every social client already
-       cuts it around there — but it cuts mid-word, and a rubric's lead is easily
-       twice that, so the card ends on a severed syllable. `truncate` cuts on a
-       word boundary and adds the ellipsis itself. plainify first: a `lead` may
-       carry inline markup, and a stray tag in a meta attribute is worse than a
-       long line. The JSON-LD and the drawn cover use the same capped string, so
-       the card, the crawler and the image never disagree. */ -}}
+       The description comes from head/description.html — the same string
+       head/meta.html puts in the meta tag, so the card, the search result and
+       the drawn cover can never disagree about what this page is.
+
+       og:title NAMES THE CONTAINER too (`params.og.seriesTitle`, on by
+       default):
+
+         guide in a series   «Планировщик · Цена одновременности: …»
+         series landing      «Планировщик — серия из 10 статей»
+
+       Why: og:title is the line a messenger prints in bold above the picture,
+       and it is the only text a reader sees before deciding. A guide title
+       alone gives no hint that nine more parts follow it, and a series landing
+       titled «Планировщик» reads as one more article. The drawn card says both
+       things as well, but the card is an image — it is not what a screen
+       reader, a search result or a preview-less client gets. */ -}}
 {{- $isGuide := and (eq .Kind "page") (in (partialCached "guide-sections.html" .) .Section) -}}
 {{- $title := .Title | default site.Title -}}
-{{- $desc := .Description | default .Params.lead | default site.Params.heroLine -}}
-{{- $desc = $desc | plainify | chomp | truncate 200 -}}
+{{- /* `| default true` would be wrong here: `default` treats false as empty,
+       so an explicit `og.seriesTitle = false` would read as true. */ -}}
+{{- $og := site.Params.og | default dict -}}
+{{- $wantSeries := true -}}
+{{- if isset $og "seriestitle" }}{{ $wantSeries = $og.seriesTitle }}{{ end -}}
+{{- if $wantSeries -}}
+  {{- if $isGuide -}}
+    {{- $s := partial "article/series-ctx.html" . -}}
+    {{- if $s.isSeries }}{{ $title = printf "%s · %s" $s.term.Title .Title }}{{ end -}}
+  {{- else if and (eq .Kind "section") (not .Parent.IsHome) (not .Params.standalone) -}}
+    {{- $parts := len (partialCached "series/parts.html" . .RelPermalink) -}}
+    {{- if gt $parts 1 -}}
+      {{- $title = printf "%s — %s" .Title (i18n "og_series_of" $parts) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- /* The 200-char cap lives HERE, not in head/description.html: it is about
+       the cards. Every social client cuts around there, and it cuts mid-word,
+       so `truncate` does it on a word boundary instead. The meta tag keeps the
+       author's sentence whole — the lint warns at 160, which is the length a
+       search result actually respects. */ -}}
+{{- $desc := partial "head/description.html" . | truncate 200 -}}
 {{- $locale := replace (site.Language.LanguageCode | default site.Language.Lang) "-" "_" -}}
 {{- $img := partial "og-cover.html" . -}}
 <meta property="og:type" content="{{ cond $isGuide "article" "website" }}">
 <meta property="og:site_name" content="{{ site.Title }}">
 <meta property="og:title" content="{{ $title }}">
-<meta property="og:description" content="{{ $desc }}">
+{{- with $desc }}
+<meta property="og:description" content="{{ . }}">
+{{- end }}
 <meta property="og:url" content="{{ .Permalink }}">
 <meta property="og:locale" content="{{ $locale }}">
 {{- with $img }}
@@ -40,7 +70,9 @@
 {{- end }}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $title }}">
-<meta name="twitter:description" content="{{ $desc }}">
+{{- with $desc }}
+<meta name="twitter:description" content="{{ . }}">
+{{- end }}
 {{- with $img }}
 <meta name="twitter:image" content="{{ .url }}">
 {{- end }}
@@ -57,20 +89,52 @@
 {{- end }}
 {{- /* JSON-LD */ -}}
 {{- if $isGuide -}}
+  {{- /* Two types, not one. TechArticle is the honest description of a guide
+         and stays first, but Google documents its Article handling for
+         Article/NewsArticle/BlogPosting — naming both costs nothing and
+         removes the question.
+
+         Dates carry their time and offset. The page knows them (article:*
+         above prints the full stamp); truncating to a day here threw away
+         precision the crawler is documented to prefer, for nothing.
+
+         mainEntityOfPage ties the article to the page it is on, which is what
+         stops the markup from being read as an article merely MENTIONED
+         here. */ -}}
   {{- $article := dict
-      "@type" "TechArticle"
+      "@type" (slice "TechArticle" "Article")
       "headline" .Title
       "description" $desc
       "url" .Permalink
-      "datePublished" (.Date.Format "2006-01-02")
-      "dateModified" (.Lastmod.Format "2006-01-02")
+      "mainEntityOfPage" (dict "@type" "WebPage" "@id" .Permalink)
+      "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00")
+      "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00")
       "inLanguage" site.Language.Lang
       "publisher" (dict "@type" "Organization" "name" site.Title "url" site.Home.Permalink) -}}
   {{- with $img }}{{ $article = merge $article (dict "image" .url) }}{{ end -}}
-  {{- $crumbs := slice
-      (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.Home.Permalink)
-      (dict "@type" "ListItem" "position" 2 "name" .FirstSection.Title "item" .FirstSection.Permalink) -}}
-  {{- $pos := 3 -}}
+  {{- /* Author. A guide written by a named person is worth saying out loud —
+         it is the one entity in this graph a reader can follow, and every
+         guidance on article markup asks for it. `authorURL` is where that
+         person IS on this site (an /about/ page), `authorSameAs` a list of
+         profiles elsewhere that are demonstrably the same person. Both
+         optional: with only params.author the Person still carries a name. */ -}}
+  {{- with site.Params.author -}}
+    {{- $who := dict "@type" "Person" "name" . -}}
+    {{- with site.Params.authorURL }}{{ $who = merge $who (dict "url" (absURL .)) }}{{ end -}}
+    {{- with site.Params.authorSameAs }}{{ $who = merge $who (dict "sameAs" .) }}{{ end -}}
+    {{- $article = merge $article (dict "author" $who) -}}
+  {{- end -}}
+  {{- /* Breadcrumbs. A section with `build.render: never` (a guide section
+         that is not a browsable rubric) has no page and therefore no
+         Permalink — and a ListItem whose `item` is an empty string is invalid
+         markup that costs the whole breadcrumb. Such a rung is skipped, and
+         the positions renumber around it. */ -}}
+  {{- $crumbs := slice (dict "@type" "ListItem" "position" 1 "name" site.Title "item" site.Home.Permalink) -}}
+  {{- $pos := 2 -}}
+  {{- with .FirstSection.Permalink -}}
+    {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" $pos "name" $.FirstSection.Title "item" .) -}}
+    {{- $pos = add $pos 1 -}}
+  {{- end -}}
   {{- $s := partial "article/series-ctx.html" . -}}
   {{- if $s.isSeries -}}
     {{- $crumbs = $crumbs | append (dict "@type" "ListItem" "position" $pos "name" $s.term.Title "item" $s.term.Permalink) -}}

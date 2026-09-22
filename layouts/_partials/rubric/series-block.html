@@ -23,7 +23,8 @@
     <span class="ser-m">{{ i18n "rubric_empty" }}</span>
     {{- end }}
   </div>
-  {{- with .Description }}
+  {{- /* `lead` first, `description` as the fallback — see series/landing.html. */ -}}
+  {{- with (.Params.lead | default .Description) }}
   <p class="ser-d">{{ . }}</p>
   {{- end }}
   {{- if $pages }}

@@ -13,7 +13,13 @@
 <main class="wrap">
   <div class="kicker"><span class="dot"></span><a href="{{ $rubric.RelPermalink }}">{{ $rubric.Params.label | default (lower $rubric.Title) }}</a> · {{ i18n "series_word" }}</div>
   <h1>{{ .Title }}{{ with .Params.tagline }}<br><span class="sub">{{ . }}</span>{{ end }}</h1>
-  {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+  {{- /* The visible paragraph is `lead` when the series has one, and the
+         `description` otherwise. Same split a rubric already uses: `lead` is
+         written for the page and may run as long as the page can carry, while
+         `description` has a second job — it is the meta tag and the share card,
+         where a long line is cut mid-thought. A series with only `description`
+         keeps behaving exactly as before. */ -}}
+  {{ with (.Params.lead | default .Description) }}<p class="lead">{{ . }}</p>{{ end }}
   {{ .Content }}
   {{- if $pages }}
   <section class="series ser-landing">

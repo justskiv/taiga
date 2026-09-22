@@ -121,6 +121,13 @@ other = "разбор"
 other = "серия"
 [all_series]
 other = "вся серия →"
+# og:title of a series landing — the only place a share card can say that the
+# link is a whole series and not one more article (head/og.html)
+[og_series_of]
+one = "серия из {{ .Count }} статьи"
+few = "серия из {{ .Count }} статей"
+many = "серия из {{ .Count }} статей"
+other = "серия из {{ .Count }} статей"
 # series landing: the "start here" CTA and the announcement teaser of a
 # series that has no published parts yet
 [series_start]

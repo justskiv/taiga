@@ -1,0 +1,37 @@
+{{- /* Should a search engine keep this page? Returns a bool, and it is the ONE
+       place that answers the question — head/meta.html emits the robots tag
+       from it, sitemap.xml filters on it, so the two can never disagree (a
+       sitemap that lists a noindex URL is a contradiction a crawler reports).
+
+       Three ways to be out:
+
+         noindex: true     the page says so itself
+         placeholder: true a metadata-only stub — there is no page to rank
+         an empty section  a rubric or a series with no published guide under
+                           it yet. It is a heading, a lead and nothing else:
+                           soft-404 shaped, and it competes with the guides for
+                           the site's crawl budget. The moment a guide lands in
+                           it, it is indexable again — no list to maintain.
+
+       `follow`, not `nofollow`, is the caller's choice for the tag: these pages
+       still link to real ones and there is nothing to withhold. */ -}}
+{{- $ok := true -}}
+{{- if eq .Params.noindex true -}}{{ $ok = false }}{{- end -}}
+{{- if eq .Params.placeholder true -}}{{ $ok = false }}{{- end -}}
+{{- /* The 404 page is served with a 404 status, so the status already says
+       everything; inviting a crawler to index it with a large image preview
+       was simply the wrong answer. */ -}}
+{{- if eq .Kind "404" -}}{{ $ok = false }}{{- end -}}
+{{- if and $ok (eq .Kind "section") -}}
+  {{- $published := len (where .RegularPagesRecursive "Params.placeholder" "!=" true) -}}
+  {{- /* A series landing whose parts are all still ANNOUNCED (drafts carrying
+         `announce: true`) has no RegularPages in a production build — and it is
+         exactly the page that most needs to be findable, because announcing the
+         series is its whole job. series/parts.html reads those from disk, so
+         ask it before calling the section empty. */ -}}
+  {{- if and (eq $published 0) (not .Parent.IsHome) (not .Params.standalone) -}}
+    {{- $published = len (partialCached "series/parts.html" . .RelPermalink) -}}
+  {{- end -}}
+  {{- if eq $published 0 -}}{{ $ok = false }}{{- end -}}
+{{- end -}}
+{{- return $ok -}}

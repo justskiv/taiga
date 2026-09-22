@@ -1,0 +1,28 @@
+{{- /* Descriptions that more than one guide carries. Built once for the whole
+       site (call it through partialCached) and read by seo/lint.html, which
+       cannot see the other pages from inside a single page's <head>.
+
+       Duplicates are the failure mode a fallback chain creates and then hides:
+       every guide missing a description gets the SAME stand-in, the tag is
+       never empty, and nothing looks wrong until a search engine reports the
+       pages as interchangeable. */ -}}
+{{- $seen := dict -}}
+{{- $dupes := slice -}}
+{{- /* guides-published, not guides: a placeholder is a metadata-only stub the
+       lint skips anyway, and counting it here would fail the build for the
+       REAL guide it happens to share a line with. */ -}}
+{{- range partial "guides-published.html" . -}}
+  {{- if not .Draft -}}
+    {{- /* `string`: the partial hands back template.HTML, and `index` refuses
+           anything but a string as a map key. */ -}}
+    {{- $d := partial "head/description.html" . | string -}}
+    {{- with $d -}}
+      {{- if index $seen . -}}
+        {{- if not (in $dupes .) }}{{ $dupes = $dupes | append . }}{{ end -}}
+      {{- else -}}
+        {{- $seen = merge $seen (dict . true) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $dupes -}}

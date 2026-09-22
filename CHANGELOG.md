@@ -9,6 +9,25 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **The site name is appended to `<title>` only while the line still fits.**
+  Every page used to read `<page> — <site>`, and on a long title that pushed the
+  whole line past what a search result prints. What gets cut there is the END of
+  the line — the page's own title, the half that says what the page is — while
+  the site name survives at the front of nothing. The budget is
+  `params.seo.titleMax` (60 characters, counted as CHARACTERS: `len` counts
+  bytes and would halve the budget on any non-Latin title), and past it the
+  page's title stands alone. Nothing is lost by dropping the suffix: a result
+  already prints the domain on its own line above the title. Per-page escape
+  hatch: `titleSuffix: false` on a page that fits, `true` on one that does not.
+
+- **A series landing prints `lead` when it has one, `description` otherwise.**
+  The landing used to print `description`, which gave a series exactly one
+  string for two jobs that pull apart: the paragraph that opens the page, and
+  the line a search result and a share card cut at around 160 characters. This
+  is the split a rubric already had (`params.lead` on the page, `description`
+  in the tags), so it is one rule now instead of two. A series carrying only a
+  `description` renders exactly as before.
+
 - **Only guides are indexed now.** A plain page — about, support, the legal
   pages — is out of the Pagefind index unless it asks in with `search: true` in
   its front matter, and a guide can ask out with `search: false`. The modal is
@@ -116,6 +135,50 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   HTML block in half, the card's real width, a `viewBox`-only SVG, and what a
   screen reader does with a `role="dialog"`).
 
+- **SEO lint, in the templates that assemble the tags.** `params.seo.lint`
+  (`"error"` | `"warn"` | `"off"`, default `"warn"`) checks the front matter
+  where the tags are built, so a rule sees the FINAL string — after every
+  fallback — rather than what the file happens to say. Hard rules are facts,
+  not taste: the archetype's `TODO` sentinel reaching production, a guide with
+  no description of its own, a description that only repeats the title, two
+  guides sharing one. Soft rules (the lengths, a guide with no tags, a
+  `lastmod` older than its `date`) log under the id `seo-hint`, so a site that
+  disagrees silences them with `ignoreLogs` instead of editing the theme.
+  Drafts are skipped entirely — an unfinished guide is expected to carry the
+  sentinel, and `hugo server -D` has to stay usable while it does.
+
+  The archetypes now ship that sentinel: `description: "TODO …"` fails the
+  build under `"error"` instead of quietly shipping a guide that describes
+  itself as TODO, and a commented `# lastmod:` line says what to do when a
+  published guide is revised.
+
+- **`noindex`, and pages that keep themselves out of search.** A page with
+  `noindex: true`, a placeholder, the 404 page, and — automatically — a rubric
+  or series with no published guide under it get `noindex, follow` and are
+  dropped from `sitemap.xml`. A series landing whose parts are all still
+  ANNOUNCED does not count as empty: those parts are drafts, so they are
+  invisible to `.RegularPages`, and announcing the series is exactly what that
+  page is for. An empty rubric is a heading, a lead and nothing else: it is
+  soft-404 shaped and it competes with real guides for crawl budget, and the
+  moment a guide lands in it, it is indexable again with no list to maintain.
+  One partial (`seo/indexable.html`) answers the question for both the robots
+  tag and the theme's own `sitemap.xml`, so the two cannot contradict each
+  other — a sitemap listing a URL the page then refuses is a contradiction a
+  crawler reports. That `sitemap.xml` is Hugo's embedded template plus this one
+  filter: `sitemap.disable`, `changefreq`, `priority` and the hreflang
+  alternates all keep working, because overriding a built-in template inherits
+  its contract.
+
+- **`author` in the JSON-LD.** `params.author` becomes a `Person` on every
+  guide, with `authorURL` for where that person is on this site and
+  `authorSameAs` for profiles elsewhere that are the same person. A guide with
+  a named author is the one entity in that graph a reader can follow.
+
+- **A robots tag that says only what is not the default.** Not `index,follow`
+  (that IS the crawler's default, and saying it adds nothing) but the preview
+  budget: `max-image-preview:large` — what puts a guide's cover on a result
+  card — plus the snippet and video caps, which are conservative by default.
+
 - **The search modal opens on something.** Before the first keystroke it now
   shows two sections — the guides this reader opened before, then the newest
   guides, at most seven rows between them — instead of a grey placeholder line.
@@ -209,6 +272,60 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   `opacity:.3` on the button that carries the price of entry in its label.
 
 ### Fixed
+
+- **An empty `<meta name="description">` is no longer emitted.** A site that
+  sets neither a description nor `heroLine` used to get `content=""` on every
+  system page, which tells a crawler the page has been described, and described
+  as nothing. No tag at all is the honest answer, and the audit script reports
+  it.
+
+- **The search index no longer glues the two halves of a title together.** An
+  `<h1>` split at `": "` is two lines around a `<br>`, and the minifier drops
+  the whitespace on either side of it — so Pagefind stored
+  "Цена одновременности:треды", one word that matches nothing a reader would
+  type. The title now reaches the index as a value
+  (`data-pagefind-meta="title:…"`) instead of being scraped out of the markup.
+
+- **A breadcrumb could ship with an empty URL, which cost the whole
+  breadcrumb.** The JSON-LD put `.FirstSection` in the trail unconditionally,
+  and a guide section that is not a browsable rubric (`build.render: never` —
+  the shape `extraGuideSections` is for) has no page and therefore no
+  permalink. The rung came out as `"item": ""`: invalid markup, and a search
+  engine drops the entire `BreadcrumbList` rather than the one bad rung. Such a
+  rung is skipped now and the positions renumber around it.
+
+- **`<meta name="description">` and `og:description` were computed twice, and
+  differently.** `og.html` ran the string through `plainify` and a 200-character
+  cap; `head/meta.html` emitted it raw. So a page falling back to a `lead` with
+  inline markdown put backticks in the search snippet while the share card
+  showed clean text, and a long rubric lead was cut for one and not the other.
+  Both now call `head/description.html`, which is the single answer to "what is
+  this page about" — the tag, the card and the JSON-LD cannot disagree again.
+  That partial renders `lead` before it flattens it — `lead` is markdown by
+  contract and the page prints it through RenderString anyway, so a backtick in
+  it now becomes a tag `plainify` can strip instead of reaching the search
+  result verbatim. `description` is NOT rendered: it is a plain attribute, and
+  on a technical blog its vocabulary collides with markdown — `*T` would lose
+  the star and `2*3*4` would silently become `23*4`, which stops the sentence
+  from being true rather than merely unformatted. The lint warns about the one
+  thing that does go wrong there: a stray backtick.
+
+  Only the fallbacks are capped at 200 characters, because a `lead` or a
+  summary is as long as the page needs; an explicit description passes through
+  whole, and og.html does its own capping for the cards.
+
+- **A guide with no description of its own no longer inherits the site's hero
+  line.** The fallback chain ended at `heroLine`, one string for the whole
+  site — so every such guide got the SAME description, which is the duplicate
+  a search engine reports, and it was invisible because the tag was never
+  empty. A guide falls back to its own `.Summary` instead (it always has prose)
+  and the lint says so out loud; `heroLine` is reachable only from the system
+  pages it was written for.
+
+- **An `<h1>` split into title and subtitle read as one word to a crawler.**
+  `{{ $main }}<br><span class="sub">` puts no whitespace between the two, so
+  text extraction produced "Go 1.27:большой интерактивный разбор". Browsers
+  break the line either way; a parser that flattens the markup did not.
 
 - **A hover card could open on top of the very link that summoned it.**
   Placement put the card below the link, flipped it above when below had no

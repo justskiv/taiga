@@ -1,0 +1,62 @@
+{{- /* THE page description, as one string — the single source for
+       <meta name="description">, og:description, twitter:description and the
+       JSON-LD. It exists because those used to be computed in two places and
+       drifted: og.html ran the string through `plainify`, head/meta.html
+       emitted it raw.
+
+       The cascade, in order:
+
+         description   what the author wrote FOR a search result and a card
+         lead          the page's opening line — written for the page, but a
+                       truthful stand-in
+         .Summary      guides only: the prose before <!--more-->. A guide is a
+                       product; it always has prose, so this is the last honest
+                       fallback it can have.
+         heroLine      system pages only (about, legal, the home page)
+
+       heroLine is deliberately NOT reachable from a guide. It is one string for
+       the whole site, so a guide falling back to it gets a description
+       identical to every other such guide — duplicate meta descriptions, and
+       invisible ones, because the tag is never empty. The lint errors on a
+       guide that gets this far instead (see seo/lint.html).
+
+       WHAT IS AND IS NOT RENDERED. Only `lead` goes through the markdown
+       renderer, because `lead` IS markdown by contract — the page itself
+       prints it through RenderString (section.html, page.html), so this is the
+       same text the reader sees, and a backtick in it becomes a <code> tag
+       plainify can then strip.
+
+       `description` must NOT be rendered, and this is not a detail. It is a
+       plain attribute by contract (authoring.md), and on a Go blog its
+       vocabulary collides head-on with markdown: `*T` loses the star,
+       `2*3*4` silently becomes `23*4` — the text stops being true rather than
+       merely losing formatting — and `chan<- int` is parsed as raw HTML, which
+       on a site with the theme's default `unsafe = false` also logs "Raw HTML
+       omitted" and takes `--panicOnWarning` builds down with it. So a
+       description is carried through verbatim, and the lint warns about the
+       one thing that does go wrong in a plain attribute: a stray backtick.
+
+       `.Summary` is skipped for the opposite reason — it is already rendered
+       HTML, and running HTML back through the renderer is not a no-op.
+
+       Only the FALLBACKS are capped. A `lead` or a `.Summary` is as long as the
+       page needs it to be, and neither was written to be a description; 200
+       characters is where social clients cut anyway, and `truncate` cuts on a
+       word boundary. An explicit `description` is the author's sentence and
+       passes through whole — the lint warns at 160, which is the length that
+       actually matters, and og.html does its own capping for the cards. */ -}}
+{{- $p := . -}}
+{{- $isGuide := and (eq .Kind "page") (in (partialCached "guide-sections.html" .) .Section) -}}
+{{- $d := "" -}}
+{{- with .Description }}{{ $d = . | plainify }}{{ end -}}
+{{- if not $d }}{{ with .Params.lead }}
+  {{- $d = $p.RenderString (dict "display" "inline") . | plainify | truncate 200 -}}
+{{ end }}{{ end -}}
+{{- if and (not $d) $isGuide }}{{ with .Summary }}{{ $d = . | plainify | truncate 200 }}{{ end }}{{ end -}}
+{{- if and (not $d) (not $isGuide) }}{{ with site.Params.heroLine }}{{ $d = . | plainify | truncate 200 }}{{ end }}{{ end -}}
+{{- /* Entities last: `plainify` removes tags, not `&ldquo;` — and a site with
+       Goldmark's typographer on (the default) turns every quote and apostrophe
+       into one. In an HTML attribute they would still render, but the same
+       string is also jsonified into the JSON-LD, where nothing decodes them
+       and a crawler reads the entity text literally. */ -}}
+{{- return ($d | htmlUnescape | chomp) -}}
