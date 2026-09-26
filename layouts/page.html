@@ -45,9 +45,24 @@
 {{- /* `lead_deck: true` opts back into the display deck an article's standfirst
        otherwise gives up (bigger, quieter, set apart from the prose) — for an
        opening that introduces the piece rather than starting it. */ -}}
+{{- /* An epigraph opens a guide from ABOVE the lead: written as its first block
+       (> [!epigraph], render-blockquote.html), it lands inside .Summary, so it
+       is lifted out of it here and printed on its own. Found by the class the
+       hook always prints first. The meta description strips it the same way
+       (head/description.html); the feed already drops every <figure>. With the
+       legacy `lead:` param the epigraph is simply the body's first block —
+       below the lead — so an epigraph wants the divider. */ -}}
 {{- $cut := strings.Contains .RawContent "<!--more-->" -}}
 {{- $leadCls := printf "lead%s" (cond (not .Params.lead_deck) "" " deck") -}}
-{{ if $cut }}<div class="{{ $leadCls }}">{{ .Summary }}</div>
+{{- $lead := cond $cut (string .Summary) "" -}}
+{{- $epi := "" -}}
+{{- with findRE `^\s*<figure class="epigraph[" ][^>]*>(?s:.*?)</figure>` $lead 1 -}}
+  {{- $epi = index . 0 -}}
+  {{- $lead = strings.TrimPrefix $epi $lead -}}
+{{- end -}}
+{{- with $epi }}{{ trim . " \n" | safeHTML }}
+{{ end -}}
+{{ if $cut }}{{ if trim $lead " \n" }}<div class="{{ $leadCls }}">{{ $lead | safeHTML }}</div>{{ end }}
 {{ else }}{{ with .Params.lead }}<p class="{{ $leadCls }}">{{ $.RenderString (dict "display" "inline") . }}</p>{{ end }}{{ end }}
 {{ with .Params.intro }}{{ $.RenderString (dict "display" "block") . }}{{ end }}
 {{- /* The body is rendered HERE, above the TOC that lists it: render-heading.html
@@ -61,12 +76,16 @@
        stays out of the index (keeps search results to real guides), and so does
        a guide that asks to be left out with `search: false` — for a piece that
        is published but not something anyone should be sent to cold. crumb/mins
-       ride along as result-card metadata (empty spans carry inline key:value). */ -}}
-{{ if or .Params.placeholder (eq .Params.search false) }}{{ .Content }}{{ else }}
+       ride along as result-card metadata (empty spans carry inline key:value).
+       Both branches print the same body: the lead is already on the page, so
+       it is everything after the divider — the unindexed branch used to print
+       the whole .Content and repeat the lead under itself. */ -}}
+{{- $body := cond $cut .ContentWithoutSummary .Content -}}
+{{ if or .Params.placeholder (eq .Params.search false) }}{{ $body }}{{ else }}
 <div data-pagefind-body>
 <span data-pagefind-meta="crumb:{{ partial "article/crumb.html" . }}"></span>
 <span data-pagefind-meta="mins:{{ .Params.mins | default (partial "article/reading-time.html" .) }}"></span>
-{{ if $cut }}{{ .ContentWithoutSummary }}{{ else }}{{ .Content }}{{ end }}
+{{ $body }}
 </div>
 {{ end }}
 {{- /* Definition cards for {{< term >}}. AFTER .Content — the shortcode fills

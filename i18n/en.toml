@@ -71,6 +71,9 @@ other = "Under the hood"
 other = "Historical note"
 [callout_warn]
 other = "Caution"
+# > [!recap] without a label of its own
+[recap]
+other = "Recap"
 
 [widget_cap]
 other = "Play"

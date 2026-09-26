@@ -92,6 +92,44 @@ A historical footnote — the quietest type.
 A caution — the loudest type, in red.
 {{< /callout >}}
 
+## Emphasis in prose {#emphasis}
+
+> [!epigraph] Rob Pike, [Go Proverbs](https://go-proverbs.github.io/), 2015
+> Clear is better than clever.
+
+A section may open with an epigraph: the one block set wholly in italic, moved
+to the right, its source a mono line. Everything below is plain Markdown — the
+same source Obsidian reads natively.
+
+A slice header is three words, and `append` may or may not move the array
+behind them. Hence the rule for reading someone else's code:
+
+>> After an `append`, every old header onto the same array is under suspicion.
+{#append-rule}
+
+A quote stays somebody else's words — italic and a step quieter — with its rule
+on the same vertical as the thesis sign:
+
+> Don't communicate by sharing memory, share memory by communicating.
+>
+> — Go Proverbs
+
+>> A thesis may run to two paragraphs: the blank line between them is `>>` too.
+>>
+>> It stays upright and in prose colour, **bold** and *italic* included.
+
+> [!aside]
+> By the way, the header is passed by value — which is exactly why a callee's
+> `append` never shows in the caller's `len`, and why
+> [the rule above](#append-rule) holds.
+
+> [!recap] checkpoint
+> Now you can tell from a function's signature whether it may grow your slice
+> in place.
+
+Inline emphasis stays small: **bold** for a term at its definition or a run-in
+head, *italic* for one to three words of stress — *курсив* in Cyrillic too.
+
 ## Fold {#fold}
 
 A collapsible inline note — icon, summary, and a toggle; the panel slides open

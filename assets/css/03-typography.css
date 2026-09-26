@@ -30,11 +30,15 @@ li::marker{color:var(--accent)}
    paragraph. (The fold's body used to need this too; it is set in prose colour
    now, so it takes --text-strong like the article around it.) `em` sets no
    colour at all — in prose it only ever repeated the body colour, and
-   everywhere else it was an unwanted highlight. */
-strong{color:var(--strong-fg, var(--text-strong)); font-weight:650}
+   everywhere else it was an unwanted highlight.
+   Weight 600, not 650: the fonts ship 400/500/600/700, so 650 was drawn with
+   the 700 file — a shout for a term at its definition or a run-in head. */
+strong{color:var(--strong-fg, var(--text-strong)); font-weight:600}
 em{font-style:italic}
 .muted{color:var(--text-muted)}
-blockquote{margin:0 0 22px; padding:2px 0 2px 18px; border-left:3px solid var(--accent); color:var(--text-secondary); font-style:italic}
+/* 3px rule + 19px = text at 22px, the ul/ol inset: the quote's text lines up
+   with the thesis, the aside and list items (30-emphasis.css, "one vertical") */
+blockquote{margin:0 0 22px; padding:2px 0 2px 19px; border-left:3px solid var(--accent); color:var(--text-secondary); font-style:italic}
 blockquote p{margin:0}
 
 /* prose links — quiet at rest, accent on intent. The base a{} (01-base.css)
@@ -78,7 +82,7 @@ blockquote p{margin:0}
    at all, an underline that belongs to hover and to the word only. The prose
    treatment overrode it with a rest underline plus a hover pill around a
    two-word link, which read as a button. */
-:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot)
+:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot, .epigraph figcaption)
   a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .p-more, .footnote-ref, .footnote-backref)){
   color:inherit;
   border-bottom:0;              /* the base a:hover border must never resurface */
@@ -96,7 +100,7 @@ blockquote p{margin:0}
              background-color var(--dur) var(--ease),
              text-decoration-color var(--dur) var(--ease);
 }
-:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot)
+:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot, .epigraph figcaption)
   a:not(:where(.toc a, .slist a, .alist a, .hash, .btn, .p-more, .footnote-ref, .footnote-backref)):hover{
   color:var(--accent);
   /* the underline is deliberately NOT restyled here: it holds its rest state
@@ -110,7 +114,7 @@ blockquote p{margin:0}
 /* focus ring for every link in these containers, the excluded navigation
    rows included — the outline is the theme's focus pattern, not part of the
    quiet-link look */
-:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot) a:focus-visible{
+:is(.wrap, .p-lead) :where(p, li, dd, td, blockquote, .lead, .foot, .epigraph figcaption) a:focus-visible{
   outline:2px solid var(--accent); outline-offset:3px; border-radius:3px;
 }
 /* a linked image must not draw the underline beneath the picture, nor grow

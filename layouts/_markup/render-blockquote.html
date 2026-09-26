@@ -1,0 +1,68 @@
+{{- /* A `>` is somebody else's words; everything the author says in their own
+       voice gets a block of its own, still written as plain Markdown so the same
+       source reads natively in Obsidian:
+
+         >> text                     a thesis — the section's conclusion, upright,
+                                     in prose colour, with a sign on the quote's
+                                     vertical (<div class="thesis">)
+         > [!aside]                  a remark in a lower voice: "by the way",
+                                     an analogy, a caveat
+         > [!recap] label            the section's checkpoint — "now you can …"
+         > [!epigraph] source        a quotation on the threshold of a guide,
+                                     a section or a series page
+
+       `>>` is detected, not parsed: an outer quote whose whole text is ONE inner
+       quote (rendered a moment earlier by this same hook, so always a bare
+       <blockquote>) is a thesis. A real quote nested inside a quote has anything
+       else next to the inner one and stays a quote. (`>>>` comes out as a
+       quote around a thesis — harmless, and nothing to write on purpose.)
+
+       Alerts: Hugo reads only [A-Za-z]+ as a type, and everything on the marker
+       line is the title — the text starts on the next line. A typo'd type
+       ([!asdie]) would silently turn into a quote with its marker gone, and
+       text on an aside's marker line would vanish, so both warn; strict builds
+       (--panicOnWarning) fail on them. Folding (+/-) means nothing here, and in
+       Obsidian a folded block with a hidden title could not be opened again.
+
+       Block attributes ({#id .class}) survive on every wrapper; the block's own
+       class always comes first — page.html finds a leading epigraph by it.
+
+       The plain quote is rebuilt byte for byte as Goldmark would print it. */ -}}
+{{- $class := "" -}}
+{{- with .Attributes.class }}{{ $class = printf " %v" . }}{{ end -}}
+{{- $t := trim (string .Text) " \n" -}}
+{{- if eq .Type "alert" -}}
+  {{- $type := .AlertType -}}
+  {{- if and .AlertSign (in (slice "aside" "recap" "epigraph") $type) -}}
+    {{- warnf "render-blockquote: [!%s]%s folds nothing — drop the sign (%s)" $type .AlertSign .Position -}}
+  {{- end -}}
+  {{- if eq $type "aside" -}}
+    {{- with .AlertTitle }}{{ warnf "render-blockquote: [!aside] drops the text on its marker line — start the aside on the next line (%s)" $.Position }}{{ end -}}
+<div class="aside{{ $class }}" role="note"{{ range $k, $v := .Attributes }}{{ if ne $k "class" }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+{{ .Text }}</div>
+  {{- else if eq $type "recap" -}}
+<div class="recap{{ $class }}"{{ range $k, $v := .Attributes }}{{ if ne $k "class" }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+<div class="recap-label">{{ with .AlertTitle }}{{ . }}{{ else }}{{ i18n "recap" }}{{ end }}</div>
+{{ .Text }}</div>
+  {{- else if eq $type "epigraph" -}}
+<figure class="epigraph{{ $class }}"{{ range $k, $v := .Attributes }}{{ if ne $k "class" }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+<blockquote>
+{{ .Text }}</blockquote>
+{{- with .AlertTitle }}
+<figcaption>{{ . }}</figcaption>
+{{- end }}
+</figure>
+  {{- else -}}
+    {{- warnf "render-blockquote: unknown alert type [!%s], rendered as a plain quote (%s)" $type .Position -}}
+<blockquote{{ range $k, $v := .Attributes }} {{ $k }}="{{ $v }}"{{ end }}>
+{{ with .AlertTitle }}<p>{{ . }}</p>
+{{ end }}{{ .Text }}</blockquote>
+  {{- end -}}
+{{- else if and (hasPrefix $t "<blockquote>") (hasSuffix $t "</blockquote>") (eq (len (findRE `<blockquote` $t)) 1) -}}
+<div class="thesis{{ $class }}"{{ range $k, $v := .Attributes }}{{ if ne $k "class" }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+{{- $t | strings.TrimPrefix "<blockquote>" | strings.TrimSuffix "</blockquote>" | safeHTML -}}
+</div>
+{{- else -}}
+<blockquote{{ range $k, $v := .Attributes }} {{ $k }}="{{ $v }}"{{ end }}>
+{{ .Text }}</blockquote>
+{{- end }}

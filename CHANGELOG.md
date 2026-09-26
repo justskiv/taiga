@@ -9,6 +9,19 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **Bold in prose is weight 600, not 650.** The fonts ship 400/500/600/700,
+  so 650 was never drawn at 650: the browser took the 700 file, and every term
+  at its definition and every run-in head was set in the heaviest weight the
+  site has — a shout where a stress was meant. 600 is a real face, and it is
+  what Obsidian's own bold already resolves to, so the note and the page now
+  agree. Definition cards and the text of a Telegram card follow; headings
+  keep their 650/700.
+
+- **A quote's text starts at 22px, the list inset** (3px rule + 19px, was 18px).
+  One pixel, but it puts the quote on the same vertical as the new thesis and
+  aside and as list items: a quote and a thesis on one page must not show two
+  geometries.
+
 - **The site name is appended to `<title>` only while the line still fits.**
   Every page used to read `<page> — <site>`, and on a long title that pushed the
   whole line past what a search result prints. What gets cut there is the END of
@@ -108,6 +121,34 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   than as a two-line footer.
 
 ### Added
+
+- **The author's own voice has blocks of its own, in plain Markdown: a thesis
+  (`>>`), an aside (`> [!aside]`), a recap (`> [!recap] label`) and an epigraph
+  (`> [!epigraph] source`).** `>` used to mean two things — somebody else's
+  words and the author's conclusion — and drew both as a quote, italic and a
+  step quieter, so the sentence a section was written for read as a citation.
+  The one-sentence idea put in `callout type="key"` had the opposite trouble: a
+  frame and a label pull the eye out of the text exactly where the thought
+  should close it. The new blocks stay in the flow and differ by their sign and
+  the tone of the text, never by position — every sign sits on the column edge
+  and every text at the list inset. They are Markdown rather than shortcodes so
+  that Obsidian renders the same source natively: the alerts are its callouts,
+  and `>>` is a nested quote a stylesheet can find. A new
+  `render-blockquote.html` does the work; a plain quote comes out byte for byte
+  as before, `{#id .class}` survive on every block, and an unknown type, text on
+  an aside's marker line or a fold sign warn (so a strict build fails instead of
+  a marker silently turning into a quote). An epigraph that opens a guide is
+  lifted out of the lead and printed above it, and kept out of the meta
+  description. Demo: the kitchen sink; docs: `authoring.md#emphasis`.
+
+- **A true Inter italic.** Every `<em>` used to be the upright face slanted by
+  the browser — 14° in Chrome and Safari, ~17° in Firefox on Windows, against
+  the designed 9.4° — with the upright's spacing around `»`, `)` and `—`. The
+  italic ships at 400 only (latin + cyrillic, ~33 KB) and is never preloaded:
+  a page fetches it the first time it draws an italic glyph, so a page with no
+  italic pays nothing. Bold italic now fakes the weight over this face rather
+  than the slant over the 700; the "Go" link mark, which is bold italic by
+  design, keeps its look by drawing the slant itself.
 
 - **A term card carries a diagram or a picture properly now.** Block content in
   a `{{< term >}}` body always worked — the shortcode renders the body as block
@@ -272,6 +313,12 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   `opacity:.3` on the button that carries the price of entry in its label.
 
 ### Fixed
+
+- **A guide left out of search (`search: false`) or a placeholder printed its
+  lead twice** when it had a `<!--more-->` divider: the lead above the body,
+  then the whole `.Content` — lead included — as the body. The indexed branch
+  already printed only what follows the divider; now both branches share one
+  body.
 
 - **An empty `<meta name="description">` is no longer emitted.** A site that
   sets neither a description nor `heroLine` used to get `content=""` on every

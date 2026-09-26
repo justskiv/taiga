@@ -88,8 +88,13 @@ a[data-link="gob"]::after,
 a[data-link="gdoc"]::after{
   -webkit-mask:none; mask:none; background:none;
   content:"Go"; width:auto; height:auto; vertical-align:baseline;
-  font-weight:700; font-style:italic; font-size:.58em; line-height:1;
+  font-weight:700; font-size:.58em; line-height:1;
   letter-spacing:-.01em;
+  /* the slant is drawn, not asked of the font: Inter ships a true italic at
+     400 only (head/fonts.html), and `font-style:italic` at 700 now picks that
+     face and fakes the weight — a thin "Go". Upright 700 skewed by 1/4 is
+     exactly what the browser used to synthesize (~14°). */
+  font-style:normal; transform:skewX(-14deg);
 }
 /* the classifier glyph belongs on PROSE links. In COMPONENT CHROME — a fold's
    summary line, a callout label, a big CTA card — it reads as breakage: a stray
@@ -281,7 +286,7 @@ a[data-link="gdoc"]::after{
 .ic-body pre code{font-size:1em; background:none; border:0; padding:0}
 .ic-body ul, .ic-body ol{margin:0 0 10px; padding-left:20px}
 .ic-body li{margin:0 0 5px}
-.ic-body :where(p, li, blockquote) a{
+.ic-body :where(p, li, blockquote, .epigraph figcaption) a{
   color:inherit; border-bottom:0;
   text-decoration:underline;
   text-decoration-color:color-mix(in srgb, var(--accent) 50%, transparent);
@@ -289,7 +294,7 @@ a[data-link="gdoc"]::after{
   padding:0 2px; margin:0 -2px; border-radius:5px;
   transition:color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 }
-.ic-body :where(p, li, blockquote) a:hover{color:var(--accent); background:var(--accent-dim)}
+.ic-body :where(p, li, blockquote, .epigraph figcaption) a:hover{color:var(--accent); background:var(--accent-dim)}
 .ic-body a[data-link]::after{opacity:.4}
 
 /* "further in the article": a muted list of the H2s the budget dropped */
@@ -439,7 +444,7 @@ a.ic-part:hover{background:var(--bg-surface)}
   flex:0 1 auto; min-height:110px;
 }
 .tg-bubble.has-photo .tg-text{max-height:min(54vh, 460px)}
-.tg-text b{font-weight:650; color:var(--text-strong)}
+.tg-text b{font-weight:600; color:var(--text-strong)}
 .tg-text i:not(.emoji){font-style:italic}
 .tg-text a{
   color:var(--cl); border-bottom:0; text-decoration:underline;
@@ -598,8 +603,9 @@ a.ic-part:hover{background:var(--bg-surface)}
   padding:11px 18px; border-bottom:1px solid var(--border);
 }
 .gob-mark{
-  flex:none; font-weight:700; font-style:italic; font-size:17px; line-height:1;
+  flex:none; font-weight:700; font-size:17px; line-height:1;
   letter-spacing:-.01em; color:var(--gob-blue);
+  font-style:normal; transform:skewX(-14deg);   /* drawn slant: see the link mark above */
 }
 .gob-head .lp-kick{color:var(--text-muted)}
 .gob-body{padding:12px 18px 14px}

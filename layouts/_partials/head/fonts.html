@@ -1,6 +1,7 @@
 {{- /* Self-hosted Inter + JetBrains Mono (latin + cyrillic subsets, weights
-       400/500/600/700). @font-face src points at fingerprinted files, so the
-       rules are generated here (one justified inline <style>). Latin and
+       400/500/600/700) and Inter's true italic at 400. @font-face src points
+       at fingerprinted files, so the rules are generated here (one justified
+       inline <style>). Latin and
        cyrillic ship as separate files with unicode-range, so latin-only pages
        never fetch the cyrillic subset. Two text faces are preloaded. If the
        font files are absent the block emits nothing and the system fallbacks in
@@ -22,6 +23,19 @@
         {{- $faces = printf "%s@font-face{font-family:'%s';font-style:normal;font-weight:%d;font-display:swap;src:url('%s') format('woff2');unicode-range:%s}" $faces $fam.family $w $f.RelPermalink $sub.range -}}
       {{- end -}}
     {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- /* Inter's true italic, one weight: without it every <em> is the upright
+       face slanted by the browser (14° in Chrome and Safari, ~17° in Firefox
+       on Windows, against the designed 9.4°), with the upright's spacing
+       around » ) —. 400 only — the prose never sets bold italic, and a
+       <strong> inside an <em> gets its weight synthesized over this face.
+       Never preloaded: a browser fetches the face the first time an italic
+       glyph is drawn, so a page without italic never pays for it. */ -}}
+{{- range $sub := $subs -}}
+  {{- with resources.Get (printf "fonts/inter-%s-400-italic.woff2" $sub.name) -}}
+    {{- $f := cond hugo.IsProduction (. | fingerprint "sha256") . -}}
+    {{- $faces = printf "%s@font-face{font-family:'Inter';font-style:italic;font-weight:400;font-display:swap;src:url('%s') format('woff2');unicode-range:%s}" $faces $f.RelPermalink $sub.range -}}
   {{- end -}}
 {{- end -}}
 {{- if $faces -}}

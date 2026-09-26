@@ -83,6 +83,9 @@ other = "Под капотом"
 other = "Историческая сноска"
 [callout_warn]
 other = "Внимание"
+# > [!recap] without a label of its own
+[recap]
+other = "Итог"
 
 # widget figure caption
 [widget_cap]

@@ -52,7 +52,9 @@
 {{- if not $d }}{{ with .Params.lead }}
   {{- $d = $p.RenderString (dict "display" "inline") . | plainify | truncate 200 -}}
 {{ end }}{{ end -}}
-{{- if and (not $d) $isGuide }}{{ with .Summary }}{{ $d = . | plainify | truncate 200 }}{{ end }}{{ end -}}
+{{- /* An epigraph opening the guide is someone else's words above the lead
+       (page.html lifts it out the same way) — never the guide's own summary. */ -}}
+{{- if and (not $d) $isGuide }}{{ with .Summary }}{{ $d = . | replaceRE `(?s)<figure class="epigraph[" ][^>]*>.*?</figure>` "" | plainify | truncate 200 }}{{ end }}{{ end -}}
 {{- if and (not $d) (not $isGuide) }}{{ with site.Params.heroLine }}{{ $d = . | plainify | truncate 200 }}{{ end }}{{ end -}}
 {{- /* Entities last: `plainify` removes tags, not `&ldquo;` — and a site with
        Goldmark's typographer on (the default) turns every quote and apostrophe

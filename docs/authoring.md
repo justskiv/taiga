@@ -199,6 +199,70 @@ body a single line, and `placeholder: true`. It counts in the feed, tag cloud
 and series structure ("part N of M") but is **excluded from RSS and from the
 search index**. Drop the flag and write the body when the guide is ready.
 
+## Emphasis in prose {#emphasis}
+
+A `>` quote is somebody else's words. What you say in your own voice gets a
+block of its own — written as plain Markdown, so the same source reads natively
+in Obsidian (the companion theme styles all four):
+
+| Block | Markdown | For | How often |
+|---|---|---|---|
+| Thesis | `>> text` | the section's conclusion, one to three sentences | at most one per `h2` |
+| Aside | `> [!aside]` | "by the way", an analogy, a caveat — a step quieter | as needed |
+| Recap | `> [!recap] label` | the checkpoint closing a section: "now you can …" | at most one per `h2`, not next to a thesis |
+| Epigraph | `> [!epigraph] source` | a quotation on a threshold | one per threshold: a guide, a section, a series page |
+| Quote | `> text` | somebody else's words, and only them | as needed |
+
+```md
+>> After an `append`, every old header onto the same array is under suspicion.
+
+>> A thesis of two paragraphs: the blank line between them is `>>` too.
+>>
+>> The second paragraph.
+
+> [!aside]
+> By the way, the header is passed by value.
+
+> [!recap] checkpoint
+> Now you can tell whether a function may grow your slice in place.
+
+> [!epigraph] Rob Pike, [Go Proverbs](https://go-proverbs.github.io/), 2015
+> Clear is better than clever.
+```
+
+A thesis is upright and in prose colour, with an accent rule where a quote has
+its own; the quote stays italic and a step quieter. An aside has no rule at
+all — an indent and a smaller, quieter type. A recap is a short accent rule and
+a mono label over an ordinary paragraph (no label → i18n `recap`). An epigraph
+is the one block set wholly in italic, moved to the right, its source a mono
+line; the dash before the source is drawn for you. All of them keep one
+vertical: the sign on the column edge, the text at the list inset, so a quote
+and a thesis on the same page line up.
+
+The markup has rules, and the build warns (a strict build fails) when one is
+broken:
+
+- The text of `[!aside]`, `[!recap]` and `[!epigraph]` starts on the **next**
+  line. The marker line is the recap's label or the epigraph's source; on an
+  aside it would be dropped.
+- The type is Latin letters only, with no `+`/`-` fold sign. An unknown type
+  (`[!asdie]`) renders as a plain quote.
+- Don't mix `>` and `>>` in one quote: a quote holding nothing but one inner
+  quote is the thesis, and anything else beside it keeps it a quote. In
+  Obsidian write the marker on every line — a lazy continuation line loses its
+  level there.
+- Block attributes work as on any block: `{#append-rule}` on the line after a
+  thesis gives it an anchor to link to.
+- An epigraph that opens a guide stands **above** the lead: write it first and
+  keep the `<!--more-->` divider (see "The lead and `<!--more-->`" above). The
+  page lifts it out of the lead, the feed and the meta description. With the
+  legacy `lead:` param it renders below the lead instead.
+
+Inline emphasis stays small. **Bold** (weight 600) is a term at the moment it
+is defined, or a run-in head; *italic* is one to three words of stress — a
+true Inter italic, fetched only by a page that sets one. A one-sentence idea no
+longer needs `callout type="key"`: that is what `>>` is for.
+
 ## Shortcodes {#shortcodes}
 
 Eleven — seven for any guide, four more for a site that runs a newsletter.
@@ -209,6 +273,9 @@ Five types: `key` (key idea), `trap`, `note` (historical note), `internals`
 (under the hood), `warn` (caution). The label comes from i18n (`callout_key`,
 `callout_trap`, `callout_note`, `callout_internals`, `callout_warn`); override
 with `label=`. The body is Markdown. `type` defaults to `note`.
+A callout is a sidebar the text can do without. The main idea in one sentence
+belongs in the flow as a thesis (`>>`, see [Emphasis in prose](#emphasis));
+`key` is for a conclusion that needs several paragraphs or a checklist.
 
 ```md
 {{</* callout type="key" */>}}
@@ -881,7 +948,7 @@ The reference is the demo's own guides (`exampleSite/content/`). In short:
 - The arc is **naive → pain → fixed → this is how it really works**: a simple
   model first, where it breaks, then the real machinery.
 - One through-line per guide; return to it.
-- Italic checkpoints after big blocks: *"Now you can …"*.
+- A checkpoint after a big block: `> [!recap]` — *"Now you can …"*.
 - Short everyday metaphors (a library slip, a parcel tag).
 - Widgets woven in with a concrete task: "Play — …".
 - `h2` headings are short and substantive — not "Introduction" / "Conclusion".

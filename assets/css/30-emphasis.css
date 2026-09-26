@@ -1,0 +1,68 @@
+/* emphasis — the author's own voice inside the prose (render-blockquote.html) -
+   `>` is somebody else's words. What the author says in their own voice gets
+   a block of its own, written as plain Markdown so Obsidian reads it natively:
+   `>>` a thesis, `> [!aside]` a remark, `> [!recap]` a section's checkpoint,
+   `> [!epigraph]` a quotation on the threshold. None of them is boxed: a frame
+   and a label pull the eye out of the text exactly where a conclusion should
+   close it, which is what `callout key` did to one-sentence ideas.
+
+   ONE VERTICAL. Every block with a left-edge sign — the quote's rule, the
+   thesis sign, the aside's indent — keeps the sign on the column edge and its
+   text at 22px, the ul/ol inset (03-typography.css). A quote and a thesis on
+   one page with signs at two different x read as two geometries, i.e. as a
+   mess; they differ by the sign and the tone of the text, never by position.
+   Every colour is a palette token, so each block follows every palette. */
+
+/* thesis — `>>`. The section's conclusion, one to three sentences: upright and
+   in prose colour, where a quote is italic and secondary. The sign is a pseudo-
+   element rather than a border so its form (rule, //, dot, bracket — still an
+   open choice) stays one rule to change. */
+.thesis{position:relative; margin:22px 0; padding:2px 0 2px 22px}
+.thesis::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent)}
+.thesis > p{margin:0}
+.thesis > p + p{margin-top:10px}
+
+/* aside — `> [!aside]`. The mirror of the thesis: a thought one step DOWN, in
+   size and in tone — "by the way", an analogy, a caveat. No sign at all: the
+   indent alone sets it apart. Bold inside lifts to primary, the step prose
+   bold takes above prose (--strong-fg, 03-typography.css). */
+.aside{margin:20px 0; padding-left:22px; font-size:15.5px; line-height:1.66;
+  color:var(--text-secondary); --strong-fg:var(--text-primary)}
+.aside > p{margin:0}
+.aside > p + p{margin-top:9px}
+
+/* recap — `> [!recap] label`. The "now you can …" checkpoint that closes a
+   section: a short accent rule the width of the inset and a quiet mono label
+   above text that stays an ordinary paragraph. A reader skimming the section
+   ends gets the guide's spine. */
+.recap{margin:30px 0 26px}
+.recap-label{display:flex; align-items:center; gap:10px; margin:0 0 9px;
+  font:600 10.5px/1 var(--font-mono); letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-muted)}
+.recap-label::before{content:""; flex:none; width:22px; height:2px; border-radius:1px; background:var(--accent)}
+.recap > p{margin:0}
+.recap > p + p{margin-top:10px}
+
+/* epigraph — `> [!epigraph] source`. The one place a whole block is italic:
+   it stands on the threshold (of a guide, a section, a series page), not in the
+   flow. Set to the right and in the secondary tone; the source is a mono line
+   with the dash drawn here, so the marker line carries the name alone. The
+   <blockquote> inside is the quotation's semantics, not the quote's look. */
+.epigraph{margin:6px 0 34px 30%; font-style:italic; color:var(--text-secondary)}
+.epigraph blockquote{margin:0; padding:0; border:0; color:inherit; font-style:inherit}
+.epigraph p{margin:0}
+.epigraph p + p{margin-top:8px}
+.epigraph figcaption{margin-top:8px; font:500 12px/1.5 var(--font-mono); color:var(--text-muted)}
+.epigraph figcaption::before{content:"— "}
+/* the column is ~360px on a phone: 30% of it leaves the quotation too narrow */
+@media (max-width:640px){ .epigraph{margin-left:10%} }
+
+/* inside a hover card (.ic-body, 24-linkpreview.css): the article in miniature
+   at 14px. The blocks keep their signs and insets but take the card's rhythm;
+   the aside stays a step BELOW the card's own text (at 15.5px it would outgrow
+   it), and the epigraph gives up its indent — a third of a ~360px card is too
+   much to spend on air above the lead. */
+.ic-body :is(.thesis, .aside, .recap){margin:0 0 10px}
+.ic-body .aside{font-size:13px; line-height:1.6}
+.ic-body .recap-label{margin-bottom:6px}
+.ic-body .epigraph{margin:0 0 12px}

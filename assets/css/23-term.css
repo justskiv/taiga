@@ -216,7 +216,7 @@ div.term-card:has(:where(.term-card-b > div:not([data-pagefind-weight]),
 .term-card-b > :first-child{margin-top:0}
 .term-card-b > :last-child{margin-bottom:0}
 .term-card-b p{margin:0 0 9px}
-.term-card-b strong{color:var(--text-strong); font-weight:650}
+.term-card-b strong{color:var(--text-strong); font-weight:600}
 .term-card-b ul, .term-card-b ol{margin:0 0 9px; padding-left:18px}
 .term-card-b li{margin:0 0 5px}
 .term-card-b img, .term-card-b svg{max-width:100%; height:auto; border-radius:var(--radius-sm); display:block}
