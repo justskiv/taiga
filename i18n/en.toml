@@ -78,6 +78,54 @@ other = "Recap"
 [widget_cap]
 other = "Play"
 
+# {{< chart >}}: a caption when none is given, the stage's accessible name,
+# a missing value, and the legend lines for "~" and a hollow value
+[chart_cap]
+other = "Chart"
+[chart_stage]
+other = "Chart; the left and right arrow keys step through the points"
+[chart_no_data]
+other = "no data"
+[chart_same]
+other = "~ — no measurable difference"
+[chart_hollow]
+other = "hollow — measured in another run"
+[chart_modes]
+other = "Data set"
+
+# numbers in data figures (charts, bars): the decimal mark, and the mark
+# between thousands — used from five integer digits on ("1234", "12,345")
+[num_decimal]
+other = "."
+[num_group]
+other = ","
+
+# {{< spanmap >}}: a span's slots and its bitmap. {{ .Size }}, {{ .Unit }},
+# {{ .Count }} slots, {{ .Bits }} the bitmap spaced out, {{ .N }} the chosen
+# slot, {{ .Off }} its offset — all filled in by the shortcode
+[spanmap_unit]
+other = "B"
+[spanmap_cap]
+other = "slots of {{ .Size }}\u00a0{{ .Unit }}"
+[spanmap_used]
+other = "taken"
+[spanmap_free]
+other = "free"
+[spanmap_slot]
+other = "slot"
+[spanmap_map]
+other = "bitmap"
+[spanmap_rule]
+other = "allocate = find the first zero in the bitmap"
+[spanmap_addr]
+other = "that is slot\u00a0{{ .N }}: address = span start + {{ .Off }}\u00a0{{ .Unit }}"
+[spanmap_full]
+other = "no zero in the bitmap — the span has no free slot left"
+[spanmap_aria]
+other = "A span of {{ .Count }} slots of {{ .Size }} {{ .Unit }}. Bitmap: {{ .Bits }}. The first zero is slot {{ .N }}; its address is the span start plus {{ .N }} × {{ .Size }} = {{ .Off }} {{ .Unit }}."
+[spanmap_aria_full]
+other = "A span of {{ .Count }} slots of {{ .Size }} {{ .Unit }}. Bitmap: {{ .Bits }}. There is no zero: no free slot is left."
+
 [toc_heading]
 other = "Contents"
 [rail_l_aria]

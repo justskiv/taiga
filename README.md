@@ -61,6 +61,11 @@ whole design, and every feature below is built to live inside it.
   loaded on that page only. One `{{< widget >}}` in the text mounts it,
   `widgets/<id>/figure.html` supplies the no-JS view, and the `Taiga.widget`
   runtime isolates failures so one broken widget never takes down its neighbours.
+- **Charts and bars from data, not HTML.** A table between `{{< bars >}}` tags
+  draws bars; a table or a YAML file behind `{{< chart >}}` draws a line chart
+  with a Grafana-style reading panel (Observable Plot, loaded only where a chart
+  is, only as it scrolls near); `> [!stats]` over a list is a row of big numbers.
+  The Markdown stays readable anywhere, and every chart ships its data as a table.
 - **A broken internal link fails the build.** A render hook checks every internal
   link against real pages (`linkcheck = "error" | "warn"`).
 - **Open Graph covers with no external service.** `images.Text` draws a cover per

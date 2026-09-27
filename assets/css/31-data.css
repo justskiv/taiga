@@ -1,0 +1,336 @@
+/* data figures — numbers the reader compares at a glance (docs/authoring.md#data).
+
+   > [!stats]       a row of big numbers              render-blockquote.html
+   {{< bars >}}     horizontal bars from a table      _shortcodes/bars.html
+   {{< chart >}}    a line chart from a table / YAML  _shortcodes/chart.html + js/charts/core.js
+   {{< spanmap >}}  a span's slots and its bitmap     _shortcodes/spanmap.html (+ 08-diagrams.css)
+   `−41% *9,2 → 5,5 нс*` in a right-aligned column    render-table.html: a quieter second line
+
+   None of them is written as HTML in a guide: the Markdown carries the data,
+   the theme draws it, and Obsidian reads the same source.
+
+   ═══ PALETTE: one role block, plus a mirror for the light scheme. ═══
+   Series take the palette's accent hues by name (colors="blue green red"),
+   never a literal: every palette recolours every figure. Light: the accents
+   are already dark inks, so the hues stay — except green, which next to the
+   light red fails deuteranopia; lifted 25 % toward the surface it passes.
+   Keyed on data-scheme, so a future light palette joins by declaring itself
+   light rather than by being listed here. */
+.chart, .bars{
+  /* series */
+  --dv-blue:var(--accent-blue);
+  --dv-green:var(--accent-green);
+  --dv-red:var(--accent-red);
+  --dv-gold:var(--accent-gold);
+  --dv-violet:var(--accent-violet);
+  --dv-copper:var(--accent-copper);
+  --dv-accent:var(--accent);
+  /* the neutral pair of a one-series figure: a full ink, and a ghost for
+     what it is compared against */
+  --dv-ink:color-mix(in srgb, var(--text-primary) 78%, transparent);
+  --dv-ghost:color-mix(in srgb, var(--text-ghost) 42%, transparent);
+
+  /* inks ON the fills — a bar's label inside its end. Dark palettes: every
+     hue is light, so one near-black (bg-deep alone is too pale on Nord: 3,8:1
+     on red — hence the mix toward black) */
+  --dv-on:color-mix(in srgb, var(--bg-deep) 55%, black);
+  --dv-blue-on:var(--dv-on);
+  --dv-green-on:var(--dv-on);
+  --dv-red-on:var(--dv-on);
+  --dv-gold-on:var(--dv-on);
+  --dv-violet-on:var(--dv-on);
+  --dv-copper-on:var(--dv-on);
+  --dv-accent-on:var(--dv-on);
+  --dv-ink-on:var(--bg-base);
+  --dv-ghost-on:var(--text-primary);
+
+  /* grey structure: grid, the zero line, a rule, a zone, the ring that cuts
+     a point out of the line under it */
+  --dv-grid:color-mix(in srgb, var(--border) 80%, transparent);
+  --dv-base:var(--text-ghost);
+  --dv-axis:var(--text-muted);
+  --dv-zone:color-mix(in srgb, var(--text-ghost) 13%, transparent);
+  --dv-ring:var(--bg-base);
+
+  /* the reading layer: crosshair, the panel's ground and shadow */
+  --dv-cross:color-mix(in srgb, var(--text-primary) 45%, transparent);
+  --dv-panel:color-mix(in srgb, var(--bg-surface) 94%, transparent);
+  --dv-shadow:0 6px 20px rgba(0,0,0,.22);
+}
+[data-scheme="light"] :is(.chart, .bars){
+  --dv-green:color-mix(in oklab, var(--accent-green) 75%, var(--bg-surface));
+  --dv-ink:color-mix(in srgb, var(--text-primary) 82%, transparent);
+  --dv-ghost:color-mix(in srgb, var(--text-ghost) 34%, transparent);
+  /* light: the dark hues take a white label (blue 5,7:1, red 6,6:1), the
+     lifted green and the gold a dark one (5,8:1; white would be 3,4:1) */
+  --dv-blue-on:var(--bg-surface);
+  --dv-red-on:var(--bg-surface);
+  --dv-violet-on:var(--bg-surface);
+  --dv-copper-on:var(--bg-surface);
+  --dv-accent-on:var(--bg-surface);
+  --dv-green-on:var(--text-strong);
+  --dv-gold-on:var(--text-strong);
+  --dv-grid:color-mix(in srgb, var(--border) 70%, transparent);
+  --dv-zone:color-mix(in srgb, var(--text-ghost) 10%, transparent);
+}
+
+/* visually hidden, still read: a chart's tables once it is drawn, a bare
+   widget's caption */
+.vh{position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden;
+  clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0}
+
+/* ─────────────────────────── stats ─────────────────────────── */
+
+/* `> [!stats] caption` over a list: a row of two to four big numbers the
+   section is about to argue with. The list stays a list — Obsidian renders
+   the same markup, so one set of rules reads both — and the row is drawn
+   from its parts: the item's opening bold is the number, the text after it
+   the label, a trailing italic the quiet source line (dropped on a phone,
+   where the row is three columns of ~110px). Hairlines between the columns,
+   no box: the numbers hold the row by size alone. */
+.stats{margin:22px 0 30px}
+.stats > ul{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0, 1fr); margin:0; padding:0; list-style:none}
+.stats > ul > li{margin:0; padding:2px 14px 2px 0; font-size:13px; line-height:1.35; color:var(--text-secondary)}
+.stats > ul > li + li{padding-left:16px; border-left:1px solid var(--border)}
+.stats li > strong:first-of-type{display:block; margin:0 0 4px; font-size:34px; font-weight:600; line-height:1.05;
+  letter-spacing:-.02em; color:var(--text-strong); font-variant-numeric:tabular-nums}
+.stats li > em:last-of-type{display:block; margin-top:2px; font-style:normal; font-family:var(--font-mono);
+  font-size:11px; line-height:1.35; color:var(--text-muted)}
+.stats-note{margin:4px 0 0; font-family:var(--font-mono); font-size:11px; color:var(--text-muted)}
+@media (max-width:560px){
+  .stats li > em:last-of-type{display:none}
+  .stats li > strong:first-of-type{font-size:25px}
+  .stats > ul > li{padding-right:8px; font-size:12px}
+  .stats > ul > li + li{padding-left:10px}
+}
+/* in a hover card: the article in miniature */
+.ic-body .stats{margin:0 0 12px}
+.ic-body .stats li > strong:first-of-type{font-size:22px}
+
+/* ─────────────────────────── spanmap ─────────────────────────── */
+
+/* {{< spanmap >}} draws the span figure of 08-diagrams.css, whose grid was
+   written for one map: six slots and a measure four wide. The shortcode
+   passes both as properties instead, so a map of 2 to 12 slots lands on the
+   same grid; the column cap (58px) and the gutter stay 08's. */
+.span-fig .span-row{grid-template-columns:var(--sp-gut) repeat(var(--sp-n, 6), minmax(0, 58px))}
+.span-fig .span-measure{grid-column:2 / span var(--sp-pick, 4)}
+
+/* ─────────────────────── a table cell's detail ─────────────────────── */
+
+/* `−41% *9,2 → 5,5 нс*` in a right-aligned column: the trailing italic is a
+   second, quieter line under the number — the absolute values behind a
+   percentage, a source, a unit. render-table.html marks such a cell
+   (has-detail) only when text comes before the italic, so a cell that is
+   all italic stays italic. Upright and muted: it is a footnote to the
+   number, not an emphasis. */
+td.has-detail > em:last-child{display:block; margin-top:1px; font-style:normal; font-size:11.5px;
+  line-height:1.35; color:var(--text-muted); white-space:nowrap}
+
+/* ───────────────────────────── bars ───────────────────────────── */
+
+/* {{< bars >}}: a name column, then the rest of the width for the track.
+   A bar's length is a share (--f) of the track minus --room, the space the
+   template reserved for the longest note or total, so the longest bar never
+   pushes its text off the column. --nm (the name column) and --room are in
+   ch of the mono face the values print in. Each row carries its fill (--c)
+   and the ink on it (--on) as properties, so the rules below never name a
+   colour. */
+.bars{margin:18px 0 22px}
+.bars-fig .bars{margin:0}
+.bars-r{display:grid; grid-template-columns:minmax(0, calc(var(--nm, 12ch) + 4px)) minmax(0, 1fr); column-gap:14px;
+  align-items:center; min-height:26px}
+.bars-r + .bars-r{margin-top:6px}
+.bars-nm{display:flex; flex-direction:column; min-width:0; font-family:var(--font-mono); font-size:13.5px; line-height:1.3; color:var(--text-primary)}
+.bars-nm strong{font-family:var(--font-sans); font-weight:600}
+.bars-nm em{font-style:normal; font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.bars-lane{display:flex; align-items:center; min-width:0; height:24px; font-family:var(--font-mono)}
+.bars-bar{position:relative; display:block; flex:none; height:24px; border-radius:0 4px 4px 0;
+  width:calc(var(--f) * (100% - var(--room, 0ch))); background:var(--c)}
+.bars-v{position:absolute; right:7px; top:50%; transform:translateY(-50%);
+  font-size:12px; font-weight:700; white-space:nowrap; font-variant-numeric:tabular-nums; color:var(--on)}
+/* too short a bar gives its label out past the end, in text ink */
+.bars-r.is-out .bars-v{right:auto; left:calc(100% + 6px); color:var(--text-primary)}
+/* no number, no bar: the text alone (a "~", a dash) */
+.bars-r.is-na .bars-v{position:static; transform:none; font-weight:500; color:var(--text-muted)}
+.bars-note{margin-left:10px; font-size:12.5px; font-weight:600; white-space:nowrap; color:var(--note, var(--text-secondary))}
+.bars-r.is-out .bars-note{margin-left:calc(var(--lw) * 1ch + 18px)}
+
+/* grouped: a heading per row of the table, a bar per column — narrower
+   bars on a baseline, the column's name small in the name slot */
+.bars-g + .bars-g{margin-top:14px}
+.bars-hd{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; margin-bottom:5px;
+  font-size:13px; font-weight:600; color:var(--text-primary)}
+.bars-hd strong{font-weight:600}
+.bars-hd em{margin-left:auto; font-style:normal; font-family:var(--font-mono); font-size:11.5px; font-weight:400; color:var(--text-secondary)}
+.bars-hd code{font-size:12px; font-weight:500; background:none; padding:0; border:0}
+.bars:is(.is-grouped, .is-stack) .bars-r{min-height:24px}
+.bars:is(.is-grouped, .is-stack) .bars-r + .bars-r{margin-top:3px}
+.bars:is(.is-grouped, .is-stack) .bars-nm{font-size:11px; color:var(--text-muted); white-space:nowrap}
+.bars:is(.is-grouped, .is-stack) .bars-lane{border-left:1px solid var(--dv-base)}
+.bars.is-grouped .bars-bar{height:20px}
+.bars.is-grouped .bars-v{font-size:11.5px; right:6px}
+
+/* whole: every bar is the whole, its value the part washed out at its end —
+   what a saving took away, what a share is of — with the label inside that
+   part, or on the solid just before it (is-out) where the part is too thin */
+.bars-bar.is-whole{background:linear-gradient(90deg, var(--c) calc((1 - var(--p)) * 100% - 2px), transparent 0)}
+.bars-cut{position:absolute; top:0; right:0; bottom:0; width:calc(var(--p) * 100%); border-radius:0 4px 4px 0;
+  background:color-mix(in srgb, var(--c) 32%, transparent)}
+.bars-cut .bars-v{color:var(--text-strong)}
+.bars-r.is-out .bars-cut .bars-v{left:auto; right:calc(100% + 8px); color:var(--on)}
+.bars-r.is-out .bars-bar.is-whole + .bars-note{margin-left:10px}
+
+/* stack: the columns are parts of one bar — the same hue, told apart by
+   fill (solid, hatched, washed; cut by a 2px gap, never a stroke) — with the
+   total at the tip and the parts spelled out under it */
+.bars.is-stack .bars-r{row-gap:0}
+.bars-part{display:block; flex:none; height:14px; width:calc(var(--f) * (100% - var(--room, 0ch)))}
+.bars-part.p1{background:var(--c)}
+.bars-part.p2{margin-left:2px; background:repeating-linear-gradient(45deg, var(--c) 0 1.6px, transparent 1.6px 5px);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 60%, transparent)}
+.bars-part.p3{margin-left:2px; background:color-mix(in srgb, var(--c) 40%, transparent)}
+.bars-part:last-of-type{border-radius:0 4px 4px 0}
+.bars-total{margin-left:8px; font-size:12px; font-weight:600; white-space:nowrap; color:var(--text-primary); font-variant-numeric:tabular-nums}
+.bars-parts{grid-column:2; margin:1px 0 3px; font-family:var(--font-mono); font-size:10.5px; color:var(--text-muted); font-variant-numeric:tabular-nums}
+.bars-parts span{color:var(--text-secondary)}
+/* the key explains the fills, not a group: neutral swatches */
+.bars-key{display:flex; flex-wrap:wrap; gap:6px 18px; margin:14px 0 0; font-family:var(--font-mono); font-size:11px; color:var(--text-muted)}
+.bars-key > span{display:inline-flex; align-items:center; gap:7px}
+.bars-sw{--c:var(--text-secondary); display:inline-block; flex:none; width:18px; height:10px}
+.bars-sw.p1{background:var(--c)}
+.bars-sw.p2{background:repeating-linear-gradient(45deg, var(--c) 0 1.6px, transparent 1.6px 5px);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text-ghost) 55%, transparent)}
+.bars-sw.p3{background:color-mix(in srgb, var(--c) 40%, transparent)}
+
+@media (max-width:560px){
+  /* one series: the name goes above its bar, the track takes the width */
+  .bars.is-single .bars-r{grid-template-columns:minmax(0, 1fr); row-gap:3px}
+  .bars.is-single .bars-r + .bars-r{margin-top:10px}
+  .bars.is-single .bars-nm{flex-direction:row; align-items:baseline; gap:8px}
+  .bars-r{column-gap:8px}
+}
+/* in a hover card: the article in miniature */
+.ic-body .bars{margin:0 0 12px}
+
+/* ───────────────────────── a bare widget ───────────────────────── */
+
+/* {{< widget … bare="true" >}}: a figure that reads as part of the prose —
+   an explorable sentence, a slider under a paragraph — so no frame, and the
+   caption (class vh) kept only as the figure's accessible name. */
+figure.widget.is-bare{margin:18px 0 24px}
+figure.widget.is-bare > .w-root{border:0; border-radius:0; background:none; padding:0}
+
+/* ───────────────────────────── chart ───────────────────────────── */
+
+/* the no-JS view: the data as tables, one per mode. Once the chart is up the
+   tables step out of sight but stay in the page for a screen reader. */
+.chart-root.is-drawn > .chart-fb{position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0}
+.chart-fb .tbl-wrap{margin:0 0 6px}
+.chart-fb-mode{margin:0 0 6px; font-family:var(--font-mono); font-size:12px; color:var(--text-secondary)}
+.chart-fb-mode:not(:first-child){margin-top:14px}
+.chart-tbl{font-size:13px}
+.chart-tbl th, .chart-tbl td{padding:5px 10px}
+.chart-tbl th:not(:first-child), .chart-tbl td:not(:first-child){text-align:right}
+.chart-tbl td{font-family:var(--font-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.chart-tbl td:first-child{color:var(--text-secondary)}
+.chart-tbl td.is-alt::before{content:"○ "; color:var(--text-muted)}
+.chart-tbl td.is-nd{color:var(--text-muted)}
+.chart-fb-notes{margin:4px 0 0; font-family:var(--font-mono); font-size:11px; color:var(--text-muted)}
+
+/* shapes: one glyph per series, coloured by its role (--c, set inline) */
+.ch-mk{display:inline-flex; flex:none; width:10px; height:10px; color:var(--c, var(--dv-ink))}
+.ch-sh{display:block; width:10px; height:10px; fill:currentColor}
+.ch-sh.is-hollow{fill:none; stroke:currentColor; stroke-width:1.4}
+
+/* head: the mode tabs and the y title */
+.ch-head{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin-bottom:10px}
+.ch-ytitle{font-family:var(--font-mono); font-size:11px; color:var(--text-muted)}
+/* segmented control: one frame, hairline-cut buttons, the accent on the
+   selected one only (the accent is for UI; the series own the hues) */
+.ch-seg{display:inline-flex; flex-wrap:wrap; background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden}
+.ch-seg-b{appearance:none; -webkit-appearance:none; margin:0; border:0; border-right:1px solid var(--border); background:none;
+  color:var(--text-secondary); font:inherit; padding:0 12px; min-height:40px; cursor:pointer;
+  touch-action:manipulation; transition:background var(--dur) var(--ease), color var(--dur) var(--ease)}
+.ch-seg-b:last-child{border-right:0}
+.ch-seg-b:hover{background:var(--bg-hover)}
+.ch-seg-b.is-on{color:var(--accent); background:var(--accent-dim)}
+.ch-seg-b:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+
+/* the stage: the chart and the reading layer over it */
+.ch-stage{position:relative}
+.ch-plot{cursor:crosshair; touch-action:pan-y; -webkit-user-select:none; user-select:none}
+.ch-svg{display:block; overflow:visible}
+/* drawn over the chart, never catches the pointer; only opacity animates
+   (120 ms) — the panel itself never glides */
+.ch-hover{position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .12s var(--ease)}
+.ch-hover.is-on{opacity:1}
+.ch-hover.is-touch .ch-tip{display:none}
+.ch-stage:focus{outline:none}
+.ch-stage:focus-visible{box-shadow:0 0 0 2px var(--accent); border-radius:var(--radius-sm)}
+.ch-x{position:absolute; left:0; width:0; border-left:1px solid var(--dv-cross)}
+.ch-ring{position:absolute; left:-7px; top:-7px; width:14px; height:14px; border-radius:50%; box-sizing:border-box;
+  border:2px solid var(--text-strong); box-shadow:0 0 0 2px var(--bg-base)}
+/* constant width: the columns are fixed in ch by the runtime (the widest
+   text any point can show) and the digits are tabular, so a flipped panel
+   does not jitter as the numbers change */
+.ch-tip{position:absolute; left:0; top:0; display:grid; grid-template-columns:10px var(--tn,auto) var(--tv,auto); column-gap:8px; row-gap:3px; align-items:center;
+  padding:8px 10px; border-radius:var(--radius-sm); background:var(--dv-panel);
+  border:1px solid var(--border); box-shadow:var(--dv-shadow); font-family:var(--font-mono); font-size:11.5px; white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.ch-tip.has-detail{grid-template-columns:10px var(--tn,auto) var(--tv,auto) var(--td,auto)}
+.ch-th{grid-column:1 / -1; font-weight:700; color:var(--text-strong); margin-bottom:2px}
+.ch-tr{display:contents}
+.ch-tn{color:var(--text-secondary)}
+.ch-tr b{color:var(--text-strong); font-weight:700; text-align:right}
+.ch-td{color:var(--text-muted); text-align:right}
+.ch-tr.is-nd b{color:var(--text-muted); font-weight:400}
+
+/* touch: the values in a line ABOVE the chart, never under the finger;
+   hidden where a mouse hovers. Its height is reserved up front, so a tap
+   never shifts the chart */
+.ch-readout{display:none; flex-direction:column; justify-content:center; min-height:22px; margin:0 0 6px;
+  font-family:var(--font-mono); font-size:12px; font-variant-numeric:tabular-nums}
+.ch-readout.is-wide{min-height:40px}
+.ch-r1, .ch-r2{display:flex; flex-wrap:nowrap; align-items:center; gap:4px 12px; white-space:nowrap; overflow:hidden}
+.ch-r1 > b{color:var(--accent); font-weight:700; margin-right:-6px}
+.ch-readout.is-rest .ch-r1 > b{color:var(--text-secondary)}
+.ch-r2{display:none; color:var(--text-muted); font-size:11px; margin-top:2px}
+.ch-readout.is-wide .ch-r2{display:flex}
+.ch-rv{display:inline-flex; align-items:center; gap:5px; color:var(--text-strong); font-weight:600}
+.ch-r2 .ch-rv{color:var(--text-muted); font-weight:400}
+.ch-rv.is-nd{color:var(--text-muted); font-weight:400}
+@media (hover:none), (pointer:coarse){ .ch-readout{display:flex} }
+.ch.is-touched .ch-readout{display:flex}
+
+/* key: the series by shape and name (a note — say a ratio — in bold after
+   it), then what "~" and a hollow point mean */
+.ch-key{display:flex; flex-wrap:wrap; align-items:center; gap:4px 16px; margin-top:6px; padding-top:10px;
+  border-top:1px solid var(--border); font-family:var(--font-mono); font-size:12px}
+.ch-kh{color:var(--text-muted)}
+.ch-k{display:inline-flex; align-items:center; gap:6px; color:var(--text-secondary)}
+.ch-k b{color:var(--text-strong); font-weight:700}
+.ch-notes{display:flex; flex-wrap:wrap; gap:4px 14px; margin-left:auto}
+.ch-note{display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted)}
+.ch-note .ch-mk{--c:var(--text-muted)}
+
+@media (max-width:560px){
+  .ch-notes{margin-left:0; flex-basis:100%}
+  /* on a phone the panel must not cover the chart it explains: the names go
+     (the key and the shapes carry them), the shape, value and detail stay */
+  .ch-tip{grid-template-columns:10px var(--tv,auto); column-gap:6px; padding:6px 8px; font-size:11px}
+  .ch-tip.has-detail{grid-template-columns:10px var(--tv,auto) var(--td,auto)}
+  .ch-tn{display:none}
+  .ch-readout{font-size:11.5px}
+  .ch-r1{gap:4px 9px}
+}
+@media (max-width:420px){
+  .chart-tbl th, .chart-tbl td{padding:5px 6px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ch-hover, .ch-seg-b{transition:none}
+}
+@media print{
+  .ch-hover, .ch-readout{display:none}
+}

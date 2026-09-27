@@ -1,0 +1,97 @@
+{{- /* The no-JS view of a {{< chart src="…" />}}: every data set of the YAML
+       file as a table — one per mode, under its label — and a line saying
+       what "~" and a hollow value mean. It is what a reader without
+       JavaScript, a feed reader and a failed Plot load get, and what a screen
+       reader keeps once the chart is drawn, so no mode may be left out.
+
+       Cells go through data/cell.html (the grammar the chart reads) and
+       data/fmt.html (printed at the data set's digits); a hollow value is
+       marked, a detail becomes the table's quieter second line. Typos warn:
+       CI builds with --panicOnWarning, so a cell the chart would silently drop
+       fails the build instead.
+
+       Takes dict "d" (the unmarshalled file) "src" (its name) "pos" (the
+       shortcode's .Position). */ -}}
+{{- $d := .d -}}
+{{- $src := .src -}}
+{{- $pos := .pos -}}
+{{- $x := $d.x | default dict -}}
+{{- $y := $d.y | default dict -}}
+{{- $modes := $d.modes | default (slice (dict "label" "" "rows" ($d.rows | default slice))) -}}
+{{- $series := $d.series | default slice -}}
+{{- $n := len $series -}}
+{{- if not $n -}}
+  {{- range $modes }}{{ range .rows }}{{ if gt (sub (len .) 1) $n }}{{ $n = sub (len .) 1 }}{{ end }}{{ end }}{{ end -}}
+  {{- range seq $n }}{{ $series = $series | append (dict "name" (string .)) }}{{ end -}}
+{{- end -}}
+
+{{- /* first pass: read every cell once — the digits, the flags, the warnings */ -}}
+{{- $xdig := 0 -}}
+{{- $ydig := 0 -}}
+{{- $same := false -}}
+{{- $alt := false -}}
+{{- $read := slice -}}
+{{- range $mi, $m := $modes -}}
+  {{- $rows := slice -}}
+  {{- range $ri, $r := $m.rows -}}
+    {{- $where := printf "%s, %srow %d" $src (cond (gt (len $modes) 1) (printf "mode %d, " (add $mi 1)) "") (add $ri 1) -}}
+    {{- $xn := partial "data/num.html" (index $r 0) -}}
+    {{- if not $xn -}}
+      {{- warnf "chart: %s: x %v is not a number (%s)" $where (index $r 0) $pos -}}
+    {{- else -}}
+      {{- if gt $xn.dec $xdig }}{{ $xdig = $xn.dec }}{{ end -}}
+      {{- if ne (sub (len $r) 1) $n }}{{ warnf "chart: %s: %d cells for %d series (%s)" $where (sub (len $r) 1) $n $pos }}{{ end -}}
+      {{- $cells := slice -}}
+      {{- range $k := (cond (gt $n 0) $n 1 | seq) -}}
+        {{- if gt $n 0 -}}
+        {{- /* seq counts from 1: cell $k sits at index $k of the row, after x */ -}}
+        {{- $raw := "" -}}
+        {{- if lt $k (len $r) }}{{ $raw = index $r $k }}{{ end -}}
+        {{- $c := partial "data/cell.html" $raw -}}
+        {{- if $c.bad }}{{ warnf "chart: %s: %q is not a value, ~, *hollow* or empty (%s)" $where (string $raw) $pos }}{{ end -}}
+        {{- if and (in (slice "val" "alt") $c.kind) (gt $c.dec $ydig) }}{{ $ydig = $c.dec }}{{ end -}}
+        {{- if eq $c.kind "same" }}{{ $same = true }}{{ end -}}
+        {{- if eq $c.kind "alt" }}{{ $alt = true }}{{ end -}}
+        {{- $cells = $cells | append $c -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $rows = $rows | append (dict "x" $xn.v "cells" $cells) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $read = $read | append (dict "label" ($m.label | default "") "rows" $rows) -}}
+{{- end -}}
+{{- /* isset, not with: digits 0 is a real choice and a falsy value */ -}}
+{{- if isset $x "digits" }}{{ $xdig = int $x.digits }}{{ end -}}
+{{- if isset $y "digits" }}{{ $ydig = int $y.digits }}{{ end -}}
+{{- $xu := $x.unit | default "" -}}
+{{- $yu := $y.unit | default "" -}}
+<div class="chart-fb">
+{{- range $read }}
+{{- with .label }}
+<p class="chart-fb-mode">{{ . }}</p>
+{{- end }}
+<div class="tbl-wrap"><table class="chart-tbl">
+<thead><tr><th>{{ $x.title }}</th>{{ range $series }}<th>{{ .name }}</th>{{ end }}</tr></thead>
+<tbody>
+{{- range .rows }}
+<tr><td>{{ partial "data/fmt.html" (dict "v" .x "d" $xdig) }}{{ $xu }}</td>
+{{- range .cells -}}
+  {{- $text := partial "data/cell-text.html" (dict "c" . "d" $ydig "unit" $yu) -}}
+  {{- $cls := slice -}}
+  {{- if eq .kind "alt" }}{{ $cls = $cls | append "is-alt" }}{{ end -}}
+  {{- if eq .kind "none" }}{{ $cls = $cls | append "is-nd" }}{{ end -}}
+  {{- if .detail }}{{ $cls = $cls | append "has-detail" }}{{ end -}}
+<td{{ with $cls }} class="{{ delimit . " " }}"{{ end }}>{{ $text }}{{ with .detail }} <em>{{ . }}</em>{{ end }}</td>
+{{- end -}}
+</tr>
+{{- end }}
+</tbody>
+</table></div>
+{{- end }}
+{{- $notes := slice -}}
+{{- if $same }}{{ $notes = $notes | append (($d.legend | default dict).same | default (i18n "chart_same")) }}{{ end -}}
+{{- if $alt }}{{ $notes = $notes | append (($d.legend | default dict).hollow | default (i18n "chart_hollow")) }}{{ end -}}
+{{- with $notes }}
+<p class="chart-fb-notes">{{ delimit . " · " }}</p>
+{{- end }}
+</div>

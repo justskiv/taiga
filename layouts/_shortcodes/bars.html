@@ -1,0 +1,235 @@
+{{- /* Horizontal bars from a Markdown table — the comparison a sentence makes,
+       drawn to one scale (docs/authoring.md#bars). Pure HTML/CSS: every
+       label is real text at a real size, nothing to load, nothing to fall
+       back from. One table, three shapes:
+
+         one value column         a bar per row (the binary-size pair)
+         several value columns    a group per row, a bar per column in the
+                                  column's colour (forms × machines)
+         stack="true"             the columns are parts of one bar per row,
+                                  told apart by fill (a cost and its GC share);
+                                  three parts at most
+         whole="100"              every bar is the whole, its value the part
+                                  marked at its end (a saving, per machine)
+
+         {{< bars mark="2" note-color="green" >}}
+         | | Прирост |
+         |---|--:|
+         | **Go 1.26** *под флагом, до 512 Б* | +155 КБ |
+         | **Go 1.27** *в релизе, до 80 Б* | +44 КБ *в 3,5 раза легче* |
+         {{< /bars >}}
+
+       The grammar is the site's one for data: **bold** is the thing, a
+       trailing *italic* the quiet addition. A row label `**name** *sub*`
+       stacks the two; a value cell prints as written — its FIRST NUMBER is
+       the bar's length (a comma is a decimal mark, thousands take a space;
+       data/num.html) — and its trailing *italic* is a note after the bar. A
+       row whose value cells are all empty is a group heading. A header cell
+       `**short** *longer*` gives a stack its part name (short) and its legend
+       line (longer).
+
+       Parameters: colors (per column; per group in a stack), max (the
+       scale's right end; default the largest bar), mark (rows, 1-based as in
+       the table, drawn full — every other row turns ghost), stack, unit
+       (after a stack's total), digits (a stack prints its parts and total at
+       this many decimals: write the parts exact, 32,25 + 20,68, and the total
+       is 52,9 rather than the 53,0 the rounded parts would add up to),
+       whole (every bar spans the track and stands for this much; its value
+       is the part of it washed out at the bar's end, the label inside that
+       part — mixes with neither stack nor max), note-color, cap / note (a
+       caption puts the bars in the widget's frame). Unknown ones warn: CI
+       builds with --panicOnWarning.
+
+       A label goes inside its bar's end in an ink picked per hue and palette
+       (31-data.css). Too short a bar gives it out past the end: guessed here
+       for a ~300px track, measured on the page by modules/barsfit.js. In a
+       whole it is the marked part that must hold the label, and a part too
+       thin for it gives the label to the solid just before it. */ -}}
+{{- $p := .Page -}}
+{{- $pos := .Position -}}
+{{- $keys := slice "cap" "note" "colors" "max" "mark" "stack" "unit" "note-color" "digits" "whole" -}}
+{{- if and .Params (not .IsNamedParams) -}}
+  {{- errorf "bars: parameters must be named, e.g. stack=\"true\" (%s)" $pos -}}
+{{- end -}}
+{{- range $k, $_ := .Params }}{{ if not (in $keys $k) }}{{ warnf "bars: unknown parameter %q (%s)" $k $pos }}{{ end }}{{ end -}}
+{{- $inks := slice "ink" "ghost" "blue" "green" "red" "gold" "violet" "copper" "accent" -}}
+{{- $colors := split (.Get "colors" | default "") " " -}}
+{{- range $colors }}{{ if and . (not (in $inks .)) }}{{ warnf "bars: colour %q is none of %s (%s)" . (delimit $inks ", ") $pos }}{{ end }}{{ end -}}
+{{- $stack := eq (.Get "stack" | default "" | string) "true" -}}
+{{- $unit := .Get "unit" | default "" -}}
+{{- $digits := -1 -}}
+{{- with .Get "digits" }}{{ $digits = int . }}{{ end -}}
+{{- $marks := slice -}}
+{{- with .Get "mark" }}{{ $marks = split . " " }}{{ end -}}
+{{- $noteColor := .Get "note-color" | default "" -}}
+{{- if and $noteColor (not (in $inks $noteColor)) }}{{ warnf "bars: note-color %q is none of %s (%s)" $noteColor (delimit $inks ", ") $pos }}{{ end -}}
+
+{{- $t := partial "data/table.html" .InnerDeindent -}}
+{{- range $t.warn }}{{ warnf "bars: %s (%s)" . $pos }}{{ end -}}
+{{- if not $t.body }}{{ errorf "bars: no rows — a Markdown table between {{< bars >}} and {{< /bars >}} (%s)" $pos }}{{ end -}}
+{{- $n := sub (len $t.head) 1 -}}
+{{- if lt $n 1 }}{{ errorf "bars: the table needs a label column and at least one value column (%s)" $pos }}{{ end -}}
+{{- /* one hue, three fills a reader tells apart: solid, hatched, washed */ -}}
+{{- if and $stack (gt $n 3) }}{{ warnf "bars: a stack draws at most 3 parts (solid, hatched, washed), this table has %d value columns (%s)" $n $pos }}{{ end -}}
+
+{{- /* ── read every row once: labels, values, notes, the scale ── */ -}}
+{{- $rows := slice -}}
+{{- $big := 0.0 -}}
+{{- $neg := false -}}
+{{- $pos_ := false -}}
+{{- range $ri, $row := $t.body -}}
+  {{- $r := $row.cells -}}
+  {{- if gt (sub (len $r) 1) $n }}{{ warnf "bars: row %d has %d cells for %d columns (%s)" (add $ri 1) (len $r) (add $n 1) $pos }}{{ end -}}
+  {{- $vals := slice -}}
+  {{- $filled := false -}}
+  {{- $sum := 0.0 -}}
+  {{- $dec := 0 -}}
+  {{- range $k := seq $n -}}
+    {{- $raw := "" -}}
+    {{- if lt $k (len $r) }}{{ $raw = index $r $k }}{{ end -}}
+    {{- $text := $raw -}}
+    {{- $note := "" -}}
+    {{- with findRESubmatch `^(.+?)\s+\*([^*]+)\*$` $raw 1 }}{{ $text = trim (index (index . 0) 1) " " }}{{ $note = trim (index (index . 0) 2) " " }}{{ end -}}
+    {{- if $raw }}{{ $filled = true }}{{ end -}}
+    {{- $v := false -}}
+    {{- with partial "data/num.html" $text -}}
+      {{- $v = . -}}
+      {{- $sum = add $sum (math.Abs .v) -}}
+      {{- if gt .dec $dec }}{{ $dec = .dec }}{{ end -}}
+      {{- if lt .v 0.0 }}{{ $neg = true }}{{ else if gt .v 0.0 }}{{ $pos_ = true }}{{ end -}}
+      {{- if and (not $stack) (gt (math.Abs .v) $big) }}{{ $big = math.Abs .v }}{{ end -}}
+    {{- else -}}
+      {{- if and $text (ne $text "~") (ne $text "—") }}{{ warnf "bars: row %d: %q has no number to measure (%s)" (add $ri 1) $text $pos }}{{ end -}}
+    {{- end -}}
+    {{- $vals = $vals | append (dict "text" $text "note" $note "v" $v) -}}
+  {{- end -}}
+  {{- if and $stack (gt $sum $big) }}{{ $big = $sum }}{{ end -}}
+  {{- $rows = $rows | append (dict "i" (add $ri 1) "label" (index $r 0) "vals" $vals "group" (not $filled) "sum" $sum "dec" $dec) -}}
+{{- end -}}
+{{- if and $neg $pos_ }}{{ warnf "bars: values of both signs — bars grow from one baseline, keep one sign (%s)" $pos }}{{ end -}}
+{{- with .Get "max" -}}
+  {{- $m := partial "data/num.html" . -}}
+  {{- if not $m }}{{ errorf "bars: max=%q is not a number (%s)" . $pos }}{{ end -}}
+  {{- if gt $big (math.Abs $m.v) }}{{ warnf "bars: a bar of %v runs past max=%s (%s)" $big . $pos }}{{ end -}}
+  {{- $big = math.Abs $m.v -}}
+{{- end -}}
+{{- $whole := 0.0 -}}
+{{- with .Get "whole" -}}
+  {{- $w := partial "data/num.html" . -}}
+  {{- if or (not $w) (eq $w.v 0.0) }}{{ errorf "bars: whole=%q is not a number above zero (%s)" . $pos }}{{ end -}}
+  {{- if $stack }}{{ warnf "bars: whole and stack do not mix — a stack's bar is the sum of its parts (%s)" $pos }}{{ end -}}
+  {{- if $.Get "max" }}{{ warnf "bars: whole is the scale, drop max (%s)" $pos }}{{ end -}}
+  {{- if gt $big (math.Abs $w.v) }}{{ warnf "bars: a part of %v runs past whole=%s (%s)" $big . $pos }}{{ end -}}
+  {{- $whole = math.Abs $w.v -}}
+  {{- $big = $whole -}}
+{{- end -}}
+{{- if le $big 0.0 }}{{ $big = 1.0 }}{{ end -}}
+
+{{- /* ── the shape, the colours, the columns ── */ -}}
+{{- $grouped := and (gt $n 1) (not $stack) -}}
+{{- $palette := slice "blue" "green" "red" "gold" "violet" "copper" -}}
+{{- $colorAt := dict -}}
+{{- range $k := seq (math.Max $n 8 | int) -}}
+  {{- $c := "" -}}
+  {{- if le $k (len $colors) }}{{ $c = index $colors (sub $k 1) }}{{ end -}}
+  {{- if not $c -}}
+    {{- $c = cond (or $grouped $stack) (index $palette (mod (sub $k 1) 6)) "ink" -}}
+  {{- end -}}
+  {{- $colorAt = merge $colorAt (dict (string $k) $c) -}}
+{{- end -}}
+{{- $heads := slice -}}
+{{- range $k := seq $n -}}
+  {{- $h := index $t.head $k -}}
+  {{- $short := $h -}}
+  {{- $long := "" -}}
+  {{- with findRESubmatch `^\*\*(.+?)\*\*\s*(?:\*([^*]+)\*)?$` $h 1 }}{{ $short = index (index . 0) 1 }}{{ $long = index (index . 0) 2 }}{{ end -}}
+  {{- $heads = $heads | append (dict "short" $short "long" ($long | default $short)) -}}
+{{- end -}}
+{{- $cls := cond $stack "is-stack" (cond $grouped "is-grouped" "is-single") -}}
+
+{{- /* label widths, in ch of the mono face the values print in: the name
+       column fits the longest label, a note or an outside label reserves
+       room at the end of the track so the longest bar never pushes text off */ -}}
+{{- $nameCh := 4 -}}
+{{- $room := 0 -}}
+{{- range $rows -}}
+  {{- if $grouped -}}
+    {{- range $heads }}{{ if gt (strings.RuneCount .short) $nameCh }}{{ $nameCh = strings.RuneCount .short }}{{ end }}{{ end -}}
+  {{- else if not .group -}}
+    {{- $plain := replaceRE `\*\*(.+?)\*\*\s*` "" .label | replaceRE `\*` "" -}}
+    {{- $bold := "" }}{{ with findRESubmatch `\*\*(.+?)\*\*` .label 1 }}{{ $bold = index (index . 0) 1 }}{{ end -}}
+    {{- $w := math.Max (strings.RuneCount $bold) (math.Ceil (mul (strings.RuneCount $plain) 0.82)) | int -}}
+    {{- if gt $w $nameCh }}{{ $nameCh = $w }}{{ end -}}
+  {{- end -}}
+  {{- /* a note or a total needs room only where its bar runs long: a track is
+         some 40ch, so a bar at share f leaves 40·(1−f) free behind it */ -}}
+  {{- range .vals -}}
+    {{- if and .note .v -}}
+      {{- $share := div (math.Abs .v.v) $big }}{{ if $whole }}{{ $share = 1.0 }}{{ end -}}
+      {{- $need := sub (add (strings.RuneCount .note) 3) (mul 40 (sub 1 $share)) -}}
+      {{- if gt $need (float $room) }}{{ $room = math.Ceil $need | int }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and $stack (not .group) -}}
+    {{- $tl := add (strings.RuneCount (print (partial "data/fmt.html" (dict "v" .sum "d" .dec)) $unit)) 2 -}}
+    {{- $need := sub $tl (mul 40 (sub 1 (div .sum $big))) -}}
+    {{- if gt $need (float $room) }}{{ $room = math.Ceil $need | int }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $nameCh = math.Min $nameCh 26 | int -}}
+
+{{- $out := "" -}}
+{{- $group := 0 -}}
+{{- $open := false -}}
+{{- range $row := $rows -}}
+  {{- if .group -}}
+    {{- $group = add $group 1 -}}
+    {{- if $open }}{{ $out = print $out "</div>\n" }}{{ end -}}
+    {{- $c := index $colorAt (string $group) -}}
+    {{- $out = print $out (printf "<div class=\"bars-g\" style=\"--c:var(--dv-%s);--on:var(--dv-%s-on)\">\n<div class=\"bars-hd\">%s</div>\n" $c $c ($p.RenderString .label)) -}}
+    {{- $open = true -}}
+  {{- else if $grouped -}}
+    {{- if $open }}{{ $out = print $out "</div>\n" }}{{ end -}}
+    {{- $out = print $out (printf "<div class=\"bars-g\">\n<div class=\"bars-hd\">%s</div>\n" ($p.RenderString .label)) -}}
+    {{- $open = true -}}
+    {{- range $k, $v := .vals -}}
+      {{- $c := index $colorAt (string (add $k 1)) -}}
+      {{- $out = print $out (partial "data/bar-row.html" (dict "page" $p "name" (index $heads $k).short "val" $v "big" $big "c" $c "row" $row "marks" $marks "sub" true "whole" (gt $whole 0.0))) -}}
+    {{- end -}}
+  {{- else if $stack -}}
+    {{- $c := index $colorAt (string (math.Max $group 1 | int)) -}}
+    {{- $parts := "" -}}
+    {{- $said := slice -}}
+    {{- range $k, $v := .vals -}}
+      {{- if $v.v -}}
+        {{- $parts = print $parts (printf "<i class=\"bars-part p%d\" style=\"--f:%.4f\"></i>" (add $k 1) (div (math.Round (mul (div (math.Abs $v.v.v) $big) 10000)) 10000.0)) -}}
+        {{- $shown := cond (ge $digits 0) (partial "data/fmt.html" (dict "v" (math.Abs $v.v.v) "d" $digits)) $v.text -}}
+        {{- $said = $said | append (printf "<span>%s</span> %s" $shown (index $heads $k).short) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $total := print (partial "data/fmt.html" (dict "v" .sum "d" (cond (ge $digits 0) $digits .dec))) $unit -}}
+    {{- $out = print $out (printf "<div class=\"bars-r\"%s>\n<span class=\"bars-nm\">%s</span>\n<span class=\"bars-lane\">%s<b class=\"bars-total\">%s</b></span>\n<span class=\"bars-parts\">%s</span>\n</div>\n" (cond (gt $group 0) "" (printf " style=\"--c:var(--dv-%s);--on:var(--dv-%s-on)\"" $c $c)) ($p.RenderString .label) $parts $total (delimit $said " + ")) -}}
+  {{- else -}}
+    {{- $out = print $out (partial "data/bar-row.html" (dict "page" $p "name" .label "val" (index .vals 0) "big" $big "c" (index $colorAt "1") "row" $row "marks" $marks "sub" false "whole" (gt $whole 0.0))) -}}
+  {{- end -}}
+{{- end -}}
+{{- if $open }}{{ $out = print $out "</div>\n" }}{{ end -}}
+{{- if $stack -}}
+  {{- $key := "" -}}
+  {{- range $k, $h := $heads }}{{ $key = print $key (printf "<span><i class=\"bars-sw p%d\"></i>%s</span>" (add $k 1) ($p.RenderString $h.long)) }}{{ end -}}
+  {{- $out = print $out (printf "<p class=\"bars-key\">%s</p>\n" $key) -}}
+{{- end -}}
+
+{{- $style := printf "--nm:%dch;--room:%dch" $nameCh $room -}}
+{{- with $noteColor }}{{ $style = printf "%s;--note:var(--dv-%s)" $style . }}{{ end -}}
+{{- $body := printf "<div class=\"bars %s\" style=\"%s\">\n%s</div>" $cls $style $out -}}
+{{- with .Get "cap" }}
+<figure class="bars-fig widget">
+<figcaption>{{ . }}{{ with $.Get "note" }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
+<div class="w-root">
+{{ $body | safeHTML }}
+</div>
+</figure>
+{{- else }}
+{{ $body | safeHTML }}
+{{- end }}

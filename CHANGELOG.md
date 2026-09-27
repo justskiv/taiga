@@ -150,6 +150,48 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   than the slant over the 700; the "Go" link mark, which is bold italic by
   design, keeps its look by drawing the slant itself.
 
+- **Numbers are written as data now: a row of big numbers (`> [!stats]`),
+  bars (`{{< bars >}}`), a line chart (`{{< chart >}}`), a span and its bitmap
+  (`{{< spanmap >}}`), and a detail line in a table cell.** A guide that wanted
+  a figure had two ways to get one, and both were wrong for the site: raw HTML
+  in the Markdown, which Obsidian shows as a wall of source, or a one-off
+  widget — the Go 1.27 allocation section carried five of them, up to 550 lines
+  each, every one with its own copy of the number formatting. Now the Markdown
+  carries the numbers — a list, a table, a YAML file beside the page — and the
+  theme draws them: the stats row and the table detail with CSS alone, bars as
+  plain HTML (a label inside its bar's end, in an ink picked per hue and palette,
+  stepped out when the bar is too short; with `whole`, every bar is the full
+  old value and a saving is washed out at its end), the span figure from its
+  bits and slot size, charts with Observable Plot and a reading layer after
+  Grafana's (a crosshair that snaps to the nearest measured x, a panel that
+  follows the pointer and never covers the point, a readout line on touch
+  screens, arrow keys). Every chart ships its data as a table too — each mode of it — for a
+  reader without JavaScript, a feed reader and a screen reader. One grammar for
+  cells everywhere (a value, `*hollow*`, `~` for "no difference", a trailing
+  `*detail*`), one implementation of it in `assets/js/charts/`, which the
+  Obsidian plugin carries byte for byte, and the Hugo partials that print the
+  no-JS tables are held to the same test vectors (`scripts/check-charts.mjs`).
+  Every malformed cell and parameter warns, so a strict build fails instead of a
+  point silently vanishing. Demo: the kitchen sink; docs: `authoring.md#data`.
+
+- **Observable Plot ships with the theme, and loads only when a chart is about
+  to be seen.** A custom build of 0.6.17 with only the marks the charts use
+  (~82 KB gzip), rebuilt byte for byte by `scripts/vendor-plot/`. A page with a
+  chart, or with `plot: true` for a widget of its own, carries the address as
+  inert JSON; nothing is fetched until a figure comes within 600px of the
+  viewport, and only once per page — a script already on its way is joined, not
+  doubled. Widgets get the same helpers the charts use: `Taiga.plot()`,
+  `Taiga.plotWhenNear(root, live)`, `Taiga.fmt(v, digits)`, `Taiga.num(text)`.
+
+- **`{{< widget … bare="true" >}}` — a figure without its frame.** An
+  explorable sentence or a slider under a paragraph has to read as part of the
+  prose; the only way to get there was a `:has()` rule per widget undoing the
+  frame and hiding the caption. The caption stays as the figure's accessible
+  name, and a hover card still stands a placeholder in for it — as it now does
+  for any widget-shaped figure, a chart or a raw `<figure class="widget x">`
+  with a class of its own, which used to reach the card bare, without the
+  page's widget styles.
+
 - **A term card carries a diagram or a picture properly now.** Block content in
   a `{{< term >}}` body always worked — the shortcode renders the body as block
   Markdown and the card is emitted after `.Content` precisely so a `<div>` can

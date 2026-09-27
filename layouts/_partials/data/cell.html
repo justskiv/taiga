@@ -1,0 +1,39 @@
+{{- /* One cell of a data table, in the grammar {{< chart >}} documents — the
+       same reading as cell in assets/js/charts/fmt.js, checked against the
+       same vectors (assets/js/charts/cases.json):
+
+         12,65              a value
+         *13,18*            a hollow point from another source, never joined
+         ~                  no measurable difference: hollow, on the zero line
+         (empty, nil, —)    no data
+       and any of the first three may end in *detail*, a second quieter line.
+
+       Returns dict "kind" (val|alt|same|none) "v" "dec" "detail" "bad"; `bad`
+       marks text that is none of the above, which the caller warns about. */ -}}
+{{- $in := . -}}
+{{- $o := dict "kind" "none" "v" nil "dec" 0 "detail" "" "bad" false -}}
+{{- if in (slice "int" "int64" "int32" "uint" "uint64" "float64" "float32") (printf "%T" $in) -}}
+  {{- $n := partial "data/num.html" $in -}}
+  {{- $o = dict "kind" "val" "v" $n.v "dec" $n.dec "detail" "" "bad" false -}}
+{{- else if ne $in nil -}}
+  {{- $s := trim (string $in) " \t\r\n" -}}
+  {{- if and $s (ne $s "—") -}}
+    {{- $detail := "" -}}
+    {{- with findRESubmatch `^(.+?)\s+\*([^*]+)\*$` $s 1 -}}
+      {{- $s = trim (index (index . 0) 1) " \t" -}}
+      {{- $detail = trim (index (index . 0) 2) " \t" -}}
+    {{- end -}}
+    {{- if eq $s "~" -}}
+      {{- $o = dict "kind" "same" "v" 0.0 "dec" 0 "detail" $detail "bad" false -}}
+    {{- else -}}
+      {{- $kind := "val" -}}
+      {{- with findRESubmatch `^\*([^*]+)\*$` $s 1 }}{{ $s = index (index . 0) 1 }}{{ $kind = "alt" }}{{ end -}}
+      {{- with partial "data/num.html" $s -}}
+        {{- $o = dict "kind" $kind "v" .v "dec" .dec "detail" $detail "bad" false -}}
+      {{- else -}}
+        {{- $o = dict "kind" "none" "v" nil "dec" 0 "detail" "" "bad" true -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $o -}}

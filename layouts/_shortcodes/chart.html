@@ -1,0 +1,117 @@
+{{- /* A line chart from data alone — no JavaScript in the guide, no HTML in its
+       Markdown. Two forms (docs/authoring.md#chart):
+
+         {{< chart x="size, B" y="ns per op" colors="blue green red" cap="…" >}}
+         | Size | M4 Pro | Genoa | Skylake |
+         |--:|--:|--:|--:|
+         | 80 | 12,65 | 34,99 | 68,07 |
+         {{< /chart >}}
+
+         {{< chart src="charts/alloc-cliff.yaml" cap="…" note="…" />}}
+
+       The inline form is the simple case: one data set, options as
+       parameters. The file form carries everything — modes, rules, zones,
+       jumps, per-cell details — and must self-close: a chart reads its body,
+       so an unclosed tag would swallow the text after it.
+
+       What ships:
+         · a <figure class="widget chart"> in the widget's frame and caption;
+         · inside it the no-JS view — the author's own table (inline form) or
+           every mode of the file as a table (data/chart-fallback.html) — which
+           a feed reader, a reader without JavaScript and a failed Plot load
+           get, and which a screen reader keeps once the chart is drawn;
+         · the data as JSON (script.chart-spec), read by the one chart runtime,
+           assets/js/charts/core.js, on the site and — as a byte copy — in the
+           Obsidian plugin. The runtime reads the cells itself; this template
+           only checks them, so a typo fails a --panicOnWarning build instead
+           of vanishing from the chart.
+       The "chart" flag on .Page.Store makes scripts.html load the runtime and
+       print Plot's address; Plot itself arrives only when the figure comes
+       near the viewport (modules/plot.js). */ -}}
+{{- $p := .Page -}}
+{{- $pos := .Position -}}
+{{- $inlineKeys := slice "cap" "note" "x" "y" "x-unit" "y-unit" "x-digits" "y-digits" "x-domain" "y-domain" "x-ticks" "y-ticks" "x-narrow"
+      "colors" "shapes" "rule" "rule-label" "zone" "zone-label" "legend" "same" "hollow" "rest" "summary" "height" -}}
+{{- if and .Params (not .IsNamedParams) -}}
+  {{- errorf "chart: parameters must be named, e.g. src=\"charts/x.yaml\" (%s)" $pos -}}
+{{- end -}}
+{{- $src := .Get "src" -}}
+{{- range $k, $_ := .Params -}}
+  {{- if $src -}}
+    {{- if not (in (slice "src" "cap" "note") $k) }}{{ warnf "chart: %s has no effect with src= — set it in %s (%s)" $k $src $pos }}{{ end -}}
+  {{- else if not (in $inlineKeys $k) -}}
+    {{- warnf "chart: unknown parameter %q (%s)" $k $pos -}}
+  {{- end -}}
+{{- end -}}
+{{- $cap := .Get "cap" | default (i18n "chart_cap") -}}
+{{- $note := .Get "note" -}}
+{{- $inner := trim (string .InnerDeindent) " \t\r\n" -}}
+{{- $spec := dict "v" 1 "lang" $p.Language.Lang "num" (dict "dec" (i18n "num_decimal") "group" (i18n "num_group")) -}}
+{{- $fb := "" -}}
+
+{{- if $src -}}
+  {{- if $inner }}{{ warnf "chart: src= and a body at once — the body is ignored; a file chart self-closes, {{< chart src=\"…\" />}} (%s)" $pos }}{{ end -}}
+  {{- $r := $p.Resources.Get $src -}}
+  {{- if not $r }}{{ errorf "chart: %s is not in the bundle of %s (%s)" $src $p.File.Path $pos }}{{ end -}}
+  {{- $d := $r | transform.Unmarshal -}}
+  {{- if and $d.rows $d.modes }}{{ errorf "chart: %s has both rows and modes — keep one (%s)" $src $pos }}{{ end -}}
+  {{- if not (or $d.rows $d.modes) }}{{ errorf "chart: %s has neither rows nor modes (%s)" $src $pos }}{{ end -}}
+  {{- $spec = merge $d $spec -}}
+  {{- $fb = partial "data/chart-fallback.html" (dict "d" $d "src" $src "pos" $pos) -}}
+{{- else -}}
+  {{- if not $inner }}{{ errorf "chart: no data — a Markdown table in the body, or src=\"file.yaml\" (%s)" $pos }}{{ end -}}
+  {{- /* check the table the way the runtime will read it */ -}}
+  {{- $t := partial "data/table.html" $inner -}}
+  {{- range $t.warn }}{{ warnf "chart: %s (%s)" . $pos }}{{ end -}}
+  {{- $n := sub (len $t.head) 1 -}}
+  {{- range $ri, $row := $t.body -}}
+    {{- $r := $row.cells -}}
+    {{- if not (partial "data/num.html" (index $r 0)) }}{{ warnf "chart: row %d: x %q is not a number (%s)" (add $ri 1) (index $r 0) $pos }}{{ end -}}
+    {{- if ne (sub (len $r) 1) $n }}{{ warnf "chart: row %d: %d cells for %d series (%s)" (add $ri 1) (sub (len $r) 1) $n $pos }}{{ end -}}
+    {{- range after 1 $r -}}
+      {{- if (partial "data/cell.html" .).bad }}{{ warnf "chart: row %d: %q is not a value, ~, *hollow* or empty (%s)" (add $ri 1) . $pos }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $axis := dict -}}
+  {{- range slice "x" "y" -}}
+    {{- $a := dict -}}
+    {{- with $.Get . }}{{ $a = merge $a (dict "title" .) }}{{ end -}}
+    {{- with $.Get (print . "-unit") }}{{ $a = merge $a (dict "unit" .) }}{{ end -}}
+    {{- with $.Get (print . "-digits") }}{{ $a = merge $a (dict "digits" (int .)) }}{{ end -}}
+    {{- with $.Get (print . "-domain") }}{{ $a = merge $a (dict "domain" (split . " ")) }}{{ end -}}
+    {{- with $.Get (print . "-ticks") }}{{ $a = merge $a (dict "ticks" (split . " ")) }}{{ end -}}
+    {{- with $.Get (print . "-narrow") }}{{ $a = merge $a (dict "narrow" (split . " ")) }}{{ end -}}
+    {{- $axis = merge $axis (dict . $a) -}}
+  {{- end -}}
+  {{- $colors := split (.Get "colors" | default "") " " -}}
+  {{- $shapes := split (.Get "shapes" | default "") " " -}}
+  {{- $series := slice -}}
+  {{- range $i := seq (math.Max 1 (len $colors) (len $shapes) | int) -}}
+    {{- $o := dict -}}
+    {{- if lt (sub $i 1) (len $colors) }}{{ with index $colors (sub $i 1) }}{{ $o = merge $o (dict "color" .) }}{{ end }}{{ end -}}
+    {{- if lt (sub $i 1) (len $shapes) }}{{ with index $shapes (sub $i 1) }}{{ $o = merge $o (dict "shape" .) }}{{ end }}{{ end -}}
+    {{- $series = $series | append $o -}}
+  {{- end -}}
+  {{- $rules := slice -}}
+  {{- with .Get "rule" }}{{ $rules = slice (dict "x" . "label" ($.Get "rule-label" | default "")) }}{{ end -}}
+  {{- $zones := slice -}}
+  {{- with .Get "zone" -}}
+    {{- $z := split . " " -}}
+    {{- if eq (len $z) 2 }}{{ $zones = slice (dict "from" (index $z 0) "to" (index $z 1) "label" ($.Get "zone-label" | default "")) }}
+    {{- else }}{{ warnf "chart: zone=%q wants two numbers, \"from to\" (%s)" . $pos }}{{ end -}}
+  {{- end -}}
+  {{- $spec = merge $spec (dict
+        "table" $inner "x" $axis.x "y" $axis.y "series" $series "rules" $rules "zones" $zones
+        "legend" (dict "title" (.Get "legend" | default "") "same" (.Get "same" | default "") "hollow" (.Get "hollow" | default ""))
+        "rest" (.Get "rest" | default "") "summary" (.Get "summary" | default "")
+        "height" (split (.Get "height" | default "") " ")) -}}
+  {{- $fb = printf "<div class=\"chart-fb\">\n%s</div>" ($p.RenderString (dict "display" "block") $inner) -}}
+{{- end -}}
+{{- $p.Store.Set "chart" true -}}
+<figure class="widget chart">
+<figcaption>{{ $cap }}{{ with $note }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
+<div class="w-root chart-root">
+{{ $fb | safeHTML }}
+</div>
+<script type="application/json" class="chart-spec">{{ $spec | jsonify | safeJS }}</script>
+</figure>

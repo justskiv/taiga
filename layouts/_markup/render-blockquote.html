@@ -11,6 +11,13 @@
          > [!epigraph] source        a quotation on the threshold of a guide,
                                      a section or a series page
 
+       And one block that is not a voice but a row of numbers (31-data.css):
+
+         > [!stats] caption          a list, one big number per item:
+         > - **30%** label *sub*     value first and bold, a trailing italic is
+                                     the quiet line under it; the caption
+                                     goes under the row
+
        `>>` is detected, not parsed: an outer quote whose whole text is ONE inner
        quote (rendered a moment earlier by this same hook, so always a bare
        <blockquote>) is a thesis. A real quote nested inside a quote has anything
@@ -33,7 +40,7 @@
 {{- $t := trim (string .Text) " \n" -}}
 {{- if eq .Type "alert" -}}
   {{- $type := .AlertType -}}
-  {{- if and .AlertSign (in (slice "aside" "recap" "epigraph") $type) -}}
+  {{- if and .AlertSign (in (slice "aside" "recap" "epigraph" "stats") $type) -}}
     {{- warnf "render-blockquote: [!%s]%s folds nothing — drop the sign (%s)" $type .AlertSign .Position -}}
   {{- end -}}
   {{- if eq $type "aside" -}}
@@ -52,6 +59,23 @@
 <figcaption>{{ . }}</figcaption>
 {{- end }}
 </figure>
+  {{- else if eq $type "stats" -}}
+    {{- /* The list stays a list — the markup Obsidian renders too, so one set
+           of rules reads both — and only its shape is checked: a tight list
+           of items that each open with the bold value. */ -}}
+    {{- $items := len (findRE `<li>` $t) -}}
+    {{- if not (and (hasPrefix $t "<ul>") (hasSuffix $t "</ul>") (eq (len (findRE `<ul>` $t)) 1)) -}}
+      {{- warnf "render-blockquote: [!stats] holds one list — «- **value** label *sub*» per line, nothing else (%s)" .Position -}}
+    {{- else if findRE `<li>\s*<p>` $t -}}
+      {{- warnf "render-blockquote: [!stats] list has blank lines between items — keep it tight (%s)" .Position -}}
+    {{- else if ne $items (len (findRE `<li><strong>` $t)) -}}
+      {{- warnf "render-blockquote: [!stats] every item opens with its value in bold, «- **30%%** label» (%s)" .Position -}}
+    {{- else if gt $items 4 -}}
+      {{- warnf "render-blockquote: [!stats] holds %d numbers — a row reads at four at most (%s)" $items .Position -}}
+    {{- end -}}
+<div class="stats{{ $class }}"{{ range $k, $v := .Attributes }}{{ if ne $k "class" }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+{{ .Text }}{{ with .AlertTitle }}<p class="stats-note">{{ . }}</p>
+{{ end }}</div>
   {{- else -}}
     {{- warnf "render-blockquote: unknown alert type [!%s], rendered as a plain quote (%s)" $type .Position -}}
 <blockquote{{ range $k, $v := .Attributes }} {{ $k }}="{{ $v }}"{{ end }}>

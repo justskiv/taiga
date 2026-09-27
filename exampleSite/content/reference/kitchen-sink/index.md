@@ -262,6 +262,102 @@ A memory diagram and a byte strip — raw HTML via `{{</* raw */>}}`:
 </div>
 {{< /raw >}}
 
+## Data figures {#data}
+
+Numbers the reader compares at a glance — written as Markdown, drawn by the
+theme, read by Obsidian from the same source (`docs/authoring.md#data`).
+
+A row of big numbers — a `[!stats]` callout over a list:
+
+> [!stats] promises from the release notes
+> - **up to 30%** cheaper small allocations *on a microbenchmark*
+> - **~1%** in real code *in programs that allocate a lot*
+> - **+60 KB** to the binary *whatever the load*
+
+A table cell with a detail — a trailing italic in a right-aligned column
+becomes a quieter second line:
+
+| 24 bytes | laptop | server |
+|---|---:|---:|
+| No pointers | −41% *9.2 → 5.5 ns* | −28% *27.0 → 19.5 ns* |
+| With a pointer | −46% *11.7 → 6.3 ns* | −36% *34.5 → 22.0 ns* |
+
+Bars, one series — the marked row full, the other a ghost, a note after the
+bar:
+
+{{< bars mark="2" note-color="green" >}}
+| | Binary growth |
+|---|--:|
+| **Go 1.26** *behind a flag, up to 512 B* | +155 KB |
+| **Go 1.27** *in the release, up to 80 B* | +44 KB *3.5× lighter* |
+{{< /bars >}}
+
+Bars, grouped — a group per row, a bar per column, framed when captioned:
+
+{{< bars colors="blue green" max="50" cap="Time saved per 24-byte allocation" note="— illustrative numbers" >}}
+| 24 bytes | laptop | server |
+|---|--:|--:|
+| No pointers | −41% | −28% |
+| With a pointer | −46% | −36% |
+| Through `make([]byte, 24)` | −33% | −19% |
+{{< /bars >}}
+
+Bars of a whole — the same saving, but every bar is the full old time and the
+saved part is marked at its end:
+
+{{< bars colors="blue green" whole="100" cap="How much of a 24-byte allocation the specialization took away" note="— illustrative numbers, a bar is the time without it" >}}
+| 24 bytes | laptop | server |
+|---|--:|--:|
+| No pointers | −41% | −28% |
+| With a pointer | −46% | −36% |
+| Through `make([]byte, 24)` | −33% | −19% |
+{{< /bars >}}
+
+Bars, stacked — the parts of one bar told apart by fill, a heading row, the
+exact parts printed at `digits`:
+
+{{< bars stack="true" digits="1" colors="green" unit=" ns" cap="How much of an allocation was the GC" note="— illustrative numbers" >}}
+| | **allocator** *stays with the ballast — the allocator itself* | **GC** *goes with the ballast — the collector's work* |
+|---|--:|--:|
+| **server** *win −28% → −35% with the ballast* | | |
+| off | 19.54 | 7.48 |
+| on | 12.79 | 6.70 |
+{{< /bars >}}
+
+A chart, inline — the table is the data, `*n*` a hollow point from another
+run:
+
+{{< chart x="object size, B" y="ns per allocation" x-unit=" B" y-unit=" ns" colors="blue green" hollow="laptop at 96 B — another run" cap="Cost by size" note="— illustrative numbers" >}}
+| Size | laptop | server |
+|--:|--:|--:|
+| 8 | 5.67 | 16.02 |
+| 24 | 9.00 | 24.42 |
+| 80 | 12.65 | 34.99 |
+| 96 | *13.18* | 34.61 |
+| 128 | 55.48 | 41.40 |
+{{< /chart >}}
+
+A chart from a file — `charts/ks-speedup.yaml` beside the page: two data
+sets under a toggle, a rule, a zone, `~`, a detail in the panel:
+
+{{< chart src="charts/ks-speedup.yaml" cap="Where the speed-up ends" note="— illustrative numbers" />}}
+
+A span and its bitmap, derived from the bits and the slot size — alone, and
+inside a {{< term word="definition" title="Span" kind="Definition" color="green" >}}
+A block of memory cut into equal slots, one bit per slot in its bitmap.
+
+{{< spanmap bits="11011000" size="16" >}}
+
+The first zero is where the next object goes.
+{{< /term >}}:
+
+{{< spanmap bits="111100" size="24" >}}
+
+A widget without its frame — `bare="true"`, the caption kept for screen
+readers:
+
+{{< widget cap="By hand" bare="true" >}}<p><b>1 million</b> allocations a second save <b>3.75 ms</b> every second.</p>{{< /widget >}}
+
 ## Widgets {#widgets}
 
 Form 1 — an empty mount, brought to life by `Taiga.widget` from `widgets.js`:

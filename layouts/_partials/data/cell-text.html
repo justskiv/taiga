@@ -1,0 +1,15 @@
+{{- /* A read cell (data/cell.html) as a no-JS table prints it: the value at
+       the data set's digits with its unit, "~" for no difference, "—" for no
+       data. The same text the chart's panel shows (valText in
+       assets/js/charts/core.js); the detail and the hollow mark are the
+       caller's.
+
+       Takes dict "c" (the read cell) "d" (digits) "unit". */ -}}
+{{- $c := .c -}}
+{{- $out := "—" -}}
+{{- if eq $c.kind "same" -}}
+  {{- $out = "~" -}}
+{{- else if in (slice "val" "alt") $c.kind -}}
+  {{- $out = print (partial "data/fmt.html" (dict "v" $c.v "d" .d)) (.unit | default "") -}}
+{{- end -}}
+{{- return $out -}}

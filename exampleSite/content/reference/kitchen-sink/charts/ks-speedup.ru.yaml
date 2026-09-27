@@ -1,0 +1,35 @@
+# Demo data for the kitchen sink — illustrative numbers, not a measurement.
+# The file form of {{< chart >}}: two data sets under a toggle, a rule, a zone,
+# "~" cells (no measurable difference) and a detail after each value.
+# The Russian twin of ks-speedup.yaml.
+x: {title: "размер объекта, Б", unit: " Б", domain: [0, 136], ticks: [8, 16, 32, 48, 64, 80, 96, 128], narrow: [8, 32, 80, 128]}
+y: {title: "насколько дешевле одна аллокация", unit: "%", digits: 0, domain: [0, -50], ticks: [0, -10, -20, -30, -40, -50]}
+series:
+  - {name: ноутбук, color: blue, shape: circle}
+  - {name: сервер, color: green, shape: square}
+rules: [{x: 80, label: "80 Б"}]
+zones: [{from: 80, to: 136, label: "общий путь"}]
+legend: {same: "~ — разницы не видно"}
+rest: 80
+summary: "До 80 байт обе машины экономят на каждой аллокации; с 96 байт разницы нет."
+modes:
+  - label: без указателей
+    rows:
+      - [8, "-38 *5,7 → 3,5 нс*", "-30 *14,9 → 10,4 нс*"]
+      - [16, "-37 *7,6 → 4,8 нс*", "-32 *26,8 → 18,2 нс*"]
+      - [32, "-36 *9,4 → 6,0 нс*", "-31 *28,5 → 19,7 нс*"]
+      - [48, "-27 *9,9 → 7,2 нс*", "-27 *30,4 → 22,2 нс*"]
+      - [64, "-22 *10,8 → 8,4 нс*", "-27 *32,4 → 23,7 нс*"]
+      - [80, "-20 *12,5 → 10,0 нс*", "-25 *33,5 → 25,1 нс*"]
+      - [96, "~", "~"]
+      - [128, "~", "~"]
+  - label: с указателем
+    rows:
+      - [8, -35, -33]
+      - [16, -43, -35]
+      - [32, -43, -34]
+      - [48, -37, -30]
+      - [64, -32, -30]
+      - [80, -29, -26]
+      - [96, "~", -6]
+      - [128, null, "~"]

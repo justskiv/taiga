@@ -13,18 +13,25 @@
 
        A leading <!-- … --> header comment inside a figure file is metadata and
        is stripped here so it never reaches the DOM. cap defaults to the i18n
-       "widget_cap" («Play»); note is the muted instruction after it. */ -}}
+       "widget_cap" («Play»); note is the muted instruction after it.
+
+       bare="true" drops the frame for a figure that has to read as part of
+       the prose — an explorable sentence, a slider under a paragraph. The
+       caption is hidden from the eye but kept as the figure's accessible
+       name, so `cap` still names it. */ -}}
 {{- $id := .Get "id" -}}
 {{- $cap := .Get "cap" | default (i18n "widget_cap") -}}
 {{- $note := .Get "note" -}}
+{{- /* Hugo hands bare="false" over as a non-empty string: compare, do not test */ -}}
+{{- $bare := eq (.Get "bare" | default "" | string) "true" -}}
 {{- $inner := .Inner -}}
 {{- if and $id (not (trim (string $inner) " \n\r\t")) -}}
   {{- with .Page.Resources.Get (printf "widgets/%s/figure.html" $id) -}}
     {{- $inner = .Content | replaceRE `(?s)\A\s*<!--.*?-->\s*` "" -}}
   {{- end -}}
 {{- end -}}
-<figure class="widget">
-<figcaption>{{ $cap }}{{ with $note }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
+<figure class="widget{{ if $bare }} is-bare{{ end }}">
+<figcaption{{ if $bare }} class="vh"{{ end }}>{{ $cap }}{{ with $note }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
 {{- if $id }}
 <div id="{{ $id }}" class="w-root">{{ with $inner }}{{ . | safeHTML }}{{ end }}</div>
 {{- else }}

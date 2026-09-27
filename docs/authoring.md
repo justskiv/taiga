@@ -468,6 +468,25 @@ Three forms (see [Widgets](#widgets)):
   shortcode rather than in its own file.
 - **raw** (no `id`, inner only): the inner HTML is dropped straight into the figure.
 
+`bare="true"` drops the frame: no border, no padding, the caption hidden from
+the eye but kept as the figure's accessible name. For a figure that has to read
+as part of the prose — an explorable sentence, a slider under a paragraph.
+
+### bars — `{{</* bars */>}}` + a table {#bars-shortcode}
+
+Horizontal bars from a Markdown table: one series, grouped, or stacked. See
+[Data figures → bars](#bars).
+
+### chart — `{{</* chart */>}}` + a table, or `{{</* chart src="…" /*/>}}` {#chart-shortcode}
+
+A line chart drawn from data alone — a table in the body, or a YAML file in the
+bundle. See [Data figures → chart](#chart).
+
+### spanmap — `{{</* spanmap bits="111100" size="24" */>}}` {#spanmap-shortcode}
+
+A span's slots and its allocation bitmap, derived from the bits. See
+[Data figures → spanmap](#spanmap).
+
 ### bigcard — `{{</* bigcard href="/playground/" k="Playground →" t="…" s="…" */>}}` {#bigcard}
 
 A link card: `k` kicker, `t` title, `s` subtitle. An internal `href` is resolved
@@ -477,7 +496,10 @@ to its permalink (and so survives a slug change); an external one passes through
 
 Passes its inner HTML through untouched — for the hand-built diagrams below.
 Unlike a bare HTML block in Markdown, a shortcode captures its body whole, so
-blank lines inside don't cut the block short.
+blank lines inside don't cut the block short — at the top level. Inside a
+`{{</* term */>}}` the body is Markdown rendered after the shortcode, and there
+a blank line in the HTML still ends the block. Before reaching for raw HTML,
+look at [Data figures](#data): in Obsidian raw HTML is a wall of source.
 
 ### run — `{{</* run sandbox="go1.26.4" */>}}…{{</* /run */>}}` {#run}
 
@@ -767,6 +789,259 @@ The theme has no images in guides — memory diagrams are hand-built HTML inside
 - Byte strip: `.byte-strip > .byte-seg > .cells > .byte-box.{f0|f1|f2|pad}`
   plus a `.seg-tag` label (`.seg-tag.padtag` for padding).
 - A worked example of both sits on the demo's `reference/kitchen-sink` page.
+- A span and its bitmap has a shortcode of its own, `{{</* spanmap */>}}`, and
+  numbers have [Data figures](#data): prefer those — in Obsidian raw HTML shows
+  as a wall of source.
+
+## Data figures {#data}
+
+Numbers a reader should compare at a glance — a row of promises, two sizes
+against each other, a curve with a cliff in it — are written as **data in
+Markdown**, and the theme draws them. No HTML in the guide, no widget to write:
+the same source reads as a plain list or table in any Markdown viewer, and
+Obsidian draws it too (the Taiga theme and the taiga-companion plugin).
+
+| What | Write | Drawn by |
+|---|---|---|
+| A row of 2–4 big numbers | `> [!stats]` over a list | CSS only |
+| A number with its detail in a table | `−41% *9,2 → 5,5 ns*` in a right-aligned cell | CSS only |
+| Horizontal bars — one series, groups, parts | `{{</* bars */>}}` + a table | HTML/CSS, a tiny label fitter |
+| A line chart with a reading panel | `{{</* chart */>}}` + a table, or a YAML file | Observable Plot, loaded on demand |
+| A span's slots and bitmap | `{{</* spanmap bits="111100" size="24" */>}}` | HTML/CSS |
+
+One grammar runs through all of them: **bold** is the thing, a trailing
+*italic* is the quiet addition — a source, a detail, a note. Numbers print the
+page language's way (`num_decimal`, `num_group` in i18n) with a real minus sign.
+
+The theme's own `hugo.toml` sets no markup options; a site using these needs
+`markup.goldmark.renderer.unsafe = true` (the demo and golang.guide have it) —
+the figures are HTML the shortcodes emit into the Markdown flow.
+
+### stats — a row of big numbers {#stats}
+
+```md
+> [!stats] promises from the release notes
+> - **up to 30%** cheaper small allocations *on a microbenchmark*
+> - **~1%** in real code *in programs that allocate a lot*
+> - **+60 KB** to the binary *whatever the load*
+```
+
+- Each item opens with its value in **bold**; the text after it is the label; a
+  trailing *italic* is the quiet line under it (hidden on a phone, where the row
+  is three columns of ~110px).
+- The text on the marker line is the caption under the row. It may be empty.
+- 2–4 items, a tight list (no blank lines between items). The render hook
+  warns about anything else — and CI builds with `--panicOnWarning`.
+- It stays a `<ul>` in the page: a screen reader reads «list, 3 items», and a
+  feed reader shows a list.
+
+### A number with its detail, in a table {#table-details}
+
+```md
+| 24 bytes | M4 Pro | Genoa |
+|---|---:|---:|
+| No pointers | −41% *9,2 → 5,5 ns* | −28% *27,0 → 19,5 ns* |
+```
+
+In a **right-aligned** column, a trailing italic after some text becomes a
+second, quieter line under the number — the absolute values behind a
+percentage. A cell that is all italic stays italic, and other columns are left
+alone. This replaces `−41%<br><small>…</small>`.
+
+### bars {#bars}
+
+```md
+{{</* bars mark="2" note-color="green" */>}}
+| | Binary growth |
+|---|--:|
+| **Go 1.26** *behind a flag, up to 512 B* | +155 KB |
+| **Go 1.27** *in the release, up to 80 B* | +44 KB *3.5× lighter* |
+{{</* /bars */>}}
+```
+
+- **The first column** labels a row: `**name** *sub*` stacks the two, plain
+  text is just a name.
+- **A value cell** prints as written; its **first number** is the bar's length
+  (a comma is a decimal mark, thousands take a space, `−` and `-` both read as
+  minus, the magnitude is drawn). A trailing `*italic*` is a note after the bar.
+  `~` or an empty cell shows its text with no bar.
+- **Shape follows the table.** One value column: a bar per row. Several: a
+  group per row, a bar per column in the column's colour, the column's header
+  as the bar's name. `stack="true"`: the columns are parts of one bar, told
+  apart by fill (solid, hatched, washed — so three parts at most, a fourth
+  warns), the total at the tip, the parts spelled out under it, and a key
+  from the header — `**short** *longer*` gives a part its name and its key
+  line.
+- **A row whose value cells are all empty** is a group heading: `**Genoa**
+  *win −28% → −35%*` puts the name left and the italic right.
+- **`whole="100"`: every bar is the whole**, and a value is the part of it
+  marked at the bar's end — the same hue washed out, the label inside that
+  part (on the solid just before it when the part is too thin). For a saving
+  or a share per machine: `−41%` is the time the change took away from a
+  full bar of the old time. Nothing else is drawn — no total, no key; say
+  what the bar is in the caption.
+
+| Parameter | Meaning |
+|---|---|
+| `colors` | Per column (per group in a stack): `ink` `ghost` `blue` `green` `red` `gold` `violet` `copper` `accent`. Default: `ink` for one series, the palette order otherwise. |
+| `max` | The scale's right end. Default: the longest bar. |
+| `mark` | Rows drawn full, 1-based as in the table (`mark="2"`, `mark="1 3"`); every other row turns `ghost`. |
+| `stack` | `"true"` — see above. Always written with a value: Hugo cannot mix a bare flag with named parameters. |
+| `unit` | After a stack's total, as written (`unit=" ns"`). |
+| `digits` | A stack prints its parts and total at this many decimals. Write the parts exact (`32,25` + `20,68`) and the total reads 52,9 — not the 53,0 the rounded parts would add up to. |
+| `note-color` | The colour of the notes after the bars. Default: the secondary text colour. |
+| `whole` | Every bar stands for this much (`whole="100"` for percentages) — see above. Mixes with neither `stack` nor `max`. |
+| `cap`, `note` | A caption puts the bars in the widget's frame, the way a widget is captioned. Without one they sit in the prose. |
+
+A label goes inside its bar's end, in an ink picked per hue and palette for
+contrast; too short a bar gives it out past the end. That is guessed at build
+time and measured on the page (`modules/barsfit.js`). A bar's length comes from
+the text as printed, so `−41%` draws 41, not the 40,58 behind it — invisible at
+this scale.
+
+### chart {#chart}
+
+A line chart — points joined per series, a crosshair that snaps to the nearest
+measured x, a reading panel after Grafana's (numbers and details per series, it
+follows the pointer and never covers the point being read), a readout line
+above the chart on touch screens, arrow keys on the keyboard. Two forms:
+
+````md
+{{</* chart x="object size, B" y="ns per op" x-unit=" B" y-unit=" ns" colors="blue green red" cap="The 128-byte outlier" */>}}
+| Size | M4 Pro | Genoa | Skylake |
+|--:|--:|--:|--:|
+| 80 | 12,65 | 34,99 | 68,07 |
+| 96 | *13,18* | 34,61 | 70,30 |
+| 128 | 55,48 | 41,40 | 78,31 |
+{{</* /chart */>}}
+
+{{</* chart src="charts/alloc-cliff.yaml" cap="Where the speed-up ends" note="— go1.27, off → on" /*/>}}
+````
+
+The **inline form** is the simple case — one data set, options as parameters.
+The first column is x (its first number), each further column a series named
+by its header. The **file form** takes everything from a YAML file in the page
+bundle, and must **self-close** (`/>`): a chart reads its body, so an unclosed
+tag would swallow the text after it.
+
+**The cell grammar** — the same in a table, in YAML, in Obsidian:
+
+| Cell | Meaning |
+|---|---|
+| `12,65` | a value |
+| `*13,18*` | a hollow point from another source — never joined, and it breaks the line |
+| `~` | no measurable difference: a hollow point on the zero line, dashed to its neighbours |
+| empty, `null`, `—` | no data: the line breaks |
+| `12,65 *detail*` | any of the above with a detail for the panel and the no-JS table |
+
+Inline parameters: `x`, `y` (titles), `x-unit`, `y-unit` (after values; a unit
+without a leading space — `%` — rides on the tick labels too), `x-digits`,
+`y-digits`, `x-domain`, `y-domain` (`"0 136"`; a reversed domain such as
+`"0 -50"` draws magnitudes upward), `x-ticks`, `y-ticks`, `x-narrow` (x ticks
+below 480px), `colors`, `shapes` (`circle square triangle diamond star
+cross`), `rule` + `rule-label`, `zone` (`"80 136"`) + `zone-label`, `legend`,
+`same`, `hollow` (legend lines for `~` and hollow points), `rest` (the x the
+touch readout shows at rest), `summary` (a sentence for screen readers),
+`height` (`"250 290"`: narrow and wide), `cap`, `note`. Unknown parameters
+warn.
+
+**The file form**, `charts/alloc-cliff.yaml` beside `index.md`:
+
+```yaml
+x: {title: "object size, B", unit: " B", domain: [0, 136], ticks: [8, 24, 80, 128], narrow: [8, 80, 128]}
+y: {title: "time saved per allocation", unit: "%", digits: 0, domain: [0, -50]}
+series:
+  - {name: M4 Pro, color: blue, shape: circle, note: "×4,4"}   # note: bold, after the name in the key
+  - {name: Genoa, color: green, shape: square}
+rules: [{x: 80, label: "80 B"}]
+zones: [{from: 80, to: 136, label: "generic path"}]
+jumps: [{series: M4 Pro, from: 80, to: 128, label: "×4,4"}]    # an arrow from one x to another
+legend: {title: "80 → 128 B:", same: "~ — no measurable difference", hollow: "another run"}
+rest: 80
+summary: "Up to 80 bytes every machine saves time; from 88 bytes on, none does."
+modes:                                    # a segmented toggle — or `rows:` for one data set
+  - label: no pointers
+    rows:
+      - [80, "-20.47 *12,5 → 10,0 ns*", -25.53]
+      - [88, "~", "~"]
+  - label: with a pointer
+    rows:
+      - [80, -29.74, -26.03]
+      - [88, "~", -5.62]
+```
+
+- Keys are lowercase. `rows` and `modes` exclude each other (a build error).
+- **Quote `"~"`**: bare `~` is YAML's null, which draws no point at all. Quote
+  anything YAML could read as something else (`yes`, `no`, `0x10`).
+- A row is `[x, one cell per series]`; a short or long row warns.
+- **Two languages:** Hugo gives `alloc-cliff.ru.yaml` to the Russian page under
+  the name `alloc-cliff.yaml`, so a bilingual guide keeps one `src`.
+- The file is read at build time and is not published.
+
+**What ships.** The figure carries a table of every mode — the no-JS view, what
+a feed reader gets, what stays when Plot fails to load, and what a screen reader
+keeps once the chart is drawn — plus the data as JSON. The runtime
+(`assets/js/charts/`) and Observable Plot load only on pages with a chart, and
+Plot only as the figure comes near the viewport; colours are palette roles, so
+switching the palette repaints the chart with no JavaScript.
+
+**The runtime is shared.** The Obsidian plugin draws charts with a byte copy of
+`assets/js/charts/{core,fmt}.js` and the same Plot build; its drift check fails
+the moment the two part. The grammar's test vectors
+(`assets/js/charts/cases.json`) run through the runtime and through the Hugo
+partials that print the no-JS tables: `node scripts/check-charts.mjs`.
+
+### spanmap {#spanmap}
+
+```md
+{{</* spanmap bits="111100" size="24" */>}}
+```
+
+A span of equal slots and its allocation bitmap, one bit per slot. The chosen
+slot is the first zero — the allocation rule the figure teaches — and the
+measure over the strip and the address in the conclusion are its index times
+the slot size. 2–12 bits; `unit` overrides the byte sign; the words come from
+i18n (`spanmap_*`). A full map says so instead of picking.
+
+It works inside a `{{</* term */>}}` card — on a line of its own, with blank
+lines around it (the card's body is Markdown, and the figure must reach it as
+one HTML block).
+
+### Numbers and Plot in your own widgets {#data-helpers}
+
+A widget that needs what the figures have gets it from the theme instead of
+carrying a copy:
+
+- `Taiga.fmt(v, digits)` — a number the way the figures print it: the page
+  language's decimal mark, a real minus, half-up on the printed digit, never
+  `−0`. `Taiga.num("−41%")` reads the first number out of a string.
+- `Taiga.plot()` — a promise of the Plot namespace, one request per page;
+  `Taiga.plotWhenNear(root, live)` calls `live(Plot)` once `root` comes near
+  the viewport. Both need front matter `plot: true` (a chart turns it on by
+  itself). The build carries the marks `plot dot link arrow text rect ruleX
+  ruleY gridY`; `scripts/vendor-plot/` rebuilds it with more.
+
+In Obsidian, widgets run in a sandboxed frame: `Taiga.fmt` is there,
+`Taiga.plot()` rejects and the widget keeps its `figure.html`.
+
+### Which one — a checklist for authors and agents {#data-checklist}
+
+- **Two to four headline numbers** before a section argues with them →
+  `[!stats]`.
+- **A percentage with the absolute values behind it** in a table → a detail
+  cell, not `<br><small>`.
+- **A few magnitudes side by side** (sizes, costs, times) → `bars`; several
+  machines or forms → groups; a total and its share → a stack; a saving or a
+  share per machine → `whole="100"`.
+- **How a value changes along x** (sizes, versions, load) → `chart`; one data set
+  → the inline table, anything richer → a YAML file.
+- **A span, a bitmap, a slot** → `spanmap`.
+- **Anything else** — an interaction that explains a mechanism → a
+  [widget](#widgets). Never raw HTML in the Markdown for a figure the list above
+  covers.
+- Check it: the site's build with `--panicOnWarning` (the shortcodes warn on
+  every malformed cell and parameter), then the page in the browser, light
+  palette included, and at 360px.
 
 ## Widgets {#widgets}
 
@@ -809,7 +1084,10 @@ of your own CSS: `.w-row` (control row), `.w-btn` (`.primary`/`.ghost`),
 `.w-num` (big number; add `.tick` to its `<b>` to animate a change),
 `.w-badge.ok`/`.alloc`, `.w-cap` (output line), sliders as `.gc-slider-row` with
 a `.nval` readout. A widget should work offline with no dependencies and have a
-clear initial state.
+clear initial state. Numbers print through `Taiga.fmt`, and a widget that draws
+with Observable Plot loads it through `Taiga.plot` — see
+[Data figures → helpers](#data-helpers); a figure that must read as part of the
+prose drops its frame with `bare="true"`.
 
 ### One widgets/ folder, two languages {#widgets-i18n}
 

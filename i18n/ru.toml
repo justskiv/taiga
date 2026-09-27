@@ -91,6 +91,54 @@ other = "Итог"
 [widget_cap]
 other = "Поиграй"
 
+# {{< chart >}}: подпись, когда её не дали, имя сцены для скринридера,
+# нет значения, и строки легенды для «~» и полой точки
+[chart_cap]
+other = "График"
+[chart_stage]
+other = "График; стрелки влево и вправо выбирают точку"
+[chart_no_data]
+other = "нет данных"
+[chart_same]
+other = "~ — разницы не видно"
+[chart_hollow]
+other = "полые — из другого прогона"
+[chart_modes]
+other = "Набор данных"
+
+# числа в фигурах с данными (графики, полосы): десятичный знак и знак между
+# разрядами — с пяти цифр целой части («1234», «12 345»)
+[num_decimal]
+other = ","
+[num_group]
+other = "\u00a0"
+
+# {{< spanmap >}}: слоты спана и его битовая карта. {{ .Size }}, {{ .Unit }},
+# {{ .Count }} слотов, {{ .Bits }} карта через пробел, {{ .N }} выбранный
+# слот, {{ .Off }} его смещение — всё подставляет шорткод
+[spanmap_unit]
+other = "Б"
+[spanmap_cap]
+other = "слоты по {{ .Size }}\u00a0{{ .Unit }}"
+[spanmap_used]
+other = "занят"
+[spanmap_free]
+other = "свободен"
+[spanmap_slot]
+other = "слот"
+[spanmap_map]
+other = "карта"
+[spanmap_rule]
+other = "выделить = найти в карте первый ноль"
+[spanmap_addr]
+other = "это слот\u00a0{{ .N }}: адрес = начало спана + {{ .Off }}\u00a0{{ .Unit }}"
+[spanmap_full]
+other = "нулей в карте нет — свободных слотов не осталось"
+[spanmap_aria]
+other = "Спан из {{ .Count }} слотов по {{ .Size }} {{ .Unit }}. Карта битов: {{ .Bits }}. Первый ноль — слот {{ .N }}; его адрес — начало спана плюс {{ .N }} × {{ .Size }} = {{ .Off }} {{ .Unit }}."
+[spanmap_aria_full]
+other = "Спан из {{ .Count }} слотов по {{ .Size }} {{ .Unit }}. Карта битов: {{ .Bits }}. Нулей нет — свободных слотов не осталось."
+
 # inline table of contents + rails
 [toc_heading]
 other = "Содержание"

@@ -1,0 +1,46 @@
+{{- /* One bar of {{< bars >}} (a plain one, or one of a group): its name,
+       the bar with its value at the end, and a note after it. The value and
+       the note are rendered Markdown, so `code` in a cell stays code.
+
+       Text order is reading order — name, value, note — so a screen reader
+       and a feed reader get a clean sentence; the bar itself is a sized box
+       carrying the value, nothing to announce.
+
+       The label sits inside the bar's end unless the bar is too short for
+       it. That is guessed here for a ~300px track (7px a mono character,
+       16px of padding) and measured on the page by modules/barsfit.js, which
+       moves the class as the column narrows or widens.
+
+       In a whole (whole="100") the bar runs the full track and its value is
+       the part marked at its end: the label sits inside that part, and the
+       guess is made for the part, not the bar.
+
+       Takes dict "page" "name" "sub" (name is a column's short name, printed
+       plain) "val" (dict text note v) "big" (the scale) "c" (colour role)
+       "row" (dict i) "marks" (the rows to draw full) "whole" (bool). */ -}}
+{{- $p := .page -}}
+{{- $v := .val -}}
+{{- $c := .c -}}
+{{- $marked := false -}}
+{{- if and (not .sub) .marks -}}
+  {{- if in .marks (string .row.i) }}{{ $marked = true }}{{ else }}{{ $c = "ghost" }}{{ end -}}
+{{- end -}}
+{{- $name := cond .sub (htmlEscape .name) (string ($p.RenderString .name)) -}}
+{{- $chars := strings.RuneCount $v.text -}}
+{{- $cls := slice "bars-r" -}}
+{{- if $marked }}{{ $cls = $cls | append "is-mark" }}{{ end -}}
+{{- $lane := "" -}}
+{{- if and $v.v .whole -}}
+  {{- $cut := div (math.Round (mul (div (math.Abs $v.v.v) .big) 10000)) 10000.0 -}}
+  {{- if lt (mul $cut 300) (add (mul $chars 7) 16) }}{{ $cls = $cls | append "is-out" }}{{ end -}}
+  {{- $lane = printf "<span class=\"bars-bar is-whole\" style=\"--f:1.0000;--p:%.4f\"><span class=\"bars-cut\"><b class=\"bars-v\">%s</b></span></span>" $cut ($p.RenderString $v.text) -}}
+{{- else if $v.v -}}
+  {{- $f := div (math.Round (mul (div (math.Abs $v.v.v) .big) 10000)) 10000.0 -}}
+  {{- if lt (mul $f 300) (add (mul $chars 7) 16) }}{{ $cls = $cls | append "is-out" }}{{ end -}}
+  {{- $lane = printf "<span class=\"bars-bar\" style=\"--f:%.4f\"><b class=\"bars-v\">%s</b></span>" $f ($p.RenderString $v.text) -}}
+{{- else -}}
+  {{- $cls = $cls | append "is-na" -}}
+  {{- $lane = printf "<b class=\"bars-v\">%s</b>" ($p.RenderString ($v.text | default "—")) -}}
+{{- end -}}
+{{- with $v.note }}{{ $lane = printf "%s<span class=\"bars-note\">%s</span>" $lane ($p.RenderString .) }}{{ end -}}
+{{- return printf "<div class=\"%s\" style=\"--c:var(--dv-%s);--on:var(--dv-%s-on);--lw:%d\">\n<span class=\"bars-nm\">%s</span>\n<span class=\"bars-lane\">%s</span>\n</div>\n" (delimit $cls " ") $c $c $chars $name $lane -}}

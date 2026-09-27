@@ -1,0 +1,35 @@
+{{- /* The first number written in a value — the same reading as numMatch in
+       assets/js/charts/fmt.js, checked against the same vectors
+       (assets/js/charts/cases.json). A number passes through; a string gives
+       the first number in it: a sign right before the digits (- or U+2212), a
+       comma or a dot as the decimal mark, spaces between digit groups —
+       "−41%" → −41, "+155 КБ" → 155, "1 234,5" → 1234.5. A comma is always a
+       decimal mark, so thousands take a space only.
+
+       Returns dict "v" (float) "dec" (decimals as written), or false. */ -}}
+{{- $out := false -}}
+{{- $in := . -}}
+{{- if in (slice "int" "int64" "int32" "uint" "uint64" "float64" "float32") (printf "%T" $in) -}}
+  {{- $s := printf "%v" $in -}}
+  {{- $dec := 0 -}}
+  {{- with findRESubmatch `\.(\d+)$` $s 1 }}{{ $dec = len (index (index . 0) 1) }}{{ end -}}
+  {{- if strings.Contains $s "e" }}{{ $dec = 6 }}{{ end -}}
+  {{- $out = dict "v" (float $in) "dec" (math.Min $dec 6 | int) -}}
+{{- else if $in -}}
+  {{- $s := string $in -}}
+  {{- /* twice: RE2 has no lookahead, and a match eats the digit after the gap */ -}}
+  {{- $s = replaceRE `(\d)[ \x{00a0}\x{202f}\x{2009}](\d)` "${1}${2}" $s -}}
+  {{- $s = replaceRE `(\d)[ \x{00a0}\x{202f}\x{2009}](\d)` "${1}${2}" $s -}}
+  {{- with findRESubmatch `([+\-\x{2212}]?)(\d+(?:[.,]\d+)?|[.,]\d+)` $s 1 -}}
+    {{- $m := index . 0 -}}
+    {{- $body := replace (index $m 2) "," "." -}}
+    {{- $v := float $body -}}
+    {{- if in (slice "-" "−") (index $m 1) }}{{ $v = mul -1.0 $v }}{{ end -}}
+    {{- if eq $v 0.0 }}{{ $v = 0.0 }}{{ end -}}
+    {{- $parts := split $body "." -}}
+    {{- $dec := 0 -}}
+    {{- if gt (len $parts) 1 }}{{ $dec = len (index $parts 1) }}{{ end -}}
+    {{- $out = dict "v" $v "dec" $dec -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

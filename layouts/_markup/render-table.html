@@ -1,5 +1,10 @@
 {{- /* Wrap every markdown table in <div class="tbl-wrap"> (the mock's scroll box),
-       reproducing Hugo's default table output inside. */ -}}
+       reproducing Hugo's default table output inside.
+
+       One addition: a right-aligned cell that ends in an italic after some
+       text — `−41% *9,2 → 5,5 нс*` — is marked has-detail, and the italic
+       becomes a quieter second line under the number (31-data.css). A cell
+       that is all italic is left alone, and so is every other column. */ -}}
 <div class="tbl-wrap">
   <table{{ range $k, $v := .Attributes }} {{ $k }}="{{ $v }}"{{ end }}>
     <thead>
@@ -15,7 +20,7 @@
       {{- range .TBody }}
       <tr>
         {{- range . }}
-        <td{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}>{{ .Text }}</td>
+        <td{{ with .Alignment }} style="text-align: {{ . }}"{{ end }}{{ if and (eq .Alignment "right") (findRE `\S\s*<em>[^<]*</em>\s*$` (string .Text)) }} class="has-detail"{{ end }}>{{ .Text }}</td>
         {{- end }}
       </tr>
       {{- end }}

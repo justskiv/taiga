@@ -1,0 +1,66 @@
+{{- /* A span and its allocation bitmap — the strip of equal slots, one bit per
+       slot, and where the next allocation lands:
+
+         {{< spanmap bits="111100" size="24" >}}
+
+       Everything else is derived. The slots are the bits (1 taken, 0 free),
+       the chosen slot is the first 0 — that IS the allocation rule the figure
+       teaches — and the measure over the strip and the address in the
+       conclusion are its index times the slot size. The words come from
+       i18n (spanmap_*), so a guide carries no markup and no prose to keep in
+       step with the numbers. A full map says so instead of picking.
+
+       Works inside a {{< term >}} card. The card's body is Markdown rendered
+       after this shortcode, and Goldmark reads the output as an HTML block —
+       which ends at the first blank line. So the markup below is one block
+       with no blank line in it and starts at column 0, and the call must
+       stand on a line of its own with blank lines around it. The root stays a
+       bare <div class="span-fig">: 23-term.css widens a card holding a block
+       child by that shape.
+
+       The styles are 08-diagrams.css; the slot count and the measure's span
+       arrive as --sp-n / --sp-pick (31-data.css), so any map from 2 to 12
+       slots draws on the same grid.
+
+       bits  required  2–12 of 0 and 1
+       size  required  bytes per slot
+       unit  optional  after the numbers (i18n spanmap_unit: Б / B) */ -}}
+{{- $pos := .Position -}}
+{{- $bits := .Get "bits" | default "" -}}
+{{- $size := .Get "size" | default "" -}}
+{{- if not (findRE `^[01]{2,12}$` $bits) -}}
+  {{- errorf "spanmap: bits=%q wants 2–12 of 0 and 1, one per slot (%s)" $bits $pos -}}
+{{- end -}}
+{{- $sz := partial "data/num.html" $size -}}
+{{- if or (not $sz) (le $sz.v 0.0) -}}
+  {{- errorf "spanmap: size=%q wants the bytes per slot, a positive number (%s)" $size $pos -}}
+{{- end -}}
+{{- $unit := .Get "unit" | default (i18n "spanmap_unit") -}}
+{{- $n := len $bits -}}
+{{- $cells := split $bits "" -}}
+{{- $pick := -1 -}}
+{{- range $i, $b := $cells }}{{ if and (lt $pick 0) (eq $b "0") }}{{ $pick = $i }}{{ end }}{{ end -}}
+{{- $sizeText := partial "data/fmt.html" (dict "v" $sz.v "d" $sz.dec) -}}
+{{- $off := partial "data/fmt.html" (dict "v" (mul $sz.v (math.Max $pick 0)) "d" $sz.dec) -}}
+{{- $words := dict "Count" $n "Size" $sizeText "Unit" $unit "Bits" (delimit $cells " ") "N" $pick "Off" $off -}}
+{{- $aria := cond (ge $pick 0) (i18n "spanmap_aria" $words) (i18n "spanmap_aria_full" $words) -}}
+<div class="span-fig" role="img" aria-label="{{ $aria }}" style="{{ printf "--sp-n:%d;--sp-pick:%d" $n (math.Max $pick 1 | int) | safeCSS }}">
+<div class="span-cap">{{ i18n "spanmap_cap" $words }}<span class="span-key"><span><i class="span-slot used"></i>{{ i18n "spanmap_used" }}</span><span><i class="span-slot free"></i>{{ i18n "spanmap_free" }}</span></span></div>
+{{- if gt $pick 0 }}
+<div class="span-row"><span class="span-rl"></span><span class="span-measure"><b>{{ $pick }} × {{ $sizeText }}&nbsp;{{ $unit }}</b></span></div>
+{{- end }}
+<div class="span-row"><span class="span-rl">{{ i18n "spanmap_slot" }}</span>
+{{- range $i, $b := $cells }}<span class="span-slot {{ cond (eq $b "1") "used" "free" }}{{ if eq $i $pick }} pick{{ end }}">{{ $i }}</span>{{ end -}}
+</div>
+<div class="span-row"><span class="span-rl">{{ i18n "spanmap_map" }}</span>
+{{- range $i, $b := $cells }}<span class="span-bit{{ if eq $b "1" }} one{{ end }}{{ if eq $i $pick }} pick{{ end }}">{{ $b }}</span>{{ end -}}
+</div>
+<div class="span-note">
+{{- if ge $pick 0 -}}
+<span>{{ i18n "spanmap_rule" }}</span><span>{{ i18n "spanmap_addr" $words }}</span>
+{{- else -}}
+<span>{{ i18n "spanmap_full" }}</span>
+{{- end -}}
+</div>
+</div>
+{{- /* no trailing blank line: the next line of the card's Markdown follows */ -}}

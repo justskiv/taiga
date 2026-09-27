@@ -1,0 +1,29 @@
+{{- /* A number printed the way the data figures print it — the same rules as
+       fmt in assets/js/charts/fmt.js, checked against the same vectors
+       (assets/js/charts/cases.json): half-up away from zero on the printed
+       digit (41.55 → 41,6, though the double is 41.5499…), a real minus
+       (U+2212) and never "−0", the language's decimal mark, and thousands
+       grouped only from five integer digits ("1234", "12 345"). The marks are
+       the i18n keys num_decimal / num_group.
+
+       Takes dict "v" (number) "d" (decimals). */ -}}
+{{- $v := float .v -}}
+{{- $d := int (.d | default 0) -}}
+{{- if gt $d 6 }}{{ $d = 6 }}{{ end -}}
+{{- $k := math.Pow 10 $d -}}
+{{- $r := div (math.Round (add (mul (math.Abs $v) $k) 0.0000001)) $k -}}
+{{- $parts := split (printf (printf "%%.%df" $d) $r) "." -}}
+{{- $int := index $parts 0 -}}
+{{- if ge (len $int) 5 -}}
+  {{- $g := "" -}}
+  {{- $n := len $int -}}
+  {{- range $i, $ch := split $int "" -}}
+    {{- if and (gt $i 0) (eq (mod (sub $n $i) 3) 0) }}{{ $g = print $g (i18n "num_group") }}{{ end -}}
+    {{- $g = print $g $ch -}}
+  {{- end -}}
+  {{- $int = $g -}}
+{{- end -}}
+{{- $out := $int -}}
+{{- if gt $d 0 }}{{ $out = print $out (i18n "num_decimal") (index $parts 1) }}{{ end -}}
+{{- if and (lt $v 0.0) (ne $r 0.0) }}{{ $out = print "−" $out }}{{ end -}}
+{{- return $out -}}

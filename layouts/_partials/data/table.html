@@ -1,0 +1,45 @@
+{{- /* A GFM table written as text (a shortcode's body) → its raw cells — the
+       same reading as parseTable in assets/js/charts/core.js. Leading and
+       trailing pipes are optional, \| is a literal pipe, the delimiter row
+       (---, :--, --:, :-:) gives the alignments and is dropped.
+
+       Returns dict "head" (slice) "body" (slice of rows, each a dict "cells"
+       — Hugo's append would flatten a slice of slices) "align" (slice:
+       left|right|center|"") "warn" (slice of messages: a line that is not a
+       table row). Cells come back as written — Markdown and all. */ -}}
+{{- $rows := slice -}}
+{{- $warn := slice -}}
+{{- range $i, $ln := split (replace (string .) "\r" "") "\n" -}}
+  {{- $s := trim $ln " \t" -}}
+  {{- if $s -}}
+    {{- if not (strings.Contains $s "|") -}}
+      {{- $warn = $warn | append (printf "line %d is not a table row: %s" (add $i 1) $s) -}}
+    {{- else -}}
+      {{- $s = replace $s `\|` "\x00" -}}
+      {{- $s = strings.TrimSuffix "|" (strings.TrimPrefix "|" $s) -}}
+      {{- $cells := slice -}}
+      {{- range split $s "|" }}{{ $cells = $cells | append (trim (replace . "\x00" "|") " \t") }}{{ end -}}
+      {{- $rows = $rows | append (dict "cells" $cells) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $head := slice -}}
+{{- $body := slice -}}
+{{- $align := slice -}}
+{{- if $rows -}}
+  {{- $head = (index $rows 0).cells -}}
+  {{- $body = after 1 $rows -}}
+  {{- with $body -}}
+    {{- $delim := true -}}
+    {{- range (index . 0).cells }}{{ if not (findRE `^:?-+:?$` .) }}{{ $delim = false }}{{ end }}{{ end -}}
+    {{- if $delim -}}
+      {{- range (index . 0).cells -}}
+        {{- $a := "" -}}
+        {{- if and (hasPrefix . ":") (hasSuffix . ":") }}{{ $a = "center" }}{{ else if hasSuffix . ":" }}{{ $a = "right" }}{{ else if hasPrefix . ":" }}{{ $a = "left" }}{{ end -}}
+        {{- $align = $align | append $a -}}
+      {{- end -}}
+      {{- $body = after 1 $body -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return dict "head" $head "body" ($body | default slice) "align" $align "warn" $warn -}}

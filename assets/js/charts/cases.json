@@ -1,0 +1,314 @@
+{
+  "about": "Shared test vectors for the data-figure grammar. One meaning, three implementations must agree on it: the chart runtime (assets/js/charts/core.js, fmt.js), the Hugo partials that build the no-JS tables (layouts/_partials/taiga/{num,fmt,chart-cell}.html), and the Obsidian plugin (a byte copy of the runtime). scripts/check-charts.mjs runs the JS side; the Hugo side is checked against a page built from these same cases.",
+  "num": [
+    {
+      "in": "12",
+      "out": 12
+    },
+    {
+      "in": "12,65",
+      "out": 12.65
+    },
+    {
+      "in": "12.65",
+      "out": 12.65
+    },
+    {
+      "in": "−41%",
+      "out": -41
+    },
+    {
+      "in": "-41%",
+      "out": -41
+    },
+    {
+      "in": "+155 КБ",
+      "out": 155
+    },
+    {
+      "in": "в 3,5 раза",
+      "out": 3.5
+    },
+    {
+      "in": "1 234,5",
+      "out": 1234.5
+    },
+    {
+      "in": "1\u00a0234,5",
+      "out": 1234.5
+    },
+    {
+      "in": "12 345",
+      "out": 12345
+    },
+    {
+      "in": "~1%",
+      "out": 1
+    },
+    {
+      "in": "−0",
+      "out": 0
+    },
+    {
+      "in": ".5",
+      "out": 0.5
+    },
+    {
+      "in": "×4,4",
+      "out": 4.4
+    },
+    {
+      "in": "~",
+      "out": null
+    },
+    {
+      "in": "",
+      "out": null
+    },
+    {
+      "in": "нет данных",
+      "out": null
+    }
+  ],
+  "fmt": [
+    {
+      "v": 12.65,
+      "d": 2,
+      "lang": "ru",
+      "out": "12,65"
+    },
+    {
+      "v": 12.65,
+      "d": 2,
+      "lang": "en",
+      "out": "12.65"
+    },
+    {
+      "v": 41.55,
+      "d": 1,
+      "lang": "ru",
+      "out": "41,6"
+    },
+    {
+      "v": -40.58,
+      "d": 0,
+      "lang": "ru",
+      "out": "−41"
+    },
+    {
+      "v": -0.3,
+      "d": 0,
+      "lang": "ru",
+      "out": "0"
+    },
+    {
+      "v": -0.04,
+      "d": 1,
+      "lang": "en",
+      "out": "0.0"
+    },
+    {
+      "v": 26.6,
+      "d": 2,
+      "lang": "ru",
+      "out": "26,60"
+    },
+    {
+      "v": 0.5,
+      "d": 0,
+      "lang": "en",
+      "out": "1"
+    },
+    {
+      "v": -2.5,
+      "d": 0,
+      "lang": "en",
+      "out": "−3"
+    },
+    {
+      "v": 12345.6,
+      "d": 1,
+      "lang": "ru",
+      "out": "12\u00a0345,6"
+    },
+    {
+      "v": 12345.6,
+      "d": 1,
+      "lang": "en",
+      "out": "12,345.6"
+    },
+    {
+      "v": 1234,
+      "d": 0,
+      "lang": "ru",
+      "out": "1234"
+    }
+  ],
+  "digits": [
+    {
+      "in": [
+        5.67,
+        16.02,
+        26.6
+      ],
+      "out": 2
+    },
+    {
+      "in": [
+        8,
+        24,
+        80
+      ],
+      "out": 0
+    },
+    {
+      "in": [
+        -38.86,
+        "~",
+        null,
+        "*13.18*"
+      ],
+      "out": 2
+    },
+    {
+      "in": [
+        "−41%",
+        "12,5"
+      ],
+      "out": 1
+    }
+  ],
+  "cells": [
+    {
+      "in": 5.67,
+      "kind": "val",
+      "v": 5.67,
+      "detail": ""
+    },
+    {
+      "in": "5,67",
+      "kind": "val",
+      "v": 5.67,
+      "detail": ""
+    },
+    {
+      "in": "−38,86",
+      "kind": "val",
+      "v": -38.86,
+      "detail": ""
+    },
+    {
+      "in": "-38.86 *5,697 → 3,483 нс*",
+      "kind": "val",
+      "v": -38.86,
+      "detail": "5,697 → 3,483 нс"
+    },
+    {
+      "in": "*13,18*",
+      "kind": "alt",
+      "v": 13.18,
+      "detail": ""
+    },
+    {
+      "in": "*13.18* *другой прогон*",
+      "kind": "alt",
+      "v": 13.18,
+      "detail": "другой прогон"
+    },
+    {
+      "in": "~",
+      "kind": "same",
+      "v": 0,
+      "detail": ""
+    },
+    {
+      "in": "~ *35,1 → 33,5 нс*",
+      "kind": "same",
+      "v": 0,
+      "detail": "35,1 → 33,5 нс"
+    },
+    {
+      "in": "",
+      "kind": "none",
+      "v": null,
+      "detail": ""
+    },
+    {
+      "in": null,
+      "kind": "none",
+      "v": null,
+      "detail": ""
+    },
+    {
+      "in": "—",
+      "kind": "none",
+      "v": null,
+      "detail": ""
+    },
+    {
+      "in": "  12,5  ",
+      "kind": "val",
+      "v": 12.5,
+      "detail": ""
+    },
+    {
+      "in": "нет данных",
+      "kind": "none",
+      "v": null,
+      "detail": "",
+      "bad": true
+    },
+    {
+      "in": "*n/a*",
+      "kind": "none",
+      "v": null,
+      "detail": "",
+      "bad": true
+    }
+  ],
+  "table": [
+    {
+      "about": "cells as the no-JS table prints them, at the data set's digits (2 here), lang ru, y unit empty",
+      "digits": 2,
+      "lang": "ru",
+      "rows": [
+        {
+          "in": 5.67,
+          "text": "5,67",
+          "alt": false,
+          "detail": ""
+        },
+        {
+          "in": 26.6,
+          "text": "26,60",
+          "alt": false,
+          "detail": ""
+        },
+        {
+          "in": "*13.18*",
+          "text": "13,18",
+          "alt": true,
+          "detail": ""
+        },
+        {
+          "in": "~ *35,1 → 33,5 нс*",
+          "text": "~",
+          "alt": false,
+          "detail": "35,1 → 33,5 нс"
+        },
+        {
+          "in": null,
+          "text": "—",
+          "alt": false,
+          "detail": ""
+        },
+        {
+          "in": -0.001,
+          "text": "0,00",
+          "alt": false,
+          "detail": ""
+        }
+      ]
+    }
+  ]
+}

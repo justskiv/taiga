@@ -25,6 +25,9 @@ import { bindRunOutputs } from './modules/runout.js';
 import { patchRunClock } from './modules/runclock.js';
 import { bindNewsletter } from './modules/newsletter.js';
 import { bindComments } from './modules/comments.js';
+import { plot, plotWhenNear } from './modules/plot.js';
+import { fitBars } from './modules/barsfit.js';
+import { fmt, num, sepFor } from './charts/fmt.js';
 
 /* Build-time feature flags. esbuild substitutes a literal `true`/`false` for
    these (js.Build `defines` in layouts/_partials/scripts.html), so a call
@@ -50,6 +53,18 @@ function onReady(fn) {
 const Taiga = (window.Taiga = window.Taiga || {});
 const widgetInits = [];
 Taiga.widget = function (id, fn) { widgetInits.push([id, fn]); };
+
+/* Helpers a widget may lean on instead of carrying its own copy
+   (docs/authoring.md#data). Taiga.plot() / Taiga.plotWhenNear(root, live) load
+   Observable Plot once per page — only where the page asks for it, see
+   modules/plot.js. Taiga.fmt(v, digits) prints a number the way the figures do
+   (the page language's decimal mark, a real minus, half-up, no "−0");
+   Taiga.num(text) reads the first number out of a string ("−41%" → −41). */
+Taiga.plot = plot;
+Taiga.plotWhenNear = plotWhenNear;
+let numSep = null;
+Taiga.fmt = function (v, digits) { return fmt(v, digits, numSep || (numSep = sepFor(document.documentElement.lang))); };
+Taiga.num = num;
 function runWidgets() {
   widgetInits.forEach(function (w) {
     const mount = document.getElementById(w[0]);
@@ -73,6 +88,7 @@ onReady(function () {
   bindHeader();
   bindNavMenu();   /* narrow screens only: self-guards on .nav-wrap/.nav-btn */
   markVisited();   /* before the minimaps: dots read .is-visited/.cur */
+  fitBars();       /* {{< bars >}}: labels in or out of their bars, by measure */
   buildToc();
   bindRails();
   bindTips();
