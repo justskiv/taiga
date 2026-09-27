@@ -16,5 +16,9 @@
 # product. Never committed.
 /local/
 
+# Plot vendor build (scripts/vendor-plot): packages and esbuild's metafile
+/scripts/vendor-plot/node_modules/
+/scripts/vendor-plot/meta.json
+
 # OS junk
 .DS_Store
