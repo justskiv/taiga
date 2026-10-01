@@ -23,6 +23,7 @@ import { bindCodeCopy } from './modules/codecopy.js';
 import { bindCodeEditors } from './modules/codeedit.js';
 import { bindRunOutputs } from './modules/runout.js';
 import { patchRunClock } from './modules/runclock.js';
+import { patchRunFiles } from './modules/runfiles.js';
 import { bindNewsletter } from './modules/newsletter.js';
 import { bindComments } from './modules/comments.js';
 import { plot, plotWhenNear } from './modules/plot.js';
@@ -80,8 +81,10 @@ function runWidgets() {
    to the number a finished run reports, and a snippet can be run from script as
    well as from a click. codapi is loaded by the same deferred tag one line
    above this bundle in scripts.html, so window.codapi is already there; on a
-   page without a snippet the call finds nothing and returns. */
+   page without a snippet the call finds nothing and returns. The files a run
+   sends get their last newline back the same way, and for the same reason. */
 patchRunClock();
+patchRunFiles();
 
 onReady(function () {
   bindScrollHold();  /* page-wide: guards on the engine, not on the DOM — the disclosures it covers may not exist yet */

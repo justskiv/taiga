@@ -138,6 +138,36 @@ $ go1.26.4 run main.go
 ./main.go:7:21: syntax error: method must have no type parameters
 {{< /run >}}
 
+### Runnable, output as a diff {#run-lang}
+
+`lang="diff"` says the output is a unified diff: inserted and deleted lines
+take the palette's diff colours, and the headers step back. Every part of the
+block, recorded or live, is highlighted by the same rules, and what the reader
+copies is the plain diff.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var v interface{} = 42
+	fmt.Println(v)
+}
+```
+{{< run sandbox="go1.27" command="fix-diff" lang="diff" cmd="go fix -diff ." >}}
+--- main.go (old)
++++ main.go (new)
+@@ -3,6 +3,6 @@
+ import "fmt"
+ 
+ func main() {
+-	var v interface{} = 42
++	var v any = 42
+ 	fmt.Println(v)
+ }
+{{< /run >}}
+
 
 ## Table {#table}
 

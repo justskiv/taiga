@@ -136,9 +136,19 @@
 .ro-pre{
   margin:0; padding:.1em 0;
   background:none; border:0; border-radius:0;
+  /* The listing's own font, on the <pre> as well as on its <code>. The
+     <code> alone was never enough: every row of a <pre> is at least as tall
+     as the <pre>'s own strut, and without this that is the body text's 17px
+     × 1.72 — 29px a row where the listing above has 23, output spread out
+     under its own code, and only 14 of the 18 rows below fitting in. The
+     face counts too: a strut in another face sits on another baseline and
+     still pads the row. */
+  font-family:var(--font-mono); font-size:var(--code-fs); line-height:var(--code-lh);
   /* long output scrolls INSIDE the block rather than growing the page past the
-     listing it belongs to; ~18 lines is about a screenful on a phone */
-  max-height:calc(var(--code-fs) * var(--code-lh) * 18);
+     listing it belongs to; 18 rows is about a screenful on a phone. The .2em
+     is the padding above and below them (box-sizing is border-box), without
+     which an output of exactly 18 rows would scroll by 3px. */
+  max-height:calc(var(--code-fs) * var(--code-lh) * 18 + .2em);
   overflow-x:hidden; overflow-y:auto;
   scrollbar-width:thin; scrollbar-color:var(--bg-raised) transparent;
   transition:opacity var(--dur) var(--ease);
@@ -166,6 +176,14 @@
    for; a stack trace nobody can read is not. */
 .ro[data-state="failed"] .ro-pre code{
   color:color-mix(in srgb, var(--accent-copper) 65%, var(--text-primary))}
+
+/* lang="diff": the output is a unified diff, and it reads like the ```diff
+   listing it is. Its lines carry Chroma's diff tokens (gi gd gu gh, from
+   _partials/run/output.html and runout.js), coloured by the very rules that
+   colour a listing (20-chroma.css); the file header (--- / +++) also stands
+   a weight above the hunk headers, so a diff of several files still shows
+   where each one starts. */
+.ro-pre .gh{font-weight:600}
 
 @media (prefers-reduced-motion:reduce){
   .ro::details-content, .ro[open]::details-content{

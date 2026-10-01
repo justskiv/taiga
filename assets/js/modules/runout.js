@@ -76,6 +76,47 @@ function transcript(res) {
   return out || err;
 }
 
+/* lang= on the shortcode names the language the output is written in, and
+   the block highlights it. The recorded part arrives highlighted from the
+   build (_partials/run/output.html); a live result and a restored example are
+   highlighted here, line by line, by the same rules — change one, change the
+   other. The classes are Chroma's own diff tokens, so the palette paints them
+   exactly as it paints a ```diff listing (20-chroma.css). A marked line is
+   wrapped whole and nothing is added around it: what the reader copies is the
+   output, byte for byte. */
+const LANGS = new Map([
+  ['diff', (line) => {
+    if (line.startsWith('+++') || line.startsWith('---')) return 'gh';
+    if (line.startsWith('@@')) return 'gu';
+    if (line.startsWith('+')) return 'gi';
+    if (line.startsWith('-')) return 'gd';
+    return '';
+  }],
+]);
+
+function fill(code, text, lang) {
+  const tone = LANGS.get(lang);
+  if (!tone) {
+    code.textContent = text;
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  text.split('\n').forEach((line, i) => {
+    if (i) frag.append('\n');
+    const cls = tone(line);
+    if (!cls) {
+      if (line) frag.append(line);
+      return;
+    }
+    const span = document.createElement('span');
+    span.className = cls;
+    span.textContent = line;
+    frag.append(span);
+  });
+  code.textContent = '';
+  code.appendChild(frag);
+}
+
 /* Focus goes back to Run only if nothing else has it: a disabled button hands
    it to <body>, and a reader who moved on while the run was out keeps their
    place. */
@@ -104,6 +145,7 @@ class RunOutput {
        the block stays hidden until the first run. */
     this.example = box.dataset.src === 'example' ? this.code.textContent : null;
     this.exampleState = box.dataset.state || 'idle';
+    this.lang = box.dataset.lang || '';
 
     snip.dataset.ro = '1';
     if (!part) {
@@ -170,7 +212,8 @@ class RunOutput {
        looking at this snippet — if they pressed Run and read on below,
        anchoring is doing its job. */
     holdScroll(this.snip);
-    this.code.textContent = text || I18N.runEmpty;
+    if (text) fill(this.code, text, this.lang);
+    else this.code.textContent = I18N.runEmpty;
     this.box.hidden = false;
     this.box.open = true;
     this.box.dataset.src = 'live';
@@ -209,7 +252,7 @@ class RunOutput {
 
   restore() {
     if (this.example === null) return;
-    this.code.textContent = this.example;
+    fill(this.code, this.example, this.lang);
     this.box.dataset.src = 'example';
     this.box.dataset.state = this.exampleState;
     this.chip.textContent = I18N.runExample;

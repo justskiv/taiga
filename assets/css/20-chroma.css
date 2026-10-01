@@ -111,11 +111,17 @@
 
 /* Generic tokens — diff only. Red and green carry the sign, and nothing else
    in a diff is coloured: the marker column is the whole message, so lighting
-   the code inside a hunk as well would bury it. Hunk headers recede. */
-.chroma .gd { color: var(--accent-red); }
-.chroma .gi { color: var(--accent-green); }
+   the code inside a hunk as well would bury it. Hunk headers recede.
+   A run block's output written as a diff (lang="diff", 26-run-output.css)
+   wears the same tokens, so it is painted by these same rules. */
+.chroma .gd,
+.ro-pre .gd { color: var(--accent-red); }
+.chroma .gi,
+.ro-pre .gi { color: var(--accent-green); }
 .chroma .gh,
-.chroma .gu { color: var(--text-muted); }
+.chroma .gu,
+.ro-pre .gh,
+.ro-pre .gu { color: var(--text-muted); }
 .chroma .gs { font-weight: 600; }
 .chroma .ge { font-style: italic; }
 

@@ -36,6 +36,13 @@
                    (below) it may instead name the commands whose recorded
                    part is one, space-separated: "run asm-nospec".
          label=    the main command's name in the mode switch (see below).
+         lang=     the language the output is written in, for the block to
+                   highlight it: "diff" — a unified diff, its inserted and
+                   deleted lines in the palette's diff colours, its headers
+                   quiet. Every part of the block, recorded or live. The only
+                   language so far; any other value fails the build. Not
+                   codapi's output-mode=, which hands the result to codapi's
+                   own box.
 
        Passed through to <codapi-snippet> when given: template, files, id,
        depends-on, actions, output-mode, engine, selector, init-delay,
@@ -90,6 +97,14 @@
 {{- $command := .Get "command" | default "run" -}}
 {{- $editor := .Get "editor" | default "basic" -}}
 {{- $note := .Get "note" -}}
+{{- /* lang= is read by _partials/run/output.html for the recorded parts and
+       by modules/runout.js (via data-lang) for a live one — the same rules in
+       both. A language with no rules would highlight nothing and say nothing,
+       so an unknown one stops the build. */ -}}
+{{- $lang := .Get "lang" -}}
+{{- if and $lang (ne $lang "diff") -}}
+  {{- errorf "run: lang=%q is not a language the output can be highlighted in — the one there is: diff — page %s" $lang .Page.Path -}}
+{{- end -}}
 {{- if and (not $sandbox) (not (.Get "cmd")) -}}
   {{- errorf "run: needs sandbox= (a runnable snippet) or cmd= (a recorded run with no sandbox behind it) — page %s" .Page.Path -}}
 {{- end -}}
@@ -268,7 +283,7 @@
   {{- with .Get "status-failed" }} status-failed="{{ . }}"{{ end -}}
 ></codapi-snippet>
 {{ end }}{{ if $group }}<div class="ro-group">
-{{ end }}{{ range $parts }}{{ $out := .out }}{{ $has := ne $out "" }}<details class="ro"{{ if and $has $open }} open{{ end }}{{ if not $has }} hidden{{ end }} data-src="{{ if $has }}example{{ else }}none{{ end }}" data-state="{{ if and $has .failed }}failed{{ else }}idle{{ end }}"{{ with .cmd }} data-cmd="{{ . }}"{{ end }}{{ with .label }} data-label="{{ . }}"{{ end }}>
+{{ end }}{{ range $parts }}{{ $out := .out }}{{ $has := ne $out "" }}{{ $code := htmlEscape $out }}{{ with $lang }}{{ $code = partial "run/output.html" (dict "out" $out "lang" .) }}{{ end }}<details class="ro"{{ if and $has $open }} open{{ end }}{{ if not $has }} hidden{{ end }} data-src="{{ if $has }}example{{ else }}none{{ end }}" data-state="{{ if and $has .failed }}failed{{ else }}idle{{ end }}"{{ with .cmd }} data-cmd="{{ . }}"{{ end }}{{ with .label }} data-label="{{ . }}"{{ end }}{{ with $lang }} data-lang="{{ . }}"{{ end }}>
 <summary class="ro-h">
 <span class="ro-ps" aria-hidden="true">$</span>
 <span class="ro-cmd">{{ .prompt }}</span>
@@ -280,7 +295,7 @@
 </span>
 <svg class="ro-chev" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>
 </summary>
-<div class="ro-b">{{ printf `<pre class="ro-pre" aria-live="polite"><code>%s</code></pre>` (htmlEscape $out) | safeHTML }}</div>
+<div class="ro-b">{{ printf `<pre class="ro-pre" aria-live="polite"><code>%s</code></pre>` $code | safeHTML }}</div>
 </details>
 {{ end }}{{ if $group }}</div>
 {{ end -}}

@@ -1,0 +1,42 @@
+{{- /* The recorded output of one part of {{< run >}}, as the HTML inside its
+       <code>: escaped, and — when the block names the language its output is
+       written in (lang=) — highlighted by that language's line rules.
+
+       One language so far, diff. A unified diff is read by the first
+       characters of each line, so that is all the rules look at:
+
+         +++ / ---   file header       → gh  (GenericHeading)
+         @@          hunk header       → gu  (GenericSubheading)
+         +           inserted line     → gi  (GenericInserted)
+         -           deleted line      → gd  (GenericDeleted)
+         anything else                 → context, left as it is
+
+       The classes are Chroma's own diff tokens, so 20-chroma.css paints them
+       with the same rules — the same roles of the palette — as a ```diff
+       listing. A marked line is wrapped whole and nothing is added around it:
+       the text a reader selects and copies is the diff, byte for byte.
+
+       modules/runout.js applies the same rules to a live result and to a
+       restored example; change one, change the other. */ -}}
+{{- $out := .out -}}
+{{- $html := htmlEscape $out -}}
+{{- if eq .lang "diff" -}}
+  {{- $rows := slice -}}
+  {{- range split $out "\n" -}}
+    {{- $cls := "" -}}
+    {{- if or (hasPrefix . "+++") (hasPrefix . "---") -}}
+      {{- $cls = "gh" -}}
+    {{- else if hasPrefix . "@@" -}}
+      {{- $cls = "gu" -}}
+    {{- else if hasPrefix . "+" -}}
+      {{- $cls = "gi" -}}
+    {{- else if hasPrefix . "-" -}}
+      {{- $cls = "gd" -}}
+    {{- end -}}
+    {{- $row := htmlEscape . -}}
+    {{- with $cls }}{{ $row = printf `<span class="%s">%s</span>` . $row }}{{ end -}}
+    {{- $rows = $rows | append $row -}}
+  {{- end -}}
+  {{- $html = delimit $rows "\n" -}}
+{{- end -}}
+{{- return $html -}}

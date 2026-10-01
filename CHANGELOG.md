@@ -120,6 +120,16 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   against the right edge under empty space, which reads as broken markup rather
   than as a two-line footer.
 
+- **Run output is set at the listing's own line height.** The `<code>` of a
+  run block was 13.5px × 1.7 like the listing above it, but every row of its
+  `<pre>` is at least as tall as the `<pre>`'s own strut — the body text's
+  17px × 1.72 — so output stood at 29px a row under code at 23: spread out,
+  and its box, sized for 18 rows, held 14 before it scrolled. The `<pre>`
+  now carries the listing's font too, and 18 rows fit (the padding is in the
+  height, so exactly 18 do not scroll by 3px). Tabs follow: they are measured
+  in the `<pre>`'s own font, and now line up as they do in the listing. The
+  HTML is unchanged; every run block is shorter.
+
 ### Added
 
 - **`{{< bars stack="true" tabs="true" >}}` — a stack's groups as tabs.** A
@@ -310,6 +320,19 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   its error left behind, would otherwise mark nothing without a word.
   `error="true"` is unchanged, and so is every block that uses it.
 
+- **`{{< run lang="diff" >}}` — output that is a diff reads as one.** `go fix
+  -diff` printed its unified diff as plain transcript, with no colour to tell
+  what goes from what comes. With `lang="diff"` every line is read by its
+  first characters — `+` inserted, `-` deleted, in the colours a `diff` code
+  block gives them (the same Chroma tokens, painted by the same rules in
+  `20-chroma.css`); `---` / `+++` and `@@` headers muted, the file header a
+  weight above. The recorded output is highlighted by the build, a live
+  result and «restore example» by `runout.js`, by the same rules, in every
+  part of a mode switch.
+  Nothing is added to the text: selected and copied, it is the diff byte for
+  byte. `diff` is the one language so far, and any other value fails the
+  build. A block without `lang=` renders byte for byte as before.
+
 - **SEO lint, in the templates that assemble the tags.** `params.seo.lint`
   (`"error"` | `"warn"` | `"off"`, default `"warn"`) checks the front matter
   where the tags are built, so a rule sees the FINAL string — after every
@@ -447,6 +470,15 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   `opacity:.3` on the button that carries the price of entry in its label.
 
 ### Fixed
+
+- **A run sends its file with the last newline.** codapi reads the listing
+  as its element's text, trimmed, so the file reached the sandbox without
+  the newline every file on disk ends with. Most commands never notice; a diff
+  does — `go fix -diff` printed `\ No newline at end of file` and a changed
+  last line, so the reader's run never matched the output recorded from a
+  real file. `modules/runfiles.js` puts the newline back on the way out
+  (after the template, only where it is missing), wrapping codapi's engine
+  the way `runclock.js` does; the vendored `snippet.js` stays as shipped.
 
 - **A stack prints its parts' notes, and its parts add up.** The template read
   a part's trailing italic (`7,53 *−28%*`) and reserved room for it, then never

@@ -654,6 +654,15 @@ it has no network in it. Nothing here depends on a particular cache or on its
 headers; the snippet's own `result` event carries `cached: true` on a replayed
 answer, for a site that wants to say so out loud.
 
+The output is set like the listing above it — the same font, size and line
+height — and past 18 rows it scrolls inside the block rather than pushing the
+page down. The listing reaches the sandbox as a file that ends with a
+newline, the way a file on disk does: codapi trims it off, and a command that
+diffs the file (`go fix -diff`, `gofmt -d`) would otherwise report
+`\ No newline at end of file` that an output recorded from a real file never
+shows. The theme puts it back on the way out, after the template, only where
+it is missing.
+
 | param | |
 |---|---|
 | `sandbox=` | codapi sandbox id. Required, except for a run with no sandbox behind it (see below). |
@@ -664,6 +673,7 @@ answer, for a site that wants to say so out loud.
 | `open=` | `false` ships the output folded away. Default open. |
 | `error=` | `true` when the recorded output IS an error — it then reads in the failed colour from the start. With several commands it names the commands whose recorded part is an error instead ([below](#run-modes)). |
 | `label=` | the main command's name in the mode switch of a snippet with several commands ([below](#run-modes)). |
+| `lang=` | the language the output is written in, to have it highlighted: `diff` ([below](#run-lang)). |
 
 Written self-closing — `{{</* run sandbox="go1.26.4" /*/>}}` — the block ships
 hidden and appears with the reader's first result. Written **without** `sandbox=`
@@ -747,6 +757,38 @@ and on paper, every part is there, one under the other.
   `output-mode` other than text.
 - An `@event` action is codapi's own business: it keeps its link and takes no
   part of the body.
+
+#### Output as a diff {#run-lang}
+
+When the command prints a unified diff — `go fix -diff`, `gofmt -d` — say so
+with `lang="diff"`, and the output reads like a `diff` code block:
+
+```md
+{{</* run sandbox="go1.27" command="fix-diff" lang="diff" cmd="go fix -diff ." */>}}
+--- main.go (old)
++++ main.go (new)
+@@ -3,6 +3,6 @@
+ import "fmt"
+ 
+ func main() {
+-	var v interface{} = 42
++	var v any = 42
+ 	fmt.Println(v)
+ }
+{{</* /run */>}}
+```
+
+- Lines are read by their first characters: `+` is an inserted line and `-` a
+  deleted one, in the colours a `diff` code block gives them; `---` / `+++`
+  (the file header, set a weight above) and `@@` (a hunk header) step back to
+  the muted tone; everything else is context and stays as it is.
+- It holds for the whole block: every part of a snippet with several
+  commands, the recorded output and a live one alike — after a run, after a
+  switch, after **restore example**. Nothing is added to the text: what the
+  reader selects and copies is the diff, byte for byte.
+- `diff` is the only language so far; any other value **fails the build**.
+  Not to be confused with codapi's `output-mode=`, which hands the result to
+  codapi's own box instead.
 
 #### The editor {#run-editor}
 
