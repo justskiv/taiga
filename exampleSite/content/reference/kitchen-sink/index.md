@@ -403,6 +403,73 @@ exact parts printed at `digits`:
 | on | 12.79 | 6.70 |
 {{< /bars >}}
 
+Bars in tabs — a stack's heading rows become tabs on one scale, `open` picks
+the tab shown first; a part's trailing italic is printed after the total:
+
+{{< bars stack="true" tabs="true" open="Genoa" digits="1" colors="blue green red" unit=" ns" cap="Time per 24-byte allocation without the specialization, and how much of it the specialization took away" note="— Go 1.27, specialization off → on" >}}
+
+| | **remains** *what an allocation takes with the specialization* | **saved** *what the specialization took away* |
+|---|--:|--:|
+| **M4 Pro** *−33…−46%* | | |
+| No pointers | 5.496 | 3.752 *−41%* |
+| With a pointer | 6.295 | 5.41 *−46%* |
+| Through `make([]byte, 24)` | 6.756 | 3.304 *−33%* |
+| **Genoa** *−19…−36%* | | |
+| No pointers | 19.49 | 7.53 *−28%* |
+| With a pointer | 22.01 | 12.48 *−36%* |
+| Through `make([]byte, 24)` | 22.45 | 5.28 *−19%* |
+| **Skylake** *−11…−28%* | | |
+| No pointers | 41.55 | 11.38 *−21%* |
+| With a pointer | 46.71 | 17.81 *−28%* |
+| Through `make([]byte, 24)` | 48.10 | 5.90 *−11%* |
+
+{{< fold >}}
+
+| No pointers, ns | {{< mk blue circle >}} M4 Pro | {{< mk green square >}} Genoa (Zen 4) | {{< mk red triangle >}} Skylake |
+|---|---:|---:|---:|
+| specialization off | 9.25 | 27.02 | 52.93 |
+| specialization on | 5.50 | 19.49 | 41.55 |
+| saved | 3.75 *−41%* | 7.53 *−28%* | 11.38 *−21%* |
+
+*Twenty runs per configuration, compared by {{< term word="benchstat" kind="tool" color="green" >}}The Go team's tool for comparing benchmark runs: it tells a real difference from noise.{{< /term >}}.*
+
+{{< /fold >}}
+
+{{< /bars >}}
+
+A `{{</* fold */>}}` written inside a figure is the card's footer — a quiet
+row after the key, one for all the tabs; its body is any Markdown (above: a
+table whose headers carry the series glyphs, a note with a term).
+
+Pairs in tabs — grouped bars take tabs too: the colour is the tab's, and the
+columns of a row are told apart by fill, the last one (the result) solid:
+
+{{< bars tabs="true" open="Genoa" colors="green red" cap="Time per 24-byte allocation" note="— illustrative numbers, with a ballast and without" >}}
+
+| | no specialization | with specialization |
+|---|--:|--:|
+| **Genoa** | | |
+| No ballast | 27.0 ns | 19.5 ns *−28%* |
+| 256 MiB ballast | 19.5 ns | 12.8 ns *−35%* |
+| **Skylake** | | |
+| No ballast | 52.9 ns | 41.6 ns *−21%* |
+| 256 MiB ballast | 32.3 ns | 20.1 ns *−38%* |
+
+{{< /bars >}}
+
+A series' glyph in the text — `{{</* mk blue circle */>}}` before a name
+draws the shape and the colour the tabs and the chart give that series,
+wherever it stands. In a sentence: the machines above are
+{{< mk blue circle >}} M4 Pro, a laptop, {{< mk green square >}} Genoa (Zen 4),
+a server, and {{< mk red triangle >}} Skylake, an older server — the glyph
+stays on its word's line when the sentence wraps. In a table's header:
+
+| 24 bytes | {{< mk blue circle >}} M4 Pro | {{< mk green square >}} Genoa (Zen 4) | {{< mk red triangle >}} Skylake |
+|---|---:|---:|---:|
+| No pointers | −41% *9.2 → 5.5 ns* | −28% *27.0 → 19.5 ns* | −21% *52.9 → 41.6 ns* |
+| With a pointer | −46% *11.7 → 6.3 ns* | −36% *34.5 → 22.0 ns* | −28% *64.5 → 46.7 ns* |
+| Through `make([]byte, 24)` | −33% *10.1 → 6.8 ns* | −19% *27.7 → 22.5 ns* | −11% *54.0 → 48.1 ns* |
+
 A chart, inline — the table is the data, `*n*` a hollow point from another
 run:
 
@@ -414,7 +481,13 @@ run:
 | 80 | 12.65 | 34.99 |
 | 96 | *13.18* | 34.61 |
 | 128 | 55.48 | 41.40 |
+
+{{< fold title="The table behind the chart" />}}
+
 {{< /chart >}}
+
+An empty `{{</* fold /*/>}}` in a chart holds the chart's own tables — the
+view a reader without JavaScript gets — instead of printing them twice.
 
 A chart from a file — `charts/ks-speedup.yaml` beside the page: two data
 sets under a toggle, a rule, a zone, `~`, a detail in the panel:

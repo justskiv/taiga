@@ -43,6 +43,10 @@
 {{- /* any widget-shaped figure: a bare one (its caption hidden, class
        "vh"), and a {{< chart >}}, whose frame is the widget's */ -}}
 {{- $c = replaceRE `(?s)<figure class="widget[^"]*">\s*<figcaption[^>]*>(.*?)</figcaption>.*?</figure>` $wrepl $c -}}
+{{- /* bars in tabs: the card runs no script to build the tablist, so the
+       figure goes back to its stacked, headed groups — the no-JS view — rather
+       than the tabbed shape html.js would give it (31-data.css) */ -}}
+{{- $c = replaceRE `(<div class="bars [^"]*?) has-tabs"` "${1}\"" $c -}}
 {{- /* ── split into intro + one section per H2 ────────────────────────────── */ -}}
 {{- $chunks := split $c "<h2 " -}}
 <article class="lp-card ic" data-lp="article" data-lp-budget="{{ $budget }}">

@@ -5,6 +5,7 @@
    {{< chart >}}    a line chart from a table / YAML  _shortcodes/chart.html + js/charts/core.js
    {{< spanmap >}}  a span's slots and its bitmap     _shortcodes/spanmap.html (+ 08-diagrams.css)
    `−41% *9,2 → 5,5 нс*` in a right-aligned column    render-table.html: a quieter second line
+   {{< mk blue >}}  a series' glyph in the text   _shortcodes/mk.html (+ modules/mk.js)
 
    None of them is written as HTML in a guide: the Markdown carries the data,
    the theme draws it, and Obsidian reads the same source.
@@ -16,7 +17,7 @@
    light red fails deuteranopia; lifted 25 % toward the surface it passes.
    Keyed on data-scheme, so a future light palette joins by declaring itself
    light rather than by being listed here. */
-.chart, .bars{
+.chart, .bars, .mk{
   /* series */
   --dv-blue:var(--accent-blue);
   --dv-green:var(--accent-green);
@@ -57,7 +58,7 @@
   --dv-panel:color-mix(in srgb, var(--bg-surface) 94%, transparent);
   --dv-shadow:0 6px 20px rgba(0,0,0,.22);
 }
-[data-scheme="light"] :is(.chart, .bars){
+[data-scheme="light"] :is(.chart, .bars, .mk){
   --dv-green:color-mix(in oklab, var(--accent-green) 75%, var(--bg-surface));
   --dv-ink:color-mix(in srgb, var(--text-primary) 82%, transparent);
   --dv-ghost:color-mix(in srgb, var(--text-ghost) 34%, transparent);
@@ -127,6 +128,49 @@
 td.has-detail > em:last-child{display:block; margin-top:1px; font-style:normal; font-size:11.5px;
   line-height:1.35; color:var(--text-muted); white-space:nowrap}
 
+/* ─────────────────────── a series glyph in the text ─────────────────────── */
+
+/* {{< mk blue circle >}} before a name — in a table's header, a sentence, a
+   list: the glyph the chart's key and the bars tabs give that series, in its
+   hue, so the text beside a figure speaks the figure's code (M4 Pro is a blue
+   circle in all three). The shortcode prints an empty span with a role class
+   and a shape class. The hue is a palette role: .mk is one of the roles'
+   scopes above, so it needs no wrapper and repaints with the palette. The
+   shape is the path charts/core.js draws, as a mask the hue is painted
+   through, at the size the chart draws it. Decorative (aria-hidden); no
+   stylesheet — a feed reader — shows nothing; on paper it keeps its ink.
+
+   An inline box, not an inline-block: its padding is the glyph and its
+   height the line's content area, so the mask centred in it sits on the
+   middle of the capitals in a header, of the words in a sentence. The gap
+   after it is its margin, the same wherever it stands: the space the author
+   types after the tag is dropped at the start of a line and folds into the
+   space before the tag inside one. Empty, the box is welded to the next word
+   at the start of a cell or a line — an inline-block would be a break of its
+   own. Inside a line an empty box can still be left hanging at the end of it;
+   modules/mk.js removes the typed space and gives the box a zero-width letter
+   (is-glued), and from then on the glyph travels with its word. Nothing moves
+   when it does: the gap was the margin before and is the margin after. */
+.mk{padding-left:10px; margin-right:7px; background:currentColor;
+  -webkit-mask:var(--mk-s) 0 50% / 10px 10px no-repeat; mask:var(--mk-s) 0 50% / 10px 10px no-repeat;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact}
+.mk.is-glued::after{content:"\2061"}
+.mk-circle{--mk-s:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='4'/%3E%3C/svg%3E")}
+.mk-square{--mk-s:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Crect x='1.2' y='1.2' width='7.6' height='7.6' rx='1'/%3E%3C/svg%3E")}
+.mk-triangle{--mk-s:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 .8 9.4 8.9H.6Z'/%3E%3C/svg%3E")}
+.mk-diamond{--mk-s:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 .4 9.6 5 5 9.6.4 5Z'/%3E%3C/svg%3E")}
+.mk-star{--mk-s:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='m5 .5 1.3 3 3.3.3-2.5 2.2.8 3.3L5 7.6 2.1 9.3l.8-3.3L.4 3.8l3.3-.3Z'/%3E%3C/svg%3E")}
+.mk-cross{--mk-s:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3.7.6h2.6v3.1h3.1v2.6H6.3v3.1H3.7V6.3H.6V3.7h3.1Z'/%3E%3C/svg%3E")}
+.mk-ink{color:var(--dv-ink)}
+.mk-ghost{color:var(--dv-ghost)}
+.mk-blue{color:var(--dv-blue)}
+.mk-green{color:var(--dv-green)}
+.mk-red{color:var(--dv-red)}
+.mk-gold{color:var(--dv-gold)}
+.mk-violet{color:var(--dv-violet)}
+.mk-copper{color:var(--dv-copper)}
+.mk-accent{color:var(--dv-accent)}
+
 /* ───────────────────────────── bars ───────────────────────────── */
 
 /* {{< bars >}}: a name column, then the rest of the width for the track.
@@ -194,6 +238,14 @@ td.has-detail > em:last-child{display:block; margin-top:1px; font-style:normal; 
 .bars-total{margin-left:8px; font-size:12px; font-weight:600; white-space:nowrap; color:var(--text-primary); font-variant-numeric:tabular-nums}
 .bars-parts{grid-column:2; margin:1px 0 3px; font-family:var(--font-mono); font-size:10.5px; color:var(--text-muted); font-variant-numeric:tabular-nums}
 .bars-parts span{color:var(--text-secondary)}
+/* the tip: a part's note (`7,53 *−28%*`) follows the total — the number the
+   row was written for leads in the primary ink, the time behind it steps
+   back */
+.bars.is-stack .bars-total{color:var(--text-secondary)}
+.bars.is-stack .bars-note{font-size:12px; color:var(--note, var(--text-primary))}
+/* the name on one line: a column of flex items broke `Through make(…)` in
+   two, the text and the code each on a line of its own */
+.bars.is-stack .bars-nm{flex-direction:row; flex-wrap:wrap; align-items:baseline; column-gap:6px}
 /* the key explains the fills, not a group: neutral swatches */
 .bars-key{display:flex; flex-wrap:wrap; gap:6px 18px; margin:14px 0 0; font-family:var(--font-mono); font-size:11px; color:var(--text-muted)}
 .bars-key > span{display:inline-flex; align-items:center; gap:7px}
@@ -203,12 +255,115 @@ td.has-detail > em:last-child{display:block; margin-top:1px; font-style:normal; 
   box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text-ghost) 55%, transparent)}
 .bars-sw.p3{background:color-mix(in srgb, var(--c) 40%, transparent)}
 
+/* grouped bars in tabs: a tab is a group, in its hue, and each row of the
+   table is a set in it — the row's label over its bars, a bar per column
+   told apart by fill, the stack's three (the last column solid: the result;
+   the first washed, a middle one hatched) and named by the key. A bar ends
+   the way a stack's does: the cell at its tip, quieter, the note after it
+   in the primary ink — nothing sits inside a washed or hatched fill. Thin
+   bars on one unbroken baseline per set, so a pair reads as a pair. */
+.bars-set + .bars-set{margin-top:12px}
+.bars-sub{display:flex; flex-wrap:wrap; align-items:baseline; column-gap:6px; margin:0 0 4px;
+  font-family:var(--font-mono); font-size:13px; line-height:1.3; color:var(--text-primary)}
+.bars-sub strong{font-family:var(--font-sans); font-weight:600}
+.bars-sub em{font-style:normal; font-size:11px; color:var(--text-muted)}
+.bars.is-grouped .bars-set .bars-r{grid-template-columns:minmax(0, 1fr); min-height:0}
+.bars.is-grouped .bars-set .bars-r + .bars-r{margin-top:0}
+.bars-set .bars-lane{height:20px}
+.bars.is-grouped .bars-set .bars-bar{height:14px}
+.bars-bar.p2{background:repeating-linear-gradient(45deg, var(--c) 0 1.6px, transparent 1.6px 5px);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 60%, transparent)}
+.bars-bar.p3{background:color-mix(in srgb, var(--c) 40%, transparent)}
+.bars-set .bars-total{color:var(--text-secondary)}
+.bars-set .bars-note{font-size:12px; color:var(--note, var(--text-primary))}
+
+/* ─────────────── bars in tabs ─────────────── */
+
+/* tabs="true" on a stack or on grouped bars: the groups (the heading rows)
+   become tabs. The shortcode prints them one under another with their
+   headings and parts lines — the figure without JavaScript, in a feed and on
+   paper — and marks the open one (is-on). modules/barstabs.js adds the tablist and .is-live;
+   before it runs, html.js (set by prefs.js before first paint) already gives
+   the figure its tabbed shape, so the page never jumps from three groups to
+   one. Screen only: on paper the groups stand stacked, nothing hidden.
+
+   The groups share ONE grid cell: the card is as tall as the tallest of
+   them and never jumps on a switch; the inactive ones are out of sight and
+   out of the accessibility tree (visibility); the headings step aside (the
+   tab carries the name) and so does the parts line — the key and the bar's
+   end say enough — hidden for the eye, still read. */
+@media screen{
+  :is(html.js .bars.has-tabs, .bars.is-live){display:grid; grid-template-columns:minmax(0, 1fr)}
+  :is(html.js .bars.has-tabs, .bars.is-live) > .bars-g{grid-area:2 / 1; min-width:0; margin:0}
+  :is(html.js .bars.has-tabs, .bars.is-live) > .bars-g:not(.is-on){visibility:hidden}
+  :is(html.js .bars.has-tabs, .bars.is-live) > .bars-key{grid-row:3}
+  :is(html.js .bars.has-tabs, .bars.is-live) .bars-hd{display:none}
+  :is(html.js .bars.has-tabs, .bars.is-live) .bars-parts{position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+    overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0}
+  /* until the tablist arrives: its strip, empty, at its height */
+  html.js .bars.has-tabs:not(.is-live)::before{content:""; grid-row:1; box-sizing:border-box; height:50px; margin:-16px -18px 16px;
+    background:var(--bg-deep); border-bottom:1px solid var(--border); border-radius:calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0}
+}
+/* the strip: the full width of the card, welded to its top edge; the
+   selected tab overlaps the strip's bottom hairline and merges with the body
+   — the tab the widgets use, so a reader meets one kind of tab per page. The
+   accent marks the selected tab only (it is for UI); the groups keep their
+   hues in the glyph next to the name */
+.bars-tabs{grid-row:1; display:flex; gap:2px; margin:-16px -18px 16px; padding:8px 10px 0;
+  background:var(--bg-deep); border-bottom:1px solid var(--border);
+  border-radius:calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0}
+.bars-tab{appearance:none; -webkit-appearance:none; position:relative; flex:1 1 0; min-width:0;
+  display:inline-flex; align-items:center; justify-content:center; gap:4px 10px;
+  min-height:42px; margin:0 0 -1px; padding:0 10px; border:1px solid transparent; border-bottom:0;
+  border-radius:8px 8px 0 0; background:none; cursor:pointer; touch-action:manipulation;
+  font-family:var(--font-mono); font-size:12px; line-height:1.2; color:var(--text-muted);
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.bars-tab:hover[aria-selected="false"]{color:var(--text-primary); background:color-mix(in srgb, var(--bg-surface) 66%, transparent)}
+.bars-tab[aria-selected="true"]{border-color:var(--border); background:var(--bg-base); color:var(--accent)}
+.bars-tab:focus-visible{outline:2px solid var(--accent); outline-offset:-3px}
+/* the name: the chart's series glyph in the group's hue, and the heading's
+   bold; the weight never changes on selection, so the strip does not shift a
+   pixel when a tab turns on */
+.bars-tab-n{display:inline-flex; align-items:center; gap:7px; min-width:0; white-space:nowrap}
+.bars-tab-n b{font-weight:600; overflow:hidden; text-overflow:ellipsis}
+.bars-tab .ch-mk{opacity:.7; transition:opacity var(--dur) var(--ease)}
+.bars-tab[aria-selected="true"] .ch-mk, .bars-tab:hover .ch-mk{opacity:1}
+/* the heading's italic, quietly after the name: the group's summary, so a
+   reader who never clicks still compares the groups */
+.bars-tab small{font-size:11px; font-weight:400; white-space:nowrap; color:var(--text-muted); font-variant-numeric:tabular-nums}
+.bars-tab[aria-selected="true"] small{color:var(--text-secondary)}
+.bars.is-live > .bars-g:focus-visible{outline:2px solid var(--accent); outline-offset:6px; border-radius:4px}
+/* the switch: the bars grow or shrink from the old tab's lengths to the new
+   ones (barstabs.js sets the old widths, then lets go), the numbers fade in
+   as they ride the bar's end — only while .is-anim */
+.bars.is-anim :is(.bars-part, .bars-bar){transition:width .42s var(--ease)}
+.bars.is-anim .bars-g.is-on :is(.bars-total, .bars-note, .bars-parts){animation:bars-in .32s var(--ease) both}
+@keyframes bars-in{from{opacity:0}}
+
 @media (max-width:560px){
   /* one series: the name goes above its bar, the track takes the width */
   .bars.is-single .bars-r{grid-template-columns:minmax(0, 1fr); row-gap:3px}
   .bars.is-single .bars-r + .bars-r{margin-top:10px}
   .bars.is-single .bars-nm{flex-direction:row; align-items:baseline; gap:8px}
   .bars-r{column-gap:8px}
+  /* a stack too: its name column ate the track — at 360px a 27 ns bar was
+     20px long */
+  .bars.is-stack .bars-r{grid-template-columns:minmax(0, 1fr); row-gap:2px}
+  .bars.is-stack .bars-r + .bars-r{margin-top:10px}
+  .bars.is-stack .bars-parts{grid-column:1}
+  /* three tabs across ~290px: the summary drops under the name */
+  .bars-tabs{padding:6px 6px 0}
+  .bars-tab{flex-direction:column; gap:3px; min-height:50px; padding:6px 4px; font-size:11.5px}
+  .bars-tab-n{gap:6px}
+  html.js .bars.has-tabs:not(.is-live)::before{height:56px}
+}
+@media (prefers-reduced-motion:reduce){
+  .bars-tab, .bars-tab .ch-mk{transition:none}
+  .bars.is-anim :is(.bars-part, .bars-bar){transition:none}
+  .bars.is-anim .bars-g.is-on :is(.bars-total, .bars-note, .bars-parts){animation:none}
+}
+@media print{
+  .bars-tabs{display:none}
 }
 /* in a hover card: the article in miniature */
 .ic-body .bars{margin:0 0 12px}
@@ -333,4 +488,127 @@ figure.widget.is-bare > .w-root{border:0; border-radius:0; background:none; padd
 }
 @media print{
   .ch-hover, .ch-readout{display:none}
+}
+
+/* ─────────────────────── a figure's fold ─────────────────────── */
+
+/* {{< fold >}} inside {{< bars >}} or {{< chart >}}: a quiet row of its own
+   at the foot of the card, after the key (data/figure-fold.html). The fold
+   in prose (22-fold.css) is an inset at reading size — an icon, the title,
+   "Подробнее ⌄", a rail. Here the same idea is a step lighter: a footnote
+   to a drawing the reader has already understood. No icon, no rail, no
+   "Подробнее" — the label is the control, in the mono of the figure's own
+   key, a chevron before it (› closed, ⌄ open). The motion is the fold's:
+   the height reveal through ::details-content (interpolate-size is on :root,
+   00-tokens.css), open decelerating in, close a touch quicker. A figure in a
+   prose fold must not borrow that fold's summary rules, so every property
+   `.fold summary` sets is set again here. */
+.fig-fold{
+  --o:.2s; --c:.15s;                        /* open / close */
+  --eo:cubic-bezier(.2,0,0,1);              /* ease-out (open) */
+  --ei:cubic-bezier(.4,0,1,1);              /* ease-in (close) */
+  --pad:18px;                               /* the card's side padding (.w-root) */
+  --under:var(--bg-base);                   /* what a sticky column hides behind */
+  display:block; margin:8px 0 0}
+/* alone in the card — a chart not drawn, JavaScript off — it heads it */
+.fig-fold:first-child{margin-top:0}
+/* the hit area is a 36px pill bled past the text — a finger gets 36px, the
+   eye sees a 12px line; its tint is the fold's hover */
+.fig-fold > summary{display:flex; align-items:center; gap:7px; width:max-content; max-width:100%;
+  min-height:36px; margin:0 -8px -8px; padding:0 8px; border-radius:6px; list-style:none; cursor:pointer;
+  font-family:var(--font-mono); font-size:12px; line-height:1.3; color:var(--text-muted);
+  /* a control, not text: a double click must not select a word, a double
+     tap must not zoom (the fold's reasoning, 22-fold.css) */
+  user-select:none; -webkit-user-select:none; touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease)}
+.fig-fold > summary::-webkit-details-marker{display:none}
+.fig-fold > summary::marker{content:""}
+.fig-fold > summary:hover{color:var(--text-primary); background:color-mix(in srgb, var(--text-primary) 6%, transparent)}
+.fig-fold > summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.fig-fold-label{min-width:0}
+.fig-fold-chev{flex:none; order:-1; transform:rotate(-90deg); color:var(--text-muted);
+  transition:transform var(--c) var(--ei), color var(--dur) var(--ease)}
+.fig-fold[open] .fig-fold-chev{transform:none; transition:transform var(--o) var(--eo), color var(--dur) var(--ease)}
+.fig-fold > summary:hover .fig-fold-chev{color:var(--accent)}
+/* open, the label steps up a tone: it now heads the panel under it */
+.fig-fold[open] > summary{color:var(--text-secondary)}
+
+/* the reveal: height is the motion, as in the fold; no fade */
+.fig-fold::details-content{height:0; overflow:clip;
+  transition:height var(--c) var(--ei), content-visibility var(--c) allow-discrete}
+.fig-fold[open]::details-content{height:auto;
+  transition:height var(--o) var(--eo), content-visibility var(--o) allow-discrete}
+
+/* the panel: prose again, whatever the card around it is set in */
+.fig-fold-body{padding-top:14px; font-family:var(--font-sans); font-size:14px; line-height:1.5;
+  color:var(--text-primary); text-align:left; white-space:normal}
+.fig-fold-body > :last-child{margin-bottom:0}
+.fig-fold-body :where(p, ul, ol){margin:0 0 10px}
+/* a paragraph that is all italic is the body's quiet note — marked by the
+   template (data/figure-fold.html): smaller, a tone back, upright */
+.fig-fold-body .fig-fold-note{font-size:12.5px; color:var(--text-secondary)}
+.fig-fold-body .fig-fold-note > em{font-style:normal}
+
+/* a table: the card's own width, its scroll running edge to edge of the
+   card (the side padding moves inside the scroller), so a phone gets every
+   pixel the card has; compact, like the chart's no-JS tables */
+.fig-fold-body .tbl-wrap{margin:0 calc(-1 * var(--pad)) 10px; padding:0 var(--pad);
+  overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin}
+.fig-fold-body table{font-size:13px}
+.fig-fold-body :is(th, td){padding:7px 10px}
+.fig-fold-body td{font-variant-numeric:tabular-nums}
+.fig-fold-body td.has-detail > em:last-child{font-size:11px}
+/* the row names: a short one ("80 bytes", "No pointers") stays on one line
+   even when the columns are squeezed to their narrowest, a long one breaks
+   between its words, never inside a piece of code. A chart's own tables
+   name their rows by x — "80 B" — and need no floor */
+.fig-fold-body .tbl-wrap:not(.chart-fb .tbl-wrap) td:first-child{min-width:8em}
+.fig-fold-body td:first-child code{white-space:nowrap}
+
+/* a table wider than the card: the row names stay put while the numbers
+   scroll under them. The column sticks at the text's edge, its shadow
+   paints the card's side padding to its left, so nothing scrolls visibly
+   past it on that side; on its right a short fade takes whatever is sliding
+   under it — without it a clipped "PRO", "1%" stood against the column.
+   The scroller's far edge fades while there are columns behind it: the one
+   hint that there is more. Both follow the scroll (scroll-driven); where
+   that is not supported (or motion is reduced) the fade by the column
+   simply stays on — at rest it lies over the next cell's padding — and the
+   far edge does not fade. */
+.fig-fold-body .tbl-wrap :is(th, td):first-child{--cell:var(--under); position:sticky; left:0; z-index:1;
+  background:var(--cell); box-shadow:calc(-1 * var(--pad)) 0 0 var(--under)}
+.fig-fold-body .tbl-wrap th:first-child{--cell:var(--bg-surface)}
+.fig-fold-body .tbl-wrap :is(th, td):first-child::after{content:""; position:absolute; top:0; bottom:0; left:100%;
+  width:16px; pointer-events:none; background:linear-gradient(to right, var(--cell) 3px, transparent)}
+@property --fig-fold-far{syntax:"<length>"; inherits:false; initial-value:0px}
+@keyframes fig-fold-far{from{--fig-fold-far:44px} to{--fig-fold-far:0px}}
+@keyframes fig-fold-near{from{opacity:0} to{opacity:1}}
+@supports (animation-timeline:scroll()){
+  .fig-fold-body .tbl-wrap{scroll-timeline:--fig-fold-x inline;
+    animation:fig-fold-far linear both; animation-timeline:--fig-fold-x;
+    -webkit-mask-image:linear-gradient(to left, transparent 0, #000 var(--fig-fold-far));
+    mask-image:linear-gradient(to left, transparent 0, #000 var(--fig-fold-far))}
+  .fig-fold-body .tbl-wrap :is(th, td):first-child::after{animation:fig-fold-near linear both;
+    animation-timeline:--fig-fold-x; animation-range:0px 16px}
+}
+
+@media (max-width:560px){
+  .fig-fold-body :is(th, td){padding:6px 8px}
+}
+@media (prefers-reduced-motion:reduce){
+  .fig-fold::details-content, .fig-fold[open]::details-content{transition:none}
+  .fig-fold > summary, .fig-fold-chev{transition:none}
+  .fig-fold-body .tbl-wrap{animation:none; -webkit-mask-image:none; mask-image:none}
+  .fig-fold-body .tbl-wrap :is(th, td):first-child::after{animation:none}
+}
+/* paper: every fold open, the label kept as the panel's heading, no
+   chevron, no scroller (modules/figfold.js opens them on beforeprint where
+   ::details-content cannot be styled) */
+@media print{
+  .fig-fold::details-content{content-visibility:visible; height:auto}
+  .fig-fold-chev{display:none}
+  .fig-fold > summary{cursor:auto; color:var(--text-secondary)}
+  .fig-fold-body .tbl-wrap{overflow:visible; -webkit-mask-image:none; mask-image:none; animation:none}
+  .fig-fold-body .tbl-wrap :is(th, td):first-child{position:static}
+  .fig-fold-body .tbl-wrap :is(th, td):first-child::after{content:none}
 }

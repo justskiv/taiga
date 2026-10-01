@@ -27,6 +27,9 @@ import { bindNewsletter } from './modules/newsletter.js';
 import { bindComments } from './modules/comments.js';
 import { plot, plotWhenNear } from './modules/plot.js';
 import { fitBars } from './modules/barsfit.js';
+import { mountBarsTabs } from './modules/barstabs.js';
+import { bindFigureFolds } from './modules/figfold.js';
+import { glueMarks } from './modules/mk.js';
 import { fmt, num, sepFor } from './charts/fmt.js';
 
 /* Build-time feature flags. esbuild substitutes a literal `true`/`false` for
@@ -88,7 +91,10 @@ onReady(function () {
   bindHeader();
   bindNavMenu();   /* narrow screens only: self-guards on .nav-wrap/.nav-btn */
   markVisited();   /* before the minimaps: dots read .is-visited/.cur */
+  mountBarsTabs(); /* {{< bars tabs="true" >}}: the tablist over the groups */
   fitBars();       /* {{< bars >}}: labels in or out of their bars, by measure */
+  bindFigureFolds(); /* a fold inside bars/chart: opened for print */
+  glueMarks();       /* {{< mk >}}: the glyph kept on its word's line */
   buildToc();
   bindRails();
   bindTips();

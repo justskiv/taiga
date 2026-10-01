@@ -15,9 +15,16 @@
        the part marked at its end: the label sits inside that part, and the
        guess is made for the part, not the bar.
 
+       In a tab of grouped bars (fill: p1 solid, p2 hatched, p3 washed) the
+       column is told by its fill and named by the key, so its name is kept
+       for a screen reader only; the cell is printed at the bar's tip and its
+       note after it, the way a stack prints its total — never inside a
+       washed or hatched fill, so nothing to guess here.
+
        Takes dict "page" "name" "sub" (name is a column's short name, printed
        plain) "val" (dict text note v) "big" (the scale) "c" (colour role)
-       "row" (dict i) "marks" (the rows to draw full) "whole" (bool). */ -}}
+       "row" (dict i) "marks" (the rows to draw full) "whole" (bool) and,
+       optionally, "fill". */ -}}
 {{- $p := .page -}}
 {{- $v := .val -}}
 {{- $c := .c -}}
@@ -26,6 +33,7 @@
   {{- if in .marks (string .row.i) }}{{ $marked = true }}{{ else }}{{ $c = "ghost" }}{{ end -}}
 {{- end -}}
 {{- $name := cond .sub (htmlEscape .name) (string ($p.RenderString .name)) -}}
+{{- $fill := .fill | default "" -}}
 {{- $chars := strings.RuneCount $v.text -}}
 {{- $cls := slice "bars-r" -}}
 {{- if $marked }}{{ $cls = $cls | append "is-mark" }}{{ end -}}
@@ -34,6 +42,9 @@
   {{- $cut := div (math.Round (mul (div (math.Abs $v.v.v) .big) 10000)) 10000.0 -}}
   {{- if lt (mul $cut 300) (add (mul $chars 7) 16) }}{{ $cls = $cls | append "is-out" }}{{ end -}}
   {{- $lane = printf "<span class=\"bars-bar is-whole\" style=\"--f:1.0000;--p:%.4f\"><span class=\"bars-cut\"><b class=\"bars-v\">%s</b></span></span>" $cut ($p.RenderString $v.text) -}}
+{{- else if and $v.v $fill -}}
+  {{- $f := div (math.Round (mul (div (math.Abs $v.v.v) .big) 10000)) 10000.0 -}}
+  {{- $lane = printf "<span class=\"bars-bar %s\" style=\"--f:%.4f\"></span><b class=\"bars-total\">%s</b>" $fill $f ($p.RenderString $v.text) -}}
 {{- else if $v.v -}}
   {{- $f := div (math.Round (mul (div (math.Abs $v.v.v) .big) 10000)) 10000.0 -}}
   {{- if lt (mul $f 300) (add (mul $chars 7) 16) }}{{ $cls = $cls | append "is-out" }}{{ end -}}
@@ -43,4 +54,4 @@
   {{- $lane = printf "<b class=\"bars-v\">%s</b>" ($p.RenderString ($v.text | default "—")) -}}
 {{- end -}}
 {{- with $v.note }}{{ $lane = printf "%s<span class=\"bars-note\">%s</span>" $lane ($p.RenderString .) }}{{ end -}}
-{{- return printf "<div class=\"%s\" style=\"--c:var(--dv-%s);--on:var(--dv-%s-on);--lw:%d\">\n<span class=\"bars-nm\">%s</span>\n<span class=\"bars-lane\">%s</span>\n</div>\n" (delimit $cls " ") $c $c $chars $name $lane -}}
+{{- return printf "<div class=\"%s\" style=\"--c:var(--dv-%s);--on:var(--dv-%s-on);--lw:%d\">\n<span class=\"%s\">%s</span>\n<span class=\"bars-lane\">%s</span>\n</div>\n" (delimit $cls " ") $c $c $chars (cond (ne $fill "") "bars-nm vh" "bars-nm") $name $lane -}}

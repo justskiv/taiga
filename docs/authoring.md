@@ -342,6 +342,10 @@ The panel animates its height — a real slide, not a fade — via
 `interpolate-size` on `:root` (set in `00-tokens.css`); where a browser lacks
 it the panel snaps open. Labels default to Russian; override per call.
 
+Written inside a `bars` or a `chart`, a fold is the card's footer instead —
+lighter, and with only `title=` and `open=`: see
+[Data figures → a fold under a figure](#figure-fold).
+
 ### term — `{{</* term "mcache" */>}}` {#term}
 
 A word in the sentence with a full definition card behind it: hover opens the
@@ -481,6 +485,12 @@ Horizontal bars from a Markdown table: one series, grouped, or stacked. See
 
 A line chart drawn from data alone — a table in the body, or a YAML file in the
 bundle. See [Data figures → chart](#chart).
+
+### mk — `{{</* mk blue circle */>}}` {#mk-shortcode}
+
+A series' glyph inline, before the name it marks — in a table's header, a
+sentence, a list item: the shape and colour the chart gives that series. See
+[Data figures → a series glyph in the text](#series-glyph).
 
 ### spanmap — `{{</* spanmap bits="111100" size="24" */>}}` {#spanmap-shortcode}
 
@@ -872,9 +882,11 @@ Obsidian draws it too (the Taiga theme and the taiga-companion plugin).
 |---|---|---|
 | A row of 2–4 big numbers | `> [!stats]` over a list | CSS only |
 | A number with its detail in a table | `−41% *9,2 → 5,5 ns*` in a right-aligned cell | CSS only |
+| A series' glyph before a name — in a table header, in a sentence | `{{</* mk blue circle */>}}` | CSS, a few lines of JS |
 | Horizontal bars — one series, groups, parts | `{{</* bars */>}}` + a table | HTML/CSS, a tiny label fitter |
 | A line chart with a reading panel | `{{</* chart */>}}` + a table, or a YAML file | Observable Plot, loaded on demand |
 | A span's slots and bitmap | `{{</* spanmap bits="111100" size="24" */>}}` | HTML/CSS |
+| The exact values under a figure, folded | `{{</* fold */>}}` inside `bars` or `chart` | native `<details>` |
 
 One grammar runs through all of them: **bold** is the thing, a trailing
 *italic* is the quiet addition — a source, a detail, a note. Numbers print the
@@ -915,6 +927,45 @@ second, quieter line under the number — the absolute values behind a
 percentage. A cell that is all italic stays italic, and other columns are left
 alone. This replaces `−41%<br><small>…</small>`.
 
+### A series' glyph in the text {#series-glyph}
+
+```md
+| 24 bytes | {{</* mk blue circle */>}} M4 Pro | {{</* mk green square */>}} Genoa (Zen 4) | {{</* mk red triangle */>}} Skylake |
+|---|---:|---:|---:|
+| No pointers | −41% *9,2 → 5,5 ns* | −28% *27,0 → 19,5 ns* | −21% *52,9 → 41,6 ns* |
+
+The laptop, {{</* mk blue circle */>}} M4 Pro, gains the most.
+```
+
+When the names in a table's header or in a sentence are the series of a chart
+or a `bars` figure nearby — the machines, the forms — `mk` before a name draws
+that series' glyph: the same shape in the same colour the chart's key and the
+bars tabs give it, so the text and the figures speak one code. It is a mark
+in the text, written where it stands: the table stays an ordinary table (its
+detail cells too), and any cell, sentence or list item can carry one.
+
+- **`{{</* mk <color> [<shape>] */>}}`**, or named: `color="blue" shape="square"`.
+  **color** is a palette role: `ink` `ghost` `blue` `green` `red` `gold`
+  `violet` `copper` `accent`. **shape**: `circle` `square` `triangle`
+  `diamond` `star` `cross`; a circle when omitted. A chart gives its series
+  these shapes in this order (and so do the bars tabs), so the second series
+  of a figure is a `square` unless the figure says otherwise — write the
+  colour and the shape the figure has.
+- **Before the name, with a space** — the glyph and the name are one unit: a
+  line never breaks between them, at the start of a cell or in the middle of
+  a sentence. The gap after the glyph is its own margin, not the space you
+  type, so it is the same everywhere.
+- **Decorative**: `aria-hidden`, never read aloud — the name after it is the
+  text. A feed reader, which has no stylesheet, shows nothing in its place
+  (the chart it points to is not in the feed either); on paper it keeps its
+  ink. Its hue is a palette role, so it repaints with the palette, light
+  schemes included.
+- **Not in the data of a `bars` or a `chart`** — those tables are read as
+  numbers and names, and the figures draw their own glyphs. In their
+  [fold](#figure-fold) it is at home.
+- An unknown colour warns and prints nothing; an unknown shape warns and
+  draws a circle; a third word or an unknown parameter warns.
+
 ### bars {#bars}
 
 ```md
@@ -938,9 +989,58 @@ alone. This replaces `−41%<br><small>…</small>`.
   apart by fill (solid, hatched, washed — so three parts at most, a fourth
   warns), the total at the tip, the parts spelled out under it, and a key
   from the header — `**short** *longer*` gives a part its name and its key
-  line.
+  line. A part's trailing italic (`7,53 *−28%*`) is printed after the total:
+  `27,0 ns  −28%`, the percentage in the primary ink, the time quieter.
 - **A row whose value cells are all empty** is a group heading: `**Genoa**
   *win −28% → −35%*` puts the name left and the italic right.
+- **`tabs="true"` turns the groups of a stack or of grouped bars into tabs**
+  — a tab per heading row: the chart's series glyph in the group's colour, the
+  heading's bold as the name, its italic as a quiet summary beside it
+  (`**M4 Pro** *−33…−46%*`). The tabs share one scale, so a switch compares:
+  the bars grow or shrink from the old tab's lengths to the new ones (at once
+  with reduced motion). ←/→ and Home/End move between tabs; `open="Genoa"`
+  picks the one shown first, by its heading's bold. Every row must sit under a
+  heading row, and there must be two groups or more — otherwise a warning and
+  the figure untabbed. Live, a stack's parts line under each bar is hidden from
+  the eye (the key and the bar's end say enough) and still read aloud. Without JavaScript, in a feed and on paper the groups
+  stand one under another with their headings and parts lines — nothing is
+  hidden. A tabbed figure is framed even without `cap`: the tabs sit on the
+  frame's top edge.
+
+  ```md
+  {{</* bars stack="true" tabs="true" open="Genoa" digits="1" colors="blue green red" unit=" ns" cap="…" */>}}
+  | | **remains** *with the specialization* | **saved** *what it took away* |
+  |---|--:|--:|
+  | **M4 Pro** *−33…−46%* | | |
+  | No pointers | 5.496 | 3.752 *−41%* |
+  | **Genoa** *−19…−36%* | | |
+  | No pointers | 19.49 | 7.53 *−28%* |
+  {{</* /bars */>}}
+  ```
+- **Grouped bars in tabs** — no `stack`, two or three value columns: a tab is
+  a machine, so `colors` is per group, as in a stack (`colors="green red"`).
+  Inside a tab each row is a set: its label over its bars, a bar per column
+  told apart by fill, not hue. A row reads before → after, so the **last
+  column is the result, solid** in the group's colour; the first is washed,
+  a middle one hatched — a fourth column, or a `whole`, warns and the figure
+  is drawn as plain groups. The key comes from the header (`**short**
+  *longer*` works as in a stack) and names the fills, so the bar keeps no
+  name of its own (a screen reader still hears it). A cell prints as written
+  at the bar's tip, quieter, and its trailing italic follows in the primary
+  ink — `19.5 ns  −28%`, as a stack ends.
+
+  ```md
+  {{</* bars tabs="true" open="Genoa" colors="green red" cap="…" */>}}
+  | | no specialization | with specialization |
+  |---|--:|--:|
+  | **Genoa** | | |
+  | No ballast | 27.0 ns | 19.5 ns *−28%* |
+  | 256 MiB ballast | 19.5 ns | 12.8 ns *−35%* |
+  | **Skylake** | | |
+  | No ballast | 52.9 ns | 41.6 ns *−21%* |
+  | 256 MiB ballast | 32.3 ns | 20.1 ns *−38%* |
+  {{</* /bars */>}}
+  ```
 - **`whole="100"`: every bar is the whole**, and a value is the part of it
   marked at the bar's end — the same hue washed out, the label inside that
   part (on the solid just before it when the part is too thin). For a saving
@@ -950,14 +1050,16 @@ alone. This replaces `−41%<br><small>…</small>`.
 
 | Parameter | Meaning |
 |---|---|
-| `colors` | Per column (per group in a stack): `ink` `ghost` `blue` `green` `red` `gold` `violet` `copper` `accent`. Default: `ink` for one series, the palette order otherwise. |
+| `colors` | Per column (per group in a stack and in tabs): `ink` `ghost` `blue` `green` `red` `gold` `violet` `copper` `accent`. Default: `ink` for one series, the palette order otherwise. |
 | `max` | The scale's right end. Default: the longest bar. |
 | `mark` | Rows drawn full, 1-based as in the table (`mark="2"`, `mark="1 3"`); every other row turns `ghost`. |
 | `stack` | `"true"` — see above. Always written with a value: Hugo cannot mix a bare flag with named parameters. |
 | `unit` | After a stack's total, as written (`unit=" ns"`). |
-| `digits` | A stack prints its parts and total at this many decimals. Write the parts exact (`32,25` + `20,68`) and the total reads 52,9 — not the 53,0 the rounded parts would add up to. |
+| `digits` | A stack prints its parts and total at this many decimals. Write the parts exact (`32,25` + `20,68`) and the total reads 52,9 — not the 53,0 the rounded parts would add up to. The last part is then printed as the total less the other parts as printed, so the line under the bar adds up to the number at its end: 52,9 − 32,3 = 20,6. |
 | `note-color` | The colour of the notes after the bars. Default: the secondary text colour. |
 | `whole` | Every bar stands for this much (`whole="100"` for percentages) — see above. Mixes with neither `stack` nor `max`. |
+| `tabs` | `"true"` on a stack or on grouped bars: the groups become tabs — see above. |
+| `open` | The tab shown first, by its heading's bold (`open="Genoa"`). Default: the first. Needs `tabs`. |
 | `cap`, `note` | A caption puts the bars in the widget's frame, the way a widget is captioned. Without one they sit in the prose. |
 
 A label goes inside its bar's end, in an ink picked per hue and palette for
@@ -989,7 +1091,8 @@ The **inline form** is the simple case — one data set, options as parameters.
 The first column is x (its first number), each further column a series named
 by its header. The **file form** takes everything from a YAML file in the page
 bundle, and must **self-close** (`/>`): a chart reads its body, so an unclosed
-tag would swallow the text after it.
+tag would swallow the text after it. Its paired form holds a
+[fold](#figure-fold) and nothing else.
 
 **The cell grammar** — the same in a table, in YAML, in Obsidian:
 
@@ -1058,6 +1161,76 @@ the moment the two part. The grammar's test vectors
 (`assets/js/charts/cases.json`) run through the runtime and through the Hugo
 partials that print the no-JS tables: `node scripts/check-charts.mjs`.
 
+### A fold under a figure {#figure-fold}
+
+````md
+{{</* bars stack="true" tabs="true" open="Genoa" digits="1" colors="blue green red" unit=" ns" cap="Time per 24-byte allocation" */>}}
+
+| | **remains** *with the specialization* | **saved** *what it took away* |
+|---|--:|--:|
+| **M4 Pro** | | |
+| No pointers | 5.496 | 3.752 *−41%* |
+| **Genoa** | | |
+| No pointers | 19.49 | 7.53 *−28%* |
+
+{{</* fold */>}}
+
+| 24 bytes | {{</* mk blue circle */>}} M4 Pro | {{</* mk green square */>}} Genoa (Zen 4) | {{</* mk red triangle */>}} Skylake |
+|---|---:|---:|---:|
+| No pointers | −41% *9.2 → 5.5 ns* | −28% *27.0 → 19.5 ns* | −21% *52.9 → 41.6 ns* |
+
+*~ — no measurable difference.*
+
+{{</* /fold */>}}
+
+{{</* /bars */>}}
+
+{{</* chart src="charts/alloc-cliff.yaml" cap="Where the speed-up ends" */>}}
+{{</* fold /*/>}}
+{{</* /chart */>}}
+````
+
+A `fold` written **inside** a `bars` or a `chart` is not printed where it
+stands: it becomes the card's footer — a quiet row after the key,
+`› Exact values` in the key's mono, that opens into its body. It is a footnote
+to a drawing the reader has already understood, so it is a step lighter than
+the [fold](#fold) in prose: no icon, no rail, no "Подробнее". The chevron
+leads (`›`, `⌄` when open) where the prose fold's trails — that difference is
+meant.
+
+- **Only `title=` and `open=`.** `title` is the label, optional — "Exact
+  values" by default (i18n `figure_fold`); `open="true"` renders it open.
+  `icon`, `more`, `less` and `size` do nothing here and warn.
+- **The body is any Markdown** — a table with detail cells and the series
+  glyphs in its header (`mk`), a paragraph, a `term`. A paragraph that is all
+  italic (`*~ — …*`) is set as a quiet note.
+- **An empty fold in a chart** — `{{</* fold /*/>}}` — holds the chart's own
+  tables: the no-JS view moves into it rather than being printed twice (for a
+  reader without JavaScript, in a feed, for a screen reader). A fold with a
+  body of its own leaves that view where it was, so without JavaScript both
+  show. In `bars`, which have no tables of their own, an empty fold warns and
+  is dropped.
+- **A file chart pairs around it**: with `src=` the body holds a fold and
+  nothing else — any other text warns, as before. The self-closing form works
+  as it did.
+- **One per figure**; a second one warns and is dropped. It is drawn at the
+  foot wherever it stands in the body — write it last, and the source reads
+  top to bottom as the figure does. A tabbed figure has one fold for all its
+  tabs, after the key. A figure with a fold is framed, captioned or not.
+- **Blank lines around the tables and around `{{</* fold */>}}` /
+  `{{</* /fold */>}}` are required.** GFM — Hugo and Obsidian alike — glues a
+  line that follows a table onto it as one more row.
+- **For a short supplement** — the exact numbers behind the drawing, a line
+  about the method. Anything longer is an ordinary `fold` in the text.
+
+A table in the fold takes the card's full width: on a phone it scrolls edge to
+edge of the card, its first column stays put with a short fade on its right
+edge while the numbers slide under it, and the far edge fades while there are
+columns behind it. It is a native `<details>`: the keyboard, a screen reader,
+find-in-page and a reader without JavaScript get it for free. It opens by
+height (at once with reduced motion) and prints open; a feed gets the
+`<details>` as it is.
+
 ### spanmap {#spanmap}
 
 ```md
@@ -1097,12 +1270,18 @@ In Obsidian, widgets run in a sandboxed frame: `Taiga.fmt` is there,
   `[!stats]`.
 - **A percentage with the absolute values behind it** in a table → a detail
   cell, not `<br><small>`.
+- **Names that are the series of a chart or bars nearby** — a table's
+  columns, the machines in a sentence → `{{</* mk <color> <shape> */>}}`
+  before each, with the figure's colours and shapes.
 - **A few magnitudes side by side** (sizes, costs, times) → `bars`; several
-  machines or forms → groups; a total and its share → a stack; a saving or a
-  share per machine → `whole="100"`.
+  machines or forms → groups; a total and its share → a stack; the same stack,
+  or the same before/after pairs, on several machines → `tabs`; a saving or a share per machine →
+  `whole="100"`.
 - **How a value changes along x** (sizes, versions, load) → `chart`; one data set
   → the inline table, anything richer → a YAML file.
 - **A span, a bitmap, a slot** → `spanmap`.
+- **The exact numbers behind a figure**, a line about the method → a `fold`
+  inside that figure; anything longer → a `fold` in the text.
 - **Anything else** — an interaction that explains a mechanism → a
   [widget](#widgets). Never raw HTML in the Markdown for a figure the list above
   covers.

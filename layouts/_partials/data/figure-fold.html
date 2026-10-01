@@ -1,0 +1,29 @@
+{{- /* The fold at the foot of a data figure's card — a {{< fold >}} written
+       inside {{< bars >}} or {{< chart >}} (fold.html leaves it on the
+       figure's .Store; the figure calls this after its legend). A footnote to
+       a drawing the reader has already understood, so one step lighter than
+       the fold in prose: no icon, no rail, no "Подробнее" — the label is the
+       control, in the mono of the figure's own legend, a chevron before it
+       (31-data.css, "a figure's fold").
+
+       Native <details>/<summary>: the keyboard, a screen reader, find-in-page
+       and a reader without JavaScript get it for free; paper opens it
+       (31-data.css, and modules/figfold.js for a browser that cannot style
+       ::details-content). A feed gets the <details> as it is.
+
+       A paragraph that is all italic (`*~ — no measurable difference*`) is
+       the body's quiet note — the site's grammar for a quiet addition — and
+       is marked here, where "all italic" can be read exactly: CSS cannot tell
+       a text node beside the <em> from none.
+
+       Takes dict "fold" (title, open, body — what fold.html stored) and "fb"
+       (HTML standing in for an empty body: a chart's own tables). */ -}}
+{{- $f := .fold -}}
+{{- $body := $f.body | default .fb | default "" -}}
+{{- $body = replaceRE `<p><em>((?:[^<]|<[^/]|</[^e]|</e[^m]|</em[^>])*)</em></p>` `<p class="fig-fold-note"><em>$1</em></p>` $body -}}
+<details class="fig-fold"{{ if $f.open }} open{{ end }}>
+<summary><svg class="fig-fold-chev" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg><span class="fig-fold-label">{{ $f.title | default (i18n "figure_fold") | safeHTML }}</span></summary>
+<div class="fig-fold-body">
+{{ $body | safeHTML }}
+</div>
+</details>

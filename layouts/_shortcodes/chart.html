@@ -11,8 +11,21 @@
 
        The inline form is the simple case: one data set, options as
        parameters. The file form carries everything — modes, rules, zones,
-       jumps, per-cell details — and must self-close: a chart reads its body,
-       so an unclosed tag would swallow the text after it.
+       jumps, per-cell details — and self-closes: a chart reads its body, so
+       an unclosed tag would swallow the text after it. Its paired form holds
+       a {{< fold >}} and nothing else:
+
+         {{< chart src="charts/alloc-cliff.yaml" cap="…" >}}
+         {{< fold />}}
+         {{< /chart >}}
+
+       A fold in either form is drawn at the foot of the card, after the key
+       (data/figure-fold.html); it prints nothing where it stands, so the
+       table the chart reads never sees it. An EMPTY fold stands for the
+       chart's own tables: the no-JS view below moves into it instead of
+       being printed a second time, and — no longer a direct child of the
+       root — is not hidden once the chart is drawn (31-data.css). A fold
+       with a body of its own leaves the no-JS view where it was.
 
        What ships:
          · a <figure class="widget chart"> in the widget's frame and caption;
@@ -50,7 +63,7 @@
 {{- $fb := "" -}}
 
 {{- if $src -}}
-  {{- if $inner }}{{ warnf "chart: src= and a body at once — the body is ignored; a file chart self-closes, {{< chart src=\"…\" />}} (%s)" $pos }}{{ end -}}
+  {{- if $inner }}{{ warnf "chart: src= and a body at once — the body is ignored; a file chart self-closes, {{< chart src=\"…\" />}}, or holds a {{< fold >}} and nothing else (%s)" $pos }}{{ end -}}
   {{- $r := $p.Resources.Get $src -}}
   {{- if not $r }}{{ errorf "chart: %s is not in the bundle of %s (%s)" $src $p.File.Path $pos }}{{ end -}}
   {{- $d := $r | transform.Unmarshal -}}
@@ -108,10 +121,16 @@
   {{- $fb = printf "<div class=\"chart-fb\">\n%s</div>" ($p.RenderString (dict "display" "block") $inner) -}}
 {{- end -}}
 {{- $p.Store.Set "chart" true -}}
+{{- $fold := .Store.Get "fold" -}}
 <figure class="widget chart">
 <figcaption>{{ $cap }}{{ with $note }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
 <div class="w-root chart-root">
+{{- if or (not $fold) $fold.body }}
 {{ $fb | safeHTML }}
+{{- end }}
+{{- with $fold }}
+{{ partial "data/figure-fold.html" (dict "fold" . "fb" $fb) }}
+{{- end }}
 </div>
 <script type="application/json" class="chart-spec">{{ $spec | jsonify | safeJS }}</script>
 </figure>

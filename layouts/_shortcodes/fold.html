@@ -66,7 +66,42 @@
        select a paragraph naturally starts.
        Without JS the only cost is that such a link click also toggles and that
        the closing row collapses without the scroll — the component still
-       works. */ -}}
+       works.
+
+       INSIDE A FIGURE. Put in the body of a {{< bars >}} or a {{< chart >}},
+       a fold prints nothing where it stands: it leaves its title, its open
+       flag and its rendered body on the figure's .Store, and the figure draws
+       it at the foot of its card (data/figure-fold.html) — a footnote to the
+       drawing, one step lighter than the fold in prose. There title= is
+       optional (i18n figure_fold), open= works, and icon/more/less/size
+       warn: the figure's fold has none of them. An empty body in a chart
+       stands for the chart's own tables; in bars, which have none, it warns
+       and is dropped. One fold per figure: a second one warns and is
+       dropped. Nested shortcodes render before their parent, so the store
+       is filled by the time the figure reads it. */ -}}
+{{- $fig := "" -}}
+{{- with .Parent }}{{ if in (slice "bars" "chart") .Name }}{{ $fig = .Name }}{{ end }}{{ end -}}
+{{- if $fig -}}
+  {{- /* a nested shortcode's own .Position reads 1:1, so the figure's is
+         the one that points at the source */ -}}
+  {{- $pos := .Parent.Position -}}
+  {{- range $k, $_ := .Params -}}
+    {{- if not (in (slice "title" "open") $k) }}{{ warnf "fold: %s= has no effect in a figure's fold — it takes title= and open= (the %s at %s)" $k $fig $pos }}{{ end -}}
+  {{- end -}}
+  {{- if .Parent.Store.Get "fold" -}}
+    {{- warnf "fold: one fold per figure — a second one in the %s is dropped, the first stays (%s)" $fig $pos -}}
+  {{- else -}}
+    {{- $title := "" -}}
+    {{- with .Get "title" }}{{ $title = $.Page.RenderString . }}{{ end -}}
+    {{- $body := "" -}}
+    {{- with trim .InnerDeindent " \t\r\n" }}{{ $body = $.Page.RenderString (dict "display" "block") . }}{{ end -}}
+    {{- if and (not $body) (eq $fig "bars") -}}
+      {{- warnf "fold: an empty fold in bars has nothing to show — give it a body (only a chart has tables of its own to put there) (%s)" $pos -}}
+    {{- else -}}
+      {{- .Parent.Store.Set "fold" (dict "title" $title "open" (eq (.Get "open" | default "" | string) "true") "body" $body) -}}
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
 
 {{- $icons := dict
   "video"    `<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M10 8.4v7.2l6-3.6z" fill="currentColor" stroke="none"/>`
@@ -113,4 +148,5 @@
 {{- if not (.Page.Store.Get "foldScriptDone") -}}
 {{- .Page.Store.Set "foldScriptDone" true -}}
 <script>addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".fold summary a").forEach(function(a){a.addEventListener("click",function(e){e.stopPropagation()})});function collapse(el){var d=el.closest(".fold"),r=d.getBoundingClientRect(),y=r.top+window.scrollY,up=r.top<0;if(window.Taiga&&window.Taiga.holdScroll)window.Taiga.holdScroll();d.open=false;if(up){var h=document.querySelector(".site-head"),e=document.documentElement,b=e.style.scrollBehavior;e.style.scrollBehavior="auto";window.scrollTo(0,y-((h?h.offsetHeight:0)+16));e.style.scrollBehavior=b}d.querySelector("summary").focus({preventScroll:true})}document.querySelectorAll(".fold-end").forEach(function(b){b.addEventListener("click",function(){collapse(b)})});document.querySelectorAll(".fold-rail").forEach(function(r){r.addEventListener("click",function(){var s=window.getSelection();if(s&&!s.isCollapsed)return;collapse(r)})})})</script>
+{{- end -}}
 {{- end -}}

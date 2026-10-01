@@ -51,6 +51,34 @@ if (existsSync(join(dir, 'core.js'))) {
   if (typeof C.selfTest === 'function') for (const e of C.selfTest(cases)) bad.push(`core: ${e}`);
 }
 
+/* ── the series glyphs: charts/core.js draws them in the key; the bars tabs
+   (modules/barstabs.js) and {{< mk >}} in the text (31-data.css, as mask
+   data URIs) carry copies. One series, one glyph wherever it is shown. ── */
+{
+  const glyphs = (src) => {
+    const out = {};
+    const block = /GLYPH = \{([\s\S]*?)\n\};/.exec(src);
+    if (block) for (const m of block[1].matchAll(/(\w+): '([^']*)'/g)) out[m[1]] = m[2];
+    return out;
+  };
+  const shapes = (src) => JSON.parse((/SHAPES = (\[[^\]]*\])/.exec(src)?.[1] ?? '[]').replace(/'/g, '"'));
+  const coreSrc = readFileSync(join(dir, 'core.js'), 'utf8');
+  const core = glyphs(coreSrc);
+  const tabsFile = join(root, 'assets/js/modules/barstabs.js');
+  if (existsSync(tabsFile)) {
+    const tabsSrc = readFileSync(tabsFile, 'utf8');
+    eq('barstabs.js SHAPES', shapes(tabsSrc), shapes(coreSrc));
+    eq('barstabs.js GLYPH', glyphs(tabsSrc), core);
+  }
+  const css = readFileSync(join(root, 'assets/css/31-data.css'), 'utf8');
+  const masks = {};
+  for (const m of css.matchAll(/\.mk-(\w+)\{--mk-s:url\("data:image\/svg\+xml,([^"]*)"\)\}/g)) {
+    const svg = decodeURIComponent(m[2]).replace(/'/g, '"');
+    masks[m[1]] = /viewBox="0 0 10 10">(.*)<\/svg>$/.exec(svg)?.[1] ?? svg;
+  }
+  eq('31-data.css .mk-* masks', masks, core);
+}
+
 /* ── the Hugo half ── */
 const HUGO_PAGE = `{{- $c := resources.Get "js/charts/cases.json" | transform.Unmarshal -}}
 {{- $lang := .Language.Lang -}}

@@ -28,17 +28,41 @@
        `**short** *longer*` gives a stack its part name (short) and its legend
        line (longer).
 
-       Parameters: colors (per column; per group in a stack), max (the
+       Parameters: colors (per column; per group in a stack or tabs), max (the
        scale's right end; default the largest bar), mark (rows, 1-based as in
        the table, drawn full — every other row turns ghost), stack, unit
        (after a stack's total), digits (a stack prints its parts and total at
        this many decimals: write the parts exact, 32,25 + 20,68, and the total
-       is 52,9 rather than the 53,0 the rounded parts would add up to),
-       whole (every bar spans the track and stands for this much; its value
-       is the part of it washed out at the bar's end, the label inside that
-       part — mixes with neither stack nor max), note-color, cap / note (a
-       caption puts the bars in the widget's frame). Unknown ones warn: CI
+       is 52,9 rather than the 53,0 the rounded parts would add up to; the
+       last part is then printed as the total less the others AS PRINTED, so
+       the parts line adds up to the number at the bar's end), whole (every
+       bar spans the track and stands for this much; its value is the part of
+       it washed out at the bar's end, the label inside that part — mixes with
+       neither stack nor max), tabs (the groups of a stack or of grouped bars
+       become tabs, one scale for all of them — modules/barstabs.js), open
+       (the group a tabbed figure opens on, by its heading's bold; default
+       the first),
+       note-color, cap / note (a caption puts the bars in the widget's frame;
+       a tabbed figure is framed with or without one). Unknown ones warn: CI
        builds with --panicOnWarning.
+
+       A stack part's trailing italic (`7,53 *−28%*`) is printed after the
+       total at the bar's end, where a single bar prints its note.
+
+       Grouped bars in tabs: a tab is a group (a heading row), so `colors` is
+       per group, as in a stack, and inside a tab the columns of a row are told
+       apart by fill — the row reads before → after, so the last column is the
+       result, solid; the first is washed, a middle one hatched (three columns
+       at most) — with a key from the header. The row's label heads its bars;
+       a bar prints its cell at its tip and its note after it, as a stack
+       prints its total. The column's name stays in the row for a screen
+       reader only: the key says it for the eye.
+
+       A {{< fold >}} in the body is not data: it prints nothing where it
+       stands (so the table below never sees it) and is drawn at the foot of
+       the card, after the key — one for all the tabs of a tabbed figure. A
+       figure with a fold is framed, captioned or not: the fold is the card's
+       footer (data/figure-fold.html).
 
        A label goes inside its bar's end in an ink picked per hue and palette
        (31-data.css). Too short a bar gives it out past the end: guessed here
@@ -47,7 +71,7 @@
        thin for it gives the label to the solid just before it. */ -}}
 {{- $p := .Page -}}
 {{- $pos := .Position -}}
-{{- $keys := slice "cap" "note" "colors" "max" "mark" "stack" "unit" "note-color" "digits" "whole" -}}
+{{- $keys := slice "cap" "note" "colors" "max" "mark" "stack" "unit" "note-color" "digits" "whole" "tabs" "open" -}}
 {{- if and .Params (not .IsNamedParams) -}}
   {{- errorf "bars: parameters must be named, e.g. stack=\"true\" (%s)" $pos -}}
 {{- end -}}
@@ -56,6 +80,8 @@
 {{- $colors := split (.Get "colors" | default "") " " -}}
 {{- range $colors }}{{ if and . (not (in $inks .)) }}{{ warnf "bars: colour %q is none of %s (%s)" . (delimit $inks ", ") $pos }}{{ end }}{{ end -}}
 {{- $stack := eq (.Get "stack" | default "" | string) "true" -}}
+{{- $tabs := eq (.Get "tabs" | default "" | string) "true" -}}
+{{- if and (.Get "open") (not $tabs) }}{{ warnf "bars: open picks a tab — it needs tabs=\"true\" (%s)" $pos }}{{ end -}}
 {{- $unit := .Get "unit" | default "" -}}
 {{- $digits := -1 -}}
 {{- with .Get "digits" }}{{ $digits = int . }}{{ end -}}
@@ -71,6 +97,21 @@
 {{- if lt $n 1 }}{{ errorf "bars: the table needs a label column and at least one value column (%s)" $pos }}{{ end -}}
 {{- /* one hue, three fills a reader tells apart: solid, hatched, washed */ -}}
 {{- if and $stack (gt $n 3) }}{{ warnf "bars: a stack draws at most 3 parts (solid, hatched, washed), this table has %d value columns (%s)" $n $pos }}{{ end -}}
+{{- /* tabs hold groups: a stack's, or those of grouped bars — whose columns
+       a tab tells apart by the same three fills, and a whole's washed part
+       would be a fourth */ -}}
+{{- if and $tabs (not $stack) -}}
+  {{- if lt $n 2 -}}
+    {{- warnf "bars: tabs work on a stack or on grouped bars — add stack=\"true\" or a second value column (%s)" $pos -}}
+    {{- $tabs = false -}}
+  {{- else if gt $n 3 -}}
+    {{- warnf "bars: grouped bars in tabs tell their columns apart by fill (solid, hatched, washed), so 3 at most, this table has %d value columns (%s)" $n $pos -}}
+    {{- $tabs = false -}}
+  {{- else if .Get "whole" -}}
+    {{- warnf "bars: whole and tabs do not mix — in a tab the columns are told apart by fill, and a whole's part is one (%s)" $pos -}}
+    {{- $tabs = false -}}
+  {{- end -}}
+{{- end -}}
 
 {{- /* ── read every row once: labels, values, notes, the scale ── */ -}}
 {{- $rows := slice -}}
@@ -125,8 +166,48 @@
 {{- end -}}
 {{- if le $big 0.0 }}{{ $big = 1.0 }}{{ end -}}
 
+{{- /* tabs: a heading row opens each tab, so every row must sit under one;
+       open names a group by its heading's bold (the heading less its
+       trailing italic, if it has no bold). A table that cannot be tabbed
+       warns and is drawn untabbed: a plain stack, plain grouped bars. */ -}}
+{{- $openAt := 1 -}}
+{{- if $tabs -}}
+  {{- $names := slice -}}
+  {{- $orphan := false -}}
+  {{- range $rows -}}
+    {{- if .group -}}
+      {{- $nm := replaceRE `\s*\*[^*]+\*$` "" .label -}}
+      {{- with findRESubmatch `\*\*(.+?)\*\*` .label 1 }}{{ $nm = index (index . 0) 1 }}{{ end -}}
+      {{- $names = $names | append (trim (replaceRE "[*`]" "" $nm) " ") -}}
+    {{- else if not $names -}}
+      {{- $orphan = true -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if lt (len $names) 2 -}}
+    {{- warnf "bars: tabs need two groups or more — a heading row (every value cell empty) opens each (%s)" $pos -}}
+    {{- $tabs = false -}}
+  {{- else if $orphan -}}
+    {{- warnf "bars: with tabs every row sits under a heading row — start the table with one (%s)" $pos -}}
+    {{- $tabs = false -}}
+  {{- end -}}
+  {{- with $.Get "open" -}}
+    {{- $want := trim . " " -}}
+    {{- $at := 0 -}}
+    {{- range $i, $n := $names }}{{ if and (eq $n $want) (not $at) }}{{ $at = add $i 1 }}{{ end }}{{ end -}}
+    {{- if $at }}{{ $openAt = $at }}{{ else }}{{ warnf "bars: open=%q names no group — the groups are %s (%s)" . (delimit $names ", ") $pos }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* ── the shape, the colours, the columns ── */ -}}
 {{- $grouped := and (gt $n 1) (not $stack) -}}
+{{- /* grouped bars in tabs: a colour per group, the columns told apart by
+       fill — the last one solid (the result), the first washed, a middle one
+       hatched; p1/p2/p3 are the stack's solid/hatched/washed */ -}}
+{{- $fills := and $grouped $tabs -}}
+{{- $fillAt := dict -}}
+{{- range $k := seq $n -}}
+  {{- $fillAt = merge $fillAt (dict (string $k) (cond (eq $k $n) "p1" (cond (eq $k 1) "p3" "p2"))) -}}
+{{- end -}}
 {{- $palette := slice "blue" "green" "red" "gold" "violet" "copper" -}}
 {{- $colorAt := dict -}}
 {{- range $k := seq (math.Max $n 8 | int) -}}
@@ -164,7 +245,14 @@
   {{- /* a note or a total needs room only where its bar runs long: a track is
          some 40ch, so a bar at share f leaves 40·(1−f) free behind it */ -}}
   {{- range .vals -}}
-    {{- if and .note .v -}}
+    {{- if and $fills .v -}}
+      {{- /* in a tab a bar's cell is printed at its tip and its note after
+             that, as a stack prints its total */ -}}
+      {{- $tl := add (strings.RuneCount .text) 2 -}}
+      {{- with .note }}{{ $tl = add $tl (strings.RuneCount .) 1 }}{{ end -}}
+      {{- $need := sub $tl (mul 40 (sub 1 (div (math.Abs .v.v) $big))) -}}
+      {{- if gt $need (float $room) }}{{ $room = math.Ceil $need | int }}{{ end -}}
+    {{- else if and .note .v -}}
       {{- $share := div (math.Abs .v.v) $big }}{{ if $whole }}{{ $share = 1.0 }}{{ end -}}
       {{- $need := sub (add (strings.RuneCount .note) 3) (mul 40 (sub 1 $share)) -}}
       {{- if gt $need (float $room) }}{{ $room = math.Ceil $need | int }}{{ end -}}
@@ -172,6 +260,8 @@
   {{- end -}}
   {{- if and $stack (not .group) -}}
     {{- $tl := add (strings.RuneCount (print (partial "data/fmt.html" (dict "v" .sum "d" .dec)) $unit)) 2 -}}
+    {{- /* a stack prints its parts' notes after the total, a gap apart */ -}}
+    {{- range .vals }}{{ if and .note .v }}{{ $tl = add $tl (strings.RuneCount .note) 1 }}{{ end }}{{ end -}}
     {{- $need := sub $tl (mul 40 (sub 1 (div .sum $big))) -}}
     {{- if gt $need (float $room) }}{{ $room = math.Ceil $need | int }}{{ end -}}
   {{- end -}}
@@ -186,8 +276,16 @@
     {{- $group = add $group 1 -}}
     {{- if $open }}{{ $out = print $out "</div>\n" }}{{ end -}}
     {{- $c := index $colorAt (string $group) -}}
-    {{- $out = print $out (printf "<div class=\"bars-g\" style=\"--c:var(--dv-%s);--on:var(--dv-%s-on)\">\n<div class=\"bars-hd\">%s</div>\n" $c $c ($p.RenderString .label)) -}}
+    {{- $out = print $out (printf "<div class=\"bars-g%s\" style=\"--c:var(--dv-%s);--on:var(--dv-%s-on)\">\n<div class=\"bars-hd\">%s</div>\n" (cond (and $tabs (eq $group $openAt)) " is-on" "") $c $c ($p.RenderString .label)) -}}
     {{- $open = true -}}
+  {{- else if $fills -}}
+    {{- /* a row of a tab: its label over its bars, in the group's hue */ -}}
+    {{- $c := index $colorAt (string $group) -}}
+    {{- $out = print $out (printf "<div class=\"bars-set\">\n<div class=\"bars-sub\">%s</div>\n" ($p.RenderString .label)) -}}
+    {{- range $k, $v := .vals -}}
+      {{- $out = print $out (partial "data/bar-row.html" (dict "page" $p "name" (index $heads $k).short "val" $v "big" $big "c" $c "row" $row "marks" $marks "sub" true "whole" false "fill" (index $fillAt (string (add $k 1))))) -}}
+    {{- end -}}
+    {{- $out = print $out "</div>\n" -}}
   {{- else if $grouped -}}
     {{- if $open }}{{ $out = print $out "</div>\n" }}{{ end -}}
     {{- $out = print $out (printf "<div class=\"bars-g\">\n<div class=\"bars-hd\">%s</div>\n" ($p.RenderString .label)) -}}
@@ -200,34 +298,64 @@
     {{- $c := index $colorAt (string (math.Max $group 1 | int)) -}}
     {{- $parts := "" -}}
     {{- $said := slice -}}
+    {{- $notes := "" -}}
+    {{- /* with digits the parts are rounded, and rounded parts need not add
+           up to the rounded total (3,752 + 5,496 prints 3,8 + 5,5 under a
+           9,2). So the parts are counted in units of the last printed digit,
+           the way data/fmt.html rounds, and the last part is whatever the
+           printed total leaves after the others: 9,2 − 5,5 = 3,7 */ -}}
+    {{- $last := -1 -}}
+    {{- range $k, $v := .vals }}{{ if $v.v }}{{ $last = $k }}{{ end }}{{ end -}}
+    {{- $unitOf := math.Pow 10 (math.Max $digits 0) -}}
+    {{- $left := math.Round (add (mul .sum $unitOf) 0.0000001) -}}
     {{- range $k, $v := .vals -}}
       {{- if $v.v -}}
         {{- $parts = print $parts (printf "<i class=\"bars-part p%d\" style=\"--f:%.4f\"></i>" (add $k 1) (div (math.Round (mul (div (math.Abs $v.v.v) $big) 10000)) 10000.0)) -}}
-        {{- $shown := cond (ge $digits 0) (partial "data/fmt.html" (dict "v" (math.Abs $v.v.v) "d" $digits)) $v.text -}}
+        {{- $shown := $v.text -}}
+        {{- if ge $digits 0 -}}
+          {{- $units := math.Round (add (mul (math.Abs $v.v.v) $unitOf) 0.0000001) -}}
+          {{- if eq $k $last }}{{ $units = $left }}{{ end -}}
+          {{- $left = sub $left $units -}}
+          {{- $shown = partial "data/fmt.html" (dict "v" (div $units $unitOf) "d" $digits) -}}
+        {{- end -}}
         {{- $said = $said | append (printf "<span>%s</span> %s" $shown (index $heads $k).short) -}}
+        {{- with $v.note }}{{ $notes = print $notes (printf "<span class=\"bars-note\">%s</span>" ($p.RenderString .)) }}{{ end -}}
       {{- end -}}
     {{- end -}}
     {{- $total := print (partial "data/fmt.html" (dict "v" .sum "d" (cond (ge $digits 0) $digits .dec))) $unit -}}
-    {{- $out = print $out (printf "<div class=\"bars-r\"%s>\n<span class=\"bars-nm\">%s</span>\n<span class=\"bars-lane\">%s<b class=\"bars-total\">%s</b></span>\n<span class=\"bars-parts\">%s</span>\n</div>\n" (cond (gt $group 0) "" (printf " style=\"--c:var(--dv-%s);--on:var(--dv-%s-on)\"" $c $c)) ($p.RenderString .label) $parts $total (delimit $said " + ")) -}}
+    {{- $out = print $out (printf "<div class=\"bars-r\"%s>\n<span class=\"bars-nm\">%s</span>\n<span class=\"bars-lane\">%s<b class=\"bars-total\">%s</b>%s</span>\n<span class=\"bars-parts\">%s</span>\n</div>\n" (cond (gt $group 0) "" (printf " style=\"--c:var(--dv-%s);--on:var(--dv-%s-on)\"" $c $c)) ($p.RenderString .label) $parts $total $notes (delimit $said " + ")) -}}
   {{- else -}}
     {{- $out = print $out (partial "data/bar-row.html" (dict "page" $p "name" .label "val" (index .vals 0) "big" $big "c" (index $colorAt "1") "row" $row "marks" $marks "sub" false "whole" (gt $whole 0.0))) -}}
   {{- end -}}
 {{- end -}}
 {{- if $open }}{{ $out = print $out "</div>\n" }}{{ end -}}
-{{- if $stack -}}
+{{- if or $stack $fills -}}
   {{- $key := "" -}}
-  {{- range $k, $h := $heads }}{{ $key = print $key (printf "<span><i class=\"bars-sw p%d\"></i>%s</span>" (add $k 1) ($p.RenderString $h.long)) }}{{ end -}}
+  {{- range $k, $h := $heads -}}
+    {{- $sw := printf "p%d" (add $k 1) }}{{ if $fills }}{{ $sw = index $fillAt (string (add $k 1)) }}{{ end -}}
+    {{- $key = print $key (printf "<span><i class=\"bars-sw %s\"></i>%s</span>" $sw ($p.RenderString $h.long)) -}}
+  {{- end -}}
   {{- $out = print $out (printf "<p class=\"bars-key\">%s</p>\n" $key) -}}
 {{- end -}}
 
 {{- $style := printf "--nm:%dch;--room:%dch" $nameCh $room -}}
 {{- with $noteColor }}{{ $style = printf "%s;--note:var(--dv-%s)" $style . }}{{ end -}}
-{{- $body := printf "<div class=\"bars %s\" style=\"%s\">\n%s</div>" $cls $style $out -}}
-{{- with .Get "cap" }}
+{{- /* tabs: modules/barstabs.js builds the tablist on the frame's top edge,
+       so a tabbed figure is framed even without a caption */ -}}
+{{- $attrs := "" -}}
+{{- if $tabs }}{{ $cls = print $cls " has-tabs" }}{{ $attrs = printf " data-open=\"%d\"" $openAt }}{{ end -}}
+{{- $body := printf "<div class=\"bars %s\" style=\"%s\"%s>\n%s</div>" $cls $style $attrs $out -}}
+{{- $fold := .Store.Get "fold" -}}
+{{- if or (.Get "cap") $tabs $fold }}
 <figure class="bars-fig widget">
+{{- with .Get "cap" }}
 <figcaption>{{ . }}{{ with $.Get "note" }} <span class="wnote">{{ . }}</span>{{ end }}</figcaption>
+{{- end }}
 <div class="w-root">
 {{ $body | safeHTML }}
+{{- with $fold }}
+{{ partial "data/figure-fold.html" (dict "fold" .) }}
+{{- end }}
 </div>
 </figure>
 {{- else }}

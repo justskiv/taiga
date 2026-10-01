@@ -1,0 +1,63 @@
+{{- /* A series' glyph, inline, before the name it marks — in a table's
+       header, a sentence, a list (docs/authoring.md#series-glyph):
+
+         | 24 bytes | {{< mk blue circle >}} M4 Pro | {{< mk green square >}} Genoa |
+
+       The same shape in the same hue the chart's key and the bars tabs give
+       that series, so the text beside a figure speaks the figure's code.
+
+         {{< mk <color> [<shape>] >}}      or   {{< mk color="…" shape="…" >}}
+
+       color  required  a palette role: ink ghost blue green red gold violet
+                        copper accent — the roles a chart's series take
+       shape  optional  circle square triangle diamond star cross; circle
+                        when omitted, as a chart's first series is
+
+       The output is an empty <span> and nothing else — no newline around it,
+       so it stays inside the cell or the sentence it was written in. The
+       glyph is drawn by 31-data.css ("a series glyph in the text"): the role
+       class picks the hue from the palette roles, the shape class the chart's
+       own 10×10 path as a mask. Decorative (aria-hidden): the name after it is
+       the text. A feed reader, which has no stylesheet, shows nothing in its
+       place — the chart it points to is not in the feed either, and a black
+       "●" would stand for no series at all. modules/mk.js glues the glyph to
+       the word after it, so a line never breaks between the two.
+
+       A mistake warns with the place: an unknown colour prints nothing, an
+       unknown shape falls back to the circle. */ -}}
+{{- $pos := .Position -}}
+{{- with .Parent -}}
+  {{- /* a nested shortcode's own .Position reads 1:1; the outermost one
+         points at the source */ -}}
+  {{- $top := . -}}
+  {{- range seq 4 }}{{ with $top.Parent }}{{ $top = . }}{{ end }}{{ end -}}
+  {{- $pos = printf "inside the %s at %s" $top.Name $top.Position -}}
+{{- end -}}
+{{- $inks := slice "ink" "ghost" "blue" "green" "red" "gold" "violet" "copper" "accent" -}}
+{{- $glyphs := slice "circle" "square" "triangle" "diamond" "star" "cross" -}}
+{{- $color := "" -}}
+{{- $shape := "" -}}
+{{- if .IsNamedParams -}}
+  {{- range $k, $v := .Params -}}
+    {{- if eq $k "color" }}{{ $color = $v }}
+    {{- else if eq $k "shape" }}{{ $shape = $v }}
+    {{- else }}{{ warnf "mk: unknown parameter %q — it takes color= and shape= (%s)" $k $pos }}{{ end -}}
+  {{- end -}}
+{{- else if .Params -}}
+  {{- $color = .Get 0 -}}
+  {{- if gt (len .Params) 1 }}{{ $shape = .Get 1 }}{{ end -}}
+  {{- if gt (len .Params) 2 }}{{ warnf "mk: %q is one word too many — {{< mk <color> [<shape>] >}} (%s)" (.Get 2) $pos }}{{ end -}}
+{{- end -}}
+{{- $color = string $color -}}
+{{- $shape = string $shape -}}
+{{- if not $color -}}
+  {{- warnf "mk: no colour — {{< mk blue >}}, a palette role: %s (%s)" (delimit $inks ", ") $pos -}}
+{{- else if not (in $inks $color) -}}
+  {{- warnf "mk: colour %q is none of %s (%s)" $color (delimit $inks ", ") $pos -}}
+{{- else -}}
+  {{- if and $shape (not (in $glyphs $shape)) -}}
+    {{- warnf "mk: shape %q is none of %s — drawn as a circle (%s)" $shape (delimit $glyphs ", ") $pos -}}
+    {{- $shape = "" -}}
+  {{- end -}}
+  {{- printf `<span class="mk mk-%s mk-%s" aria-hidden="true"></span>` $color ($shape | default "circle") | safeHTML -}}
+{{- end -}}

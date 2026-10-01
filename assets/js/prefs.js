@@ -9,6 +9,10 @@ import * as params from '@params';
 (function () {
   'use strict';
   var root = document.documentElement;
+  /* scripts run: CSS may shape what the deferred bundle is about to build
+     (html.js — a tabbed bars figure takes its tabbed height at first paint
+     instead of jumping to it) */
+  root.classList.add('js');
   function read(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   var t = read('taiga.theme');
   if (t) {

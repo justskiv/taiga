@@ -122,6 +122,60 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **`{{< bars stack="true" tabs="true" >}}` — a stack's groups as tabs.** A
+  stack of three machines was three stacks under one another: a tall figure
+  whose point — how the same saving looks on each machine — sat a screen apart.
+  Now each heading row is a tab (the chart's series glyph in the group's
+  colour, the heading's bold as the name, its italic as a quiet summary), on
+  one scale for all of them, so a switch compares: the bars grow or shrink from
+  the old tab's lengths to the new ones, the numbers fade in, and reduced
+  motion swaps at once. `open="…"` picks the first tab by its heading's bold.
+  Keyboard and screen readers get a real tablist (roving tabindex, ←/→ with
+  wrap, Home/End, selection on focus, a focusable panel). The groups share one
+  grid cell, so the card never changes height on a switch; and so it does not
+  jump on load either — three groups printed, one shown — `prefs.js` now puts
+  `html.js` on the root before first paint, and CSS shapes the figure before
+  the deferred bundle builds its tabs. Without JavaScript, in a feed, in a
+  hover card and on paper the groups stand one under another with their
+  headings, nothing hidden. A tabbed figure is framed even without a caption.
+  The runtime is `modules/barstabs.js` (no imports: the Obsidian plugin carries
+  a byte copy). Demo: the kitchen sink; docs: `authoring.md#bars`.
+
+- **`tabs="true"` on grouped bars too.** Pairs measured on several machines —
+  before and after, with a ballast and without — were a column of groups, or a
+  warning that tabs need a stack. Now the heading rows of grouped bars become
+  tabs the same way: a tab is a machine, so `colors` is per group, and inside
+  it the columns of a row are told apart by fill, not hue — the last column,
+  the result, solid; the first washed; a middle one hatched (a fourth column
+  or a `whole` warns and draws plain groups). The row's label heads its bars,
+  the key names the fills, and a bar ends as a stack does: the cell at its
+  tip, quieter, the note after it in the primary ink. One scale, the same
+  grow-or-shrink switch. Demo: the kitchen sink; docs: `authoring.md#bars`.
+
+- **`{{< mk blue circle >}}` — a series' glyph in the text.** Written before
+  a name — in a table's header, a sentence, a list item — it draws the glyph
+  the chart's key and the bars tabs give that series (a colour role, a shape;
+  a circle by default), so a table of three machines wears the same blue
+  circle, green square and red triangle as the figures beside it, and the
+  table stays an ordinary one. An empty inline span painted by CSS: the hue
+  is a palette role (`.mk` joins the roles' scopes, no wrapper needed), the
+  shape the chart's own path as a mask. It never parts from its word — at the
+  start of a cell the empty box is welded to it, and inside a sentence
+  `modules/mk.js` drops the typed space and glues the two, with no shift.
+  Decorative (`aria-hidden`); a feed reader, with no stylesheet, shows
+  nothing; on paper it keeps its ink. Docs: `authoring.md#series-glyph`.
+
+- **A `{{< fold >}}` inside `{{< bars >}}` or `{{< chart >}}` is the card's
+  footer.** It prints nothing where it stands and is drawn after the key: a
+  quiet `› Exact values` row in the key's mono (`title=`, `open=`; the prose
+  fold's `icon`/`more`/`less`/`size` warn) that opens into any Markdown — a
+  table (its header glyphs by `mk`), a note, a term. Native `<details>`:
+  no-JS, keyboard, prints open, a feed keeps it. A table in it runs edge to
+  edge of the card on a phone, its first column sticky with a fade where the
+  numbers slide under it. An empty fold in a chart holds the chart's own no-JS tables instead of a
+  second copy, and a file chart pairs around it (`{{< chart src=… >}}{{< fold
+  />}}{{< /chart >}}`). Docs: `authoring.md#figure-fold`.
+
 - **The author's own voice has blocks of its own, in plain Markdown: a thesis
   (`>>`), an aside (`> [!aside]`), a recap (`> [!recap] label`) and an epigraph
   (`> [!epigraph] source`).** `>` used to mean two things — somebody else's
@@ -393,6 +447,18 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   `opacity:.3` on the button that carries the price of entry in its label.
 
 ### Fixed
+
+- **A stack prints its parts' notes, and its parts add up.** The template read
+  a part's trailing italic (`7,53 *−28%*`) and reserved room for it, then never
+  printed it; it now follows the total at the bar's end — `27,0 ns  −28%`,
+  the percentage in the primary ink and the time a step quieter. With
+  `digits`, the last part is printed as the total less the other parts as
+  printed, so the line under a bar adds up to the number at its end (9,2 − 5,5
+  = 3,7, though 3,752 alone rounds to 3,8). A stack's name stays on one line —
+  the name column was a flex column, so `Through make([]byte, 24)` always broke
+  after its first word — and on a phone it goes above its bar, as a single
+  series already did, instead of eating the track (a 27 ns bar was 20px long at
+  360px).
 
 - **A guide left out of search (`search: false`) or a placeholder printed its
   lead twice** when it had a `<!--more-->` divider: the lead above the body,

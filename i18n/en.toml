@@ -93,6 +93,11 @@ other = "hollow — measured in another run"
 [chart_modes]
 other = "Data set"
 
+# a {{< fold >}} inside {{< bars >}} or {{< chart >}}: its label when it has
+# no title= — the numbers behind the drawing
+[figure_fold]
+other = "Exact values"
+
 # numbers in data figures (charts, bars): the decimal mark, and the mark
 # between thousands — used from five integer digits on ("1234", "12,345")
 [num_decimal]
