@@ -377,6 +377,12 @@ other = "restore example"
 [run_empty]
 other = "(no output)"
 
+# run shortcode, a snippet with several commands (actions=): the accessible
+# name of the switch that picks which one Run runs. Read by screen readers
+# only; the options themselves are the labels the guide gives.
+[run_modes]
+other = "Command"
+
 # term shortcode: the definition card's footer link and its no-JS appendix.
 [term_more]
 other = "read more"

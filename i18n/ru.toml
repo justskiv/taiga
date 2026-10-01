@@ -432,6 +432,12 @@ other = "вернуть пример"
 [run_empty]
 other = "(пусто)"
 
+# run shortcode, a snippet with several commands (actions=): the accessible
+# name of the switch that picks which one Run runs. Read by screen readers
+# only; the options themselves are the labels the guide gives.
+[run_modes]
+other = "Команда"
+
 # term shortcode: the definition card's footer link and its no-JS appendix.
 # term_more is the default text of the optional "read more" link (per-term
 # override with more=); the rest label the appendix that JS takes away.

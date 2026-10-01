@@ -45,6 +45,7 @@ const DEFAULTS = {
   runFailed: 'error',
   runRestore: 'restore example',
   runEmpty: '(no output)',
+  runModes: 'Command',
   guideForms: { '1': 'guide', '2': 'guides' },
   /* The subscription form's strings are NOT here: they belong to an optional
      feature, and modules/newsletter.js keeps its own fallbacks so that a site

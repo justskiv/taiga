@@ -16,7 +16,11 @@
 
    Nothing here is required for the block to work: without JS (or with codapi
    failing to load) the recorded output is still there, still folds, still
-   reads. The module only ever adds the live half. */
+   reads. The module only ever adds the live half.
+
+   A snippet with several commands (codapi's actions="Label:command") ships a
+   frame of such blocks, one per command (.ro-group). RunModes below turns it
+   into a mode switch: pick a command, Run runs it, the frame shows its part. */
 
 import { I18N } from './i18n.js';
 import { holdScroll } from './scrollhold.js';
@@ -37,6 +41,17 @@ export function bindRunOutputs() {
       new RunOutput(snip, box);
     } catch (e) {
       console.error('run output failed:', e);
+    }
+  });
+  /* the parts of a group sit inside the frame, so none of them has the
+     snippet as its previous sibling and the loop above passes them by */
+  document.querySelectorAll('.ro-group').forEach((group) => {
+    const snip = group.previousElementSibling;
+    if (!snip || snip.tagName !== 'CODAPI-SNIPPET') return;
+    try {
+      new RunModes(snip, group);
+    } catch (e) {
+      console.error('run modes failed:', e);
     }
   });
 }
@@ -61,10 +76,23 @@ function transcript(res) {
   return out || err;
 }
 
+/* Focus goes back to Run only if nothing else has it: a disabled button hands
+   it to <body>, and a reader who moved on while the run was out keeps their
+   place. */
+function focusLost() {
+  const a = document.activeElement;
+  return !a || a === document.body || a === document.documentElement;
+}
+
 class RunOutput {
-  constructor(snip, box) {
+  /* `part` is set when the block is one part of a group: RunModes then decides
+     which part a run belongs to and calls running/result/error itself, and is
+     told when the reader puts a part's example back. */
+  constructor(snip, box, part) {
     this.snip = snip;
     this.box = box;
+    this.part = part || null;
+    this.refocus = null;
     this.pre = box.querySelector('.ro-pre');
     this.code = box.querySelector('.ro-pre code');
     this.chip = box.querySelector('.ro-chip');
@@ -78,9 +106,11 @@ class RunOutput {
     this.exampleState = box.dataset.state || 'idle';
 
     snip.dataset.ro = '1';
-    snip.addEventListener('execute', () => this.running());
-    snip.addEventListener('result', (e) => this.result(e.detail));
-    snip.addEventListener('error', (e) => this.error(e.detail));
+    if (!part) {
+      snip.addEventListener('execute', () => this.running());
+      snip.addEventListener('result', (e) => this.result(e.detail));
+      snip.addEventListener('error', (e) => this.error(e.detail));
+    }
 
     /* the button sits inside <summary>, where a click also toggles the panel —
        collapsing the block is the opposite of what "restore the example" means */
@@ -88,11 +118,14 @@ class RunOutput {
       this.btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        const hadFocus = document.activeElement === this.btn;
         this.restore();
+        if (part) part.restored(this, hadFocus);
       });
     }
 
-    this.hydrate();
+    /* a group reads codapi's leftover state once, for the part it belongs to */
+    if (!part) this.hydrate();
   }
 
   running() {
@@ -102,6 +135,14 @@ class RunOutput {
     this.box.hidden = false;
     this.box.open = true;   /* they pressed Run to see the output — show it */
     this.box.dataset.state = 'running';
+    /* codapi disables Run right after this event, and a disabled button hands
+       the focus to <body>: a keyboard reader would start over from the top of
+       the page after every run. Whether Run had it is remembered here and
+       given back in put(). A group does the same for its Run (RunModes). */
+    if (!this.part) {
+      const run = this.snip.querySelector('codapi-toolbar > button');
+      this.refocus = run && document.activeElement === run ? run : null;
+    }
   }
 
   result(res) {
@@ -141,6 +182,9 @@ class RunOutput {
     this.chip.hidden = false;
     if (this.btn) this.btn.hidden = this.example === null;
     this.pre.scrollTop = 0;   /* a fresh result is read from its first line */
+    /* codapi has enabled Run again by the time it fires result or error */
+    if (this.refocus && focusLost()) this.refocus.focus({ preventScroll: true });
+    this.refocus = null;
   }
 
   /* hydrate covers the one ordering this module cannot control: codapi is a
@@ -171,5 +215,202 @@ class RunOutput {
     this.chip.textContent = I18N.runExample;
     this.btn.hidden = true;
     this.pre.scrollTop = 0;
+  }
+}
+
+/* ── several commands: the mode switch ──────────────────────────────────── */
+
+/* the glyph Run wears in a group: ▶ at rest, a spinner while a run is out */
+const PLAY = '<svg class="ro-g ro-g-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.3 1.8v8.4L10.2 6z"/></svg>';
+const SPIN = '<svg class="ro-g ro-g-spin" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.3"/></svg>';
+
+/* the editor modes codeedit.js mounts on: those toolbars get an Edit button,
+   and the seam that sets it apart from running */
+const EDITABLE = new Set(['basic', 'external']);
+
+/* A snippet with command actions, as the shortcode prints it: one part per
+   command in a .ro-group frame, each part an ordinary .ro block carrying its
+   command (data-cmd) and its name in the switch (data-label).
+
+   codapi stays as shipped. Its toolbar gets a switch after Run, and picking a
+   command sets the snippet's own `command` attribute, which codapi observes and
+   rebuilds its executor from — so Run, and ⌘↵ in the editor, both run the
+   picked command without our having to intercept either. Its action links
+   stay in the DOM (it keeps references to them) and are hidden: the switch
+   speaks for them.
+
+   Which part a result belongs to is decided at `execute`: the switch is
+   locked for the length of a run, so the command picked when it started is
+   the one that answers. */
+class RunModes {
+  constructor(snip, group) {
+    this.snip = snip;
+    this.group = group;
+    this.parts = new Map();
+    group.querySelectorAll(':scope > .ro[data-cmd]').forEach((box) => {
+      this.parts.set(box.dataset.cmd, new RunOutput(snip, box, this));
+    });
+    if (this.parts.size < 2) return;
+
+    this.primary = this.parts.keys().next().value;
+    this.selected = this.primary;
+    this.target = null;
+    /* runs in flight: the switch stays locked, and every answer goes to the
+       part picked when they started, until the last one is in */
+    this.inflight = 0;
+    this.busy = false;
+    this.refocus = false;
+    this.radios = [];
+    this.run = null;
+
+    snip.addEventListener('execute', () => this.running());
+    snip.addEventListener('result', (e) => this.settle((p) => p.result(e.detail)));
+    snip.addEventListener('error', (e) => this.settle((p) => p.error(e.detail)));
+
+    /* until the reader picks, the snippet runs its own command= — the first part */
+    this.parts.get(this.primary).hydrate();
+
+    /* the switch goes into codapi's toolbar, which exists once the element is
+       upgraded — before this runs, or later with defer/init-delay */
+    if (snip.ready) this.mount();
+    else snip.addEventListener('load', () => this.mount(), { once: true });
+  }
+
+  mount() {
+    const bar = this.snip.querySelector('codapi-toolbar');
+    const run = bar && bar.querySelector(':scope > button');
+    if (!run) return;
+    this.run = run;
+    bar.classList.add('ro-bar');
+
+    bar.querySelectorAll(':scope > a').forEach((a) => {
+      const href = a.getAttribute('href') || '';
+      if (href !== '#edit' && this.parts.has(href.slice(1))) a.hidden = true;
+    });
+
+    const label = run.textContent.trim();
+    run.innerHTML = PLAY + SPIN;
+    run.append(label);
+
+    const seg = document.createElement('span');
+    seg.className = 'ro-seg';
+    seg.setAttribute('role', 'radiogroup');
+    seg.setAttribute('aria-label', I18N.runModes);
+    this.parts.forEach((part, cmd) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ro-opt';
+      b.setAttribute('role', 'radio');
+      b.dataset.cmd = cmd;
+      b.textContent = part.box.dataset.label || cmd;
+      b.addEventListener('click', () => this.select(cmd, false));
+      seg.appendChild(b);
+      this.radios.push(b);
+    });
+    seg.addEventListener('keydown', (e) => this.onKey(e));
+    run.after(seg);
+
+    if (EDITABLE.has(this.snip.getAttribute('editor') || 'off')) {
+      const sep = document.createElement('span');
+      sep.className = 'ro-sep';
+      sep.setAttribute('aria-hidden', 'true');
+      seg.after(sep);
+    }
+    this.sync();
+
+    /* Only now, with the switch on the page, does the frame show one part at
+       a time: the part is marked first, then the frame. Until then — and for
+       good if codapi never loads — every recorded part stays readable. */
+    this.show(this.selected);
+    this.group.dataset.mode = '';
+  }
+
+  /* Picking a command never runs it. The part on screen follows the pick:
+     the command's recorded output, or its last live one. */
+  select(cmd, focus) {
+    if (this.busy || !this.parts.has(cmd)) return;
+    if (cmd !== this.selected) {
+      /* the frame grows or shrinks under the switch the reader just pressed —
+         hold the page, before a byte changes (modules/scrollhold.js) */
+      holdScroll(this.snip);
+      /* one frame, one fold: the next part opens, or stays folded, the way
+         the reader left the one before it */
+      const prev = this.parts.get(this.selected);
+      if (!prev.box.hidden) this.parts.get(cmd).box.open = prev.box.open;
+      this.selected = cmd;
+      this.snip.setAttribute('command', cmd);
+      this.show(cmd);
+      this.sync();
+    }
+    if (focus) {
+      const b = this.radios.find((r) => r.dataset.cmd === cmd);
+      if (b) b.focus();
+    }
+  }
+
+  show(cmd) {
+    this.parts.forEach((p, c) => p.box.toggleAttribute('data-on', c === cmd));
+  }
+
+  /* one tab stop for the group; arrows move the pick inside it, as radios do */
+  onKey(e) {
+    const i = this.radios.indexOf(document.activeElement);
+    if (i < 0) return;
+    const n = this.radios.length;
+    let j = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % n;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + n) % n;
+    else if (e.key === 'Home') j = 0;
+    else if (e.key === 'End') j = n - 1;
+    if (j < 0) return;
+    e.preventDefault();
+    this.select(this.radios[j].dataset.cmd, true);
+  }
+
+  sync() {
+    this.radios.forEach((b) => {
+      const on = b.dataset.cmd === this.selected;
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+  }
+
+  running() {
+    if (!this.inflight) this.target = this.selected;
+    this.inflight++;
+    this.busy = true;
+    /* codapi disables Run right after this event, and a disabled button hands
+       the focus to <body>: a keyboard reader would lose their place on every
+       run. Whether Run had it is remembered here and given back in settle(). */
+    if (this.inflight === 1) this.refocus = !!this.run && document.activeElement === this.run;
+    this.parts.get(this.target).running();
+    this.radios.forEach((b) => { b.disabled = true; });
+    if (this.run) this.run.classList.add('is-running');
+  }
+
+  settle(apply) {
+    const cmd = this.target || this.selected;
+    const part = this.parts.get(cmd);
+    this.inflight = Math.max(0, this.inflight - 1);
+    /* the part first: put() arms the scroll hold before anything changes */
+    apply(part);
+    if (this.inflight) {
+      /* another run of the same command is still out: stay locked for it */
+      part.running();
+      return;
+    }
+    this.target = null;
+    this.busy = false;
+    this.radios.forEach((b) => { b.disabled = false; });
+    if (this.run) this.run.classList.remove('is-running');
+    /* codapi has re-enabled Run by the time it fires result or error */
+    if (this.refocus && this.run && focusLost()) this.run.focus({ preventScroll: true });
+    this.refocus = false;
+  }
+
+  /* "restore the example" on one part: a focused button that has just hidden
+     itself hands the focus to the prompt line it sat on */
+  restored(part, hadFocus) {
+    if (hadFocus) part.box.querySelector('.ro-h').focus({ preventScroll: true });
   }
 }

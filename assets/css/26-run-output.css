@@ -194,3 +194,135 @@ codapi-ref{display:none}
    over the element's own — so zeroing one without the other changes nothing. */
 codapi-snippet:has(+ .ro){margin-bottom:.55em}
 codapi-snippet:has(+ .ro) codapi-toolbar{margin-bottom:0}
+
+/* ── several commands: the mode switch ────────────────────────────────────── */
+/* A snippet with command actions (actions="Label:command") ships one part per
+   command — the shortcode cuts its body at the `$ ` prompt lines — each an
+   ordinary .ro block, all of them in one frame. runout.js turns the frame into
+   a mode switch: the reader picks a command in the toolbar, Run runs it, and
+   the frame shows that command's part, recorded or live. Everything below is
+   keyed on markup only such a snippet gets — the .ro-group frame and the
+   .ro-bar class the module puts on codapi's toolbar — so a snippet with one
+   command renders exactly as before. */
+.ro-group{
+  display:block; margin:0 0 20px;
+  background:var(--bg-base);
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  overflow:hidden;
+}
+/* each part is the ordinary block minus its own frame */
+.ro-group > .ro{margin:0; border:0; border-radius:0; background:none}
+/* Without JS, in a feed and on paper, every part is on the page, one under the
+   other, and a hairline tells them apart — after a part that is there, so a
+   hidden first one leaves no seam on the frame's own edge. */
+.ro-group > .ro:not([hidden]) ~ .ro{border-top:1px solid var(--border)}
+/* A part with nothing recorded ships hidden, like a single block does, and
+   appears with its command's first run. When the part(s) meant to be on
+   screen are all like that, the frame goes too rather than stand empty. */
+.ro-group:not(:has(> .ro:not([hidden]))){display:none}
+
+/* One part at a time, on screen only: print keeps the whole transcript. The
+   module marks the frame (data-mode) once its switch is in the toolbar, and
+   the part it marks (data-on) is the one shown. Nothing is hidden before
+   that: until the switch exists there is no way to reach a hidden part, and
+   a codapi that never loads — or a hover card, where the snippet is a badge —
+   must still show everything the author recorded. The price is a frame that
+   opens on every part and shrinks to one as the page's scripts start. */
+@media screen{
+  .ro-group[data-mode] > .ro:not([data-on]){display:none}
+  .ro-group[data-mode] > .ro{border-top:0}
+  .ro-group[data-mode]:has(> .ro[data-on][hidden]){display:none}
+}
+
+/* the same closing of the gap to the toolbar that a single block gets */
+codapi-snippet:has(+ .ro-group){margin-bottom:.55em}
+codapi-snippet:has(+ .ro-group) codapi-toolbar{margin-bottom:0}
+
+/* A long prompt line wraps instead of being cut: here the command IS what
+   tells one part from the next (GOEXPERIMENT=… in front of the same build),
+   and an ellipsis would hide exactly that. The meta and the chevron keep to
+   the first line. */
+.ro-group .ro-h{align-items:flex-start}
+.ro-group .ro-cmd{white-space:normal; overflow-wrap:anywhere; text-overflow:clip}
+.ro-group .ro-meta{flex:0 0 auto; align-self:flex-start; min-height:1.5em}
+.ro-group .ro-chev{align-self:flex-start; margin-top:.3em}
+
+/* On a phone a live result's provenance ("вернуть пример · запуск · 812 ms")
+   is too wide to share the row with a wrapping command — it would squeeze the
+   command into a column one word wide. It drops to a row of its own, right-
+   aligned where the chip stood; the chevron stays on the prompt row. At rest
+   the short "пример" still fits beside the command. */
+@media (max-width:640px){
+  .ro-group .ro-h{flex-wrap:wrap; row-gap:2px}
+  .ro-group .ro-cmd{flex:1 1 0}
+  .ro-group .ro[data-src="live"] .ro-meta{order:1; flex:1 0 100%; margin:0;
+    justify-content:flex-end; padding-right:20px}
+}
+
+/* ── the toolbar of such a snippet ── */
+/* "✓ Done" cannot say which command finished; the chip of the part the result
+   landed in already does, with the time. While a run is in flight Run's ▶
+   turns into a spinner instead. */
+codapi-toolbar.ro-bar codapi-status{display:none}
+codapi-toolbar.ro-bar > button:not(.ced-btn){display:inline-flex; align-items:center; gap:.5em}
+/* the glyph slot never changes width between ▶ and the spinner */
+.ro-g{flex:0 0 auto; width:10px; height:10px; display:block}
+.ro-g-play{fill:currentColor}
+.ro-g-spin{display:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round;
+  stroke-dasharray:18 9; transform-origin:50% 50%; animation:ro-spin .8s linear infinite}
+.ro-bar .is-running > .ro-g-play{display:none}
+.ro-bar .is-running > .ro-g-spin{display:block}
+@keyframes ro-spin{to{transform:rotate(360deg)}}
+/* codapi disables Run for the length of a run; the spinner inside it is the
+   one thing on the row that says a run is going, so it is not dimmed */
+codapi-toolbar.ro-bar > button.is-running[disabled]{opacity:1}
+
+/* The switch picks, it does not run — so it is neutral, and the accent stays
+   with Run. Written as `.ro-seg .ro-opt` on purpose: codapi's toolbar buttons
+   are styled by element (`codapi-toolbar button`, here and in sites that
+   dressed codapi before the theme did), and one more class is what keeps every
+   one of those rules, :hover included, off these.
+
+   Each option is a button of Run's own size — Run's paddings, and the frame's
+   1px border where Run has its own — so Run, the switch and Edit read as one
+   row of 28px controls on one baseline. An inset frame with a smaller pill
+   inside it made the picked option look cramped next to Run. Whose output a
+   part shows is not marked on the option: the part itself says it, with its
+   `$`, its provenance and «restore example», and a run always lands in the
+   part on screen, since the switch is locked while it is out. */
+.ro-seg{display:inline-flex; border:1px solid var(--border); border-radius:var(--radius-sm)}
+.ro-seg .ro-opt{
+  display:inline-flex; align-items:center;
+  font:500 13px/1 var(--font-sans); color:var(--text-secondary);
+  background:transparent; border:0; border-radius:calc(var(--radius-sm) - 1px);
+  padding:.5em .95em; cursor:pointer; white-space:nowrap;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.ro-seg .ro-opt:hover{color:var(--text-primary); background:transparent}
+.ro-seg .ro-opt[aria-checked="true"]{background:var(--bg-raised); color:var(--text-strong)}
+/* the option touches the frame, so an outside ring would run over the frame's
+   border and the neighbouring option: it is drawn inside */
+.ro-seg .ro-opt:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.ro-seg .ro-opt[disabled]{opacity:.6; cursor:progress}
+
+/* the seam between running and editing: Edit / Close / Reset follow it */
+.ro-sep{flex:0 0 1px; align-self:center; height:18px; background:var(--border)}
+
+/* On a phone the switch takes a line of its own above Run — pick, then run —
+   and its options share it equally. The seam would then open the next line by
+   itself, so it goes: the line break separates the groups instead. */
+@media (max-width:640px){
+  codapi-toolbar.ro-bar .ro-seg{order:-1; flex:1 0 100%}
+  .ro-seg .ro-opt{flex:1 1 0; justify-content:center}
+  codapi-toolbar.ro-bar .ro-sep{display:none}
+}
+/* Two long labels do not fit the narrowest phones at Run's paddings:
+   «Со специализацией | Без специализации» wants 304px of the 288 a 320px
+   screen leaves. Half the side padding brings it to 283. */
+@media (max-width:359px){
+  .ro-seg .ro-opt{padding-left:.5em; padding-right:.5em}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .ro-g-spin{animation:none; stroke-dasharray:none; opacity:.7}
+}

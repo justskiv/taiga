@@ -283,6 +283,14 @@ timeZone = "Europe/Moscow"
       articleEnd = true
       seriesLanding = true
 
+  # Runnable snippets (codapi) — ON here so the kitchen-sink page can show a
+  # snippet with several commands and its mode switch. Like the newsletter's
+  # endpoint above, there is nothing behind the address: the demo is a static
+  # site, and pressing Run shows the failure state. A real site points this at
+  # its own codapi server; see docs/authoring.md#runnable.
+  [params.codapi]
+    url = "https://run.example.com/v1"
+
 # Tag TERM pages never render (tags link to /tags/#tag), but their data stays
 # available to templates (.GetTerms / term.Pages). The /tags/ list node is
 # kind=taxonomy and unaffected. Series need no such block: a series is a section

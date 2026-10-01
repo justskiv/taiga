@@ -206,6 +206,10 @@ class CodeEditor {
   }
 
   run() {
+    /* One run at a time, as with Run itself: codapi disables its button for
+       the length of a run, but execute() has no such guard, and a second ⌘↵
+       would send a second request whose answer races the first. */
+    if (this.snip.getAttribute('state') === 'running') return;
     if (typeof this.snip.execute === 'function') this.snip.execute();
   }
 

@@ -218,6 +218,44 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   HTML block in half, the card's real width, a `viewBox`-only SVG, and what a
   screen reader does with a `role="dialog"`).
 
+- **`{{< run actions="…" >}}` — several commands over one listing, as a mode
+  switch.** codapi's `actions=` ran the same code under another command, but the
+  result landed under the one prompt line of the main command, the extra command
+  was a dashed link beside Run, and «✓ Done» could not say whose run had
+  finished. With command actions the body is now a terminal transcript: a line
+  starting with `$ ` opens the next action's part, its text being that action's
+  prompt, and each part renders as its own output block inside one frame. The
+  toolbar gets a switch — `label=` names the main command, the actions their own
+  labels — and one Run for whichever is picked (⌘↵ in the editor too); picking
+  runs nothing and shows that command's part, recorded or live, each with its
+  own provenance and «restore example». The options are buttons of Run's own
+  size, so Run, the switch and Edit stand as one row of 28px controls on one
+  baseline. The status line goes, Run carries the spinner, Edit sits behind a
+  hairline seam, and the focus returns to Run when the answer lands — now on
+  every runnable snippet: codapi disables Run for the length of a run, which
+  used to drop a keyboard reader's focus to the top of the page (a reader who
+  has moved on keeps their place). ⌘↵ in the editor is ignored while a run is
+  out, as Run is: a second request used to race the first. Without JavaScript,
+  in a feed and on paper every part is there, one under another — and so until
+  the switch is in the toolbar, so a codapi that fails to load hides nothing. A
+  number of `$ ` lines that does not match the number of commands fails the
+  build, as do a repeated command, `actions=` without `sandbox=` and a non-text
+  `output-mode`; a missing `label=` warns. A snippet with one command renders
+  byte for byte as before; only the focus fix reaches it.
+
+- **An action's part can be a recorded error too.** `error="true"` marked the
+  main command's part only, so a mode whose recorded run is the point — the
+  previous Go version refusing to compile the listing — read like a success.
+  `error=` now also takes the commands whose part is an error,
+  space-separated: `error="run-go126"` for an action, `error="run run-go126"`
+  for both (`command=` by its id, `true` standing for it in the list too). A
+  marked action part reads and behaves exactly like a marked main part: the
+  failed colour from the start, again after «restore example», on every side
+  of the switch, and without JavaScript, in a feed and on paper. A name that is
+  no command of the block fails the build — a typo, or an action renamed with
+  its error left behind, would otherwise mark nothing without a word.
+  `error="true"` is unchanged, and so is every block that uses it.
+
 - **SEO lint, in the templates that assemble the tags.** `params.seo.lint`
   (`"error"` | `"warn"` | `"off"`, default `"warn"`) checks the front matter
   where the tags are built, so a rule sees the FINAL string — after every

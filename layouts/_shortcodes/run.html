@@ -32,7 +32,10 @@
                    is what a folded block shows about what is inside it.
          open=     "false" to ship the output folded away. Default open.
          error=    "true" when the recorded output IS an error — it then reads
-                   in the failed colour from the start.
+                   in the failed colour from the start. With several commands
+                   (below) it may instead name the commands whose recorded
+                   part is one, space-separated: "run asm-nospec".
+         label=    the main command's name in the mode switch (see below).
 
        Passed through to <codapi-snippet> when given: template, files, id,
        depends-on, actions, output-mode, engine, selector, init-delay,
@@ -40,9 +43,48 @@
        own status labels (Running… / ✓ Done / ✗ Failed), left in English by
        default like the rest of the snippet controls — see i18n/*.toml.
 
-       Labels: run_example · run_ok · run_failed · run_restore · run_empty in
-       i18n/<lang>.toml, overridable per site (docs/i18n.md). Styling lives in
-       assets/css/26-run-output.css. */ -}}
+       Several commands over one listing. codapi's actions="Label:command …"
+       runs the same code under another command of the sandbox. Each such
+       action gets a part of the body — the body is then a terminal transcript,
+       and every line that starts with "$ " opens the part of the next action,
+       in the order actions= lists them, its text being that action's prompt:
+
+         {{< run sandbox="go1.27" command="asm" label="With specialization"
+                 actions="Without_specialization:asm-nospec"
+                 cmd="go build -gcflags=-S main.go | grep CALL" >}}
+         main.go:7   CALL runtime.mallocgcSmallNoScanSC3(SB)
+
+         $ GOEXPERIMENT=nosizespecializedmalloc go build -gcflags=-S main.go | grep CALL
+         main.go:7   CALL runtime.newobject(SB)
+         {{< /run >}}
+
+       The first part belongs to command=, with cmd=, note= and error= as
+       usual. Each part renders as its own output block inside one frame, and
+       runout.js turns the frame into a mode switch: the reader picks a command
+       (label= names the main one, the action labels the rest), Run runs it,
+       and the block shows that command's part. Without JS, in a feed and on
+       paper every part is there, one under the other.
+
+       An action's recorded run can be an error too — a compile error under
+       another Go version. error="true" speaks for the first part only, so
+       error= then names the parts by their commands instead:
+
+         {{< run sandbox="go1.27" label="Go 1.27"
+                 actions="Go_1.26:run-go126" error="run-go126" >}}
+
+       "run run-go126" marks both; "true" in the list stands for command=. A
+       name that is no command of the block fails the build — without
+       actions= that leaves command= alone, which is "true" spelled longer.
+
+       The split is keyed on actions=, so a "$ " inside the output of a snippet
+       without them stays output. With them, a count that does not match fails
+       the build: a stray "$ " in a program's output would otherwise cut the
+       block in the wrong place without a word. `@event` actions are codapi's
+       own business and take no part.
+
+       Labels: run_example · run_ok · run_failed · run_restore · run_empty ·
+       run_modes in i18n/<lang>.toml, overridable per site (docs/i18n.md).
+       Styling lives in assets/css/26-run-output.css. */ -}}
 
 {{- $sandbox := .Get "sandbox" -}}
 {{- $command := .Get "command" | default "run" -}}
@@ -103,7 +145,104 @@
 {{- $out := trim .Inner "\n" -}}
 {{- $has := ne $out "" -}}
 {{- $open := ne (.Get "open") "false" -}}
-{{- $failed := eq (.Get "error") "true" -}}
+
+{{- /* error= read as the commands whose recorded part is an error: "true" is
+       command=, the one part there is without actions=. Split on single
+       spaces, like actions=; a doubled space names nothing. Checked against
+       the block's commands once actions= is read, below. */ -}}
+{{- $errs := slice -}}
+{{- with .Get "error" -}}
+  {{- range split . " " -}}
+    {{- if eq . "true" -}}
+      {{- $errs = $errs | append $command -}}
+    {{- else if . -}}
+      {{- $errs = $errs | append . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $failed := in $errs $command -}}
+
+{{- /* One part per command. A snippet without command actions is one part with
+       no data-cmd — the markup below then comes out exactly as it always has. */ -}}
+{{- $parts := slice (dict "prompt" $cmd "out" $out "note" $note "failed" $failed) -}}
+{{- $label := .Get "label" -}}
+
+{{- /* The actions that run something, read by codapi's own grammar
+       (Action.parse in snippet.js: /^([^:]+):(@?\S+)$/, split on single
+       spaces, "_" in the label for a space). An `@event` is not a run. */ -}}
+{{- $acts := slice -}}
+{{- with .Get "actions" -}}
+  {{- range split . " " -}}
+    {{- with findRESubmatch `^([^:]+):(\S+)$` . 1 -}}
+      {{- $m := index . 0 -}}
+      {{- if not (hasPrefix (index $m 2) "@") -}}
+        {{- $acts = $acts | append (dict "cmd" (index $m 2) "label" (replace (index $m 1) "_" " ")) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if $acts -}}
+  {{- if not $sandbox -}}
+    {{- errorf "run: actions= runs commands in a sandbox, and this block has no sandbox= — page %s" .Page.Path -}}
+  {{- end -}}
+  {{- /* codapi's other output modes build DOM of their own, into its own box;
+         there is no part of ours to pour a table or an SVG into. */ -}}
+  {{- with .Get "output-mode" -}}
+    {{- if ne (lower .) "text" -}}
+      {{- errorf "run: actions= needs text output — output-mode=%q renders into codapi's own box, not into the parts of the body — page %s" . $.Page.Path -}}
+    {{- end -}}
+  {{- end -}}
+  {{- /* Each command owns one part, so one command may not stand for two. */ -}}
+  {{- $seen := slice $command -}}
+  {{- range $acts -}}
+    {{- if in $seen .cmd -}}
+      {{- errorf "run: actions= names command %q twice (command= counts too) — each command owns one part of the body — page %s" .cmd $.Page.Path -}}
+    {{- end -}}
+    {{- $seen = $seen | append .cmd -}}
+  {{- end -}}
+  {{- /* A missing label= degrades the switch, not the page: the command's own
+         name stands in, and a strict build says so. */ -}}
+  {{- if not $label -}}
+    {{- warnf "run: actions= makes a mode switch, and its first option — command=%q — has no label= — page %s" $command .Page.Path -}}
+    {{- $label = $command -}}
+  {{- end -}}
+
+  {{- /* The cut: a line opening with "$ " starts the next action's part, and
+         what follows the "$ " is its prompt. Prefixing a newline lets a body
+         that opens with a prompt line (a main command with nothing recorded)
+         be cut like any other. */ -}}
+  {{- $chunks := split (printf "\n%s" $out) "\n$ " -}}
+  {{- $got := sub (len $chunks) 1 -}}
+  {{- if ne $got (len $acts) -}}
+    {{- errorf "run: actions= names %d command(s) and the body has %d line(s) starting with \"$ \" — each action's part opens with its own prompt line, in the order actions= lists them — page %s" (len $acts) $got .Page.Path -}}
+  {{- else -}}
+    {{- $first := trim (index $chunks 0) "\n" -}}
+    {{- $parts = slice (dict "prompt" $cmd "out" $first "note" $note "failed" $failed "cmd" $command "label" $label) -}}
+    {{- range $i, $a := $acts -}}
+      {{- $rows := split (index $chunks (add $i 1)) "\n" -}}
+      {{- $parts = $parts | append (dict
+            "prompt" (trim (index $rows 0) " \t\r")
+            "out" (trim (delimit (after 1 $rows) "\n") "\n")
+            "failed" (in $errs $a.cmd)
+            "cmd" $a.cmd
+            "label" $a.label) -}}
+    {{- end -}}
+  {{- end -}}
+{{- else if $label -}}
+  {{- warnf "run: label= names the main command in the mode switch, and there is none without command actions= — page %s" .Page.Path -}}
+{{- end -}}
+
+{{- /* A name in error= that is no command of the block would mark nothing and
+       say nothing: a typo, or an action renamed with its error left behind. */ -}}
+{{- $cmds := slice $command -}}
+{{- range $acts }}{{ $cmds = $cmds | append .cmd }}{{ end -}}
+{{- range $errs -}}
+  {{- if not (in $cmds .) -}}
+    {{- errorf "run: error= names command %q, and the block has no such command — error= is \"true\" or the commands whose recorded output is an error (here: %s) — page %s" . (delimit $cmds " ") $.Page.Path -}}
+  {{- end -}}
+{{- end -}}
+{{- $group := gt (len $parts) 1 -}}
 
 {{- /* codapi's own optional attributes, written out one by one rather than
        assembled into a string. A {{ range }} that emits attribute NAMES inside a
@@ -128,12 +267,13 @@
   {{- with .Get "status-done" }} status-done="{{ . }}"{{ end }}
   {{- with .Get "status-failed" }} status-failed="{{ . }}"{{ end -}}
 ></codapi-snippet>
-{{ end }}<details class="ro"{{ if and $has $open }} open{{ end }}{{ if not $has }} hidden{{ end }} data-src="{{ if $has }}example{{ else }}none{{ end }}" data-state="{{ if and $has $failed }}failed{{ else }}idle{{ end }}">
+{{ end }}{{ if $group }}<div class="ro-group">
+{{ end }}{{ range $parts }}{{ $out := .out }}{{ $has := ne $out "" }}<details class="ro"{{ if and $has $open }} open{{ end }}{{ if not $has }} hidden{{ end }} data-src="{{ if $has }}example{{ else }}none{{ end }}" data-state="{{ if and $has .failed }}failed{{ else }}idle{{ end }}"{{ with .cmd }} data-cmd="{{ . }}"{{ end }}{{ with .label }} data-label="{{ . }}"{{ end }}>
 <summary class="ro-h">
 <span class="ro-ps" aria-hidden="true">$</span>
-<span class="ro-cmd">{{ $cmd }}</span>
+<span class="ro-cmd">{{ .prompt }}</span>
 <span class="ro-caret" aria-hidden="true"></span>
-{{- with $note }}<span class="ro-note">{{ . }}</span>{{ end }}
+{{- with .note }}<span class="ro-note">{{ . }}</span>{{ end }}
 <span class="ro-meta">
 <button class="ro-reset" type="button" hidden>{{ i18n "run_restore" }}</button>
 <span class="ro-chip"{{ if not $has }} hidden{{ end }}>{{ i18n "run_example" }}</span>
@@ -142,3 +282,5 @@
 </summary>
 <div class="ro-b">{{ printf `<pre class="ro-pre" aria-live="polite"><code>%s</code></pre>` (htmlEscape $out) | safeHTML }}</div>
 </details>
+{{ end }}{{ if $group }}</div>
+{{ end -}}

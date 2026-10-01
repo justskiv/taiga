@@ -60,6 +60,85 @@ $ go build ./...
 ok  taiga/internals  0.312s
 ```
 
+### Запуск с несколькими командами {#run-modes}
+
+Сниппет с `actions=`: один листинг под двумя командами песочницы и
+переключатель в тулбаре, который выбирает, что запустит Run. Тело — транскрипт
+обеих, вторая часть открывается своей строкой `$ `. Песочницы за демо нет (см.
+`params.codapi` в его конфиге), поэтому Run покажет состояние ошибки;
+переключатель, части и вид без JS настоящие.
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var n int
+	var wg sync.WaitGroup
+	for range 2 {
+		wg.Add(1)
+		go func() { defer wg.Done(); n++ }()
+	}
+	wg.Wait()
+	fmt.Println(n)
+}
+```
+{{< run sandbox="go1.26" label="go run" actions="go_run_-race:run-race" >}}
+2
+
+$ go run -race main.go
+2
+==================
+WARNING: DATA RACE
+Read at 0x00c000012118 by goroutine 8:
+  main.main.func1()
+      main.go:14 +0x6c
+
+Previous write at 0x00c000012118 by goroutine 7:
+  main.main.func1()
+      main.go:14 +0x7e
+==================
+Found 1 data race(s)
+exit status 66
+{{< /run >}}
+
+Записанная ошибка бывает и у действия: `error=` называет команды, чья часть —
+ошибка. Здесь вторая команда запускает листинг прошлой версией Go, которая его
+не компилирует, и её часть сразу читается в «провальном» цвете, как первая
+часть при `error="true"`.
+
+```go
+package main
+
+import "fmt"
+
+type List[T any] []T
+
+func (l List[T]) Map[U any](f func(T) U) List[U] {
+	out := make(List[U], 0, len(l))
+	for _, v := range l {
+		out = append(out, f(v))
+	}
+	return out
+}
+
+func main() {
+	fmt.Printf("%q\n", List[int]{1, 2, 3}.Map(func(n int) string { return fmt.Sprint(n) }))
+}
+```
+{{< run sandbox="go1.27" label="Go 1.27" actions="Go_1.26:run-go126" error="run-go126" >}}
+["1" "2" "3"]
+
+$ go1.26.4 run main.go
+# command-line-arguments
+./main.go:7:21: syntax error: method must have no type parameters
+{{< /run >}}
+
+
 ## Таблица {#table}
 
 Markdown-таблица, обёртку `.tbl-wrap` вешает render-table:

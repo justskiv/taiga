@@ -30,8 +30,11 @@ codapi-toolbar{
 }
 
 /* Run — the one accented control in the row. `:not(.ced-btn)` keeps our own
-   editing buttons out of it: they are quieter siblings, styled below. */
-codapi-toolbar button:not(.ced-btn){
+   editing buttons out of it: they are quieter siblings, styled below. The
+   child combinator keeps out the mode switch of a snippet with several
+   commands (26-run-output.css): its options are buttons too, one level down,
+   inside the switch. */
+codapi-toolbar > button:not(.ced-btn){
   font:600 13px/1 var(--font-sans);
   color:var(--text-strong);
   background:var(--accent-dim);
@@ -42,7 +45,7 @@ codapi-toolbar button:not(.ced-btn){
   transition:background var(--dur) var(--ease), color var(--dur) var(--ease),
              border-color var(--dur) var(--ease);
 }
-codapi-toolbar button:not(.ced-btn):hover{background:var(--accent); color:var(--bg-base)}
+codapi-toolbar > button:not(.ced-btn):hover{background:var(--accent); color:var(--bg-base)}
 codapi-toolbar button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 codapi-toolbar button[disabled]{opacity:.6; cursor:progress}
 

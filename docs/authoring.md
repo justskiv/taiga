@@ -652,7 +652,8 @@ answer, for a site that wants to say so out loud.
 | `cmd=` | the command shown on the prompt line. Defaults to a readable stand-in for sandbox+command (`go run main.go`, `go test`, `go test -bench=.`). |
 | `note=` | a short caption, set as a shell comment after the command: `# stderr — the full trace`. This is what a folded block says about what is inside it. |
 | `open=` | `false` ships the output folded away. Default open. |
-| `error=` | `true` when the recorded output IS an error — it then reads in the failed colour from the start. |
+| `error=` | `true` when the recorded output IS an error — it then reads in the failed colour from the start. With several commands it names the commands whose recorded part is an error instead ([below](#run-modes)). |
+| `label=` | the main command's name in the mode switch of a snippet with several commands ([below](#run-modes)). |
 
 Written self-closing — `{{</* run sandbox="go1.26.4" /*/>}}` — the block ships
 hidden and appears with the reader's first result. Written **without** `sandbox=`
@@ -670,6 +671,72 @@ keys in `i18n/` — see [i18n.md](i18n.md).
 An `output-mode` other than text (`table`, `svg`, `iframe`…) builds DOM of its
 own, so those results stay in codapi's own box and the recorded output is left
 untouched.
+
+#### Several commands {#run-modes}
+
+codapi's `actions="Label:command"` runs the same listing under another command
+of the sandbox — a build with an experiment off, a test run, a benchmark.
+Written with actions, the body is a terminal transcript: the main command's
+output first, then, for every action in the order `actions=` lists them, a line
+starting with `$ ` — that action's prompt — and its output.
+
+```md
+{{</* run sandbox="go1.27" command="asm" label="With specialization"
+        actions="Without_specialization:asm-nospec"
+        cmd="go build -gcflags=-S main.go | grep CALL" */>}}
+main.go:7   CALL runtime.mallocgcSmallNoScanSC3(SB)
+
+$ GOEXPERIMENT=nosizespecializedmalloc go build -gcflags=-S main.go | grep CALL
+main.go:7   CALL runtime.newobject(SB)
+{{</* /run */>}}
+```
+
+On the page this is **one** output block with a mode switch in the toolbar:
+«With specialization | Without specialization», then Run. Picking a command
+runs nothing — it shows that command's part of the transcript, recorded or the
+reader's own last run of it, and Run runs the command picked (so does
+<kbd>⌘/Ctrl+Enter</kbd> in the editor). Each part keeps its own prompt line,
+provenance and **restore example**. The two parts sit in the same place, so
+comparing them is flicking between two options. Without JS, in a feed reader
+and on paper, every part is there, one under the other.
+
+- `label=` names the main command in the switch; the actions are named by
+  their own labels (`_` for a space, as codapi reads them). Without `label=`
+  the command's id stands in and the build warns.
+- `cmd=` and `note=` describe the main command's part; `open=` holds for the
+  whole block.
+- `error="true"` marks the main command's part as a recorded error. An
+  action's recorded run can be one too — a compile error under another Go
+  version — and then `error=` names the parts by their commands,
+  space-separated: `error="run-go126"` marks that action's part,
+  `error="run run-go126"` both (`run` being `command=`, its default; `true`
+  in the list stands for it as well). A marked part reads in the failed
+  colour from the start and after **restore example**, like the main one
+  does. A name that is no command of the block **fails the build**, so
+  without `actions=` the list may name `command=` alone — which is `true`
+  spelled longer.
+
+  ```md
+  {{</* run sandbox="go1.27" label="Go 1.27"
+          actions="Go_1.26:run-go126" error="run-go126" */>}}
+  ["1" "2" "3"]
+
+  $ go1.26.4 run main.go
+  # sandbox
+  ./main.go:10:21: syntax error: method must have no type parameters
+  {{</* /run */>}}
+  ```
+
+- A part may be just its `$ ` line: nothing is recorded for that command, and
+  its part appears with the first run.
+- The cut is keyed on `actions=`: without command actions a `$ ` inside the
+  output is output. With them, a number of `$ ` lines that does not match the
+  number of commands **fails the build** — a stray `$ ` in a program's output
+  would otherwise cut the block in the wrong place without a word. So do an
+  action repeating a command, `actions=` without `sandbox=`, and an
+  `output-mode` other than text.
+- An `@event` action is codapi's own business: it keeps its link and takes no
+  part of the body.
 
 #### The editor {#run-editor}
 
