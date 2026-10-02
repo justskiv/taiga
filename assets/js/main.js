@@ -13,6 +13,7 @@ import { buildToc } from './modules/toc.js';
 import { bindRails } from './modules/rails.js';
 import { bindTips } from './modules/tooltip.js';
 import { bindTerms } from './modules/term.js';
+import { bindUpdates } from './modules/updates.js';
 import { bindLinkPreviews } from './modules/linkpreview.js';
 import { bindKeys } from './modules/keys.js';
 import { mountScrollTop } from './modules/scrolltop.js';
@@ -102,6 +103,8 @@ onReady(function () {
   bindRails();
   bindTips();
   bindTerms();  /* articles only: self-guards on .term-cards */
+  bindUpdates();  /* articles only: self-guards on .updates; BEFORE bindKeys, so
+                     its Escape can stop keys.js while the card is open */
   bindLinkPreviews();  /* self-guards on a[data-preview]/[data-tg]/[data-yt] */
   bindKeys();
   mountScrollTop();

@@ -1,0 +1,230 @@
+/* ── edit history ───────────────────────────────────────────────────────────
+   The dates at the end of the meta line, "27 Aug | updated 22 Sep"
+   (article/dates.html), and the history behind the "updated" one
+   (article/updates-card.html, modules/updates.js).
+
+   One family with the term card (23-term.css): the date wears a term's dots,
+   because on this site dots already mean "a card opens here", and the card is
+   cut from the same material — canvas fill, hairline, two-part shadow, 14px
+   corner — and moves with the same .16s physics.
+
+   The year of a date is a span of its own (.dt-y, date-html.html). Its display
+   is never set here: prefs.js hides the reader's own year with a rule of its
+   own, and a display set in this file would override it. */
+
+/* ── the trigger: a term's dots, at meta scale ── */
+.meta .upd-trigger{
+  color:inherit; border-bottom:0; text-decoration:none;   /* the base a{} is accent + border */
+  margin:0 -3px; padding:2px 3px; border-radius:5px; cursor:help;
+  background-color:transparent;
+  background-image:radial-gradient(circle closest-side, var(--accent) 90%, transparent), none;
+  background-origin:content-box, border-box; background-clip:content-box, border-box;
+  background-size:4px 2px, auto; background-position:0 100%, 0 0; background-repeat:repeat-x, no-repeat;
+  transition:background-color var(--dur) var(--ease);
+}
+/* the dots ride the content box's lower edge, clear of descenders. The room
+   is added above AND below the date: .meta centres its items, and a gap
+   below alone would lift the date off its neighbours' line */
+.meta .upd-trigger > b{display:block; padding:3px 0}
+.meta .upd-trigger:hover, .meta .upd-trigger:focus-visible,
+.meta .upd-trigger[aria-expanded="true"]{background-color:var(--accent-dim)}
+.meta .upd-trigger:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+/* ── the block ──
+   Hidden by default; updates.js moves it to <body> and flips it to .is-live.
+   With JS off the <noscript><style> in updates-card.html reveals it in place:
+   a quiet appendix at the foot of the article, where the date links to. */
+.updates{display:none}
+.updates-h{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--text-muted);
+  font-weight:600; margin:52px 0 18px; padding-top:22px;
+  border-top:1px solid var(--border);
+}
+.updates.is-live{display:block}
+.updates.is-live .updates-h{display:none}
+
+/* ── the card ── */
+.upd-card{
+  position:relative;
+  width:400px; max-width:min(400px, calc(100vw - 32px));
+  border-radius:14px;
+  background:var(--bg-deep);
+  border:1px solid var(--border);
+  box-shadow:0 20px 50px -16px rgba(0,0,0,.62),
+             0 4px 12px -6px rgba(0,0,0,.45);
+}
+.upd-card:focus{outline:none}
+/* a pinned card firms its edge, as a term card does */
+.upd-card.is-pinned{border-color:color-mix(in srgb, var(--text-strong) 22%, var(--border))}
+
+/* in the appendix the card takes the column and loses its float; its kicker
+   would only repeat the heading above it */
+.updates:not(.is-live) .upd-card{width:auto; max-width:none; box-shadow:none; scroll-margin-top:calc(var(--head-h, 60px) + 20px)}
+.updates:not(.is-live) .upd-k{display:none}
+
+.upd-top{display:flex; flex-direction:column-reverse; align-items:flex-start; gap:6px; padding:16px 20px 0}
+.upd-h{margin:0; font-size:16px; font-weight:650; line-height:1.3; letter-spacing:-.01em; color:var(--text-strong)}
+.upd-k{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; font-weight:600; color:var(--accent); white-space:nowrap;
+}
+.upd-k::before{
+  content:""; flex:none; width:5px; height:5px; border-radius:50%; background:currentColor;
+  box-shadow:0 0 0 3px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+/* the body scrolls; updates.js holds it to the room left on the side the
+   card opened (--upd-room), so a long history in a short window or at a big
+   zoom scrolls inside the card instead of running off the screen */
+.upd-b{
+  padding:18px 20px 20px;
+  max-height:min(66vh, 560px, var(--upd-room, 560px));
+  overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin;
+}
+.updates:not(.is-live) .upd-b{max-height:none; overflow:visible}
+/* a body that scrolls fades out at its foot, as a term card's does — a
+   history cut mid-line by the card's edge read as squeezed, not as "more
+   below". Set by updates.js only when the body overflows. */
+.upd-b.is-scrollable{
+  -webkit-mask-image:linear-gradient(180deg, #000 calc(100% - 28px), transparent);
+  mask-image:linear-gradient(180deg, #000 calc(100% - 28px), transparent);
+}
+.upd-b.is-scrollable.at-end{-webkit-mask-image:none; mask-image:none}
+
+/* ── the thread: newest on top, one kind of dot, the newest in accent ──
+   The rhythm, from loosest to tightest, so an entry reads as one unit: 24px
+   between entries, 12px from a list back into text, 10px between paragraphs,
+   8px from a paragraph down into its list of sections, 6px from the date line
+   to the text, 3px between sections. Entries run long — a whole release in
+   one — and at the old 15/7/3 they ran into each other. */
+.upd-tl{list-style:none; margin:0; padding:0}
+.upd-e{position:relative; margin:0; padding:0 0 24px 22px}
+.upd-e:last-child{padding-bottom:0}
+.upd-e::before{content:""; position:absolute; left:3px; top:14px; bottom:-4px; width:1px; background:var(--border)}
+.upd-e:last-child::before{display:none}
+.upd-node{
+  position:absolute; left:0; top:5px; width:7px; height:7px; border-radius:50%;
+  background:color-mix(in srgb, var(--text-muted) 55%, var(--bg-deep));
+}
+.upd-e.is-new .upd-node{background:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)}
+.upd-eh{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 9px; font-family:var(--font-mono); line-height:17px}
+.upd-eh time{font-size:12px; font-weight:600; color:var(--text-strong)}
+.upd-kind{font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted)}
+
+.upd-t{margin-top:6px; font-size:14px; line-height:1.6; color:var(--text-primary)}
+.upd-t > *{margin:0}
+.upd-t > * + *{margin-top:10px}
+.upd-t > p + ul.upd-secs{margin-top:8px}
+.upd-t > ul + *{margin-top:12px}
+.upd-t code{font-size:.88em}
+.upd-t ul:not(.upd-secs), .upd-t ol{padding-left:18px}
+
+/* a link in an entry is the article's own quiet link (03-typography): the
+   word keeps its colour over a half-accent underline and warms on hover.
+   border-bottom:0 — the base a:hover (01-base) paints a bottom border, and a
+   live card sits outside .wrap, where nothing else switches it off: it
+   stacked under the underline as a second line */
+.upd-t a{
+  color:inherit; border-bottom:0;
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.18em;
+  text-decoration-color:color-mix(in srgb, var(--accent) 50%, transparent);
+  padding:2px 3px; margin:0 -3px; border-radius:5px;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+  transition:color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.upd-t a:hover{color:var(--accent); background:var(--accent-dim)}
+.upd-t a:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+
+/* the entry's sections: a little contents list with the section sign */
+.upd-t ul.upd-secs{list-style:none; padding:0; display:grid; gap:3px}
+.upd-secs li{margin:0; display:flex; align-items:baseline; gap:7px; font-size:13.5px; line-height:1.45}
+/* on the baseline the § sits on the lowercase centre, but every item opens
+   with a capital, whose centre is ~1.2px higher (measured in the mock) — the
+   sign read as dropped. Lifted onto the cap centre. */
+.upd-secs li::before{
+  content:"§"; flex:none; font-family:var(--font-mono); font-size:11px; color:var(--text-ghost);
+  transform:translateY(-.11em);
+}
+.upd-t .upd-secs a{color:var(--text-secondary); text-decoration-color:transparent}
+.upd-t .upd-secs a:hover{color:var(--accent); text-decoration-color:color-mix(in srgb, var(--accent) 50%, transparent)}
+
+/* ── live positioning ──
+   z-index 200 with the term cards and the diagram hints. Visibility flips at
+   the END of the fade-out but the START of the fade-in, so a pinned card can
+   take focus at once (23-term.css explains the asymmetry). */
+.updates.is-live .upd-card{
+  position:fixed; z-index:200; left:0; top:0;
+  visibility:hidden; opacity:0; transform:translateY(5px) scale(.985);
+  transition:opacity .16s var(--ease), transform .16s var(--ease),
+             border-color .16s var(--ease), visibility 0s .16s;
+}
+/* an invisible halo: the pointer may cut the corner between the date and the
+   card, or overshoot its edge, without the card closing under it. Behind the
+   content (z-index -1 in the card's own stacking context), so it never takes
+   a click meant for a link inside. */
+.updates.is-live .upd-card::before{content:""; position:absolute; inset:-10px; z-index:-1}
+@media (min-width:641px){
+  .updates.is-live .upd-card[data-side="above"]{transform:translateY(-5px) scale(.985)}
+}
+.updates.is-live .upd-card.is-open{
+  visibility:visible; opacity:1; transform:none;
+  transition:opacity .16s var(--ease), transform .16s var(--ease),
+             border-color .16s var(--ease), visibility 0s;
+}
+
+/* ── narrow screens: a bottom sheet, as the term card ── */
+@media (max-width:640px){
+  .updates.is-live .upd-card{
+    left:0 !important; right:0; bottom:0; top:auto !important;
+    width:auto; max-width:none;
+    border-radius:var(--radius) var(--radius) 0 0;
+    border-left:0; border-right:0; border-bottom:0;
+    box-shadow:0 -16px 48px -12px rgba(0,0,0,.5);
+    padding-bottom:env(safe-area-inset-bottom);
+    transform:translateY(14px);
+  }
+  .updates.is-live .upd-card.is-open{transform:translateY(0)}
+  .updates.is-live .upd-card::before{display:none}
+  .upd-b{max-height:min(58vh, 440px)}
+  .upd-scrim{
+    position:fixed; inset:0; z-index:199;
+    background:rgba(0,0,0,.45);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    opacity:0; visibility:hidden;
+    transition:opacity .16s var(--ease), visibility .16s;
+  }
+  .upd-scrim.is-open{opacity:1; visibility:visible}
+}
+@media (min-width:641px){ .upd-scrim{display:none} }
+
+@media (prefers-reduced-motion:reduce){
+  .meta .upd-trigger{transition:none}
+  .updates.is-live .upd-card,
+  .updates.is-live .upd-card[data-side]{transition:opacity .01s linear; transform:none}
+  .updates.is-live .upd-card.is-open{transform:none}
+  .upd-scrim{transition:none}
+}
+
+/* print: the history is already an appendix — show it, drop the chrome. The
+   card is named here as heavily as the live rules name it (.updates.is-live
+   .upd-card, [data-side] too): a lighter selector lost to them, and with JS
+   on a closed card printed as its heading over an empty, hidden box. */
+@media print{
+  .updates, .updates.is-live{display:block; position:static}
+  /* the live block was moved to <body>, out of the article column: give it the
+     column back, or it prints flush against the page edge */
+  .updates.is-live{max-width:var(--content); margin:0 auto; padding:0 24px; box-sizing:border-box}
+  .updates.is-live .updates-h{display:block}
+  .updates .upd-card,
+  .updates.is-live .upd-card,
+  .updates.is-live .upd-card[data-side]{
+    position:static !important; visibility:visible; opacity:1; transform:none;
+    width:auto; max-width:none; box-shadow:none; break-inside:avoid;
+  }
+  .upd-scrim{display:none}
+  .updates .upd-k{display:none}
+  .upd-b{max-height:none; overflow:visible}
+  .meta .upd-trigger{background:none; border-bottom:1px dotted #999}
+}

@@ -22,6 +22,13 @@ import * as params from '@params';
     var light = params.lightThemes || [];
     root.setAttribute('data-scheme', light.indexOf(t) >= 0 ? 'light' : 'dark');
   }
+  /* a date prints its year always (date-html.html); the reader's own year is
+     hidden here, so "current" is the reader's clock, not the build's — a
+     page built in December would otherwise drop last year's year in January.
+     `html` lifts the rule over the bundle, which loads after this script. */
+  var year = document.createElement('style');
+  year.textContent = 'html .dt-y[data-y="' + new Date().getFullYear() + '"]{display:none}';
+  document.head.appendChild(year);
   if (read('taiga.railL') === 'off') root.classList.add('rail-l-off');
   if (read('taiga.railR') === 'off') root.classList.add('rail-r-off');
   var rv = read('taiga.rubvar');

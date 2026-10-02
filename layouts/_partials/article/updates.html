@@ -1,0 +1,120 @@
+{{- /* A guide's edit history, read from `updates.md` beside its index.md
+       (`updates.ru.md` for a translation — Hugo hands each language its own).
+       The file is a plain note, readable as is in Obsidian:
+
+         ## 2026-10-01 · label
+         What changed, in ordinary Markdown.
+
+         - [A section](#its-heading-id)
+
+       Every entry opens with a level-2 heading «YYYY-MM-DD · label» (the label
+       is optional); anything before the first one is ignored, so the note may
+       carry a title of its own. A line starting with «## » inside a code block
+       would read as a new entry — the one thing this simple split cannot tell.
+       Each body is rendered in the GUIDE's context, so its links resolve
+       against the guide's own headings.
+
+       Returns a dict for article/dates.html (the dates in the meta line) and
+       article/updates-card.html (the popover and its no-JS appendix):
+
+         on       dates are shown at all — params.article.dates, on unless false
+         entries  newest first; the publication root comes last
+         n        how many entries come AFTER the day of publication
+         upd      "YYYY-MM-DD" to print as "updated", or ""
+         hist     the "updated" date opens the history (n > 0)
+
+       "Updated" is the newest entry after the day of publication. With none,
+       a lastmod on a LATER day than date still prints — without the dots,
+       there is nothing to open. A lastmod earlier than date prints nothing;
+       seo/lint.html already reports it.
+
+       Days are compared as "YYYY-MM-DD" strings, each read in the page's own
+       zone. Call it through partialCached keyed by .RelPermalink: it is read
+       twice per page and translations share .Path. */ -}}
+{{- $page := . -}}
+{{- $on := ne ((site.Params.article | default dict).dates) false -}}
+{{- $pub := .Date.Format "2006-01-02" -}}
+{{- $mod := .Lastmod.Format "2006-01-02" -}}
+{{- $where := .RelPermalink -}}
+{{- $keyed := slice -}}
+{{- $hasRoot := false -}}
+{{- $n := 0 -}}
+{{- $res := .Resources.Get "updates.md" -}}
+{{- if and $on $res -}}
+  {{- $file := printf "updates.md of %s" $where -}}
+  {{- with $res.File }}{{ $file = .Path }}{{ end -}}
+  {{- $ids := .Fragments.Identifiers -}}
+  {{- range $i, $chunk := after 1 (split (printf "\n%s" $res.RawContent) "\n## ") -}}
+    {{- $lines := split $chunk "\n" -}}
+    {{- $head := trim (index $lines 0) " \t\r" -}}
+    {{- $at := printf "%s: «## %s»" $file $head -}}
+    {{- $ms := findRESubmatch `^(\d{4}-\d{2}-\d{2})\s*(?:·\s*(.*))?$` $head 1 -}}
+    {{- if not $ms -}}
+      {{- warnf "updates: an entry opens with «## YYYY-MM-DD · label» (%s)" $at -}}
+      {{- continue -}}
+    {{- end -}}
+    {{- $date := index $ms 0 1 -}}
+    {{- with try (time.AsTime $date) -}}
+      {{- if .Err -}}
+        {{- warnf "updates: the date %s does not exist (%s)" $date $at -}}
+      {{- else if lt $date $pub -}}
+        {{- warnf "updates: %s predates the guide's date %s — drop it or fix the date (%s)" $date $pub $at -}}
+      {{- else -}}
+        {{- $label := "" -}}
+        {{- with trim (index $ms 0 2) " " }}{{ $label = $page.RenderString . }}{{ end -}}
+        {{- if eq $date $pub -}}
+          {{- $hasRoot = true -}}
+          {{- if not $label }}{{ $label = i18n "updates_published" }}{{ end -}}
+        {{- else -}}
+          {{- $n = add $n 1 -}}
+        {{- end -}}
+        {{- $body := "" -}}
+        {{- with trim (delimit (after 1 $lines) "\n") " \n\t\r" -}}
+          {{- $body = string ($page.RenderString (dict "display" "block") .) -}}
+        {{- end -}}
+        {{- /* A list whose every item is one link into the page is the entry's
+               list of sections: it gets the § look. A list with blank lines
+               between its items comes out loose — each link wrapped in a <p>
+               — and is unwrapped first, or it would keep plain bullets. Any
+               other list stays an ordinary list. */ -}}
+        {{- range findRE `<ul>[\s\S]*?</ul>` $body -}}
+          {{- $tight := replaceRE `<li>\s*<p>([\s\S]*?)</p>\s*</li>` "<li>$1</li>" . -}}
+          {{- $items := findRE `<li>[\s\S]*?</li>` $tight -}}
+          {{- $links := findRE `<li><a href="#[^"]+"[^>]*>[\s\S]*?</a></li>` $tight -}}
+          {{- if and $items (eq (len $items) (len $links)) -}}
+            {{- $body = replace $body . (replace $tight "<ul>" `<ul class="upd-secs">` 1) 1 -}}
+          {{- end -}}
+        {{- end -}}
+        {{- /* Hugo writes a fragment percent-encoded into the href (#%d0%b0…);
+               the guide's heading ids are kept as they read. Decode before the
+               lookup, or every Cyrillic section would "not exist". */ -}}
+        {{- range findRESubmatch `href="(#[^"]+)"` $body -}}
+          {{- $id := (urls.Parse (index . 1)).Fragment -}}
+          {{- if not ($ids.Contains $id) -}}
+            {{- warnf "updates: %s links to #%s, but no heading of the guide has that id (%s)" $date $id $at -}}
+          {{- end -}}
+        {{- end -}}
+        {{- $e := dict "date" $date "label" $label "body" $body -}}
+        {{- /* newest first; within one day, in the order they are written */ -}}
+        {{- $keyed = $keyed | append (dict "k" (printf "%s-%05d" $date (sub 99999 $i)) "e" $e) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $entries := slice -}}
+{{- range sort $keyed "k" "desc" }}{{ $entries = $entries | append .e }}{{ end -}}
+{{- if and (gt $n 0) (not $hasRoot) -}}
+  {{- $entries = $entries | append (dict "date" $pub "label" (i18n "updates_published") "body" "") -}}
+{{- end -}}
+{{- $upd := "" -}}
+{{- $hist := false -}}
+{{- if gt $n 0 -}}
+  {{- $upd = (index $entries 0).date -}}
+  {{- $hist = true -}}
+  {{- if lt $mod $upd -}}
+    {{- warnidf "update-lastmod" "updates: lastmod %s is older than the newest entry %s — the sitemap and dateModified still report the old day; raise lastmod (%s)" $mod $upd $where -}}
+  {{- end -}}
+{{- else if gt $mod $pub -}}
+  {{- $upd = $mod -}}
+{{- end -}}
+{{- return dict "on" $on "entries" $entries "n" $n "upd" $upd "hist" $hist -}}

@@ -1,0 +1,39 @@
+{{- /* The edit history (article/updates.html) as one block with two lives —
+       the same shape as the term cards (article/term-cards.html):
+
+       • No JS, and print — a plain appendix at the foot of the article, the
+         "updated" date in the meta line links down to it. The <noscript>
+         <style> reveals it; the default is display:none, so it never flashes
+         before the script takes it.
+       • With JS — modules/updates.js moves the block to <body> and hangs the
+         card from the "updated" date as a popover.
+
+       The entries come from updates.md beside the guide (article/updates.html).
+       role="dialog", aria-modal="false" for the same reason as a term card:
+       it holds links, and it never traps focus. */ -}}
+{{- $u := partialCached "article/updates.html" . .RelPermalink -}}
+{{- if and $u.on $u.hist -}}
+<noscript><style>.updates{display:block}</style></noscript>
+<aside class="updates" id="upd-history" aria-label="{{ i18n "updates_aria" }}">
+  <h2 class="updates-h">{{ i18n "updates_head" }}</h2>
+  <div class="upd-card" id="upd-card" role="dialog" aria-modal="false" aria-labelledby="upd-card-h" tabindex="-1">
+    <div class="upd-top">
+      <p class="upd-h" id="upd-card-h">{{ i18n "updates_title" $u.n }}</p>
+      <span class="upd-k">{{ i18n "updates_head" }}</span>
+    </div>
+    <div class="upd-b">
+      <ol class="upd-tl">
+      {{- range $i, $e := $u.entries }}
+        <li class="upd-e{{ if eq $i 0 }} is-new{{ end }}">
+          <span class="upd-node" aria-hidden="true"></span>
+          <div class="upd-eh">{{ partial "date-html.html" (time.AsTime $e.date) }}{{ with $e.label }}<span class="upd-kind">{{ . | safeHTML }}</span>{{ end }}</div>
+          {{- with $e.body }}
+          <div class="upd-t">{{ . | safeHTML }}</div>
+          {{- end }}
+        </li>
+      {{- end }}
+      </ol>
+    </div>
+  </div>
+</aside>
+{{- end -}}

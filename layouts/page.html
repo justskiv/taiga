@@ -93,6 +93,10 @@
        a definition is an aside, and indexing it would sit the same sentence in
        two search results. */ -}}
 {{ partial "article/term-cards.html" . }}
+{{- /* Edit history behind the "updated" date (updates.md beside the guide),
+       same two lives as the term cards and outside data-pagefind-body for the
+       same reason: the entries retell the article's own sections. */ -}}
+{{ partial "article/updates-card.html" . }}
 {{ partial "article/link-cards.html" . }}
 {{ partial "article/series-bridge.html" . }}
 {{- /* Newsletter, automatic end-of-article block (params.newsletter.placements
@@ -184,6 +188,8 @@
   {{ if $cut }}{{ .ContentWithoutSummary }}{{ else }}{{ .Content }}{{ end }}
   {{ end }}
   {{ partial "article/term-cards.html" . }}
+  {{- /* a plain page has no meta line to hang a history from */ -}}
+  {{- with .Resources.Get "updates.md" }}{{ warnf "updates: updates.md works beside guides only — %s has no meta line to show it" $.RelPermalink }}{{ end }}
   {{ partial "article/link-cards.html" . }}
   {{ with .Params.foot }}<div class="foot">{{ $.RenderString (dict "display" "block") . }}</div>{{ end }}
 </main>

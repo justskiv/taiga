@@ -167,6 +167,21 @@ other = "проверено на"
 other = "интерактив"
 [mins_abbr]
 other = "мин"
+[meta_updated]
+other = "обновлено"
+
+# edit history (updates.md beside a guide): the popover behind "обновлено"
+[updates_head]
+other = "История правок"
+[updates_title]
+one = "{{ .Count }} важное обновление после публикации"
+few = "{{ .Count }} важных обновления после публикации"
+many = "{{ .Count }} важных обновлений после публикации"
+other = "{{ .Count }} важного обновления после публикации"
+[updates_published]
+other = "публикация"
+[updates_aria]
+other = "История правок статьи"
 
 # kicker: non-series article ("<рубрика> · разбор")
 [kicker_standalone]

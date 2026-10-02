@@ -152,6 +152,19 @@ other = "tested on"
 other = "interactive"
 [mins_abbr]
 other = "min"
+[meta_updated]
+other = "updated"
+
+# edit history (updates.md beside a guide): the popover behind "updated"
+[updates_head]
+other = "Edit history"
+[updates_title]
+one = "{{ .Count }} notable update since publication"
+other = "{{ .Count }} notable updates since publication"
+[updates_published]
+other = "published"
+[updates_aria]
+other = "The guide's edit history"
 
 [kicker_standalone]
 other = "deep dive"

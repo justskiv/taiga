@@ -1,0 +1,18 @@
+{{- /* The last items of the meta line: "27 Aug | updated 22 Sep". Called from
+       inside <div class="meta"> (article/meta.html — and from a site's own
+       override of it, which has to add this line itself).
+
+       The "updated" date wears a term's dots when there is a history to open
+       (article/updates.html). Without JS it is a plain link to the history's
+       appendix at the foot of the article; modules/updates.js turns it into
+       the popover's trigger. With no history the date stays plain text. */ -}}
+{{- $u := partialCached "article/updates.html" . .RelPermalink -}}
+{{- if $u.on -}}
+<span class="tag"><b>{{ partial "date-html.html" .Date }}</b></span>
+{{- with $u.upd }}
+{{- $d := partial "date-html.html" (time.AsTime .) }}
+<span class="tag">{{ i18n "meta_updated" }} {{ if $u.hist -}}
+<a class="upd-trigger" href="#upd-history" aria-haspopup="dialog" aria-controls="upd-card"><b>{{ $d }}</b></a>
+{{- else }}<b>{{ $d }}</b>{{ end }}</span>
+{{- end }}
+{{- end -}}

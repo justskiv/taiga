@@ -5,6 +5,10 @@ date: {{ .Date }}
 # lastmod: 2026-01-01    # set it when you REVISE a published guide: it is what
                          # dateModified and the sitemap report, and a search
                          # engine has no other way to learn the guide changed.
+                         # A change worth telling the reader about also gets an
+                         # entry in updates.md beside this file — «## 2026-01-01
+                         # · label» and what changed (authoring.md#update); keep
+                         # lastmod up with it.
 draft: true
 # announce: true         # keep draft:true AND add this to tease a still-unwritten
                          # part: its TITLE shows in the series (locked, non-clickable),

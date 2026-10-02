@@ -2,6 +2,7 @@
 title: "Kitchen sink: every component"
 slug: kitchen-sink
 date: 2026-05-30
+lastmod: 2026-07-15
 description: "A regression testbed: every shortcode, callout, code block, diagram and widget on one page."
 lead: "A testbed for every component in the theme: one instance of each shortcode, callout, code block, diagram and widget on a single page — so design changes have something to test against, and guide authors have something to peek at and copy."
 ---
@@ -607,3 +608,13 @@ component the subscribe page uses:
 
 The card at the foot of this page is the third one — `newsletter-cta`, inserted
 automatically here by `placements.articleEnd`.
+
+## Edit history {#history}
+
+The «updated» date in this page's meta line opens its edit history. The
+history is a note of its own, `updates.md` beside this page (`updates.ru.md`
+beside the translation): one `## YYYY-MM-DD · label` heading per entry, then
+what changed in ordinary Markdown. The theme reads it into the popover, and
+into an appendix at the foot of the page for readers without JavaScript. A
+list whose every item is a link into the page becomes the entry's list of
+sections.

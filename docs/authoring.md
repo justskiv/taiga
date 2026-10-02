@@ -30,7 +30,7 @@ bridge) rather than a plain column. A guide placed one folder deeper is a
 ```yaml
 title: "Values and layout: how a Go value sits in memory"
 slug: memory-1-layout        # freezes the URL (…/memory-1-layout/)
-date: 2026-03-07             # feed order, RSS, sitemap — never shown in the article body
+date: 2026-03-07             # feed order, RSS, sitemap, and the end of the meta line
 description: "One sentence — for the feed, search and meta tags."
 lead: "Lead paragraph (may be longer than description)."
 weight: 1                    # part order inside its series; omit for a standalone guide
@@ -45,9 +45,9 @@ related: []                  # standalone guides: 3–5 content paths for the "r
 |---|---|---|
 | `title` | yes | Split on the first `": "` into an `<h1>` + `.sub`; use `sub:` to override, or a title without `": "` for a single line. |
 | `slug` | yes | Freezes the pretty URL; keep it stable once published, and **identical across translations** (see [Translating a guide](#translating-a-guide)). |
-| `date` | yes | Orders the feed and RSS, and prints on the feed card. **Never appears in the article body.** |
+| `date` | yes | Orders the feed and RSS, prints on the feed card and at the end of the article's meta line («27 Aug»). `params.article.dates = false` keeps dates out of the article. |
 | `description` | yes | Feed card, search result, `og:description`, RSS `<description>`. Write it for the result page, not as a second title: 70–160 characters, and **no markdown** — it is a plain attribute, carried through verbatim, so a backtick prints as a backtick (the lint says so). `lead`, by contrast, IS markdown: the page renders it, and so does the description fallback. The archetype ships a `TODO` **sentinel** here, and `params.seo.lint` fails the build while it is still in place — a guide is not allowed to reach production describing itself as TODO. |
-| `lastmod` | when you revise | The date a published guide last changed, e.g. `2026-09-22`. It is what `dateModified`, `article:modified_time` and the sitemap report — a search engine has no other way to learn that the guide is not the one it indexed a year ago. Standard Hugo front matter; no `enableGitInfo` needed. |
+| `lastmod` | when you revise | The date a published guide last changed, e.g. `2026-09-22`. It is what `dateModified`, `article:modified_time` and the sitemap report — a search engine has no other way to learn that the guide is not the one it indexed a year ago. Standard Hugo front matter; no `enableGitInfo` needed. On a later day than `date` it also prints in the meta line, «updated 22 Sep» — unless the guide keeps an [edit history](#update), whose newest entry then gives that date. Raise it with every entry. |
 | `titleSuffix` | optional | Overrides whether `<title>` ends with ` — <site>`. The site name is normally appended only while the whole line fits `params.seo.titleMax`; `false` drops it from a page that fits, `true` keeps it on one that does not. |
 | `noindex` | optional | `true` keeps the page out of search: `noindex, follow` in the robots tag and no entry in `sitemap.xml`. For a page that exists for a reason other than being found. |
 | `lead` | legacy | One-paragraph opening, kept for guides written before the `<!--more-->` divider (below). Also the fallback for `og:description`. |
@@ -262,6 +262,61 @@ Inline emphasis stays small. **Bold** (weight 600) is a term at the moment it
 is defined, or a run-in head; *italic* is one to three words of stress — a
 true Inter italic, fetched only by a page that sets one. A one-sentence idea no
 longer needs `callout type="key"`: that is what `>>` is for.
+
+## Edit history {#update}
+
+A guide that keeps growing after it is published can say what changed and
+when. The history is a note of its own, `updates.md` beside the guide's
+`index.md` (`updates.ru.md` beside `index.ru.md` — each language reads its
+own). The theme puts it into a card behind the «updated» date at the end of the
+meta line — and into an appendix at the foot of the page for readers without
+JavaScript, and in print. The file itself is never published as a page.
+
+```md
+## 2026-10-01 · new sections
+
+Seven sections, among them allocations measured on three machines.
+
+- [Allocations got cheaper](#allocations-got-cheaper)
+- [Runtime: traceback labels, timers](#runtime-traceback-labels-timers)
+
+Most runnable snippets now carry a version switch.
+
+## 2026-08-27 · published
+
+The five sections the guide started with.
+```
+
+- **Every entry opens with a level-2 heading**: an ISO date, then an optional
+  label after `·` (`## 2026-10-01 ·` with nothing after it is fine). A heading
+  that is not a date, or a date that does not exist, warns — and CI builds
+  with `--panicOnWarning`. Anything before the first entry is ignored, so the
+  note may carry a title of its own. A line starting with `## ` inside a code
+  block would read as a new entry.
+- **The body** is ordinary Markdown — paragraphs, `code`, links — rendered as
+  part of the guide, so a link resolves against the guide's own headings. It
+  may be empty, entries are newest first, and the order on one day is the
+  order written.
+- **A list whose every item is one link into the guide** becomes the entry's
+  list of sections, «§ Allocations got cheaper», blank lines between the items
+  or not. Write the links the way any section link is written, with the
+  heading's id; a link to an id no heading has warns. Any other list stays an
+  ordinary list.
+- **The entry on the day of publication** is the root of the thread. Without
+  one the card draws a bare «published» root itself.
+- **The «updated» date** is the newest entry after the day of publication.
+  With none, a `lastmod` on a later day than `date` prints instead, without
+  the dots — there is nothing to open. The sitemap and `dateModified` read
+  `lastmod`, not the history, so raise it with every entry: a `lastmod` older
+  than the newest entry warns (id `update-lastmod`, refusable through
+  `ignoreLogs`). An entry dated before the guide's `date` warns too.
+- **Only what a reader would want to know.** The card says «N notable
+  updates»: a typo fix gets no entry, at most a `lastmod`.
+- Guides only — beside a page with no meta line the file warns.
+  `params.article.dates = false` turns the dates and the history off.
+- The year of a date shows only when it is not the reader's own year. That is
+  decided in the reader's browser, not at build time; without JavaScript the
+  year always shows.
 
 ## Shortcodes {#shortcodes}
 

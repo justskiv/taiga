@@ -1,0 +1,14 @@
+{{- /* A date as markup: "27 Jun" with the year in a span of its own,
+       <time datetime="2026-06-27">27 Jun<span class="dt-y" data-y="2026"> 2026</span></time>.
+       Context = a time value.
+
+       The year is ALWAYS written and hidden on the reader's side when it is the
+       reader's own year (assets/js/prefs.js). date.html decides the same thing
+       against `now` — the day of the BUILD — so a page built in December still
+       drops last year's year in January, until someone rebuilds the site.
+       Without JS the year simply stays: longer, never wrong.
+
+       Month names are the same i18n keys date.html reads (month_1…month_12). */ -}}
+{{- $mon := i18n (printf "month_%d" (int .Month)) -}}
+{{- $html := printf `<time datetime="%s">%d %s<span class="dt-y" data-y="%d"> %d</span></time>` (.Format "2006-01-02") .Day $mon .Year .Year -}}
+{{- return safeHTML $html -}}

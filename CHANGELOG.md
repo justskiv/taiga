@@ -9,6 +9,16 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Changed
 
+- **A date's year follows the reader's clock, not the build's.** The feed
+  card printed the year only when it differed from the year of the BUILD, so a
+  site not rebuilt since December showed last year's posts without a year in
+  January. The year is now always in the page, in a span of its own, and the
+  pre-paint script hides it when it is the reader's own year — no flash, and
+  without JavaScript the year simply stays. Same rule in the article's new
+  meta-line dates.
+- **The article shows its dates.** `date` used to be documented as «never
+  appears in the article body»; it now ends the meta line. A site that wants
+  the old look sets `params.article.dates = false`.
 - **Bold in prose is weight 600, not 650.** The fonts ship 400/500/600/700,
   so 650 was never drawn at 650: the browser took the 700 file, and every term
   at its definition and every run-in head was set in the heaviest weight the
@@ -132,6 +142,17 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **Article dates and an edit history.** The meta line of a guide now ends
+  with its dates, «27 Aug | updated 22 Sep». A guide that grows after it is
+  published says what changed in `updates.md` beside its `index.md` — a plain
+  note, one `## 2026-10-01 · label` heading per entry, then ordinary Markdown
+  — and the «updated» date, dotted like a term, opens it as a card (a bottom
+  sheet on a phone, an appendix without JavaScript and in print). A list of
+  links into the guide inside an entry becomes its list of sections. The card
+  counts only the entries after the day of publication; two on one day stay
+  two. `lastmod` still feeds the sitemap and `dateModified`, and a `lastmod`
+  older than the newest entry warns (`update-lastmod`). Off with
+  `params.article.dates = false`. See [authoring.md](docs/authoring.md#update).
 - **`{{< bars stack="true" tabs="true" >}}` — a stack's groups as tabs.** A
   stack of three machines was three stacks under one another: a tall figure
   whose point — how the same saving looks on each machine — sat a screen apart.

@@ -20,4 +20,6 @@
 {{- with .Params.interactive }}
 <span class="tag"><b>{{ $.Params.interactive_label | default (i18n "meta_interactive") }}:</b> {{ . }}</span>
 {{- end }}
+{{- /* dates last: "27 Aug | updated 22 Sep", the feed card's order */}}
+{{ partial "article/dates.html" . }}
 </div>
