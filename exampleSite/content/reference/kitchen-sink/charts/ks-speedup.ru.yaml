@@ -3,7 +3,7 @@
 # "~" cells (no measurable difference) and a detail after each value.
 # The Russian twin of ks-speedup.yaml.
 x: {title: "размер объекта, Б", unit: " Б", domain: [0, 136], ticks: [8, 16, 32, 48, 64, 80, 96, 128], narrow: [8, 32, 80, 128]}
-y: {title: "насколько дешевле одна аллокация", unit: "%", digits: 0, domain: [0, -50], ticks: [0, -10, -20, -30, -40, -50]}
+"y": {title: "насколько дешевле одна аллокация", unit: "%", digits: 0, domain: [0, -50], ticks: [0, -10, -20, -30, -40, -50]}
 series:
   - {name: ноутбук, color: blue, shape: circle}
   - {name: сервер, color: green, shape: square}

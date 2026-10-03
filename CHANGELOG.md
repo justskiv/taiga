@@ -492,6 +492,14 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **A chart's `y:` key no longer turns into `true` on an older Hugo.** Hugo
+  0.147 reads data files as YAML 1.1, where a bare `y` is a boolean, so the
+  chart lost its y axis settings without a warning: on the live Go 1.27 guide
+  the gain chart flipped, zero on top, and the tick labels lost their `%`.
+  The docs and the kitchen-sink charts now quote the key, and
+  `scripts/check-charts.mjs` flags every bare `y`, `n`, `yes`, `no`, `on` or
+  `off` key, in exampleSite or in the directories given to it.
+
 - **A run sends its file with the last newline.** codapi reads the listing
   as its element's text, trimmed, so the file reached the sandbox without
   the newline every file on disk ends with. Most commands never notice; a diff

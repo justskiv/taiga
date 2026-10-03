@@ -1216,7 +1216,7 @@ warn.
 
 ```yaml
 x: {title: "object size, B", unit: " B", domain: [0, 136], ticks: [8, 24, 80, 128], narrow: [8, 80, 128]}
-y: {title: "time saved per allocation", unit: "%", digits: 0, domain: [0, -50]}
+"y": {title: "time saved per allocation", unit: "%", digits: 0, domain: [0, -50]}
 series:
   - {name: M4 Pro, color: blue, shape: circle, note: "×4,4"}   # note: bold, after the name in the key
   - {name: Genoa, color: green, shape: square}
@@ -1240,6 +1240,11 @@ modes:                                    # a segmented toggle — or `rows:` fo
 - Keys are lowercase. `rows` and `modes` exclude each other (a build error).
 - **Quote `"~"`**: bare `~` is YAML's null, which draws no point at all. Quote
   anything YAML could read as something else (`yes`, `no`, `0x10`).
+- **Quote the `"y"` key.** An older Hugo reads data files as YAML 1.1, where a
+  bare `y` is the boolean `true` (0.147 does this, 0.154 does not): the y axis
+  then silently loses its domain, unit and title. Run from the site,
+  `node themes/taiga/scripts/check-charts.mjs --no-hugo content` flags such
+  keys in its own files.
 - A row is `[x, one cell per series]`; a short or long row warns.
 - **Two languages:** Hugo gives `alloc-cliff.ru.yaml` to the Russian page under
   the name `alloc-cliff.yaml`, so a bilingual guide keeps one `src`.

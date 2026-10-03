@@ -8,11 +8,16 @@
        the vectors through those partials, in both languages.
    One meaning, so both must print the same thing.
 
+   It also reads the chart files themselves for keys that YAML 1.1 takes for
+   booleans (see "the chart files" below).
+
    Usage: node scripts/check-charts.mjs            (from anywhere; no deps)
-          node scripts/check-charts.mjs --no-hugo  (the JS half only) */
-import { readFileSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+          node scripts/check-charts.mjs --no-hugo  (the JS half only)
+          node scripts/check-charts.mjs DIR...     (scan a site's own content
+                                                    instead of exampleSite) */
+import { readFileSync, readdirSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname, join, basename } from 'node:path';
+import { dirname, join, basename, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 
@@ -77,6 +82,39 @@ if (existsSync(join(dir, 'core.js'))) {
     masks[m[1]] = /viewBox="0 0 10 10">(.*)<\/svg>$/.exec(svg)?.[1] ?? svg;
   }
   eq('31-data.css .mk-* masks', masks, core);
+}
+
+/* ── the chart files: YAML 1.1 reads a bare y, n, yes, no, on or off as a
+   boolean, and an older Hugo parses data files as YAML 1.1 (0.147 does,
+   0.154 does not). A bare `y:` then arrives as `true:`, and the y axis loses
+   its domain, unit and title without a word — the build passes, the chart
+   just draws differently. A quoted key is a string in both. ── */
+{
+  const BOOL = /^(?:y|Y|yes|Yes|YES|n|N|no|No|NO|on|On|ON|off|Off|OFF)$/;
+  const KEY = /(?:^\s*(?:-\s+)?|[{,]\s*)([^\s:#'"{}[\],]+)\s*:(?=\s|$)/g;
+  const dirs = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+  const roots = dirs.length ? dirs.map((d) => resolve(d)) : [join(root, 'exampleSite/content')];
+  const walk = (d, out) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      if (e.name.startsWith('.') || e.name === 'node_modules') continue;
+      const p = join(d, e.name);
+      if (e.isDirectory()) walk(p, out);
+      else if (/\.ya?ml$/.test(e.name)) out.push(p);
+    }
+    return out;
+  };
+  for (const r of roots) {
+    if (!existsSync(r)) { bad.push(`yaml: no such directory ${r}`); continue; }
+    for (const file of walk(r, [])) {
+      readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+        /* drop a comment: a # after a space, outside double quotes */
+        const code = line.replace(/(^|\s)#.*$/, (m, sp, at) => ((line.slice(0, at).match(/"/g) || []).length % 2 ? m : ''));
+        for (const m of code.matchAll(KEY)) {
+          if (BOOL.test(m[1])) bad.push(`yaml: ${relative(process.cwd(), file)}:${i + 1}: bare key ${m[1]} is a boolean in YAML 1.1 — quote it: "${m[1]}":`);
+        }
+      });
+    }
+  }
 }
 
 /* ── the Hugo half ── */
