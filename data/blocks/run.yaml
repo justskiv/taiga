@@ -1,0 +1,197 @@
+# {{< run sandbox="go1.27" >}}…{{< /run >}} under a fenced listing — the output
+# the author recorded, and codapi's Run for the listing above. Without sandbox=
+# the block is the transcript alone and needs cmd=; run.html fails the build
+# when neither is given — a rule over two params the format has no field for.
+# With actions= the body is a transcript cut on "$ " lines, a part per command,
+# and the block becomes a mode switch. Values and defaults mirror run.html.
+v: 1
+name: run
+syntax: shortcode
+shape: block                      # self-closed: hidden until the reader's first run
+class: code
+title:   {ru: Запуск, en: Run}
+summary: {ru: "Записанный вывод под листингом и кнопка Run", en: "The recorded output under a listing, and a Run button"}
+icon: square-terminal
+keywords: {ru: [запуск, вывод, песочница, листинг, codapi], en: [run, output, sandbox, listing, codapi]}
+docs: authoring.md#runnable
+common: [id, note]                # id: the snippet's, what depends-on names; note: a shell comment
+                                  # after the command
+groups:
+  sandbox: {ru: Песочница, en: Sandbox}
+  output:  {ru: Вывод, en: Output}
+  modes:   {ru: Несколько команд, en: Several commands}
+  codapi:  {ru: Транзит в codapi, en: Passed to codapi}
+params:
+  sandbox:
+    type: string
+    label: {ru: Песочница, en: Sandbox}
+    hint:  {ru: "Id песочницы codapi, go1.27; без неё — только записанный вывод, и нужна команда в приглашении", en: "codapi's sandbox id, go1.27; without it the output alone, and the prompt needs a command"}
+    tier: main
+    group: sandbox
+  command:
+    type: string
+    label: {ru: Команда песочницы, en: Sandbox command}
+    hint:  {ru: "test, test-verbose, bench — какие есть у песочницы", en: "test, test-verbose, bench — whatever the sandbox has"}
+    default: run
+    tier: more
+    group: sandbox
+    requires: [sandbox]           # run.html drops every codapi attribute without a sandbox
+  template:
+    type: string
+    label: {ru: Шаблон кода, en: Code template}
+    hint:  {ru: "#id элемента <script type=\"text/plain\"> в raw: листинг встаёт в него", en: "The #id of a <script type=\"text/plain\"> in a raw: the listing goes into it"}
+    tier: more
+    group: sandbox
+    requires: [sandbox]
+  editor:
+    type: enum
+    values: [basic, external, off]  # runout.js / codeedit.js: basic and external edit alike
+    labels:
+      basic:    {ru: Правка, en: Editable}
+      external: {ru: Правка (external), en: Editable (external)}
+      off:      {ru: Только чтение, en: Read-only}
+    default: basic
+    label: {ru: Редактор, en: Editor}
+    tier: more
+    group: sandbox
+    requires: [sandbox]
+  cmd:
+    type: string
+    label: {ru: Команда в приглашении, en: Prompt command}
+    hint:  {ru: "Что стоит после $; обязательна без песочницы", en: "What follows the $; required without a sandbox"}
+    default: {auto: {ru: "по песочнице и команде: go run main.go, go test, go test -bench=.", en: "from the sandbox and the command: go run main.go, go test, go test -bench=."}}
+    tier: more
+    group: output
+  open:
+    type: enum                    # not a bool: open unless written "false"
+    values: ["true", "false"]
+    labels:
+      "true":  {ru: Раскрыт, en: Open}
+      "false": {ru: Свёрнут, en: Folded}
+    default: "true"
+    label: {ru: Вывод при загрузке, en: Output on load}
+    tier: main
+    group: output
+  error:
+    # Not a bool: with actions= it names the commands whose recorded part is
+    # an error, "true" standing for command=. run.html fails the build on a
+    # name that is no command of the block.
+    type: list
+    of: {type: string}
+    label: {ru: Вывод — ошибка, en: Output is an error}
+    hint:  {ru: "Записанный вывод сразу в цвете провала: true; при других командах — id тех, чья часть — ошибка, через пробел: run run-go126", en: "The recorded output reads in the failed colour from the start: true; with other commands, the ids of those whose part is an error, space-separated: run run-go126"}
+    tier: main
+    group: output
+  lang:
+    # The language the output is written in, highlighted by its line rules
+    # (_partials/run/output.html, runout.js). run.html fails the build on a
+    # value it has no rules for.
+    type: enum
+    values: [diff]
+    labels:
+      diff: {ru: Дифф, en: Diff}
+    label: {ru: Язык вывода, en: Output language}
+    hint:  {ru: "Подсветить вывод: diff — добавленные и удалённые строки в цветах диффа, заголовки тише", en: "Highlight the output: diff — inserted and deleted lines in the diff colours, headers quieter"}
+    tier: more
+    group: output
+  actions:
+    type: string                  # codapi's own grammar, which run.html reads to cut the body
+    label: {ru: Другие команды, en: Other commands}
+    hint:  {ru: "Метка:команда через пробел, _ в метке — пробел; вывод каждой — своя часть тела с «$ » в начале", en: "Label:command, space-separated, _ in a label for a space; each one's output is a part of the body opening with \"$ \""}
+    tier: more
+    group: modes
+    requires: [sandbox]           # run.html fails the build: actions run in a sandbox
+  label:
+    type: string
+    label: {ru: Имя основной команды, en: "Main command's name"}
+    hint:  {ru: В переключателе команд, en: In the command switch}
+    default: {auto: {ru: "команда песочницы — сборка предупредит", en: "the sandbox command — the build warns"}}
+    tier: more
+    group: modes
+    requires: [actions]           # run.html warns: no switch to name without actions
+  # Passed through to <codapi-snippet> as written. Described because run.html
+  # reads them; folded into a group of their own because none of them changes
+  # from one insert to the next.
+  files:
+    type: string
+    label: {ru: Файлы, en: Files}
+    hint:  {ru: "Ещё файлы для песочницы, через пробел", en: "More files for the sandbox, space-separated"}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  depends-on:
+    type: string
+    label: {ru: Зависит от, en: Depends on}
+    hint:  {ru: "id сниппетов, чей код идёт перед этим, через пробел", en: "Ids of the snippets whose code goes before this one, space-separated"}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  output-mode:
+    type: string
+    label: {ru: Вид результата, en: Output mode}
+    hint:  {ru: "Не текст (table, svg, iframe…) — результат остаётся в блоке codapi; при других командах — только текст", en: "Anything but text (table, svg, iframe…) stays in codapi's own block; with other commands, text only"}
+    default: text
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  engine:
+    type: string
+    label: {ru: Движок, en: Engine}
+    default: {auto: {ru: сервер codapi, en: "codapi's server"}}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  selector:
+    type: string
+    label: {ru: Селектор кода, en: Code selector}
+    hint:  {ru: "CSS-селектор элемента с кодом", en: "A CSS selector of the element holding the code"}
+    default: {auto: {ru: листинг над блоком, en: the listing above}}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  init-delay:
+    type: number
+    integer: true
+    min: 0
+    unit: {ru: мс, en: ms}
+    label: {ru: Задержка запуска, en: Init delay}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  status-running:
+    type: string
+    label: {ru: Статус «идёт», en: Status “running”}
+    default: {auto: {ru: "свой у codapi, «Running…»", en: "codapi's own, “Running…”"}}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  status-done:
+    type: string
+    label: {ru: Статус «готово», en: Status “done”}
+    default: {auto: {ru: "свой у codapi, «✓ Done»", en: "codapi's own, “✓ Done”"}}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  status-failed:
+    type: string
+    label: {ru: Статус «ошибка», en: Status “failed”}
+    default: {auto: {ru: "свой у codapi, «✗ Failed»", en: "codapi's own, “✗ Failed”"}}
+    tier: more
+    group: codapi
+    requires: [sandbox]
+  url:
+    # run.html reads it only to refuse it: codapi takes its server from the one
+    # global setting, never from a snippet. Described so the schema matches
+    # what the template reads; deprecated so no editor offers it.
+    type: string
+    label: {ru: Адрес сервера, en: Server URL}
+    hint:  {ru: "Не действует: сборка падает — сервер один на сайт, params.codapi.url", en: "Has no effect: the build fails — the server is set once, as params.codapi.url"}
+    tier: more
+    group: codapi
+    deprecated: true
+body:
+  kind: text                      # the program's output, verbatim: write it flush left
+insert: |
+  {{< run sandbox="go" >}}
+  {cursor}
+  {{< /run >}}

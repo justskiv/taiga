@@ -1,0 +1,16 @@
+# `> text` — somebody else's words. render-blockquote.html keeps it a plain
+# <blockquote>, rebuilt as Goldmark would print it.
+v: 1
+name: quote
+syntax: quote
+depth: 1
+class: voice
+title:   {ru: Цитата, en: Quote}
+summary: {ru: Чужие слова — и только они, en: Somebody else's words and only them}
+icon: text-quote
+keywords: {ru: [цитата, чужие слова, кавычки], en: [quote, quotation, citation]}
+docs: authoring.md#emphasis
+common: [id]                      # {#id} on the line below the block
+body: {kind: markdown}
+insert: |
+  > {cursor}

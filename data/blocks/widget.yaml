@@ -1,0 +1,28 @@
+# {{< widget id="w-x" … />}} — an interactive figure from widgets/<id>/. One
+# block for every widget: a widget's own manifest (widgets/<id>/widget.yaml)
+# adds its title, summary, keywords and params; the frame and the roles stay
+# here. Values mirror widget.html.
+v: 1
+name: widget
+syntax: shortcode
+shape: block                      # self-closed, or with an inline no-JS view as its body
+class: figure
+title:   {ru: Виджет, en: Widget}
+summary: {ru: "Интерактивная фигура из widgets/<id>/", en: "An interactive figure from widgets/<id>/"}
+icon: sliders-horizontal
+keywords: {ru: [виджет, интерактив, слайдер, фигура], en: [widget, interactive, slider, figure]}
+docs: authoring.md#widgets
+common: [cap, note, bare]
+frame: {policy: bare, default: {i18n: widget_cap}}   # always framed unless bare
+params:
+  id:                             # the historical name: the mount's id, not the anchor role
+    type: string
+    ui: widget                    # a picker: the bundle's widgets/*/ folders as suggestions, free input
+    label: {ru: Виджет, en: Widget}
+    hint:  {ru: 'Совпадает с W.widget("…") символ в символ', en: 'Matches W.widget("…") character for character'}
+    tier: main
+manifest: widgets/{id}/widget.yaml
+body:
+  kind: html                      # the no-JS view; empty → widgets/<id>/figure.html, and without it an empty mount
+insert: |
+  {{< widget id="{cursor}" cap="" note="— " />}}

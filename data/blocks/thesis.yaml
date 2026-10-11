@@ -1,0 +1,18 @@
+# `>> text` — the section's conclusion in the author's own voice. Detected,
+# not parsed: render-blockquote.html turns a quote holding nothing but one
+# inner quote into <div class="thesis">.
+v: 1
+name: thesis
+syntax: quote
+depth: 2
+class: voice
+title:   {ru: Тезис, en: Thesis}
+summary: {ru: Вывод раздела своим голосом — одна–три фразы, en: The section's conclusion in your own voice — one to three sentences}
+icon: lightbulb
+keywords: {ru: [тезис, вывод, главная мысль, итог], en: [thesis, conclusion, key idea, takeaway]}
+docs: authoring.md#emphasis
+common: [id]                      # {#id} on the line below the block
+body: {kind: markdown}
+limits: {perSection: 1}           # at most one per h2
+insert: |
+  >> {cursor}

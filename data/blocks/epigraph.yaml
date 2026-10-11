@@ -1,0 +1,23 @@
+# `> [!epigraph] source` — a quotation on a threshold. The marker line is the
+# source, printed as the <figcaption>; render-blockquote.html draws the dash.
+v: 1
+name: epigraph
+syntax: alert
+class: voice
+title:   {ru: Эпиграф, en: Epigraph}
+summary: {ru: "Цитата на пороге: гайда, раздела или страницы серии", en: "A quotation on a threshold: a guide, a section, a series page"}
+icon: feather
+keywords: {ru: [эпиграф, цитата, источник, порог], en: [epigraph, quotation, source, threshold]}
+docs: authoring.md#emphasis
+common: [id]                      # {#id} on the line below the block
+params:
+  source:
+    type: inline-md               # .AlertTitle arrives as rendered inline HTML
+    at: marker
+    label: {ru: Источник, en: Source}
+    hint:  {ru: "Кто и где; тире перед источником тема рисует сама", en: "Who and where; the theme draws the dash before it"}
+    tier: main
+body: {kind: markdown}
+insert: |
+  > [!epigraph]
+  > {cursor}

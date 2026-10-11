@@ -1,0 +1,81 @@
+# {{< fold icon="video" title="…" >}}…{{< /fold >}} — a quiet one-line summary
+# that opens into a panel of Markdown. Values and defaults mirror fold.html.
+v: 1
+name: fold
+syntax: shortcode
+shape: block
+class: box
+title:   {ru: Спойлер, en: Fold}
+summary: {ru: Тихая строка — раскрывается в панель с текстом, en: A quiet line that opens into a panel of Markdown}
+icon: chevrons-down-up
+keywords: {ru: [спойлер, свернуть, раскрыть, подробнее, видео], en: [fold, collapse, expand, details, spoiler]}
+docs: authoring.md#fold
+common: []
+groups:
+  summary: {ru: Строка, en: Summary}
+  toggle:  {ru: Переключатель, en: Toggle}
+  panel:   {ru: Панель, en: Panel}
+params:
+  title:
+    type: inline-md               # RenderString: links in the summary work
+    required: true                # fold.html fails the build without it
+    label: {ru: Заголовок, en: Title}
+    hint:  {ru: "Строка в свёрнутом виде; ссылки работают", en: "The collapsed line; links work"}
+    tier: main
+    group: summary
+  icon:
+    type: enum
+    values: [video, info, tip, book, code, terminal, warning, star, link, note, none]   # $icons in fold.html + none
+    labels:
+      video:    {ru: Видео, en: Video}
+      info:     {ru: Инфо, en: Info}
+      tip:      {ru: Совет, en: Tip}
+      book:     {ru: Книга, en: Book}
+      code:     {ru: Код, en: Code}
+      terminal: {ru: Терминал, en: Terminal}
+      warning:  {ru: Предупреждение, en: Warning}
+      star:     {ru: Звезда, en: Star}
+      link:     {ru: Ссылка, en: Link}
+      note:     {ru: Заметка, en: Note}
+      none:     {ru: Без иконки, en: None}
+    default: info
+    label: {ru: Иконка, en: Icon}
+    tier: main
+    group: summary
+  more:
+    type: string
+    label: {ru: Кнопка «раскрыть», en: Expand label}
+    hint:  {ru: Подпись переключателя в свёрнутом виде, en: The toggle's label while collapsed}
+    default: Подробнее
+    tier: more
+    group: toggle
+  less:
+    type: string
+    label: {ru: Кнопка «свернуть», en: Collapse label}
+    hint:  {ru: "Подпись переключателя в раскрытом виде; у раздела — ещё и кнопка в конце", en: "The toggle's label while expanded; a section repeats it at the end"}
+    default: Свернуть
+    tier: more
+    group: toggle
+  open:
+    type: bool
+    label: {ru: Раскрыт сразу, en: Open}
+    hint:  {ru: Панель раскрыта при загрузке страницы, en: The panel renders expanded}
+    tier: more
+    group: panel
+  size:
+    type: enum
+    values: [note, section]
+    labels:
+      note:    {ru: Заметка, en: Note}
+      section: {ru: Раздел, en: Section}
+    label: {ru: Регистр, en: Register}
+    hint:  {ru: "Заметка — тихая строка; раздел — строка крупнее и кнопка «Свернуть» в конце", en: "A note keeps the quiet line; a section sets it at reading size and closes with a collapse button"}
+    default: {auto: {ru: "по длине тела: до 900 знаков — заметка, длиннее — раздел", en: "by the body's length: up to 900 runes a note, longer a section"}}
+    tier: more
+    group: panel
+body:
+  kind: markdown
+insert: |
+  {{< fold title="Заголовок" >}}
+  {cursor}
+  {{< /fold >}}

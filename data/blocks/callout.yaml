@@ -1,0 +1,41 @@
+# {{< callout type="trap" >}}…{{< /callout >}} — a framed box with a label.
+# The type drives the colour (05-callouts-toc.css); the label defaults to the
+# type's i18n string (callout.html).
+v: 1
+name: callout
+syntax: shortcode
+shape: block
+class: box
+title:   {ru: Коллаут, en: Callout}
+summary: {ru: "Рамка с меткой: ловушка, под капотом, главная мысль", en: "A framed box with a label: trap, internals, key idea"}
+icon: message-square-text
+keywords: {ru: [коллаут, врезка, ловушка, внимание, под капотом], en: [callout, box, trap, warning, internals]}
+docs: authoring.md#callout
+common: []
+params:
+  type:
+    type: enum
+    values: [note, key, trap, internals, warn]
+    labels:
+      note:      {ru: Заметка, en: Note}
+      key:       {ru: Главная мысль, en: Key idea}
+      trap:      {ru: Ловушка, en: Trap}
+      internals: {ru: Под капотом, en: Internals}
+      warn:      {ru: Внимание, en: Warning}
+    colors: {note: blue, key: accent, trap: copper, internals: green, warn: red}   # .callout.<type> in 05-callouts-toc.css
+    default: note
+    label: {ru: Тип, en: Type}
+    tier: main
+    ui: swatches
+  label:
+    type: string                  # printed as text, not rendered as Markdown
+    label: {ru: Метка, en: Label}
+    hint:  {ru: Пусто — метка типа по умолчанию, en: Empty — the type's default label}
+    default: {i18n: "callout_{type}"}   # the key follows the type's value
+    tier: main
+body:
+  kind: markdown
+insert: |
+  {{< callout type="note" >}}
+  {cursor}
+  {{< /callout >}}

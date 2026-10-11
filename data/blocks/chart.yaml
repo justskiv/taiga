@@ -1,0 +1,245 @@
+# {{< chart … >}} + a table, or {{< chart src="charts/x.yaml" … />}} — a line
+# chart from data alone. Two forms, one block: without src the options are
+# parameters and the data is the table in the body; with src everything lives
+# in the YAML file and chart.html warns on any parameter but src, cap and note.
+# So every inline parameter applies only while src is absent. Which form a
+# chart has, and what a structural edit of its series drags along, is the
+# chart adapter's (body.adapter).
+v: 1
+name: chart
+syntax: shortcode
+shape: block
+class: figure
+title:   {ru: График, en: Chart}
+summary: {ru: "Линии по точкам — из таблицы или YAML-файла бандла", en: "Lines through points — from a table or a YAML file in the bundle"}
+icon: chart-line
+keywords: {ru: [график, линии, серии, оси, точки], en: [chart, lines, series, axes, points]}
+docs: authoring.md#chart
+common: [cap, note, colors, height]   # colors and height: the inline form only — a role takes no when
+frame: {policy: always, default: {i18n: chart_cap}}
+groups:
+  source:  {ru: Источник, en: Source}
+  axes:    {ru: Оси, en: Axes}
+  series:  {ru: Серии, en: Series}
+  marks:   {ru: Отметки, en: Marks}
+  legend:  {ru: Легенда, en: Legend}
+  readout: {ru: Прицел и сводка, en: Readout and summary}
+params:
+  src:
+    type: resource
+    glob: charts/*.yaml
+    lang: true                    # a Russian page reads x.ru.yaml under the name x.yaml
+    label: {ru: Файл данных, en: Data file}
+    hint:  {ru: "YAML в бандле: оси, серии, отметки и строки — всё в нём", en: "A YAML file in the bundle: axes, series, marks and rows all live there"}
+    tier: main
+    group: source
+  x:
+    type: string
+    label: {ru: Ось X, en: X axis}
+    hint:  {ru: Подпись оси, en: "The axis title"}
+    default: {auto: {ru: шапка первой колонки, en: "the first column's header"}}
+    tier: main
+    group: axes
+    when: {param: src, is: absent}
+  y:
+    type: string
+    label: {ru: Ось Y, en: Y axis}
+    hint:  {ru: Подпись оси, en: "The axis title"}
+    tier: main
+    group: axes
+    when: {param: src, is: absent}
+  x-unit:
+    type: string
+    label: {ru: Единица X, en: X unit}
+    hint:  {ru: "После значений, как написано; без пробела впереди (%) — и на делениях", en: "After the values, as written; without a leading space (%) it rides on the ticks too"}
+    tier: main
+    group: axes
+    when: {param: src, is: absent}
+  y-unit:
+    type: string
+    label: {ru: Единица Y, en: Y unit}
+    hint:  {ru: "После значений, как написано; без пробела впереди (%) — и на делениях", en: "After the values, as written; without a leading space (%) it rides on the ticks too"}
+    tier: main
+    group: axes
+    when: {param: src, is: absent}
+  x-digits:
+    type: number
+    integer: true
+    min: 0
+    label: {ru: Знаков после запятой по X, en: X decimals}
+    default: {auto: {ru: как в данных, en: as the data is written}}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+  y-digits:
+    type: number
+    integer: true
+    min: 0
+    label: {ru: Знаков после запятой по Y, en: Y decimals}
+    default: {auto: {ru: как в данных, en: as the data is written}}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+  x-domain:
+    type: list
+    of: {type: number}
+    len: 2
+    label: {ru: Диапазон X, en: X domain}
+    hint:  {ru: "«от до»", en: '"from to"'}
+    default: {auto: {ru: по данным, en: from the data}}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+  y-domain:
+    type: list
+    of: {type: number}
+    len: 2
+    label: {ru: Диапазон Y, en: Y domain}
+    hint:  {ru: "«от до»; обратный, «0 -50», рисует величины вверх", en: '"from to"; a reversed one, "0 -50", draws magnitudes upward'}
+    default: {auto: {ru: по данным, en: from the data}}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+  x-ticks:
+    type: list
+    of: {type: number}
+    label: {ru: Деления X, en: X ticks}
+    default: {auto: {ru: подбирает Plot, en: Plot picks them}}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+  y-ticks:
+    type: list
+    of: {type: number}
+    label: {ru: Деления Y, en: Y ticks}
+    default: {auto: {ru: подбирает Plot, en: Plot picks them}}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+  x-narrow:
+    type: list
+    of: {type: number}
+    label: {ru: Деления X на узком, en: X ticks when narrow}
+    hint:  {ru: "Уже 480px", en: "Below 480px"}
+    default: {auto: {ru: те же деления X, en: the X ticks}}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+  y-narrow:
+    # chart.html reads it (the axis loop reads *-narrow for x and y) but does
+    # not list it among the inline keys, so writing it warns, and the runtime
+    # has no narrow ticks for y. Described so the schema matches what the
+    # template reads; deprecated so no editor offers it.
+    type: list
+    of: {type: number}
+    label: {ru: Деления Y на узком, en: Y ticks when narrow}
+    hint:  {ru: "Не действует: сборка предупредит", en: "Has no effect: the build warns"}
+    tier: more
+    group: axes
+    when: {param: src, is: absent}
+    deprecated: true
+  shapes:
+    type: list
+    of: {type: enum, values: [circle, square, triangle, diamond, star, cross]}
+    label: {ru: Формы точек, en: Point shapes}
+    hint:  {ru: "По серии, как цвета", en: "Per series, as the colours are"}
+    default: {auto: {ru: "по порядку серий: circle, square, triangle…", en: "in series order: circle, square, triangle…"}}
+    tier: more
+    group: series
+    when: {param: src, is: absent}
+  rule:
+    type: number
+    label: {ru: Линия, en: Rule}
+    hint:  {ru: "x, где стоит вертикальная линия", en: "The x a vertical rule stands at"}
+    tier: more
+    group: marks
+    when: {param: src, is: absent}
+  rule-label:
+    type: string
+    label: {ru: Подпись линии, en: Rule label}
+    tier: more
+    group: marks
+    when: {param: src, is: absent}
+    requires: [rule]
+  zone:
+    type: list
+    of: {type: number}
+    len: 2
+    label: {ru: Зона, en: Zone}
+    hint:  {ru: "«от до» по x — закрашенная полоса", en: '"from to" along x — a shaded band'}
+    tier: more
+    group: marks
+    when: {param: src, is: absent}
+  zone-label:
+    type: string
+    label: {ru: Подпись зоны, en: Zone label}
+    tier: more
+    group: marks
+    when: {param: src, is: absent}
+    requires: [zone]
+  legend:
+    type: string
+    label: {ru: Заголовок легенды, en: Legend title}
+    tier: more
+    group: legend
+    when: {param: src, is: absent}
+  same:
+    type: string
+    label: {ru: "Строка легенды для «~»", en: 'Legend line for "~"'}
+    hint:  {ru: "Видна, только если в данных есть «~»", en: 'Shown only when the data has a "~"'}
+    tier: more
+    group: legend
+    when: {param: src, is: absent}
+  hollow:
+    type: string
+    label: {ru: Строка легенды для полых точек, en: Legend line for hollow points}
+    hint:  {ru: "Видна, только если в данных есть *полая* точка", en: "Shown only when the data has a *hollow* point"}
+    tier: more
+    group: legend
+    when: {param: src, is: absent}
+  rest:
+    type: number
+    label: {ru: Прицел в покое, en: Readout at rest}
+    hint:  {ru: "x, который панель значений показывает на тач-экране, пока график не трогали", en: "The x the touch readout shows while the chart is untouched"}
+    default: {auto: {ru: последняя точка, en: the last point}}
+    tier: more
+    group: readout
+    when: {param: src, is: absent}
+  summary:
+    type: string
+    label: {ru: Сводка, en: Summary}
+    hint:  {ru: "Фраза для скринридера вместо рисунка", en: "A sentence a screen reader says for the drawing"}
+    tier: more
+    group: readout
+    when: {param: src, is: absent}
+body:
+  kind: table                     # the inline form; the file form is `keys`, and the adapter picks by src
+  adapter: chart
+  columns:
+    first: {role: x, grammar: number, align: right}
+    rest:  {role: value, grammar: value-detail, align: right}
+  header:
+    first: {grammar: text}        # the x axis title when x is unset
+    rest:  {grammar: text}        # the series names
+  blankLines: keep
+  keys:
+    x: {fields: {title: string, unit: string, digits: number, domain: {type: list, of: number, len: 2}, ticks: {type: list, of: number}, narrow: {type: list, of: number}}}
+    y: {fields: {title: string, unit: string, digits: number, domain: {type: list, of: number, len: 2}, ticks: {type: list, of: number}}}
+    series: {list: {name: string, color: {type: color, set: dv}, shape: {type: enum, values: [circle, square, triangle, diamond, star, cross]}, note: string}}
+    rules:  {list: {x: number, label: string}}
+    zones:  {list: {from: number, to: number, label: string}}
+    jumps:  {list: {series: string, from: number, to: number, label: string}}
+    legend: {fields: {title: string, same: string, hollow: string}}
+    rest: number
+    summary: string
+    rows:  {rows: {x: number, cell: value-detail}}
+    modes: {list: {label: string, rows: {rows: {x: number, cell: value-detail}}}}
+  oneOf: [rows, modes]            # chart.html: both, or neither, fails the build
+insert: |
+  {{< chart cap="{cursor}" >}}
+  | x | Серия |
+  |--:|--:|
+  | 1 | 10 |
+  | 2 | 14 |
+  | 3 | 12 |
+  {{< /chart >}}

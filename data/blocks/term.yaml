@@ -1,0 +1,63 @@
+# {{< term "mcache" >}}…{{< /term >}} — a word mid-sentence with a definition
+# card behind it; the body is the definition, in Markdown. Hugo takes a
+# shortcode's parameters either all positional or all named, so the short form
+# carries the word alone and anything more moves it into word=. The card is
+# rendered after the article (article/term-cards.html), the word stays a link
+# to it. Values and defaults mirror term.html.
+v: 1
+name: term
+syntax: shortcode
+shape: inline                     # lives inside a paragraph, a list item, a fold's body
+class: inline
+title:   {ru: Термин, en: Term}
+summary: {ru: "Слово в тексте, за которым стоит карточка-определение", en: "A word in the prose with a definition card behind it"}
+icon: book-open
+keywords: {ru: [термин, определение, глоссарий, слово, карточка], en: [term, definition, glossary, word, card]}
+docs: authoring.md#term
+common: []
+groups:
+  link: {ru: Ссылка, en: Link}
+params:
+  word:
+    type: inline-md               # RenderString: the word may carry Markdown
+    required: true                # term.html fails the build without it
+    at: positional                # alone, the first positional argument; beside others, word=
+    label: {ru: Слово, en: Word}
+    hint:  {ru: "Как стоит во фразе, со всеми окончаниями", en: "As it reads in the sentence, inflected"}
+    tier: main
+  title:
+    type: inline-md
+    label: {ru: Заголовок карточки, en: Card title}
+    hint:  {ru: "Когда отличается от слова: «в кэшах ядра» → «Кэш процессора»", en: "When it differs from the word, as an inflected one does"}
+    default: {auto: {ru: само слово, en: the word itself}}
+    tier: main
+  kind:
+    type: string                  # printed as text
+    label: {ru: Ярлык, en: Label}
+    hint:  {ru: "Моно-ярлык карточки: «Определение», «железо»; пусто — без ярлыка", en: "The card's mono label: “Definition”, “hardware”; empty — no label"}
+    tier: main
+  color:
+    type: color
+    set: term
+    label: {ru: Цвет, en: Colour}
+    hint:  {ru: Цвет слова и его карточки, en: The colour of the word and its card}
+    default: accent
+    tier: main
+  href:
+    type: string
+    pattern: "^\\S+$"             # internal or external, resolved by term.html; one token
+    label: {ru: Ссылка «подробнее», en: "“Read more” link"}
+    hint:  {ru: "Внутренний путь станет пермалинком, внешний адрес — как есть", en: "An internal path resolves to a permalink, an external URL goes as is"}
+    tier: more
+    group: link
+  more:
+    type: string
+    label: {ru: Текст ссылки, en: Link text}
+    default: {i18n: term_more}
+    tier: more
+    group: link
+    requires: [href]              # the card prints it only with a link to carry
+body:
+  kind: markdown
+insert: |-
+  {{< term word="слово" >}}{cursor}{{< /term >}}

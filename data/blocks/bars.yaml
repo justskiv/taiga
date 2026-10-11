@@ -1,0 +1,157 @@
+# {{< bars … >}} + a Markdown table — the comparison a sentence makes, drawn
+# to one scale. Values, defaults and checks mirror bars.html; the shape of the
+# figure follows the table (one value column, several, a stack, a whole).
+v: 1
+name: bars
+syntax: shortcode
+shape: block
+class: figure
+title:   {ru: Полосы, en: Bars}
+summary: {ru: "Несколько величин рядом, к одной шкале — из таблицы", en: "A few magnitudes side by side, to one scale — from a table"}
+icon: chart-bar
+keywords: {ru: [полосы, сравнение, размер, доля, стек], en: [bars, compare, size, share, stack]}
+docs: authoring.md#bars
+common: [cap, note, colors]       # + id once the template emits it
+frame: {policy: cap}              # framed only with a cap; a note without one is not printed
+groups:
+  shape:  {ru: Форма, en: Shape}
+  tabs:   {ru: Вкладки, en: Tabs}
+  scale:  {ru: Шкала, en: Scale}
+  colour: {ru: Цвет, en: Colour}
+params:
+  stack:
+    type: bool
+    label: {ru: Стек, en: Stack}
+    hint:  {ru: "Колонки — части одной полосы; не больше трёх", en: "Columns are parts of one bar; three at most"}
+    tier: main
+    group: shape
+    excludes: [whole]             # bars.html warns on whole + stack
+  whole:
+    type: number
+    exclusiveMin: 0
+    label: {ru: Целое, en: Whole}
+    hint:  {ru: "Каждая полоса — целое, значение — отмеченная часть", en: "Every bar is the whole, the value the part marked at its end"}
+    default: {auto: {ru: "не задано — полосы к самой длинной", en: "unset — bars to the longest"}}
+    tier: main
+    group: shape
+    excludes: [stack, max]        # whole is the scale
+  mark:
+    type: list
+    of: {type: number, integer: true, min: 1}
+    ui: rows                      # a toggle per row in the body editor; renumbered by the bars adapter
+    label: {ru: Отмеченные строки, en: Marked rows}
+    hint:  {ru: "Эти строки — полные, остальные призрачные; только одна серия и доли", en: "These rows draw full, the rest turn ghost; one series and shares only"}
+    tier: main
+    group: shape
+  tabs:
+    type: bool
+    label: {ru: Вкладки, en: Tabs}
+    hint:  {ru: "Группы стека или парных полос — вкладки с общей шкалой; каждую открывает строка-заголовок", en: "The groups of a stack or of grouped bars become tabs on one scale; a heading row opens each"}
+    tier: more
+    group: tabs
+    excludes: [whole]             # bars.html: a stack or 2–3 value columns, never a whole
+  open:
+    type: string
+    label: {ru: Открытая вкладка, en: Open tab}
+    hint:  {ru: "По жирному в строке-заголовке группы", en: "By the bold of the group's heading row"}
+    default: {auto: {ru: первая, en: the first}}
+    tier: more
+    group: tabs
+    requires: [tabs]              # bars.html: open picks a tab
+  max:
+    type: number
+    label: {ru: Правый край шкалы, en: "Scale's right end"}
+    default: {auto: {ru: самая длинная полоса, en: the longest bar}}
+    tier: more
+    group: scale
+    excludes: [whole]
+  unit:
+    type: string
+    label: {ru: Единица итога, en: "Total's unit"}
+    hint:  {ru: "После итога стека, как написано — с пробелом", en: "After a stack's total, as written — space included"}
+    tier: more
+    group: scale
+    requires: [stack]
+  digits:
+    type: number
+    integer: true
+    min: 0
+    label: {ru: Знаков после запятой, en: Decimals}
+    hint:  {ru: "У частей и итога стека; последняя часть — итог минус остальные", en: "Of a stack's parts and total; the last part is the total less the others"}
+    default: {auto: {ru: как написано в ячейках, en: as written in the cells}}
+    tier: more
+    group: scale
+    requires: [stack]
+  note-color:
+    type: color
+    set: dv
+    label: {ru: Цвет примечаний, en: "Notes' colour"}
+    default: {auto: {ru: вторичный текст, en: secondary text}}
+    tier: more
+    group: colour
+body:
+  kind: table
+  adapter: bars                   # mark and colors follow structural edits of the table
+  columns:
+    first: {role: label, grammar: name-sub}
+    rest:  {role: value, grammar: value-note, align: right}
+  header:
+    first: {grammar: text}
+    rest:  {grammar: short-long}  # a stack part's name and its key line
+  rows:
+    groupHeading: values-empty    # every value cell empty → a group heading
+  blankLines: keep
+limits:
+  valueColumns: {min: 1}
+  valueColumnsWhen: {param: stack, is: "true", max: 3}
+variations:
+  - id: single
+    title:   {ru: Одна серия, en: One series}
+    summary: {ru: полоса на строку, en: a bar per row}
+    match: {stack: absent, whole: absent}
+    insert: |
+      {{< bars >}}
+      | | Значение |
+      |---|--:|
+      | **{cursor}** | 10 |
+      | **Б** | 6 |
+      {{< /bars >}}
+  - id: grouped
+    title:   {ru: Группы, en: Groups}
+    summary: {ru: "группа на строку, полоса на колонку", en: "a group per row, a bar per column"}
+    match: {stack: absent, whole: absent}   # + two value columns or more: told by the body
+    set: {}                                 # colors are the author's, not a variation key
+    insert: |
+      {{< bars colors="blue green" >}}
+      | | **A** | **B** |
+      |---|--:|--:|
+      | **{cursor}** | 10 | 6 |
+      {{< /bars >}}
+  - id: stack
+    title:   {ru: Стек, en: Stack}
+    summary: {ru: "колонки — части одной полосы, итог на конце", en: "columns are parts of one bar, the total at its tip"}
+    match: {stack: "true"}
+    set: {stack: "true", digits: "1"}
+    insert: |
+      {{< bars stack="true" digits="1" colors="green" unit=" нс" >}}
+      | | **осталось** *что осталось* | **сэкономлено** *что убрали* |
+      |---|--:|--:|
+      | **{cursor}** | 19,5 | 7,5 |
+      {{< /bars >}}
+  - id: whole
+    title:   {ru: Доли, en: Shares}
+    summary: {ru: "каждая полоса — 100%, значение — часть", en: "every bar is 100%, the value a part of it"}
+    match: {whole: present}
+    set: {whole: "100"}
+    insert: |
+      {{< bars whole="100" >}}
+      | | Доля |
+      |---|--:|
+      | **{cursor}** | −41% |
+      {{< /bars >}}
+insert: |
+  {{< bars >}}
+  | | Значение |
+  |---|--:|
+  | **{cursor}** | 10 |
+  {{< /bars >}}

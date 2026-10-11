@@ -1,0 +1,25 @@
+# `> [!recap] label` — the checkpoint closing a section. The marker line is the
+# label; without one render-blockquote.html prints i18n `recap`.
+v: 1
+name: recap
+syntax: alert
+class: voice
+title:   {ru: Итог раздела, en: Recap}
+summary: {ru: "Контрольная точка в конце раздела: «теперь вы можете…»", en: "The checkpoint closing a section: “now you can …”"}
+icon: flag
+keywords: {ru: [итог, резюме, контрольная точка, теперь вы можете], en: [recap, summary, checkpoint, now you can]}
+docs: authoring.md#emphasis
+common: [id]                      # {#id} on the line below the block
+params:
+  label:
+    type: inline-md               # .AlertTitle arrives as rendered inline HTML
+    at: marker
+    label: {ru: Метка, en: Label}
+    hint:  {ru: "Моно-строка над текстом; пусто — метка по умолчанию", en: "The mono line over the text; empty — the default label"}
+    default: {i18n: recap}
+    tier: main
+body: {kind: markdown}
+limits: {perSection: 1}           # at most one per h2
+insert: |
+  > [!recap]
+  > {cursor}

@@ -1,0 +1,41 @@
+# {{< spanmap bits="111100" size="24" >}} — a span's slots and its allocation
+# bitmap. Everything else is derived from the two: the chosen slot is the first
+# 0, the measure and the address are its index times the slot size, the words
+# come from i18n (spanmap_*). Values and checks mirror spanmap.html.
+v: 1
+name: spanmap
+syntax: shortcode
+shape: void
+class: figure
+title:   {ru: Слоты спана, en: Span slots}
+summary: {ru: "Слоты спана и его битовая карта: куда ляжет следующая аллокация", en: "A span's slots and its bitmap: where the next allocation lands"}
+icon: binary
+keywords: {ru: [спан, слоты, битовая карта, аллокация, память], en: [span, slots, bitmap, allocation, memory]}
+docs: authoring.md#spanmap
+common: []                        # the words are the theme's; no caption to give
+params:
+  bits:
+    type: string
+    pattern: "^[01]{2,12}$"
+    required: true                # spanmap.html fails the build without it
+    ui: slots
+    label: {ru: Биты, en: Bits}
+    hint:  {ru: "Бит на слот: 1 — занят, 0 — свободен; от 2 до 12", en: "A bit per slot: 1 taken, 0 free; 2 to 12"}
+    tier: main
+  size:
+    type: number
+    exclusiveMin: 0
+    required: true                # likewise
+    label: {ru: Размер слота, en: Slot size}
+    hint:  {ru: "Байт на слот; мера и адрес — номер слота × размер", en: "Bytes per slot; the measure and the address are the slot's index × the size"}
+    tier: main
+  unit:
+    type: string
+    label: {ru: Единица, en: Unit}
+    hint:  {ru: "После чисел: у меры и адреса", en: "After the numbers: the measure's and the address's"}
+    default: {i18n: spanmap_unit}
+    tier: more
+body:
+  kind: none
+insert: |
+  {{< spanmap bits="111100{cursor}" size="24" >}}

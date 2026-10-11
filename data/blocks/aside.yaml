@@ -1,0 +1,16 @@
+# `> [!aside]` — a remark a step quieter. No marker-line parameter: text on
+# the marker line would be dropped, so render-blockquote.html warns on it.
+v: 1
+name: aside
+syntax: alert
+class: voice
+title:   {ru: Ремарка, en: Aside}
+summary: {ru: "Кстати, аналогия, оговорка — на тон тише", en: "By the way, an analogy, a caveat — a step quieter"}
+icon: corner-down-right
+keywords: {ru: [ремарка, кстати, оговорка, аналогия], en: [aside, by the way, caveat, analogy]}
+docs: authoring.md#emphasis
+common: [id]                      # {#id} on the line below the block
+body: {kind: markdown}
+insert: |
+  > [!aside]
+  > {cursor}

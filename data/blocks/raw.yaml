@@ -1,0 +1,24 @@
+# {{< raw >}}…{{< /raw >}} — hand-written HTML, passed through untouched: the
+# theme's diagram bricks (.mem, .byte-strip), codapi's code templates. Unlike an
+# HTML block in Markdown, the shortcode takes its body whole, so a blank line
+# inside does not cut it short. raw.html reads no parameters.
+v: 1
+name: raw
+syntax: shortcode
+shape: block
+class: figure                     # a diagram: the markup is the figure and its no-JS view; no caption to give
+title:   {ru: HTML-схема, en: HTML diagram}
+summary: {ru: "Рукописная HTML-разметка как есть — диаграммы памяти", en: "Hand-written HTML as is — memory diagrams"}
+icon: code-xml
+keywords: {ru: [html, схема, диаграмма, память, разметка], en: [html, diagram, memory, markup, raw]}
+docs: authoring.md#diagrams
+common: []
+body:
+  kind: html
+insert: |
+  {{< raw >}}
+  <div class="mem">
+    <div class="mem-lab">{cursor}</div>
+    <div class="mem-row"><div class="word live">e0</div><div class="word spare">··</div></div>
+  </div>
+  {{< /raw >}}

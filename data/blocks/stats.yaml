@@ -1,0 +1,29 @@
+# `> [!stats] caption` — a row of big numbers, one per list item. The list stays
+# a list; render-blockquote.html checks only its shape.
+v: 1
+name: stats
+syntax: alert                     # > [!stats] caption
+class: figure
+title:   {ru: Числа раздела, en: Section numbers}
+summary: {ru: Ряд из 2–4 крупных чисел перед разбором, en: A row of 2–4 headline numbers before the argument}
+icon: gauge
+keywords: {ru: [статистика, числа, герой, цифры], en: [stats, numbers, hero, figures]}
+docs: authoring.md#stats
+common: [id]                      # {#id} on the line below the block
+params:
+  caption:
+    type: inline-md
+    at: marker                    # the marker line's text → the caption under the row
+    label: {ru: Подпись, en: Caption}
+    hint:  {ru: Под рядом чисел; можно пусто, en: Under the row; may be empty}
+    tier: main
+body:
+  kind: list
+  item: {grammar: stat-item}      # - **up to 30%** label *sub*
+  tight: true                     # no blank lines between items
+limits:
+  items: {min: 2, max: 4}         # the hook checks only the max today
+insert: |
+  > [!stats] {cursor}
+  > - **0%** метка *деталь*
+  > - **0%** метка *деталь*

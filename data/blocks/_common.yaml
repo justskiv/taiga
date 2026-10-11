@@ -1,0 +1,26 @@
+# The shared vocabulary of the block schemas in this folder.
+#   roles    — parameters with one meaning on every block. A block accepts a
+#              role by listing it in its own `common:`; accepted, it keeps the
+#              name and the meaning.
+#   sets     — named colour-token sets that `type: color` refers to.
+#   classes  — block families; a schema names exactly one in `class:`.
+# Labels are {ru, en} inline maps. A value holding a comma or a colon is quoted:
+# unquoted, a flow map splits it into extra keys.
+v: 1
+roles:
+  id:     {type: string, pattern: "^[a-z][a-z0-9-]*$", at: attrs-line, label: {ru: Якорь, en: Anchor}}   # a Markdown block takes it as `{#id}` on the line below; a shortcode as id="…"
+  cap:    {type: string, label: {ru: Подпись, en: Caption}, hint: {ru: "Имя фигуры; рамку и дефолт задаёт блок (frame)", en: "The figure's name; the block's frame sets the frame and the default"}}
+  note:   {type: string, label: {ru: Ремарка, en: Note}, hint: {ru: "Приглушённая, после подписи, обычно с «— »", en: "Muted, after the caption, usually with \"— \""}}
+  bare:   {type: bool, label: {ru: Без рамки, en: Bare}}
+  colors: {type: list, of: {type: color, set: dv}, ui: swatches, label: {ru: Цвета серий, en: Series colours}}
+  height: {type: list, of: {type: number, integer: true, min: 80}, len: 2, unit: {ru: px «узко широко», en: 'px "narrow wide"'}, label: {ru: Высота, en: Height}, deprecated: true}   # the theme sizes a chart by its series count now
+sets:
+  dv:   [ink, ghost, blue, green, red, gold, violet, copper, accent]     # 31-data.css (--dv-*), bars.html
+  term: [accent, green, copper, blue, gold, red, violet]                 # term.html
+classes:
+  figure:  {title: {ru: Фигура, en: Figure},  section: {ru: Фигура, en: Figure}}
+  voice:   {title: {ru: Голос, en: Voice},    section: {ru: Роль, en: Role}}
+  box:     {title: {ru: Коробка, en: Box},    section: {ru: Коробка, en: Box}}
+  code:    {title: {ru: Код, en: Code},       section: {ru: Запуск, en: Run}}
+  inline:  {title: {ru: В строке, en: Inline}, section: {ru: Слово, en: Word}}
+  service: {title: {ru: Служебное, en: Service}, section: {ru: Служебное, en: Service}}
