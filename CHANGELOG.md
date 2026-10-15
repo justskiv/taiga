@@ -511,6 +511,14 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
   already running for the next link is left alone, so a reader who has moved
   on still gets the next card.
 
+- **A link preview could stay on screen for good.** Once a link was known to
+  have nothing to show — its fragment failed earlier, or its card was missing
+  from the store — moving to it from another link's open card left that card
+  in place. The state was reset as if no card were up, so nothing tracked or
+  closed it any more: not leaving it, not Escape, not a scroll. The open card
+  now closes in that case. With no card up, the path is unchanged, so the next
+  link still waits its full dwell.
+
 - **A chart's `y:` key no longer turns into `true` on an older Hugo.** Hugo
   0.147 reads data files as YAML 1.1, where a bare `y` is a boolean, so the
   chart lost its y axis settings without a warning: on the live Go 1.27 guide

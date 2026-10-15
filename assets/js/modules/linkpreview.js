@@ -451,7 +451,11 @@ export function bindLinkPreviews() {
           replan(pop, a);
         });
       } else if (!paint(p, a, data)) {   /* nothing to show (e.g. self-link) */
-        cur.a = null; cur.p = null; return;
+        /* the previous link's card may still be up: it goes too, or it stays
+           behind with nothing left to track or close it */
+        if (pop.classList.contains('is-open')) hidePop(true);
+        else { cur.a = null; cur.p = null; }
+        return;
       }
       replan(pop, a);
       pop.classList.add('is-open');
