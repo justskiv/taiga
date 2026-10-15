@@ -31,6 +31,19 @@ const MIN_CARD = 240;
    text was. ~4 lines of body; past that the card simply hangs off the edge. */
 const MIN_FLEX = 96;
 
+/* The link the card belongs to. Module scope rather than the binder's, because
+   a host card asks about it (previewFrom). */
+const cur = { a: null, p: null };
+
+/* A previewed link may itself sit in a hover card — a term definition, the edit
+   history. The preview lives in <body>, so the pointer crossing into it LEAVES
+   that host. While a preview opened from inside it is up, the host leaves the
+   closing to the preview — which keeps its own grace for a brief exit — and
+   decides for itself only once the preview is gone. */
+export function previewFrom(host) {
+  return !!cur.a && host.contains(cur.a);
+}
+
 export function bindLinkPreviews() {
   const marked = document.querySelector('a[data-preview], a[data-tg], a[data-yt], a[data-wiki], a[data-gob], a[data-gdoc]');
   if (!marked) return;
@@ -233,7 +246,6 @@ export function bindLinkPreviews() {
 
   /* ── popover shell ─────────────────────────────────────────────────────── */
   let pop = null;
-  const cur = { a: null, p: null };
   let openT = 0, closeT = 0, seq = 0, lastHideAt = -1e9;
 
   function ensurePop() {
@@ -433,7 +445,9 @@ export function bindLinkPreviews() {
         pop.replaceChildren(p.skeleton(a));
         c.promise.then((d) => {
           if (my !== seq || cur.a !== a) return;
-          if (!paint(p, a, d)) { hide(); return; }
+          /* nothing to show after all (the fragment failed): the skeleton goes,
+             but a dwell already running for the next link is left to fire */
+          if (!paint(p, a, d)) { hidePop(true); return; }
           replan(pop, a);
         });
       } else if (!paint(p, a, data)) {   /* nothing to show (e.g. self-link) */
@@ -447,8 +461,9 @@ export function bindLinkPreviews() {
     else doOpen(null, true);
   }
 
-  function hidePop() {
-    clearTimeout(openT); clearTimeout(closeT);
+  function hidePop(keepPending) {
+    if (!keepPending) clearTimeout(openT);
+    clearTimeout(closeT);
     if (!cur.a) return;
     pop.classList.remove('is-open');
     pop.setAttribute('aria-hidden', 'true');
@@ -512,7 +527,9 @@ export function bindLinkPreviews() {
   });
   document.addEventListener('focusout', () => { if (cur.a) scheduleClose(); });
 
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePop(); });
+  /* capture: the edit history swallows Escape at document level (updates.js),
+     and a preview opened from inside it must close with it, not outlive it */
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePop(); }, true);
 
   /* follow the owner on scroll; a scroll can carry the pointer off the link
      without a mouse event, so re-check :hover and let the timer decide */

@@ -7,6 +7,7 @@
    hover intent, a short grace on the way out, click to pin, Escape and a
    click outside to dismiss, a bottom sheet on narrow screens. One trigger,
    one card, so none of the term engine's per-word bookkeeping. */
+import { previewFrom } from './linkpreview.js';
 
 const CLOSE_DELAY = 120;  /* modules/term.js — the same rhythm */
 const OPEN_DELAY = 250;
@@ -134,6 +135,8 @@ export function bindUpdates() {
     closeT = setTimeout(function () {
       if (!open || pinned) return;
       if (card.matches(':hover') || trigger.matches(':hover')) return;
+      /* a preview opened from a link in the card is up: wait for it (term.js) */
+      if (previewFrom(card)) { scheduleClose(); return; }
       hide(false);
     }, CLOSE_DELAY);
   }
@@ -203,6 +206,8 @@ export function bindUpdates() {
   document.addEventListener('mousedown', function (e) {
     if (!open) return;
     if (card.contains(e.target) || trigger.contains(e.target)) return;
+    /* a click in the preview the card opened */
+    if (e.target.closest('.lp-pop') && previewFrom(card)) return;
     hide(false);
   });
 

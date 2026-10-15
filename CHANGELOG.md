@@ -492,6 +492,25 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Fixed
 
+- **A hover card no longer closes under a link preview opened from inside it.**
+  The preview lives in `<body>`, not in the card, so moving the pointer into it
+  counted as leaving the card: a term definition (or the edit history) closed
+  120ms later and took the link the preview pointed at with it. A card now
+  leaves the closing to a preview opened from one of its links. While that
+  preview is up, the card stays, and it decides for itself once the preview is
+  gone. The preview keeps its own grace for a brief exit, so a pointer that
+  slips out of it and back no longer drops the card underneath. A click inside
+  such a preview counts as a click inside the card, and Escape closes both —
+  the edit history used to swallow Escape and leave the preview hanging over a
+  link that was no longer there.
+
+- **A link preview that failed to load no longer hangs as a skeleton.** When
+  the fragment could not be fetched, the code meant to close the card called a
+  DOM helper with no element, which did nothing: the placeholder stayed until
+  the pointer left the link. It now closes as soon as the fetch fails. A dwell
+  already running for the next link is left alone, so a reader who has moved
+  on still gets the next card.
+
 - **A chart's `y:` key no longer turns into `true` on an older Hugo.** Hugo
   0.147 reads data files as YAML 1.1, where a bare `y` is a boolean, so the
   chart lost its y axis settings without a warning: on the live Go 1.27 guide

@@ -12,6 +12,7 @@
    • dismissible— Escape, a click outside, or moving the pointer away
    • persistent — it stays until dismissed. Reposition on scroll, never
                   auto-hide on a timer. */
+import { previewFrom } from './linkpreview.js';
 
 const CLOSE_DELAY = 120;  /* just enough to cross the 10px gap into the
                              card; longer and it reads as the card lingering */
@@ -63,6 +64,9 @@ export function bindTerms() {
       if (!open) return;
       if (open.matches(':hover')) return;
       if (owner && owner.matches(':hover')) return;
+      /* a preview opened from a link in the card is up: it has its own grace
+         for a brief exit, so the card waits for it to close, then asks again */
+      if (previewFrom(open)) { scheduleClose(); return; }
       hide();
     }, CLOSE_DELAY);
   }
@@ -288,6 +292,8 @@ export function bindTerms() {
   document.addEventListener('mousedown', function (e) {
     if (!open || !pinned) return;
     if (e.target.closest('.term-card') || e.target.closest('a.term')) return;
+    /* a click in the preview the card opened */
+    if (e.target.closest('.lp-pop') && previewFrom(open)) return;
     hide();
   });
 
