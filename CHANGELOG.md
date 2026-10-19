@@ -142,6 +142,31 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 
 ### Added
 
+- **GitHub issues and pull requests get a hover card.** A Go guide cites the
+  issue tracker more than any other page — a bug behind a runtime quirk, the
+  proposal a feature came from — and every such link was a bare arrow: whether
+  the issue is still open, whether the proposal was accepted, which release it
+  landed in, the reader learned only by leaving the page. The card says it: the
+  state in GitHub's colours with the date it was closed or merged, the author,
+  comments and milestone, a few labels, the opening of the description,
+  sub-issue progress and the top reactions. `go.dev/issue/<n>` and
+  `golang.org/issue/<n>` get the same card, and a link to one comment shows its
+  thread.
+
+  Read through the REST API (`body_html` for the lead) rather than scraped:
+  github.com renders its issue page in the browser, and the API answers for
+  issues and pull requests alike. Two things are read the Go project's way on
+  `golang/*`: the title's package path goes above the title, and a proposal
+  shows its stage from the `Proposal-*` labels and the close reason — the
+  status a reader of a Go guide is usually after. The lead drops the bug
+  template's "Go version" and "go env" sections, which open most Go bug
+  reports and say nothing on a card.
+
+  The API allows 60 unauthenticated requests an hour; a site with more links
+  than that wants `HUGO_GITHUB_TOKEN` in the build environment, or the rest of
+  its cards are silently left out. Every `github.com` link now wears the GitHub
+  mark instead of ↗ — the mark names the destination, as W does for any
+  Wikipedia page — and only an issue or a pull request also opens a card.
 - **Article dates and an edit history.** The meta line of a guide now ends
   with its dates, «27 Aug | updated 22 Sep». A guide that grows after it is
   published says what changed in `updates.md` beside its `index.md` — a plain

@@ -456,6 +456,38 @@ other = "Read on Wikipedia"
 other = "Read on the Go blog"
 [lp_read_gdoc]
 other = "Read on go.dev"
+[lp_gh_open_link]
+other = "Open on GitHub"
+[lp_gh_open]
+other = "Open"
+[lp_gh_closed]
+other = "Closed"
+[lp_gh_not_planned]
+other = "Not planned"
+[lp_gh_duplicate]
+other = "Duplicate"
+[lp_gh_pr_open]
+other = "Open"
+[lp_gh_draft]
+other = "Draft"
+[lp_gh_merged]
+other = "Merged"
+[lp_gh_pr_closed]
+other = "Closed"
+[lp_gh_proposal]
+other = "Proposal"
+[lp_gh_prop_active]
+other = "under review"
+[lp_gh_prop_fcp]
+other = "final comment period"
+[lp_gh_prop_hold]
+other = "on hold"
+[lp_gh_prop_accepted]
+other = "accepted"
+[lp_gh_prop_declined]
+other = "declined"
+[lp_gh_sub]
+other = "Sub-issues"
 
 # ── newsletter (28-newsletter.css / modules/newsletter.js) ────────────────────
 # The subscription UI: header button + popover, in-article and series-landing

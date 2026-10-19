@@ -1,0 +1,252 @@
+{{- /* One GitHub issue / pull request card, built at BUILD time from the REST API:
+
+         https://api.github.com/repos/<owner>/<repo>/issues/<n>
+
+       The issues endpoint answers for a pull request too (it carries a
+       `pull_request` object with `merged_at`, and `draft`), so one call covers
+       both. `application/vnd.github.full+json` adds `body_html` — GitHub's own
+       render of the body, which the lead is cut from.
+
+       Context = the canonical https://github.com/<owner>/<repo>/(issues|pull)/<n>
+       URL (render-link.html folds go.dev/issue/N and golang.org/issue/N into it).
+       partialCached by lang|URL.
+
+       Rate limit: unauthenticated, the API allows 60 requests an hour per IP — a
+       site with more GitHub links than that loses the rest of its cards on a cold
+       build. A token in HUGO_GITHUB_TOKEN (any read-only token; Hugo's default
+       security policy lets templates read HUGO_* variables only) raises it to
+       5000. A failed or rate-limited fetch degrades like every other card: no
+       card, the link stays external with the GitHub mark.
+
+       The golang/* repos get two readings the API does not spell out:
+         • the title convention "pkg/path: summary" — the package path is lifted
+           into a mono eyebrow, and a "proposal: " prefix is dropped (the
+           proposal chip says it);
+         • proposal status, which the Go project keeps in labels
+           (Proposal-Accepted / -FinalCommentPeriod / -Hold) and, for a declined
+           proposal, in the close reason (not planned). */ -}}
+{{- $url := . -}}
+{{- $seg := split (strings.TrimPrefix "/" (urls.Parse $url).Path) "/" -}}
+{{- $owner := index $seg 0 -}}{{- $repo := index $seg 1 -}}{{- $num := index $seg 3 -}}
+{{- $api := printf "https://api.github.com/repos/%s/%s/issues/%s" $owner $repo $num -}}
+{{- $hdr := dict
+    "Accept" "application/vnd.github.full+json"
+    "X-GitHub-Api-Version" "2022-11-28"
+    "User-Agent" (printf "taiga-link-previews/1.0 (+%s)" site.BaseURL) -}}
+{{- with os.Getenv "HUGO_GITHUB_TOKEN" -}}{{ $hdr = merge $hdr (dict "Authorization" (printf "Bearer %s" .)) }}{{- end -}}
+{{- $res := partial "article/lp/get.html" (dict "url" $api "opts" (dict "headers" $hdr)) -}}
+{{- $ok := false -}}
+{{- $d := dict -}}
+{{- with $res -}}
+  {{- $j := transform.Unmarshal .Content -}}
+  {{- if and $j.title $j.number -}}
+    {{- $ok = true -}}
+    {{- $golang := eq (lower $owner) "golang" -}}
+
+    {{- /* title: "proposal: " prefix, then the "pkg/path: " eyebrow */ -}}
+    {{- $title := $j.title -}}
+    {{- $pkg := "" -}}
+    {{- $propTitle := false -}}
+    {{- if $golang -}}
+      {{- with findRESubmatch `(?i)^proposal:\s+(.+)$` $title -}}{{ $propTitle = true }}{{ $title = index (index . 0) 1 }}{{- end -}}
+      {{- with findRESubmatch `^([\w./{}*+-]+(?:,\s*[\w./{}*+-]+)*):\s+(.+)$` $title -}}
+        {{- $pkg = index (index . 0) 1 -}}
+        {{- $title = index (index . 0) 2 -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- /* state: one of open | closed | not-planned | duplicate (issues),
+           pr-open | draft | merged | pr-closed (pull requests) */ -}}
+    {{- $isPR := false -}}
+    {{- with $j.pull_request -}}{{ $isPR = true }}{{- end -}}
+    {{- $state := "open" -}}
+    {{- if $isPR -}}
+      {{- if $j.pull_request.merged_at -}}{{ $state = "merged" }}
+      {{- else if eq $j.state "closed" -}}{{ $state = "pr-closed" }}
+      {{- else if $j.draft -}}{{ $state = "draft" }}
+      {{- else -}}{{ $state = "pr-open" }}{{- end -}}
+    {{- else if eq $j.state "closed" -}}
+      {{- $state = "closed" -}}
+      {{- if eq $j.state_reason "not_planned" -}}{{ $state = "not-planned" }}
+      {{- else if eq $j.state_reason "duplicate" -}}{{ $state = "duplicate" }}{{- end -}}
+    {{- end -}}
+
+    {{- /* labels: the proposal ones become the chip; the rest are shown, minus
+           the bot's FrozenDueToAge, which says nothing about the issue */ -}}
+    {{- $names := slice -}}
+    {{- range $j.labels -}}{{ $names = $names | append .name }}{{- end -}}
+    {{- $prop := "" -}}
+    {{- if and $golang (or $propTitle (in $names "Proposal")) -}}
+      {{- if in $names "Proposal-Accepted" -}}{{ $prop = "accepted" }}
+      {{- else if eq $state "not-planned" -}}{{ $prop = "declined" }}
+      {{- else if in $names "Proposal-FinalCommentPeriod" -}}{{ $prop = "fcp" }}
+      {{- else if in $names "Proposal-Hold" -}}{{ $prop = "hold" }}
+      {{- else if eq $j.state "open" -}}{{ $prop = "active" }}
+      {{- else -}}{{ $prop = "none" }}{{- end -}}
+    {{- end -}}
+    {{- $hide := slice "FrozenDueToAge" "Proposal" "Proposal-Accepted" "Proposal-FinalCommentPeriod" "Proposal-Hold" -}}
+    {{- $labels := slice -}}
+    {{- range $j.labels -}}
+      {{- if not (in $hide .name) -}}{{ $labels = $labels | append (dict "name" .name "color" .color) }}{{- end -}}
+    {{- end -}}
+
+    {{- /* reactions: the three biggest, as on a Telegram card */ -}}
+    {{- $emoji := dict "+1" "👍" "-1" "👎" "laugh" "😄" "hooray" "🎉" "confused" "😕" "heart" "❤️" "rocket" "🚀" "eyes" "👀" -}}
+    {{- $rx := slice -}}
+    {{- with $j.reactions -}}
+      {{- $r := . -}}
+      {{- range $k, $e := $emoji -}}
+        {{- $n := int (index $r $k | default 0) -}}
+        {{- if gt $n 0 -}}{{ $rx = $rx | append (dict "e" $e "n" $n) }}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $rx = first 3 (sort $rx "n" "desc") -}}
+
+    {{- $sub := dict -}}
+    {{- with $j.sub_issues_summary -}}
+      {{- if gt (int .total) 0 -}}{{ $sub = dict "done" (int .completed) "total" (int .total) "pct" (int .percent_completed) }}{{- end -}}
+    {{- end -}}
+
+    {{- $avatar := "" -}}
+    {{- with $j.user -}}{{ with .avatar_url -}}{{ $avatar = partial "article/lp/img.html" (dict "url" (printf "%s%ss=40" . (cond (strings.Contains . "?") "&" "?"))) }}{{- end -}}{{- end -}}
+
+    {{- /* lead, cut from body_html. The body is split into its TOP-LEVEL blocks
+           by tracking open/close tags line by line (GitHub starts every block on
+           its own line; a nested list or a code block inside a list item only
+           moves the depth). Then:
+             • the Go issue template's boilerplate — the "Go version" and
+               "go env" sections, the old "does this reproduce / what OS"
+               questions — is dropped with its content, and a bare "Proposal
+               Details" heading, or one that repeats the title, is dropped alone;
+             • tables, <details> and image-only paragraphs are skipped — a card
+               has no room for them;
+             • any other heading is kept as a small run-in label, but only when
+               a block of its own follows;
+             • the cut is three blocks or ~600 characters of text, whichever
+               comes first; .lp-clip fades whatever overflows the card. */ -}}
+    {{- $lead := "" -}}
+    {{- with $j.body_html -}}
+      {{- $openRE := `<(p|ul|ol|blockquote|details|div|pre|table|markdown-accessiblity-table|h[1-6])[\s>]` -}}
+      {{- $closeRE := `</(p|ul|ol|blockquote|details|div|pre|table|markdown-accessiblity-table|h[1-6])>` -}}
+      {{- $noiseRE := "(?i)^(go version|what version of go|output of .*go env|go env|does this issue reproduce|what operating system)" -}}
+      {{- $buf := slice -}}{{- $depth := 0 -}}
+      {{- $kept := slice -}}{{- $nb := 0 -}}{{- $chars := 0 -}}
+      {{- $skip := false -}}{{- $head := "" -}}
+      {{- range split . "\n" -}}
+        {{- $buf = $buf | append . -}}
+        {{- $depth = add $depth (sub (len (findRE $openRE .)) (len (findRE $closeRE .))) -}}
+        {{- if le $depth 0 -}}
+          {{- $depth = 0 -}}
+          {{- $b := trim (delimit $buf "\n") " \n\t\r" -}}
+          {{- $buf = slice -}}
+          {{- $txt := trim (htmlUnescape (plainify $b)) " \n\t\r" -}}
+          {{- if findRE `^<(h[1-6]|div class="markdown-heading)` $b -}}
+            {{- $head = "" -}}
+            {{- $skip = gt (len (findRE $noiseRE $txt)) 0 -}}
+            {{- /* a heading that only repeats the title (old proposals open with
+                   "Proposal: <title>") says nothing the card has not */ -}}
+            {{- $echo := strings.Contains (lower $txt) (lower $title) -}}
+            {{- if and (not $skip) (not $echo) (not (findRE `(?i)^proposal details$` $txt)) -}}{{ $head = $txt }}{{- end -}}
+          {{- else if and (not $skip) $txt (lt (len $b) 6000) (findRE `^<(p|ul|ol|blockquote|pre|div class="highlight)` $b) -}}
+            {{- with $head -}}{{ $kept = $kept | append (printf "<h4>%s</h4>" (htmlEscape .)) }}{{- end -}}
+            {{- $head = "" -}}
+            {{- $kept = $kept | append $b -}}
+            {{- $nb = add $nb 1 -}}
+            {{- $chars = add $chars (strings.RuneCount $txt) -}}
+          {{- end -}}
+          {{- if or (ge $nb 3) (gt $chars 600) -}}{{ break }}{{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $h := delimit $kept "\n" -}}
+      {{- /* fetched markup is never trusted verbatim (as in tg-card.html): no
+             scripts, no handlers; then GitHub's chrome attributes go — the
+             syntax-highlight classes, data-* (the copy button's whole-snippet
+             duplicate lives there), dir — and images, which a card cannot fit */ -}}
+      {{- $h = replaceRE `(?s)<(script|style|iframe)[^>]*>.*?</(script|style|iframe)>` "" $h -}}
+      {{- $h = replaceRE `(?is)\s+on[a-z]+="[^"]*"` "" $h -}}
+      {{- $h = replaceRE `\s(class|dir|role|data-[\w-]+|aria-[\w-]+|alias|fallback-src)="[^"]*"` "" $h -}}
+      {{- $h = replaceRE `<img[^>]*>` "" $h -}}
+      {{- $h = replaceRE `(href|src)="/` `$1="https://github.com/` $h -}}
+      {{- $lead = $h -}}
+    {{- end -}}
+
+    {{- /* JSON null arrives as a nil interface, and a field lookup on nil is a
+           hard template error — read the optional objects through `with` */ -}}
+    {{- $ms := "" -}}{{- with $j.milestone -}}{{ $ms = .title }}{{- end -}}
+    {{- /* golang/go files every proposal under a milestone called "Proposal" —
+           the proposal chip already says so */ -}}
+    {{- if and $prop (eq $ms "Proposal") -}}{{ $ms = "" }}{{- end -}}
+    {{- $login := "" -}}{{- with $j.user -}}{{ $login = .login }}{{- end -}}
+    {{- $d = dict
+        "owner" $owner "repo" $repo "num" $num "isPR" $isPR
+        "pkg" $pkg "title" $title "state" $state "prop" $prop
+        "labels" $labels "milestone" $ms
+        "user" $login "avatar" $avatar
+        "created" (time.AsTime $j.created_at)
+        "closed" ($j.closed_at | default "")
+        "comments" (int ($j.comments | default 0))
+        "rx" $rx "sub" $sub "lead" $lead
+        "page" ($j.html_url | default $url) -}}
+  {{- end -}}
+{{- end -}}
+{{- if $ok -}}
+{{- /* octicons (MIT, github.com/primer/octicons), one per state */ -}}
+{{- $ico := dict
+    "open" `<path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/>`
+    "closed" `<path d="M11.28 6.78a.75.75 0 0 0-1.06-1.06L7.25 8.69 5.78 7.22a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l3.5-3.5Z"/><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0Zm-1.5 0a6.5 6.5 0 1 0-13 0 6.5 6.5 0 0 0 13 0Z"/>`
+    "not-planned" `<path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm1.5 0a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm9.78-2.22-5.5 5.5a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l5.5-5.5a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"/>`
+    "pr-open" `<path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/>`
+    "merged" `<path d="M5.45 5.154A4.25 4.25 0 0 0 9.25 7.5h1.378a2.251 2.251 0 1 1 0 1.5H9.25A5.734 5.734 0 0 1 5 7.123v3.505a2.25 2.25 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.95-.218ZM4.25 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm8.5-4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM5 3.25a.75.75 0 1 0 0 .005V3.25Z"/>`
+    "pr-closed" `<path d="M3.25 1A2.25 2.25 0 0 1 4 5.372v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.251 2.251 0 0 1 3.25 1Zm9.5 5.5a.75.75 0 0 1 .75.75v3.378a2.251 2.251 0 1 1-1.5 0V7.25a.75.75 0 0 1 .75-.75Zm-2.03-5.273a.75.75 0 0 1 1.06 0l.97.97.97-.97a.748.748 0 0 1 1.265.332.75.75 0 0 1-.205.729l-.97.97.97.97a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-.97-.97-.97.97a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l.97-.97-.97-.97a.75.75 0 0 1 0-1.06ZM2.5 3.25a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0ZM3.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm9.5 0a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"/>`
+    "draft" `<path d="M3.25 1A2.25 2.25 0 0 1 4 5.372v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.251 2.251 0 0 1 3.25 1Zm9.5 14a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5ZM2.5 3.25a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0ZM3.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm9.5 0a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM14 7.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Zm0-4.25a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/>` -}}
+{{- $icoKey := $d.state -}}
+{{- if eq $icoKey "duplicate" }}{{ $icoKey = "not-planned" }}{{ end -}}
+{{- $comment := `<path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0 1 13.25 12H9.06l-2.573 2.573A1.458 1.458 0 0 1 4 13.543V12H2.75A1.75 1.75 0 0 1 1 10.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h4.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/>` -}}
+{{- $milestone := `<path d="M7.75 0a.75.75 0 0 1 .75.75V3h3.634c.414 0 .814.147 1.13.414l2.07 1.75a1.75 1.75 0 0 1 0 2.672l-2.07 1.75a1.75 1.75 0 0 1-1.13.414H8.5v5.25a.75.75 0 0 1-1.5 0V10H2.75A1.75 1.75 0 0 1 1 8.25v-3.5C1 3.784 1.784 3 2.75 3H7V.75A.75.75 0 0 1 7.75 0Zm4.384 8.5a.25.25 0 0 0 .161-.06l2.07-1.75a.248.248 0 0 0 0-.38l-2.07-1.75a.25.25 0 0 0-.161-.06H2.75a.25.25 0 0 0-.25.25v3.5c0 .138.112.25.25.25h9.384Z"/>` -}}
+{{- $svg := `<svg class="%s" viewBox="0 0 16 16" width="%d" height="%d" fill="currentColor" aria-hidden="true">%s</svg>` -}}
+<div class="lp-gh-pre" data-lp-gh="{{ $url }}">
+  <div class="lp-card gh-card">
+    <div class="gh-head">
+      <span class="gh-mark" aria-hidden="true"></span>
+      <span class="lp-kick">{{ $d.owner }}/{{ $d.repo }}</span>
+      <span class="gh-num">{{ if $d.isPR }}PR {{ end }}#{{ $d.num }}</span>
+    </div>
+    <div class="gh-body">
+      {{- with $d.pkg }}<div class="gh-pkg">{{ . }}</div>{{ end }}
+      <h3 class="gh-title">{{ $d.title }}</h3>
+      <div class="gh-status">
+        <span class="gh-state" data-state="{{ $d.state }}">{{ printf $svg "gh-ico" 14 14 (index $ico $icoKey) | safeHTML }}{{ i18n (printf "lp_gh_%s" (replace $d.state "-" "_")) }}{{ with $d.closed }}<span class="gh-when">· {{ partial "date.html" (time.AsTime .) }}</span>{{ end }}</span>
+        {{- if and $d.prop (ne $d.prop "none") }}
+        <span class="gh-prop" data-prop="{{ $d.prop }}">{{ i18n "lp_gh_proposal" }} · {{ i18n (printf "lp_gh_prop_%s" $d.prop) }}</span>
+        {{- else if eq $d.prop "none" }}
+        <span class="gh-prop">{{ i18n "lp_gh_proposal" }}</span>
+        {{- end }}
+      </div>
+      <div class="gh-meta">
+        {{- with $d.avatar }}<img class="gh-avatar" src="{{ . }}" alt="" width="16" height="16">{{ end -}}
+        <span>{{ $d.user }}</span><i>·</i><span>{{ partial "date.html" $d.created }}</span>
+        {{- if gt $d.comments 0 }}<i>·</i><span class="gh-cnt">{{ printf $svg "gh-ico" 12 12 $comment | safeHTML }}{{ $d.comments }}</span>{{ end }}
+        {{- with $d.milestone }}<i>·</i><span class="gh-cnt">{{ printf $svg "gh-ico" 12 12 $milestone | safeHTML }}{{ . }}</span>{{ end }}
+      </div>
+      {{- with $d.labels }}
+      <div class="gh-labels">
+        {{- range first 3 . }}<span class="gh-label"><i style="background:#{{ .color | safeCSS }}"></i>{{ .name }}</span>{{ end -}}
+        {{- if gt (len .) 3 }}<span class="gh-label is-more">+{{ sub (len .) 3 }}</span>{{ end -}}
+      </div>
+      {{- end }}
+      {{- with $d.lead }}<div class="gh-lead lp-clip">{{ . | safeHTML }}</div>{{ end }}
+      {{- if or $d.rx $d.sub }}
+      <div class="gh-foot">
+        {{- with $d.sub }}
+        <span class="gh-sub"><span class="gh-sub-k">{{ i18n "lp_gh_sub" }}</span><span class="gh-sub-bar"><span class="fill" style="width:{{ .pct }}%"></span></span><span class="gh-sub-n"><b>{{ .done }}</b>/{{ .total }}</span></span>
+        {{- end }}
+        {{- with $d.rx }}
+        <span class="gh-reactions">{{ range . }}<span class="tg-react"><span class="tg-react-e">{{ .e }}</span><span class="tg-react-n">{{ .n }}</span></span>{{ end }}</span>
+        {{- end }}
+      </div>
+      {{- end }}
+    </div>
+    <a class="lp-row" href="{{ $d.page }}" target="_blank" rel="noopener"><span>{{ i18n "lp_gh_open_link" }}</span><span class="arw" aria-hidden="true">↗</span></a>
+  </div>
+</div>
+{{- end -}}

@@ -587,6 +587,17 @@ The Go blog — a [preview of loop-variable scoping](https://go.dev/blog/loopvar
 and the classic [error handling in Go](https://go.dev/blog/error-handling-and-go)
 open a card with the italic Go mark, the byline and the post's opening.
 
+GitHub — an issue or a pull request opens a card from the GitHub API: its
+state, the proposal stage, the author, the discussion and the opening of the
+description. An open bug [about jsonv2 speed](https://github.com/golang/go/issues/80270),
+the accepted [encoding/json/v2 proposal](https://github.com/golang/go/issues/71497)
+with its sub-issues and reactions, the Go project's short link
+[go.dev/issue/61405](https://go.dev/issue/61405), the old
+[try proposal](https://github.com/golang/go/issues/32437) and a merged
+[pull request](https://github.com/prometheus/client_golang/pull/2167). A link to
+[the scheduler's source](https://github.com/golang/go/blob/master/src/runtime/proc.go)
+gets only the GitHub mark, no card.
+
 ## Newsletter {#newsletter}
 
 The subscription blocks, on a site that runs a newsletter

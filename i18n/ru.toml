@@ -521,6 +521,38 @@ other = "Читать в Википедии"
 other = "Читать в блоге Go"
 [lp_read_gdoc]
 other = "Читать на go.dev"
+[lp_gh_open_link]
+other = "Открыть на GitHub"
+[lp_gh_open]
+other = "Открыт"
+[lp_gh_closed]
+other = "Закрыт"
+[lp_gh_not_planned]
+other = "Не будет сделано"
+[lp_gh_duplicate]
+other = "Дубликат"
+[lp_gh_pr_open]
+other = "Открыт"
+[lp_gh_draft]
+other = "Черновик"
+[lp_gh_merged]
+other = "Влит"
+[lp_gh_pr_closed]
+other = "Закрыт"
+[lp_gh_proposal]
+other = "Пропозал"
+[lp_gh_prop_active]
+other = "на рассмотрении"
+[lp_gh_prop_fcp]
+other = "финальное обсуждение"
+[lp_gh_prop_hold]
+other = "отложен"
+[lp_gh_prop_accepted]
+other = "принят"
+[lp_gh_prop_declined]
+other = "отклонён"
+[lp_gh_sub]
+other = "Подзадачи"
 
 # ── newsletter (28-newsletter.css / modules/newsletter.js) ────────────────────
 # Подписка на рассылку: кнопка в шапке с поповером, блоки в статьях и на

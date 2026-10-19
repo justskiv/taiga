@@ -3,7 +3,7 @@
 # Link previews
 
 On a fine pointer, a prose link grows a floating **preview card** on hover — the
-term card's physics, one popover per page. Six genres, one family:
+term card's physics, one popover per page. Seven genres, one family:
 
 - **Internal** links (to a guide or a series) open a window into the target page:
   the article's header in miniature, its opening plus whole H2 sections up to a
@@ -29,9 +29,24 @@ term card's physics, one popover per page. Six genres, one family:
   section (`/ref/spec#Method_declarations`) shows the page's card, and every
   anchor into the same page shares one fetch. Marketing pages (`/learn/`,
   `/solutions/`) and the tour are left as plain external links.
+- **GitHub** issues and pull requests (`github.com/<owner>/<repo>/issues/<n>`,
+  `…/pull/<n>`, and the Go project's short links `go.dev/issue/<n>` /
+  `golang.org/issue/<n>`, which point at `golang/go`) open a card from the GitHub
+  API: `owner/repo` and the number in the header, the title, the state as GitHub
+  colours it (open, closed, not planned, duplicate; for a pull request open,
+  draft, merged, closed) with the date it was closed or merged, the author,
+  opened date, comment count and milestone, up to three labels, the opening of
+  the description, sub-issue progress and the top three reactions. A link to one
+  comment (`#issuecomment-…`) shows the thread's card. Two readings are
+  `golang/*`-only: the title's package path (`cmd/compile: …`) is lifted into a
+  mono line above the title and a `proposal:` prefix is dropped, and a proposal
+  shows its stage — under review, final comment period, on hold, accepted,
+  declined — read from the `Proposal-*` labels and the close reason.
 
 Every outbound link also gets a small classifier mark: ↗ elsewhere on the web,
-✈ your Telegram, ▶ your YouTube, W Wikipedia, *Go* go.dev (blog and docs alike).
+✈ your Telegram, ▶ your YouTube, W Wikipedia, *Go* go.dev (blog and docs alike),
+the GitHub mark any `github.com` link (and `go.dev/issue/<n>`, which lands there)
+— a repository or a source file gets the mark without a card.
 Internal links carry no mark. The
 mark is suppressed in component chrome (a fold summary, a callout label, a CTA
 card) so it never doubles up with a component's own icon — the hover card still
@@ -92,6 +107,20 @@ Hugo overrides that map key by key (it does not append), so you must repeat
 A t.me post from a channel **not** in `telegram.channels` gets only the ✈ mark,
 no card. Any `youtube.com/watch` or `youtu.be` link gets a card.
 
+GitHub cards need no setting, but they do want a token on a site with many of
+them. The API allows **60 unauthenticated requests an hour** per IP, so a cold
+build with more GitHub links than that drops the rest of the cards (silently,
+like any other failed fetch). Put a token in the build's environment:
+
+```sh
+HUGO_GITHUB_TOKEN=github_pat_… hugo
+```
+
+Any token works — a fine-grained one with no permissions at all reads public
+repositories — and lifts the limit to 5000. The variable has to start with
+`HUGO_`: Hugo's default security policy lets templates read only those (and
+`CI`), so a `GITHUB_TOKEN` is invisible to the theme.
+
 ## What is fetched at build time
 
 Telegram and YouTube cards are built with `resources.GetRemote` while Hugo runs —
@@ -132,9 +161,23 @@ anyway). The build:
   `<h2>Introduction</h2>` and the blog's rule would come back empty. Paragraphs
   under 40 characters are skipped (that is what backlinks like "Back to Go
   Security" measure). Same degradation: no `<h1>` → no card.
+- asks the **GitHub** REST API for the issue
+  (`api.github.com/repos/<owner>/<repo>/issues/<n>` — it answers for a pull
+  request too) with `Accept: application/vnd.github.full+json`, which adds
+  `body_html`, GitHub's own render of the description. The lead is cut from it by
+  whole top-level blocks: the Go issue template's boilerplate (the "Go version"
+  and "go env" sections, the old "does this reproduce / what OS" questions) goes
+  with its content, tables, `<details>` and images are skipped, other section
+  headings stay as small labels, and the cut is three blocks or ~600 characters.
+  The author's avatar is downloaded like every other card image. A 404, a
+  rate-limited 403 or any network error → no card, the link keeps the GitHub
+  mark.
 
 Fetches are `partialCached` by URL, so each post/video is fetched **once** per
-build, and Hugo caches the responses on disk between builds.
+build, and Hugo caches the responses on disk between builds — with no expiry
+(`caches.getresource.maxAge = -1`), so a local build keeps showing the state an
+issue had when it was first fetched. `hugo --ignoreCache` refetches; a clean CI
+build always does.
 
 ### Degradations (the build never fails)
 
@@ -148,9 +191,9 @@ of breaking the build — **an offline build still completes**:
   plain external link;
 - a custom emoji whose artwork cannot be fetched → its Unicode glyph shows through.
 
-Because the cards are baked at build time, a post's counters refresh on every
-deploy, and the only gap — a post created after the last build — is covered by
-the channel card.
+Because the cards are baked at build time, a post's counters — and an issue's
+state — refresh on every deploy, and the only gap — a post created after the
+last build — is covered by the channel card.
 
 ## What a preview shows of an article
 
@@ -175,7 +218,7 @@ bridge and the rails are excluded. A link to the current page is not previewed.
 ## Files
 
 - `assets/css/24-linkpreview.css` — the cards, both palettes, reduced-motion.
-- `assets/js/modules/linkpreview.js` — the hover physics and the six providers.
+- `assets/js/modules/linkpreview.js` — the hover physics and the seven providers.
 - `layouts/_markup/render-link.html` — classifies links at build time.
 - `layouts/page.preview.html`, `section.preview.html`, `baseof.preview.html` —
   the preview output fragments.

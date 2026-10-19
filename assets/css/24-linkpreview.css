@@ -14,6 +14,8 @@
 :root{
   --tg-blue:#229ED9; --tg-blue-2:#2AABEE;
   --yt-red:#f03e3e;
+  /* the GitHub mark, shared by the prose link mark and the card's header */
+  --gh-icn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='black'%3E%3Cpath d='M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'/%3E%3C/svg%3E");
 }
 
 /* ── outbound link marks ───────────────────────────────────────────────────
@@ -26,7 +28,7 @@
    warms to accent and currentColor carries the mark with it, no colour of its
    own. A classifier: only the silhouette changes — ↗ elsewhere on the web,
    ✈ the author's Telegram, ▶ the author's YouTube, W Wikipedia, Go the go.dev
-   blog. Internal links carry no mark.
+   blog, the GitHub mark github.com. Internal links carry no mark.
 
    A "rail" — the link's underline running on beneath the mark — was investigated
    and closed: a pseudo's decoration is painted BY the pseudo and the glyph mask
@@ -46,7 +48,8 @@ a[data-link]::after{
 }
 /* solid silhouettes carry more ink than a lowercase stroke — slimmed by size */
 a[data-link="tg"]::after,
-a[data-link="yt"]::after{
+a[data-link="yt"]::after,
+a[data-link="gh"]::after{
   width:.58em; height:.58em; vertical-align:-.05em;
 }
 /* on hover the whole link warms to accent; currentColor carries the mark with
@@ -72,6 +75,10 @@ a[data-link="tg"]{
 a[data-link="yt"]{
   --lnk-icn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' fill-rule='evenodd'%3E%3Cpath d='M21.6 7.2a2.8 2.8 0 0 0-1.97-1.98C17.9 4.75 12 4.75 12 4.75s-5.9 0-7.63.47A2.8 2.8 0 0 0 2.4 7.2 29.2 29.2 0 0 0 1.93 12c0 1.62.16 3.23.47 4.8a2.8 2.8 0 0 0 1.97 1.98c1.73.47 7.63.47 7.63.47s5.9 0 7.63-.47a2.8 2.8 0 0 0 1.97-1.97c.31-1.58.47-3.19.47-4.81a29.2 29.2 0 0 0-.47-4.8ZM9.75 15.02V8.98L15.5 12l-5.75 3.02Z'/%3E%3C/svg%3E");
 }
+/* GitHub — the invertocat, solid like ✈ and ▶. On every github.com link (and
+   go.dev/issue/N, which lands there): the mark names the destination, the card
+   comes only with an issue or a pull request. */
+a[data-link="gh"]{--lnk-icn:var(--gh-icn)}
 /* W — Wikipedia's serif favicon letter; a glyph made of TYPE, not a mask, but
    obeying the same grammar (same alpha, only the silhouette differs) */
 a[data-link="wiki"]::after{
@@ -639,6 +646,153 @@ a.ic-part:hover{background:var(--bg-surface)}
 }
 .gob-lead img{max-width:100%; height:auto; border-radius:var(--radius-sm)}
 .gob-card .lp-row{--cl:var(--gob-blue)}
+
+/* ═══ GitHub card ══════════════════════════════════════════════════════════
+   An issue or a pull request. The chrome strip of the wiki/Go cards — mark,
+   owner/repo as the kicker, the number on the right — then what a reader of a
+   citation wants first: what it is (a Go package path lifted out of the title
+   into a mono eyebrow), where it stands (state pill, proposal stage), how big
+   it got (comments, milestone, sub-issues, reactions) and its opening.
+
+   Colour is rationed to meaning: the state pill takes GitHub's own state hues
+   (green open, purple done/merged, gray not planned/draft, red closed PR) as a
+   tint, never a fill; the action row takes GitHub's link blue. Both adapt per
+   scheme, like the wiki and Go blues. */
+.gh-card{
+  width:min(410px, calc(100vw - 32px));
+  --gh-blue:#4493f8; --cl:var(--gh-blue);
+  --gh-green:#3fb950; --gh-purple:#ab7df8; --gh-gray:#9198a1;
+  --gh-red:#f85149; --gh-yellow:#d29922;
+}
+:root[data-theme="light"] .gh-card{
+  --gh-blue:#0969da;
+  --gh-green:#1a7f37; --gh-purple:#8250df; --gh-gray:#59636e;
+  --gh-red:#d1242f; --gh-yellow:#9a6700;
+}
+.gh-head{
+  display:flex; align-items:center; gap:8px;
+  padding:11px 18px; border-bottom:1px solid var(--border);
+}
+.gh-mark{
+  flex:none; width:16px; height:16px; background:var(--text-strong);
+  -webkit-mask:var(--gh-icn) center/contain no-repeat;
+  mask:var(--gh-icn) center/contain no-repeat;
+}
+/* owner/repo is a path, not a label: keep GitHub's own case */
+.gh-head .lp-kick{
+  color:var(--text-muted); text-transform:none; letter-spacing:.02em; font-size:11px;
+  min-width:0; overflow:hidden; text-overflow:ellipsis;
+}
+.gh-num{
+  margin-left:auto; flex:none;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--text-ghost);
+  font-variant-numeric:tabular-nums;
+}
+.gh-body{padding:12px 18px 14px}
+.gh-pkg{
+  margin-bottom:3px;
+  font-family:var(--font-mono); font-size:12px; font-weight:600; color:var(--text-secondary);
+  overflow-wrap:anywhere;
+}
+.gh-title{
+  margin:0; font-size:16.5px; font-weight:650; line-height:1.32;
+  letter-spacing:-.01em; color:var(--text-strong); overflow-wrap:break-word;
+}
+.gh-status{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; margin-top:9px}
+.gh-state{
+  --c:var(--gh-green);
+  display:inline-flex; align-items:center; gap:5px;
+  padding:2px 9px 2px 7px; border-radius:999px;
+  font-size:12px; font-weight:600; line-height:1.5; color:var(--c);
+  background:color-mix(in srgb, var(--c) 14%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 32%, transparent);
+}
+.gh-state[data-state="closed"], .gh-state[data-state="merged"]{--c:var(--gh-purple)}
+.gh-state[data-state="not-planned"], .gh-state[data-state="duplicate"],
+.gh-state[data-state="draft"]{--c:var(--gh-gray)}
+.gh-state[data-state="pr-closed"]{--c:var(--gh-red)}
+.gh-ico{flex:none; display:block}
+/* the proposal stage: quiet text with a status dot — the state pill is the loud one */
+.gh-prop{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12px; font-weight:500; color:var(--text-secondary);
+}
+.gh-prop[data-prop]::before{
+  content:""; flex:none; width:6px; height:6px; border-radius:50%;
+  background:var(--c, var(--text-muted));
+}
+.gh-prop[data-prop="accepted"]{--c:var(--gh-green)}
+.gh-prop[data-prop="declined"]{--c:var(--gh-red)}
+.gh-prop[data-prop="hold"]{--c:var(--gh-gray)}
+.gh-prop[data-prop="fcp"]{--c:var(--gh-yellow)}
+/* when it was closed or merged, inside the pill: the date belongs to the state */
+.gh-when{font-weight:500; opacity:.8}
+.gh-meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px 7px; margin-top:8px;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted);
+}
+.gh-meta i{font-style:normal; color:var(--text-ghost)}
+.gh-avatar{width:16px; height:16px; border-radius:50%; flex:none; background:var(--bg-raised)}
+.gh-cnt{display:inline-flex; align-items:center; gap:4px}
+.gh-labels{display:flex; flex-wrap:wrap; gap:5px; margin-top:9px}
+.gh-label{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:1px 8px; border-radius:999px; border:1px solid var(--border);
+  font-size:11px; line-height:1.6; color:var(--text-secondary); white-space:nowrap;
+}
+/* GitHub's label colour, reduced to a dot: a full-colour chip would shout */
+.gh-label i{
+  width:7px; height:7px; border-radius:50%; flex:none;
+  box-shadow:inset 0 0 0 1px rgba(127,127,127,.35);
+}
+.gh-label.is-more{color:var(--text-muted)}
+.gh-lead{
+  margin-top:11px; font-size:13.5px; line-height:1.6; color:var(--text-secondary);
+  max-height:min(36vh, 260px);          /* engine adds .is-ovf → fade */
+  overflow-wrap:break-word;
+}
+.gh-lead > :first-child{margin-top:0}
+.gh-lead > :last-child{margin-bottom:0}
+.gh-lead p{margin:0 0 9px}
+/* a section heading of the issue, kept as a run-in label above its block */
+.gh-lead h4{
+  margin:12px 0 4px; font-size:12.5px; font-weight:650; color:var(--text-primary);
+}
+.gh-lead h4:first-child{margin-top:0}
+.gh-lead pre{
+  margin:0 0 9px; padding:9px 11px; border-radius:var(--radius-sm);
+  font-size:12px; line-height:1.55; overflow-x:auto;
+  background:var(--bg-base); border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.gh-lead pre code{font-size:1em; background:none; border:0; padding:0}
+.gh-lead code{font-size:.88em}
+/* issue bodies quote long identifiers (metric names, import paths) as inline
+   code; in a 410px card one would run past the edge, so let it break anywhere */
+.gh-lead :not(pre) > code{white-space:normal; overflow-wrap:anywhere}
+.gh-lead ul, .gh-lead ol{margin:0 0 9px; padding-left:20px}
+.gh-lead li{margin:0 0 4px}
+.gh-lead blockquote{
+  margin:0 0 9px; padding:0 0 0 10px; border-left:2px solid var(--border); color:var(--text-muted);
+}
+.gh-lead a{
+  color:var(--gh-blue); border-bottom:0; text-decoration:underline;
+  text-decoration-color:color-mix(in srgb, var(--gh-blue) 45%, transparent);
+  text-decoration-thickness:1px; text-underline-offset:.15em;
+}
+.gh-lead strong{font-weight:600; color:var(--text-primary)}
+.gh-lead input[type="checkbox"]{margin:0 5px 0 0; vertical-align:-1px}
+/* sub-issue progress (the series meter's continuous bar) + reactions */
+.gh-foot{display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-top:11px}
+.gh-sub{display:inline-flex; align-items:center; gap:8px}
+.gh-sub-k{
+  font-family:var(--font-mono); font-size:10px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted);
+}
+.gh-sub-bar{width:56px; height:4px; border-radius:2px; background:var(--border); overflow:hidden}
+.gh-sub-bar .fill{display:block; height:100%; background:var(--gh-purple)}
+.gh-sub-n{font-family:var(--font-mono); font-size:11px; color:var(--text-muted); font-variant-numeric:tabular-nums}
+.gh-sub-n b{color:var(--text-secondary); font-weight:600}
+.gh-reactions{display:inline-flex; flex-wrap:wrap; gap:5px}
 
 /* ── touch: no hover, the feature stays off (links behave normally). The marks
    still classify. Nothing to do here — the JS never binds on coarse pointers. */

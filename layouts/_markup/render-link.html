@@ -10,9 +10,10 @@
        also where links are CLASSIFIED at build time. An internal link to a guide
        or a series carries data-preview="<permalink>" so JS can fetch its build-time
        fragment on hover. An external link gets a species mark via data-link
-       (ext | tg | yt); a t.me post from a whitelisted channel and any youtube
-       video also register their href on .Page.Store, so article/link-cards.html
-       can pre-render the hover card. All gated on params.linkPreviews.enable. */ -}}
+       (ext | tg | yt | wiki | gob | gdoc | gh); a t.me post from a whitelisted
+       channel, a youtube video, a wiki article, a go.dev blog post or doc page
+       and a GitHub issue or pull request also register their href on
+       .Page.Store, so article/link-cards.html can pre-render the hover card. All gated on params.linkPreviews.enable. */ -}}
 {{- $d := .Destination -}}
 {{- $u := urls.Parse $d -}}
 {{- $scheme := $u.Scheme -}}
@@ -58,6 +59,28 @@
     {{- else if or (hasSuffix $host ".wikipedia.org") (eq $host "wikipedia.org") -}}
       {{- $kind = "wiki" -}}
       {{- if and $lp (hasPrefix $u.Path "/wiki/") -}}{{ $reg = "wiki" }}{{- end -}}
+    {{- else if eq $host "github.com" -}}
+      {{- /* every GitHub link wears the GitHub mark — it says where the reader
+             lands, like W for any Wikipedia page; only an issue or a pull
+             request also gets a card. The card is of the whole thread, so an
+             anchor to one comment (#issuecomment-…) shares its fetch. */ -}}
+      {{- $kind = "gh" -}}
+      {{- with findRESubmatch `^/([^/]+)/([^/]+)/(issues|pull)/(\d+)` $u.Path -}}
+        {{- if $lp -}}
+          {{- $m := index . 0 -}}
+          {{- $reg = "gh" -}}
+          {{- $cardHref = printf "https://github.com/%s/%s/%s/%s" (index $m 1) (index $m 2) (index $m 3) (index $m 4) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- else if and (in (slice "go.dev" "golang.org") $host) (findRE `^/issues?/\d+$` $u.Path) -}}
+      {{- /* go.dev/issue/N and golang.org/issue/N — the Go project's short links,
+             which redirect to github.com/golang/go/issues/N. The href stays as
+             the author wrote it; the card is the GitHub issue's. */ -}}
+      {{- $kind = "gh" -}}
+      {{- if $lp -}}
+        {{- $reg = "gh" -}}
+        {{- $cardHref = printf "https://github.com/golang/go/issues/%s" (path.Base $u.Path) -}}
+      {{- end -}}
     {{- else if eq $host "go.dev" -}}
       {{- if and (hasPrefix $u.Path "/blog/") (gt (len (strings.TrimPrefix "/blog/" $u.Path)) 0) -}}
         {{- $kind = "gob" -}}{{ if $lp }}{{ $reg = "gob" }}{{ end -}}

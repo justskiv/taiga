@@ -45,7 +45,7 @@ export function previewFrom(host) {
 }
 
 export function bindLinkPreviews() {
-  const marked = document.querySelector('a[data-preview], a[data-tg], a[data-yt], a[data-wiki], a[data-gob], a[data-gdoc]');
+  const marked = document.querySelector('a[data-preview], a[data-tg], a[data-yt], a[data-wiki], a[data-gob], a[data-gdoc], a[data-gh]');
   if (!marked) return;
   const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
   if (!fine.matches) return;   /* touch: the link is the whole interaction */
@@ -151,7 +151,17 @@ export function bindLinkPreviews() {
     render: (_a, node) => (node ? cloneCard(node) : null),
     skeleton: () => skeleton(['36%', '84%', '100%', '92%', '64%']),
   };
-  const providers = [internal, tg, yt, wiki, gob, gdoc];
+  /* GitHub issue / pull request — keyed like gdoc: go.dev/issue/N and a link to
+     one comment share the thread's card under its canonical github.com URL. */
+  const gh = {
+    id: 'gh',
+    match: (a) => a.hasAttribute('data-gh'),
+    key: (a) => 'h|' + a.getAttribute('data-gh'),
+    fetch: (a) => Promise.resolve(storeCard('gh', a.getAttribute('data-gh'))),
+    render: (_a, node) => (node ? cloneCard(node) : null),
+    skeleton: () => skeleton(['40%', '80%', '30%', '100%', '92%']),
+  };
+  const providers = [internal, tg, yt, wiki, gob, gdoc, gh];
   function providerFor(a) {
     for (let i = 0; i < providers.length; i++) if (providers[i].match(a)) return providers[i];
     return null;

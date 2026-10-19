@@ -589,6 +589,17 @@ YouTube — [доклад про планировщик Go](https://www.youtube.
 и классический [error handling in Go](https://go.dev/blog/error-handling-and-go)
 открывают карточку с курсивным значком Go, байлайном и зачином поста.
 
+GitHub — issue и pull request открывают карточку из API GitHub: статус,
+стадия пропозала, автор, обсуждение и начало описания. Открытый баг
+[про скорость jsonv2](https://github.com/golang/go/issues/80270), принятый
+[пропозал encoding/json/v2](https://github.com/golang/go/issues/71497) с
+подзадачами и реакциями, короткая ссылка Go-проекта
+[go.dev/issue/61405](https://go.dev/issue/61405), старый
+[пропозал try](https://github.com/golang/go/issues/32437) и влитый
+[pull request](https://github.com/prometheus/client_golang/pull/2167). Ссылка на
+[исходник планировщика](https://github.com/golang/go/blob/master/src/runtime/proc.go)
+получает только значок GitHub, без карточки.
+
 ## Рассылка {#newsletter}
 
 Блоки подписки — на сайте, где рассылка включена (`params.newsletter.enable`,
