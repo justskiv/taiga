@@ -188,8 +188,8 @@ accent = "#7aa2f7"
 ```
 
 Now every built-in palette — and any you added — uses that colour instead of its
-native one: links, buttons, active states, the accent dot in the picker's swatch,
-the crown of the logo mark and the same crown in the favicon.
+native one: links, buttons, active states, the accent dot in the picker's swatch
+and the crown of the logo mark. The favicon is not on the list (see below).
 
 The native accent is glacier teal, and it is **not one hex**: the dark palettes
 carry `#55c0b7` and `Light ☀` carries `#0e7a71`. That is not an inconsistency —
@@ -211,9 +211,14 @@ accentGlow = "rgba(122, 162, 247, .45)"   # a stronger halo
 
 The logo (`layouts/_partials/logo.html`) is inline SVG whose crown reads
 `var(--accent)`, so it follows the palette the reader picks, live. The favicon
-cannot: it is a data-URI SVG, and a data-URI cannot read CSS variables — so its
-crown colour is **baked at build time** from `params.accent`, falling back to the
-accent of `params.defaultTheme`. It stays put when the reader switches palette.
+follows nothing: it is a plain file, `static/favicon.svg`, in the native teal,
+linked from every page as `/favicon.svg`. A file cannot read the page's CSS
+variables, and `params.accent` does not reach it either — a site with its own
+brand draws its own icon. To replace it, put your `favicon.svg` in the site's
+`static/`; Hugo serves the site's file over the theme's. If you have
+`favicon.ico` and `apple-touch-icon.png`, put them beside it: browsers that do
+not take an SVG icon, and iOS for a home-screen icon, look for those root paths
+on their own.
 
 **What the handle does *not* reach:**
 
@@ -233,8 +238,7 @@ accent of `params.defaultTheme`. It stays put when the reader switches palette.
 instead. The accent is the `accent` key (plus `-dim` / `-glow`) in
 `data/themes/<id>.toml`; ship your own palette or override a shipped one (above).
 All seven built-ins currently share the same accent, so recolour each file, or
-override just the one(s) you use. Note that the favicon still takes one colour —
-the default palette's.
+override just the one(s) you use.
 
 ## 4. Roadmap data {#roadmap-data}
 
@@ -409,8 +413,8 @@ Select it site-wide with `params.ogImages.style = "mystyle"`, or per page with
 `dots` style documents both in its `layout.toml`.)
 
 A block's `color` in `layout.toml` is a `#rrggbb` literal, or the word
-`accent`: the brand accent resolved at build time exactly like the favicon's —
-`params.accent` first, else the accent of the `params.defaultTheme` palette.
+`accent`: the brand accent resolved at build time — `params.accent` first,
+else the accent of the `params.defaultTheme` palette.
 
 Styles are for the pages that let the theme draw their cover. A page that names
 a picture of its own — `cover:`, `og_image:`, or an `og.png`

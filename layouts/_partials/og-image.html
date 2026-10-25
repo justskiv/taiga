@@ -9,10 +9,10 @@
        placeholders {title}{kicker}{meta}{domain}{part} are filled here (i18n).
 
        A block's `color` is either a literal hex, or the word "accent": the
-       brand accent resolved the same way the favicon does it (head/meta.html)
-       — params.accent first, else the default palette's accent. Covers are
-       still rendered once at build time; "accent" just means the baked colour
-       follows the site's brand axis instead of being retyped per layout.
+       brand accent — params.accent first, else the default palette's accent.
+       Covers are still rendered once at build time; "accent" just means the
+       baked colour follows the site's brand axis instead of being retyped per
+       layout.
 
        `align = "right"` on a block shifts x left by the measured width
        (runes · size · 0.6), which is exact only for a 0.6em monospace — fine,
@@ -32,8 +32,8 @@
   {{- if not $out -}}
     {{- $style := .Params.og_style | default site.Params.ogImages.style | default "dots" -}}
     {{- $dir := printf "og/%s" $style -}}
-    {{- /* brand accent for `color = "accent"` blocks — the favicon's chain
-           (head/meta.html); the literal is the last-resort fallback only. */ -}}
+    {{- /* brand accent for `color = "accent"` blocks: params.accent, else the
+           default palette's; the literal is the last-resort fallback only. */ -}}
     {{- $acc := site.Params.accent | default (index (index site.Data.themes (site.Params.defaultTheme | default "taiga")) "accent") | default "#55c0b7" -}}
     {{- $isGuide := and (eq .Kind "page") (in (partialCached "guide-sections.html" .) .Section) -}}
     {{- if .IsHome -}}

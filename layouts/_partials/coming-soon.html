@@ -7,7 +7,7 @@
        are the ones that must not have a second source of truth:
          logo.html          — the wordmark (a site may override it);
          head/fonts.html    — the self-hosted faces;
-         hooks/head-extra   — the site's favicon / analytics.
+         hooks/head-extra   — the site's own head additions (analytics).
 
        The card: the wordmark as a Go pragma (which is what it is), and the
        "soon"s as the string literals of a small, valid Go file — `var`, not
@@ -52,6 +52,7 @@
 {{- /* nothing to index until the guides ship; robots.txt says the same */}}
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="{{ $cs.bg | default (index $pal "bg-deep") }}">
+<link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | relURL }}">
 {{- partial "head/fonts.html" . }}
 {{- if .IsHome }}
 <meta property="og:type" content="website">
@@ -218,7 +219,7 @@ body{
   .sweep{display:none}
 }
 </style>
-{{- /* site override point: favicon, analytics */ -}}
+{{- /* site override point: analytics and other head additions */ -}}
 {{- partial "hooks/head-extra.html" . -}}
 </head>
 <body>

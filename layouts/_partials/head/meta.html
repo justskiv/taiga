@@ -29,12 +29,6 @@
 {{- end -}}
 <title>{{ $title }}</title>
 {{- $desc := partial "head/description.html" . -}}
-{{- /* Favicon accent square: params.accent → the default palette's accent →
-       glacier teal. As a data-URI the SVG can't read CSS vars, so the colour is
-       baked here. The literal is the last-resort fallback only (it is reached
-       solely if the palette file is missing the key); with any shipped palette
-       the value comes from data/themes/<id>.toml. */ -}}
-{{- $acc := site.Params.accent | default (index (index site.Data.themes (site.Params.defaultTheme | default "taiga")) "accent") | default "#55c0b7" -}}
 {{- /* No tag at all beats an empty one: a site that sets neither a
        description nor heroLine used to get content="" on every system page,
        which tells a crawler the page has been described and described as
@@ -72,6 +66,9 @@
 {{- with site.Home.OutputFormats.Get "rss" }}
 <link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">
 {{- end }}
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2032%2032%22%3E%3Crect%20width=%2232%22%20height=%2232%22%20rx=%227%22%20fill=%22%231d1d1c%22/%3E%3Cpath%20d=%22M10.7%2012.4L21.3%2012.4L25.3%2016.8L6.7%2016.8Z%22%20fill=%22%233c3b38%22/%3E%3Cpath%20d=%22M8.5%2019.6L23.5%2019.6L28.5%2024L3.5%2024Z%22%20fill=%22%233c3b38%22/%3E%3Crect%20x=%2214.4%22%20y=%2224%22%20width=%223.2%22%20height=%224.2%22%20fill=%22%233c3b38%22/%3E%3Cpath%20d=%22M16%203.4L21.6%209.4L10.4%209.4Z%22%20fill=%22%23{{ strings.TrimPrefix "#" $acc }}%22/%3E%3C/svg%3E">
+{{- /* A real file, not a data: URI: search engines fetch the favicon by URL
+       and show a blank globe for an inlined one. Fixed colours, no accent: a
+       site with its own brand ships its own static/favicon.svg over this one. */}}
+<link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | relURL }}">
 {{- /* Front-matter rules, checked against the strings this file just built. */ -}}
 {{- partial "seo/lint.html" (dict "page" . "title" $title "desc" $desc "suffixed" $suffixed) -}}
