@@ -211,14 +211,14 @@ accentGlow = "rgba(122, 162, 247, .45)"   # a stronger halo
 
 The logo (`layouts/_partials/logo.html`) is inline SVG whose crown reads
 `var(--accent)`, so it follows the palette the reader picks, live. The favicon
-follows nothing: it is a plain file, `static/favicon.svg`, in the native teal,
-linked from every page as `/favicon.svg`. A file cannot read the page's CSS
-variables, and `params.accent` does not reach it either — a site with its own
-brand draws its own icon. To replace it, put your `favicon.svg` in the site's
-`static/`; Hugo serves the site's file over the theme's. If you have
-`favicon.ico` and `apple-touch-icon.png`, put them beside it: browsers that do
-not take an SVG icon, and iOS for a home-screen icon, look for those root paths
-on their own.
+follows nothing: it is two plain files in the native teal, linked from every
+page — `static/favicon.svg` for browsers and `static/favicon.ico` for Google
+Search, which does not take SVG. A file cannot read the page's CSS variables,
+and `params.accent` does not reach it either — a site with its own brand draws
+its own icon. To replace it, put your `favicon.svg` and `favicon.ico` in the
+site's `static/`; Hugo serves the site's files over the theme's. An
+`apple-touch-icon.png` beside them gives iOS a home-screen icon; iOS looks for
+that root path on its own.
 
 **What the handle does *not* reach:**
 

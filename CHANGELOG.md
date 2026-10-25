@@ -520,10 +520,11 @@ a MAJOR bump, a new optional feature is MINOR, a fix is PATCH.
 - **The favicon is a real file, so search results show it.** It was baked
   into every page as a `data:` URI. Browsers draw that in the tab, but search
   engines fetch the favicon by URL, so Google showed a blank globe next to the
-  site. It is now a plain `static/favicon.svg`, linked as `/favicon.svg` from
-  every page and from the coming-soon card. The icon no longer takes
+  site. It is now two plain files linked from every page and from the
+  coming-soon card: `static/favicon.svg` for browsers and `static/favicon.ico`
+  for Google Search, which does not take SVG. The icon no longer takes
   `params.accent`: a site that sets its own accent gets the theme's teal icon
-  until it ships its own `static/favicon.svg`.
+  until it ships its own `favicon.svg` and `favicon.ico`.
 - **A hover card no longer closes under a link preview opened from inside it.**
   The preview lives in `<body>`, not in the card, so moving the pointer into it
   counted as leaving the card: a term definition (or the edit history) closed

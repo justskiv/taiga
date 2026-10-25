@@ -52,6 +52,7 @@
 {{- /* nothing to index until the guides ship; robots.txt says the same */}}
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="{{ $cs.bg | default (index $pal "bg-deep") }}">
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="32x32">
 <link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | relURL }}">
 {{- partial "head/fonts.html" . }}
 {{- if .IsHome }}

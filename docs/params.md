@@ -100,7 +100,7 @@ stripped after the fact. The published source contains the card and nothing that
 hints at the site being written behind it. The card reuses `logo.html`,
 `head/fonts.html` and `hooks/head-extra.html`, so the wordmark, the faces and the
 site's head additions (analytics) have no second source of truth, and it links
-the same `/favicon.svg` as every other page.
+the same favicon files as every other page.
 
 Pair it with `disableKinds` so Hugo does not even generate the other pages —
 that way a guide which loses its `draft: true` by accident still cannot reach the

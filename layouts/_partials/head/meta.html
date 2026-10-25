@@ -66,9 +66,12 @@
 {{- with site.Home.OutputFormats.Get "rss" }}
 <link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">
 {{- end }}
-{{- /* A real file, not a data: URI: search engines fetch the favicon by URL
-       and show a blank globe for an inlined one. Fixed colours, no accent: a
-       site with its own brand ships its own static/favicon.svg over this one. */}}
+{{- /* Real files, not a data: URI: search engines fetch the favicon by URL
+       and show a blank globe for an inlined one. The .ico is for Google
+       Search, which takes no SVG; browsers pick the SVG, and sizes="32x32"
+       keeps Chrome from preferring the .ico. Fixed colours, no accent: a site
+       with its own brand ships its own static/favicon.{svg,ico} over these. */}}
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="32x32">
 <link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | relURL }}">
 {{- /* Front-matter rules, checked against the strings this file just built. */ -}}
 {{- partial "seo/lint.html" (dict "page" . "title" $title "desc" $desc "suffixed" $suffixed) -}}
